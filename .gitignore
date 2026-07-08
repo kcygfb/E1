@@ -26,3 +26,9 @@ Thumbs.db
 *.apk
 *.aab
 *.unitypackage
+
+# Codely CLI
+.codely-cli/
+.codely.packages/
+.codelyignore
+.com-unity-codely.json
