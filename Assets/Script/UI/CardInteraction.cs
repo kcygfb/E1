@@ -49,12 +49,14 @@ namespace KiKs.UI
 
         private Image _flashImage;
         private Sequence _currentSeq;
+        private Draggable _draggable;
 
         private void Awake()
         {
             _rect = GetComponent<RectTransform>();
             _originPos = _rect.localPosition;
             _originScale = _rect.localScale;
+            _draggable = GetComponent<Draggable>();
 
             // 清理旧版组件
             var oldOutline = GetComponent<Outline>();
@@ -104,6 +106,8 @@ namespace KiKs.UI
 
         public void OnPointerEnter(PointerEventData eventData)
         {
+            if (_draggable != null && _draggable.IsDragging) return;
+
             _currentSeq?.Kill();
 
             _currentSeq = DOTween.Sequence();
@@ -121,6 +125,8 @@ namespace KiKs.UI
 
         public void OnPointerExit(PointerEventData eventData)
         {
+            if (_draggable != null && _draggable.IsDragging) return;
+
             _currentSeq?.Kill();
 
             _currentSeq = DOTween.Sequence();
@@ -138,6 +144,8 @@ namespace KiKs.UI
 
         public void OnPointerDown(PointerEventData eventData)
         {
+            if (_draggable != null && _draggable.IsDragging) return;
+
             _currentSeq?.Kill();
 
             _rect.DOScale(_originScale * clickScale, clickDuration / speedMultiplier).SetEase(Ease.InQuad);
@@ -153,6 +161,8 @@ namespace KiKs.UI
 
         public void OnPointerUp(PointerEventData eventData)
         {
+            if (_draggable != null && _draggable.IsDragging) return;
+
             bool stillHovering = _rect.localPosition.y > _originPos.y + 1f;
             float targetScale = stillHovering ? hoverScale : 1f;
             _rect.DOScale(_originScale * targetScale, releaseDuration / speedMultiplier).SetEase(Ease.OutQuint);
