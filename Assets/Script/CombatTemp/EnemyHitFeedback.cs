@@ -76,6 +76,8 @@ namespace KiKs.Combat
         private void PlayHit()
         {
             _seq?.Kill();
+            // 重置到原位，确保每次受击位移距离一致
+            _rect.anchoredPosition = _originPos;
 
             _seq = DOTween.Sequence();
 
