@@ -6,6 +6,10 @@
 [Ll]ogs/
 [Uu]ser[Ss]ettings/
 
+# Machine-local Tuanjie Codely packages
+/.codely-cli/
+/.codely.packages/
+
 .vs/
 .idea/
 *.csproj
