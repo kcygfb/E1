@@ -30,3 +30,6 @@ Thumbs.db
 *.apk
 *.aab
 *.unitypackage
+
+# Codely runtime state (auto-generated heartbeat)
+.com-unity-codely.json
