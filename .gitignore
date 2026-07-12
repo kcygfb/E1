@@ -6,6 +6,10 @@
 [Ll]ogs/
 [Uu]ser[Ss]ettings/
 
+# Machine-local Tuanjie Codely packages
+/.codely-cli/
+/.codely.packages/
+
 .vs/
 .idea/
 *.csproj
@@ -27,8 +31,5 @@ Thumbs.db
 *.aab
 *.unitypackage
 
-# Codely CLI
-.codely-cli/
-.codely.packages/
-.codelyignore
+# Codely runtime state (auto-generated heartbeat)
 .com-unity-codely.json
