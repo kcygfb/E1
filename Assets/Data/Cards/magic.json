@@ -1,0 +1,243 @@
+{
+  "schemaVersion": 1,
+  "category": "magic",
+  "categoryName": "魔法",
+  "cards": [
+    {
+      "id": "magic_blizzard",
+      "name": {
+        "zhCN": "暴风雪",
+        "en": "blizzard"
+      },
+      "category": "magic",
+      "cost": {
+        "resource": "mana",
+        "amount": 1
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "damage",
+          "damageType": "normal",
+          "amount": {
+            "base": 10,
+            "upgraded": null
+          },
+          "hits": {
+            "base": 5,
+            "upgraded": null
+          }
+        },
+        {
+          "type": "toughness_damage",
+          "unit": "percent",
+          "amount": {
+            "base": 5,
+            "upgraded": null
+          },
+          "hits": {
+            "base": 5,
+            "upgraded": null
+          }
+        },
+        {
+          "type": "stun",
+          "durationTurns": {
+            "base": 1,
+            "upgraded": null
+          }
+        },
+        {
+          "type": "vulnerability",
+          "durationTurns": {
+            "base": 2,
+            "upgraded": null
+          },
+          "multiplier": 2
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "Sheet1",
+        "row": 52,
+        "rawLabel": "1 暴风雪blizzard"
+      },
+      "notes": [
+        "Excel 削韧值为数值 0.05，按 5% 保存。"
+      ]
+    },
+    {
+      "id": "magic_tornado",
+      "name": {
+        "zhCN": "龙卷风",
+        "en": "tornado"
+      },
+      "category": "magic",
+      "cost": {
+        "resource": "mana",
+        "amount": 1
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "damage",
+          "damageType": "normal",
+          "amount": {
+            "base": 5,
+            "upgraded": null
+          },
+          "hits": {
+            "base": 30,
+            "upgraded": null
+          }
+        },
+        {
+          "type": "toughness_damage",
+          "unit": "percent",
+          "amount": {
+            "base": 1,
+            "upgraded": null
+          },
+          "hits": {
+            "base": 30,
+            "upgraded": null
+          }
+        },
+        {
+          "type": "nullify_attacks",
+          "triggerCount": {
+            "base": 3,
+            "upgraded": null
+          }
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "Sheet1",
+        "row": 53,
+        "rawLabel": "1 龙卷风tornado "
+      },
+      "notes": [
+        "Excel 削韧值为数值 0.01，按 1% 保存。"
+      ]
+    },
+    {
+      "id": "magic_summon",
+      "name": {
+        "zhCN": "召唤",
+        "en": "summon"
+      },
+      "category": "magic",
+      "cost": {
+        "resource": "mana",
+        "amount": 1
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "summon_companion",
+          "companionId": "magic_hand",
+          "durationTurns": {
+            "base": 3,
+            "upgraded": null
+          }
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "Sheet1",
+        "row": 54,
+        "rawLabel": "1 召唤summon"
+      },
+      "notes": []
+    },
+    {
+      "id": "magic_life_drain",
+      "name": {
+        "zhCN": "吸血",
+        "en": "life drain"
+      },
+      "category": "magic",
+      "cost": {
+        "resource": "mana",
+        "amount": 1
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "life_steal_max_health",
+          "normalTargetPercent": 10,
+          "bossPercent": 5
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "Sheet1",
+        "row": 55,
+        "rawLabel": "1 吸血"
+      },
+      "notes": []
+    },
+    {
+      "id": "magic_focus",
+      "name": {
+        "zhCN": "专注",
+        "en": "focus"
+      },
+      "category": "magic",
+      "cost": {
+        "resource": "mana",
+        "amount": 1
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "gain_resource",
+          "resource": "action_point",
+          "amount": {
+            "base": 5,
+            "upgraded": null
+          },
+          "timing": "current_turn"
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "Sheet1",
+        "row": 56,
+        "rawLabel": "1 专注"
+      },
+      "notes": []
+    },
+    {
+      "id": "magic_recycle",
+      "name": {
+        "zhCN": "回收",
+        "en": "recycle"
+      },
+      "category": "magic",
+      "cost": {
+        "resource": "mana",
+        "amount": 1
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "play_cards_from_discard",
+          "amount": {
+            "base": 3,
+            "upgraded": null
+          },
+          "selection": "player_choice"
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "Sheet1",
+        "row": 57,
+        "rawLabel": "1 回收"
+      },
+      "notes": []
+    }
+  ]
+}

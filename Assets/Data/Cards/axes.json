@@ -1,0 +1,330 @@
+{
+  "schemaVersion": 1,
+  "category": "axes",
+  "categoryName": "斧",
+  "cards": [
+    {
+      "id": "axe_long_axe",
+      "name": {
+        "zhCN": "长斧",
+        "en": "long axe"
+      },
+      "category": "axes",
+      "cost": {
+        "resource": "action_point",
+        "amount": 1
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "damage",
+          "damageType": "normal",
+          "amount": {
+            "base": 10,
+            "upgraded": 12
+          },
+          "hits": {
+            "base": 1,
+            "upgraded": 1
+          }
+        },
+        {
+          "type": "toughness_damage",
+          "unit": "percent",
+          "amount": {
+            "base": 20,
+            "upgraded": 25
+          },
+          "hits": {
+            "base": 1,
+            "upgraded": 1
+          }
+        },
+        {
+          "type": "stun",
+          "durationTurns": {
+            "base": 1,
+            "upgraded": 1
+          }
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "Sheet1",
+        "row": 13,
+        "rawLabel": "1 长斧long axe"
+      },
+      "notes": []
+    },
+    {
+      "id": "axe_hatchet",
+      "name": {
+        "zhCN": "手斧",
+        "en": "hatchet"
+      },
+      "category": "axes",
+      "cost": {
+        "resource": "action_point",
+        "amount": 1
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "damage",
+          "damageType": "normal",
+          "amount": {
+            "base": 15,
+            "upgraded": 15
+          },
+          "hits": {
+            "base": 1,
+            "upgraded": 1
+          }
+        },
+        {
+          "type": "toughness_damage",
+          "unit": "percent",
+          "amount": {
+            "base": 10,
+            "upgraded": 20
+          },
+          "hits": {
+            "base": 1,
+            "upgraded": 1
+          }
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "Sheet1",
+        "row": 14,
+        "rawLabel": "1 手斧hatchet"
+      },
+      "notes": []
+    },
+    {
+      "id": "axe_battle_axe",
+      "name": {
+        "zhCN": "战斧",
+        "en": "battle axe"
+      },
+      "category": "axes",
+      "cost": {
+        "resource": "action_point",
+        "amount": 2
+      },
+      "special": true,
+      "effects": [
+        {
+          "type": "damage",
+          "damageType": "normal",
+          "amount": {
+            "base": 35,
+            "upgraded": 45
+          },
+          "hits": {
+            "base": 1,
+            "upgraded": 1
+          }
+        },
+        {
+          "type": "toughness_damage",
+          "unit": "percent",
+          "amount": {
+            "base": 35,
+            "upgraded": 50
+          },
+          "hits": {
+            "base": 1,
+            "upgraded": 1
+          }
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "Sheet1",
+        "row": 15,
+        "rawLabel": "2 战斧battle axe(特殊）"
+      },
+      "notes": []
+    },
+    {
+      "id": "axe_francisca",
+      "name": {
+        "zhCN": "飞斧",
+        "en": "francisca"
+      },
+      "category": "axes",
+      "cost": {
+        "resource": "action_point",
+        "amount": 1
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "damage",
+          "damageType": "normal",
+          "amount": {
+            "base": 5,
+            "upgraded": 8
+          },
+          "hits": {
+            "base": 3,
+            "upgraded": 3
+          }
+        },
+        {
+          "type": "toughness_damage",
+          "unit": "percent",
+          "amount": {
+            "base": 5,
+            "upgraded": 8
+          },
+          "hits": {
+            "base": 3,
+            "upgraded": 3
+          }
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "Sheet1",
+        "row": 16,
+        "rawLabel": "1 飞斧francisca"
+      },
+      "notes": []
+    },
+    {
+      "id": "axe_camping_axe",
+      "name": {
+        "zhCN": "露营斧",
+        "en": "camping axe"
+      },
+      "category": "axes",
+      "cost": {
+        "resource": "action_point",
+        "amount": 2
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "damage",
+          "damageType": "normal",
+          "amount": {
+            "base": 5,
+            "upgraded": 7
+          },
+          "hits": {
+            "base": 1,
+            "upgraded": 1
+          }
+        },
+        {
+          "type": "toughness_damage",
+          "unit": "percent",
+          "amount": {
+            "base": 5,
+            "upgraded": 7
+          },
+          "hits": {
+            "base": 1,
+            "upgraded": 1
+          }
+        },
+        {
+          "type": "bleed",
+          "durationTurns": {
+            "base": 5,
+            "upgraded": 7
+          },
+          "damagePerTurn": 2,
+          "damageType": "true",
+          "stackable": true
+        },
+        {
+          "type": "damage",
+          "damageType": "true",
+          "amount": {
+            "base": 5,
+            "upgraded": 7
+          },
+          "hits": {
+            "base": 1,
+            "upgraded": 1
+          }
+        },
+        {
+          "type": "vulnerability",
+          "durationTurns": {
+            "base": 2,
+            "upgraded": 4
+          },
+          "multiplier": 2
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "Sheet1",
+        "row": 17,
+        "rawLabel": "2 露营斧camping axe"
+      },
+      "notes": []
+    },
+    {
+      "id": "axe_fire_axe",
+      "name": {
+        "zhCN": "消防斧",
+        "en": "fire axe"
+      },
+      "category": "axes",
+      "cost": {
+        "resource": "action_point",
+        "amount": 2
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "damage",
+          "damageType": "normal",
+          "amount": {
+            "base": 10,
+            "upgraded": 12
+          },
+          "hits": {
+            "base": 1,
+            "upgraded": 1
+          }
+        },
+        {
+          "type": "toughness_damage",
+          "unit": "percent",
+          "amount": {
+            "base": 25,
+            "upgraded": 35
+          },
+          "hits": {
+            "base": 1,
+            "upgraded": 1
+          }
+        },
+        {
+          "type": "bleed",
+          "durationTurns": {
+            "base": 3,
+            "upgraded": 6
+          },
+          "damagePerTurn": 2,
+          "damageType": "true",
+          "stackable": true
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "Sheet1",
+        "row": 18,
+        "rawLabel": "2 消防斧fire axe"
+      },
+      "notes": []
+    }
+  ]
+}

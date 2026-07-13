@@ -1,0 +1,353 @@
+{
+  "schemaVersion": 1,
+  "category": "flexible_weapons",
+  "categoryName": "软兵器",
+  "cards": [
+    {
+      "id": "flexible_trip_chain",
+      "name": {
+        "zhCN": "绊脚锁",
+        "en": "chain"
+      },
+      "category": "flexible_weapons",
+      "cost": {
+        "resource": "action_point",
+        "amount": 1
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "damage",
+          "damageType": "normal",
+          "amount": {
+            "base": 1,
+            "upgraded": 3
+          },
+          "hits": {
+            "base": 1,
+            "upgraded": 1
+          }
+        },
+        {
+          "type": "toughness_damage",
+          "unit": "percent",
+          "amount": {
+            "base": 10,
+            "upgraded": 20
+          },
+          "hits": {
+            "base": 1,
+            "upgraded": 1
+          }
+        },
+        {
+          "type": "stun",
+          "durationTurns": {
+            "base": 1,
+            "upgraded": 1
+          }
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "Sheet1",
+        "row": 30,
+        "rawLabel": "1绊脚锁chain"
+      },
+      "notes": []
+    },
+    {
+      "id": "flexible_morning_star_flail",
+      "name": {
+        "zhCN": "流星锤",
+        "en": "morning star flail"
+      },
+      "category": "flexible_weapons",
+      "cost": {
+        "resource": "action_point",
+        "amount": 2
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "damage",
+          "damageType": "normal",
+          "amount": {
+            "base": 25,
+            "upgraded": 35
+          },
+          "hits": {
+            "base": 1,
+            "upgraded": 1
+          }
+        },
+        {
+          "type": "toughness_damage",
+          "unit": "percent",
+          "amount": {
+            "base": 15,
+            "upgraded": 20
+          },
+          "hits": {
+            "base": 1,
+            "upgraded": 1
+          }
+        },
+        {
+          "type": "vulnerability",
+          "durationTurns": {
+            "base": 3,
+            "upgraded": null
+          },
+          "multiplier": 2
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "Sheet1",
+        "row": 31,
+        "rawLabel": "2 流星锤morning star flail"
+      },
+      "notes": []
+    },
+    {
+      "id": "flexible_kusarigama",
+      "name": {
+        "zhCN": "锁镰",
+        "en": "kusarigama"
+      },
+      "category": "flexible_weapons",
+      "cost": {
+        "resource": "action_point",
+        "amount": 2
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "damage",
+          "damageType": "normal",
+          "amount": {
+            "base": 10,
+            "upgraded": 12
+          },
+          "hits": {
+            "base": 1,
+            "upgraded": 1
+          }
+        },
+        {
+          "type": "toughness_damage",
+          "unit": "percent",
+          "amount": {
+            "base": 5,
+            "upgraded": 8
+          },
+          "hits": {
+            "base": 1,
+            "upgraded": 1
+          }
+        },
+        {
+          "type": "poison",
+          "durationTurns": {
+            "base": 3,
+            "upgraded": 5
+          },
+          "damagePerTurn": 5,
+          "damageType": "normal",
+          "stackable": true
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "Sheet1",
+        "row": 32,
+        "rawLabel": "2 锁镰kusarigama"
+      },
+      "notes": []
+    },
+    {
+      "id": "flexible_rope_dart",
+      "name": {
+        "zhCN": "绳镖",
+        "en": "rope dart"
+      },
+      "category": "flexible_weapons",
+      "cost": {
+        "resource": "action_point",
+        "amount": 2
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "damage",
+          "damageType": "normal",
+          "amount": {
+            "base": 5,
+            "upgraded": 8
+          },
+          "hits": {
+            "base": 2,
+            "upgraded": 3
+          }
+        },
+        {
+          "type": "damage",
+          "damageType": "true",
+          "amount": {
+            "base": 5,
+            "upgraded": 8
+          },
+          "hits": {
+            "base": 2,
+            "upgraded": 3
+          }
+        },
+        {
+          "type": "poison",
+          "durationTurns": {
+            "base": 2,
+            "upgraded": 4
+          },
+          "damagePerTurn": 5,
+          "damageType": "normal",
+          "stackable": true
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "Sheet1",
+        "row": 33,
+        "rawLabel": "2 绳镖rope dart"
+      },
+      "notes": []
+    },
+    {
+      "id": "flexible_urumi",
+      "name": {
+        "zhCN": "软剑",
+        "en": "urumi"
+      },
+      "category": "flexible_weapons",
+      "cost": {
+        "resource": "action_point",
+        "amount": 2
+      },
+      "special": true,
+      "effects": [
+        {
+          "type": "damage",
+          "damageType": "normal",
+          "amount": {
+            "base": 10,
+            "upgraded": 15
+          },
+          "hits": {
+            "base": 1,
+            "upgraded": 1
+          }
+        },
+        {
+          "type": "bleed",
+          "durationTurns": {
+            "base": 10,
+            "upgraded": 15
+          },
+          "damagePerTurn": 2,
+          "damageType": "true",
+          "stackable": true
+        },
+        {
+          "type": "damage",
+          "damageType": "true",
+          "amount": {
+            "base": 10,
+            "upgraded": 15
+          },
+          "hits": {
+            "base": 1,
+            "upgraded": 1
+          }
+        },
+        {
+          "type": "poison",
+          "durationTurns": {
+            "base": 5,
+            "upgraded": 8
+          },
+          "damagePerTurn": 5,
+          "damageType": "normal",
+          "stackable": true
+        },
+        {
+          "type": "vulnerability",
+          "durationTurns": {
+            "base": 5,
+            "upgraded": 8
+          },
+          "multiplier": 2
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "Sheet1",
+        "row": 34,
+        "rawLabel": "2 软剑urumi（特殊）"
+      },
+      "notes": []
+    },
+    {
+      "id": "flexible_chain_mace",
+      "name": {
+        "zhCN": "链锤",
+        "en": "chain mace"
+      },
+      "category": "flexible_weapons",
+      "cost": {
+        "resource": "action_point",
+        "amount": 1
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "damage",
+          "damageType": "normal",
+          "amount": {
+            "base": 10,
+            "upgraded": 12
+          },
+          "hits": {
+            "base": 1,
+            "upgraded": 1
+          }
+        },
+        {
+          "type": "toughness_damage",
+          "unit": "percent",
+          "amount": {
+            "base": 5,
+            "upgraded": 8
+          },
+          "hits": {
+            "base": 1,
+            "upgraded": 1
+          }
+        },
+        {
+          "type": "stun",
+          "durationTurns": {
+            "base": 1,
+            "upgraded": 1
+          }
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "Sheet1",
+        "row": 35,
+        "rawLabel": "1 链锤chain mace"
+      },
+      "notes": []
+    }
+  ]
+}
