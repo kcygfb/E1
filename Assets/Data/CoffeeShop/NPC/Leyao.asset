@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 960556f0c23ddf7479d7994860c3cd3f, type: 3}
+  m_Name: Leyao
+  m_EditorClassIdentifier: Assembly-CSharp::NPCData
+  npcId: 2
+  npcName: Leyao
+  possibleOrders:
+  - Latte
+  portrait: {fileID: 4312824466976506394, guid: 761e8259328ec88498254a12bd8e2ae9, type: 3}
+  portraitSize: {x: 500, y: 545.5}
+  arrivalDialogue: {fileID: 11400000, guid: aff9429d91c9879468dbf8c0afbc47b5, type: 2}
+  departureDialogue: {fileID: 11400000, guid: 35cac7a1d101d224b839e93cc6b7f13a, type: 2}

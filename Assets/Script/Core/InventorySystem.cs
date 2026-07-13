@@ -34,6 +34,7 @@ namespace KiKs.Core
             }
 
             Instance = this;
+            transform.SetParent(null);
             DontDestroyOnLoad(gameObject);
 
             // 初始化已注册资源的初始数量
