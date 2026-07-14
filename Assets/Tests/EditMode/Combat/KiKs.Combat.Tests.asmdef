@@ -1,0 +1,21 @@
+{
+  "name": "KiKs.Combat.Tests",
+  "rootNamespace": "KiKs.Combat.Tests",
+  "references": [
+    "KiKs.Combat"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": false,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false,
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ]
+}

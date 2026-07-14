@@ -1,0 +1,362 @@
+{
+  "schemaVersion": 1,
+  "category": "blades",
+  "categoryName": "刀剑",
+  "cards": [
+    {
+      "id": "blade_knight_sword",
+      "name": {
+        "zhCN": "骑士剑",
+        "en": "knight sword"
+      },
+      "category": "blades",
+      "cost": {
+        "resource": "action_point",
+        "amount": 2
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "damage",
+          "damageType": "normal",
+          "amount": {
+            "base": 15,
+            "upgraded": 20
+          },
+          "hits": {
+            "base": 1,
+            "upgraded": 1
+          }
+        },
+        {
+          "type": "toughness_damage",
+          "unit": "percent",
+          "amount": {
+            "base": 10,
+            "upgraded": 15
+          },
+          "hits": {
+            "base": 1,
+            "upgraded": 1
+          }
+        },
+        {
+          "type": "stun",
+          "durationTurns": {
+            "base": 1,
+            "upgraded": 1
+          }
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "Sheet1",
+        "row": 21,
+        "rawLabel": "2 骑士剑knight sword"
+      },
+      "notes": []
+    },
+    {
+      "id": "blade_dagger",
+      "name": {
+        "zhCN": "匕首",
+        "en": "dagger"
+      },
+      "category": "blades",
+      "cost": {
+        "resource": "action_point",
+        "amount": 1
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "damage",
+          "damageType": "normal",
+          "amount": {
+            "base": 10,
+            "upgraded": 15
+          },
+          "hits": {
+            "base": 1,
+            "upgraded": 1
+          }
+        },
+        {
+          "type": "damage",
+          "damageType": "true",
+          "amount": {
+            "base": 10,
+            "upgraded": 15
+          },
+          "hits": {
+            "base": 1,
+            "upgraded": 1
+          }
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "Sheet1",
+        "row": 22,
+        "rawLabel": "1 匕首dagger"
+      },
+      "notes": []
+    },
+    {
+      "id": "blade_tachi",
+      "name": {
+        "zhCN": "太刀",
+        "en": "tachi"
+      },
+      "category": "blades",
+      "cost": {
+        "resource": "action_point",
+        "amount": 2
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "damage",
+          "damageType": "normal",
+          "amount": {
+            "base": 15,
+            "upgraded": 25
+          },
+          "hits": {
+            "base": 1,
+            "upgraded": 1
+          }
+        },
+        {
+          "type": "toughness_damage",
+          "unit": "percent",
+          "amount": {
+            "base": 5,
+            "upgraded": 10
+          },
+          "hits": {
+            "base": 1,
+            "upgraded": 1
+          }
+        },
+        {
+          "type": "bleed",
+          "durationTurns": {
+            "base": 3,
+            "upgraded": 6
+          },
+          "damagePerTurn": 2,
+          "damageType": "true",
+          "stackable": true
+        },
+        {
+          "type": "vulnerability",
+          "durationTurns": {
+            "base": 3,
+            "upgraded": null
+          },
+          "multiplier": 2
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "Sheet1",
+        "row": 23,
+        "rawLabel": "2 太刀tachi"
+      },
+      "notes": []
+    },
+    {
+      "id": "blade_scalpel",
+      "name": {
+        "zhCN": "手术刀",
+        "en": "scalpel"
+      },
+      "category": "blades",
+      "cost": {
+        "resource": "action_point",
+        "amount": 1
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "damage",
+          "damageType": "normal",
+          "amount": {
+            "base": 10,
+            "upgraded": 15
+          },
+          "hits": {
+            "base": 1,
+            "upgraded": 1
+          }
+        },
+        {
+          "type": "bleed",
+          "durationTurns": {
+            "base": 10,
+            "upgraded": 15
+          },
+          "damagePerTurn": 2,
+          "damageType": "true",
+          "stackable": true
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "Sheet1",
+        "row": 24,
+        "rawLabel": "1手术刀scalpel"
+      },
+      "notes": []
+    },
+    {
+      "id": "blade_throwing_knife",
+      "name": {
+        "zhCN": "飞刀",
+        "en": "throwing knife"
+      },
+      "category": "blades",
+      "cost": {
+        "resource": "action_point",
+        "amount": 1
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "damage",
+          "damageType": "normal",
+          "amount": {
+            "base": 3,
+            "upgraded": 5
+          },
+          "hits": {
+            "base": 3,
+            "upgraded": 5
+          }
+        },
+        {
+          "type": "toughness_damage",
+          "unit": "percent",
+          "amount": {
+            "base": 3,
+            "upgraded": 5
+          },
+          "hits": {
+            "base": 3,
+            "upgraded": 5
+          }
+        },
+        {
+          "type": "bleed",
+          "durationTurns": {
+            "base": 3,
+            "upgraded": 5
+          },
+          "damagePerTurn": 2,
+          "damageType": "true",
+          "stackable": true
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "Sheet1",
+        "row": 25,
+        "rawLabel": "1 飞刀throwing knife"
+      },
+      "notes": [
+        "Excel 强化削韧值写作 5，因所在列为削韧百分比，按 5% 保存。"
+      ]
+    },
+    {
+      "id": "blade_greatsword",
+      "name": {
+        "zhCN": "巨剑",
+        "en": "greatsword"
+      },
+      "category": "blades",
+      "cost": {
+        "resource": "action_point",
+        "amount": 2
+      },
+      "special": true,
+      "effects": [
+        {
+          "type": "damage",
+          "damageType": "normal",
+          "amount": {
+            "base": 50,
+            "upgraded": 60
+          },
+          "hits": {
+            "base": 1,
+            "upgraded": 1
+          }
+        },
+        {
+          "type": "toughness_damage",
+          "unit": "percent",
+          "amount": {
+            "base": 15,
+            "upgraded": 20
+          },
+          "hits": {
+            "base": 1,
+            "upgraded": 1
+          }
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "Sheet1",
+        "row": 26,
+        "rawLabel": "2 巨剑greatsword(特殊）"
+      },
+      "notes": []
+    },
+    {
+      "id": "blade_horse_chopping_saber",
+      "name": {
+        "zhCN": "斩马刀",
+        "en": null
+      },
+      "category": "blades",
+      "cost": {
+        "resource": "action_point",
+        "amount": 3
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "damage",
+          "damageType": "normal",
+          "amount": {
+            "base": 30,
+            "upgraded": 40
+          },
+          "hits": {
+            "base": 1,
+            "upgraded": 1
+          }
+        },
+        {
+          "type": "bleed",
+          "durationTurns": {
+            "base": 5,
+            "upgraded": 7
+          },
+          "damagePerTurn": 2,
+          "damageType": "true",
+          "stackable": true
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "Sheet1",
+        "row": 27,
+        "rawLabel": "3 斩马刀"
+      },
+      "notes": []
+    }
+  ]
+}
