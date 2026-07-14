@@ -1,0 +1,9 @@
+﻿{
+  "dialogueId": "generic_departure",
+  "lines": [
+    {
+      "speaker": "顾客",
+      "text": "谢谢！再见~"
+    }
+  ]
+}

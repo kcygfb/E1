@@ -1,0 +1,13 @@
+﻿{
+  "dialogueId": "barddy_arrival",
+  "lines": [
+    {
+      "speaker": "Barddy",
+      "text": "你好！"
+    },
+    {
+      "speaker": "Barddy",
+      "text": "我想要一杯{coffee}"
+    }
+  ]
+}

@@ -1013,7 +1013,6 @@ GameObject:
   - component: {fileID: 316969647}
   - component: {fileID: 316969649}
   - component: {fileID: 316969648}
-  - component: {fileID: 316969650}
   m_Layer: 5
   m_Name: "OrderUI\t"
   m_TagString: Untagged
@@ -1081,25 +1080,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 316969646}
   m_CullTransparentMesh: 1
---- !u!114 &316969650
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 316969646}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 917fe1dc45ec2f94cae7d10237823cc7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::OrderUI
-  npcText: {fileID: 0}
-  coffeeText: {fileID: 0}
-  stateText: {fileID: 0}
-  orderPanel: {fileID: 316969646}
-  orderTicketImage: {fileID: 374898387}
-  ticketImage: {fileID: 374898389}
-  ticketCoffeeLabel: {fileID: 2131466233}
 --- !u!1 &320814569
 GameObject:
   m_ObjectHideFlags: 0
@@ -1253,6 +1233,7 @@ RectTransform:
   - {fileID: 1244659945}
   - {fileID: 398917925}
   - {fileID: 1966738964}
+  - {fileID: 2117631338}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -1524,7 +1505,7 @@ GameObject:
   - component: {fileID: 409946780}
   - component: {fileID: 409946781}
   m_Layer: 0
-  m_Name: NPCSpawner
+  m_Name: CustomerQueue
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1584,18 +1565,15 @@ MonoBehaviour:
     - {fileID: 11400000, guid: 82efd85341336bd469495ea0a6064feb, type: 2}
     - {fileID: 11400000, guid: 82efd85341336bd469495ea0a6064feb, type: 2}
     - {fileID: 11400000, guid: 82efd85341336bd469495ea0a6064feb, type: 2}
-  dialogueManager: {fileID: 1290630251}
   minNpcPerDay: 2
   maxNpcPerDay: 4
   npcVisualPrefab: {fileID: 0}
-  npcParent: {fileID: 0}
+  npcParent: {fileID: 78695401}
   spawnPoint: {fileID: 822976074}
   counterPoint: {fileID: 1918748199}
   exitPoint: {fileID: 181298184}
   endDayButton: {fileID: 398917924}
   morningCheckPanel: {fileID: 1966738963}
-  headTextOffsetY: 120
-  headTextFontSize: 24
 --- !u!1 &481336599
 GameObject:
   m_ObjectHideFlags: 0
@@ -1650,7 +1628,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CoffeeButton
   coffeeData: {fileID: 11400000, guid: 6901b4dffa703bd4e9c68fc92e3cdafa, type: 2}
   orderSystem: {fileID: 0}
-  coffeeMakeController: {fileID: 1769967501}
+  craftController: {fileID: 1769967501}
 --- !u!114 &481336602
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2665,7 +2643,7 @@ GameObject:
   - component: {fileID: 1036488487}
   - component: {fileID: 1036488488}
   m_Layer: 0
-  m_Name: CoffeeShopRewarder
+  m_Name: Rewarder
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3180,7 +3158,6 @@ GameObject:
   - component: {fileID: 1290630250}
   - component: {fileID: 1290630253}
   - component: {fileID: 1290630252}
-  - component: {fileID: 1290630251}
   m_Layer: 0
   m_Name: DialoguePanel
   m_TagString: Untagged
@@ -3210,22 +3187,6 @@ RectTransform:
   m_AnchoredPosition: {x: 196.79, y: 317}
   m_SizeDelta: {x: 906.4178, y: 119.0451}
   m_Pivot: {x: 0.5, y: 0}
---- !u!114 &1290630251
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1290630249}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 44fa84e132846b34787b4cf736470c56, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DialogueManager
-  dialoguePanel: {fileID: 1290630249}
-  speakerText: {fileID: 1278217332}
-  lineText: {fileID: 60822970}
-  nextButton: {fileID: 536599030}
 --- !u!114 &1290630252
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3512,6 +3473,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1373624599}
+  - component: {fileID: 1373624600}
   m_Layer: 5
   m_Name: OrderArea
   m_TagString: Untagged
@@ -3543,6 +3505,25 @@ RectTransform:
   m_AnchoredPosition: {x: -960, y: -540}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1373624600
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1373624598}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 917fe1dc45ec2f94cae7d10237823cc7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::OrderUI
+  npcText: {fileID: 1365387912}
+  coffeeText: {fileID: 890483782}
+  stateText: {fileID: 1258058539}
+  orderPanel: {fileID: 316969646}
+  orderTicketImage: {fileID: 374898387}
+  ticketImage: {fileID: 374898389}
+  ticketCoffeeLabel: {fileID: 2131466233}
 --- !u!1 &1382802334
 GameObject:
   m_ObjectHideFlags: 0
@@ -3777,6 +3758,53 @@ MonoBehaviour:
   targetResource: {fileID: 11400000, guid: 5ed17e6890ff86648bea08f49ffa7cb5, type: 2}
   displayText: {fileID: 1464622039}
   format: 'Coin: {0}'
+--- !u!1 &1472076477
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1472076478}
+  - component: {fileID: 1472076479}
+  m_Layer: 0
+  m_Name: DialogueRepository
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1472076478
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1472076477}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1596719260}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1472076479
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1472076477}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a5e9d631ffce63e4389bb3c0e70417aa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DialogueRepository
+  relativeDirectory: Dialogue
+  autoLoadOnAwake: 1
+  persistAcrossScenes: 1
 --- !u!1 &1517162093
 GameObject:
   m_ObjectHideFlags: 0
@@ -3909,7 +3937,7 @@ GameObject:
   - component: {fileID: 1571551006}
   - component: {fileID: 1571551007}
   m_Layer: 0
-  m_Name: 'CoffeeUnlockManager '
+  m_Name: UnlockManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3977,8 +4005,8 @@ Transform:
   - {fileID: 391905252}
   - {fileID: 148957625}
   - {fileID: 1036488487}
-  - {fileID: 1868868266}
   - {fileID: 1571551006}
+  - {fileID: 1472076478}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1610187160
@@ -4347,7 +4375,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CoffeeButton
   coffeeData: {fileID: 11400000, guid: b3b9f62e4e490fb41af83f6042dedce0, type: 2}
   orderSystem: {fileID: 0}
-  coffeeMakeController: {fileID: 1769967501}
+  craftController: {fileID: 1769967501}
 --- !u!114 &1683128248
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4992,54 +5020,6 @@ Material:
     - _UnderlayColor: {r: 0, g: 0, b: 0, a: 0.5}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
---- !u!1 &1868868265
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1868868266}
-  - component: {fileID: 1868868267}
-  m_Layer: 0
-  m_Name: DialogueManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1868868266
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1868868265}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1596719260}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1868868267
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1868868265}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 44fa84e132846b34787b4cf736470c56, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DialogueManager
-  dialoguePanel: {fileID: 0}
-  speakerText: {fileID: 0}
-  lineText: {fileID: 0}
-  nextButton: {fileID: 0}
 --- !u!1 &1884789528
 GameObject:
   m_ObjectHideFlags: 0
@@ -5094,7 +5074,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CoffeeButton
   coffeeData: {fileID: 11400000, guid: 4da01673d2f680945bdb38e98d6f463f, type: 2}
   orderSystem: {fileID: 0}
-  coffeeMakeController: {fileID: 1769967501}
+  craftController: {fileID: 1769967501}
 --- !u!114 &1884789531
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5715,7 +5695,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CoffeeButton
   coffeeData: {fileID: 11400000, guid: c755fcb219eb9f647bdc06a9a9fc8278, type: 2}
   orderSystem: {fileID: 0}
-  coffeeMakeController: {fileID: 1769967501}
+  craftController: {fileID: 1769967501}
 --- !u!114 &2094683567
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5798,6 +5778,54 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2094683564}
   m_CullTransparentMesh: 1
+--- !u!1 &2117631337
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2117631338}
+  - component: {fileID: 2117631339}
+  m_Layer: 0
+  m_Name: DialogueSystem
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2117631338
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2117631337}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 374551729}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2117631339
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2117631337}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 44fa84e132846b34787b4cf736470c56, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DialoguePlayer
+  dialoguePanel: {fileID: 1290630249}
+  speakerText: {fileID: 1278217332}
+  lineText: {fileID: 60822970}
+  nextButton: {fileID: 536599030}
 --- !u!1 &2131466231
 GameObject:
   m_ObjectHideFlags: 0

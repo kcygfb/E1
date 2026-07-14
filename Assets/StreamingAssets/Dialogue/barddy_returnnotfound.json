@@ -1,0 +1,13 @@
+﻿{
+  "dialogueId": "barddy_returnnotfound",
+  "lines": [
+    {
+      "speaker": "Barddy",
+      "text": "昨天托你找的 Mocha 有了吗？"
+    },
+    {
+      "speaker": "Barddy",
+      "text": "还没有啊……那你再找找吧，我下次再来。"
+    }
+  ]
+}

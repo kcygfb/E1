@@ -1,0 +1,13 @@
+﻿{
+  "dialogueId": "barddy_lockeddeparture",
+  "lines": [
+    {
+      "speaker": "Barddy",
+      "text": "那我先走了，记得准备 Mocha 的材料啊！"
+    },
+    {
+      "speaker": "Barddy",
+      "text": "下次我再来的时候，希望能喝到。"
+    }
+  ]
+}

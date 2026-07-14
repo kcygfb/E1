@@ -14,9 +14,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::NPCData
   npcId: 4
   npcName: maomao
-  possibleOrders:
-  - Espresso
   portrait: {fileID: 0}
   portraitSize: {x: 500, y: 545.5}
-  arrivalDialogue: {fileID: 11400000, guid: aff9429d91c9879468dbf8c0afbc47b5, type: 2}
-  departureDialogue: {fileID: 11400000, guid: 35cac7a1d101d224b839e93cc6b7f13a, type: 2}
+  willOrder: 1
+  arrivalDialogueId: generic_arrival
+  departureDialogueId: generic_departure
+  desiredCoffee: {fileID: 0}
+  lockedDialogueId: 
+  lockedDepartureDialogueId: 
+  returnFoundDialogueId: 
+  returnNotFoundDialogueId: 
+  returnReward: 0
+  spawnOrder: 0

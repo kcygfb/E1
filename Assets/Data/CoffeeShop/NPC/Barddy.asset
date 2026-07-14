@@ -17,12 +17,12 @@ MonoBehaviour:
   portrait: {fileID: -4055902353284128174, guid: 761e8259328ec88498254a12bd8e2ae9, type: 3}
   portraitSize: {x: 500, y: 545.5}
   willOrder: 1
-  arrivalDialogue: {fileID: 11400000, guid: 3f8de481f2bbc2d4db0762bd5bf46098, type: 2}
-  departureDialogue: {fileID: 11400000, guid: ac91d91f9163b90428a519f4d5159930, type: 2}
+  arrivalDialogueId: barddy_arrival
+  departureDialogueId: barddy_departure
   desiredCoffee: {fileID: 11400000, guid: 6901b4dffa703bd4e9c68fc92e3cdafa, type: 2}
-  lockedDialogue: {fileID: 11400000, guid: 516da225c35de5a44aff7ba87af3d924, type: 2}
-  lockedDepartureDialogue: {fileID: 11400000, guid: 8e9aafce18cff9840af0dad378d75319, type: 2}
-  returnFoundDialogue: {fileID: 11400000, guid: ccaaecf1574230545a02adea9f5e1d53, type: 2}
-  returnNotFoundDialogue: {fileID: 11400000, guid: c27c8798fc247344ead86087158a2d4b, type: 2}
+  lockedDialogueId: barddy_locked
+  lockedDepartureDialogueId: barddy_lockeddeparture
+  returnFoundDialogueId: barddy_returnfound
+  returnNotFoundDialogueId: barddy_returnnotfound
   returnReward: 50
   spawnOrder: 2

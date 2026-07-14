@@ -1,0 +1,17 @@
+﻿{
+  "dialogueId": "generic_arrival",
+  "lines": [
+    {
+      "speaker": "顾客",
+      "text": "你好！"
+    },
+    {
+      "speaker": "顾客",
+      "text": "我想要一杯{coffee}。"
+    },
+    {
+      "speaker": "顾客",
+      "text": "谢谢，我等着~"
+    }
+  ]
+}

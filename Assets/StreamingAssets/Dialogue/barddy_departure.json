@@ -1,0 +1,13 @@
+﻿{
+  "dialogueId": "barddy_departure",
+  "lines": [
+    {
+      "speaker": "Barddy",
+      "text": "谢谢！咖啡真好喝~"
+    },
+    {
+      "speaker": "Barddy",
+      "text": "下次再见！"
+    }
+  ]
+}
