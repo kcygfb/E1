@@ -29,7 +29,15 @@ public class CoffeeButton : MonoBehaviour
 
     private void OnClicked()
     {
-        if (coffeeMakeController != null && coffeeData != null)
+        if (coffeeData == null) return;
+
+        if (CoffeeUnlockManager.Instance != null && !CoffeeUnlockManager.Instance.IsUnlocked(coffeeData))
+        {
+            Debug.Log($"[CoffeeButton] {coffeeData.coffeeName} is locked");
+            return;
+        }
+
+        if (coffeeMakeController != null)
         {
             coffeeMakeController.OnCoffeeSelected(coffeeData);
             return;
@@ -38,7 +46,7 @@ public class CoffeeButton : MonoBehaviour
         if (orderSystem == null)
             orderSystem = FindFirstObjectByType<OrderSystem>();
 
-        if (orderSystem != null && coffeeData != null)
+        if (orderSystem != null)
             orderSystem.TryServeCoffee(coffeeData);
     }
 }

@@ -14,9 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::NPCData
   npcId: 3
   npcName: linshuil
-  possibleOrders:
-  - Latte
   portrait: {fileID: 6069710931494159596, guid: 761e8259328ec88498254a12bd8e2ae9, type: 3}
   portraitSize: {x: 500, y: 545.5}
+  willOrder: 1
   arrivalDialogue: {fileID: 11400000, guid: aff9429d91c9879468dbf8c0afbc47b5, type: 2}
   departureDialogue: {fileID: 11400000, guid: 35cac7a1d101d224b839e93cc6b7f13a, type: 2}
+  desiredCoffee: {fileID: 11400000, guid: b3b9f62e4e490fb41af83f6042dedce0, type: 2}
+  lockedDialogue: {fileID: 0}
+  spawnOrder: 1

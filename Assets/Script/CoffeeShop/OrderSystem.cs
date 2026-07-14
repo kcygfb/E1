@@ -306,4 +306,13 @@ public class OrderSystem : MonoBehaviour
 
     }
 
+
+    //==============================
+    // 清理当前订单（不触发完成事件）
+    // ==============================
+    public void ClearActiveOrder()
+    {
+        activeOrder = null;
+    }
+
 }

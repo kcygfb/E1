@@ -1,59 +1,81 @@
 using System;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class TimeSystem : MonoBehaviour
 {
     public int dayCount = 1;
-    public float dayDuration = 10f;
 
-    [Header("Optional")]
-    public NPCSpawner npcSpawner;
-    public bool waitUntilAllCustomersFinished = true;
+    public DayPhase CurrentPhase { get; private set; } = DayPhase.MorningCheck;
 
-    private float timer;
-    private bool dayEndedWaiting;
+    [Header("Night Phase")]
+    public string collectSceneName = "Collect";
 
-    public static event Action<int> OnDayEnded;
+    public static event Action<DayPhase, int> OnPhaseChanged;
+
+    private static int savedDayCount = 1;
 
     private void Start()
     {
-        Debug.Log("[TimeSystem] Start()");
-        StartDay();
+        dayCount = savedDayCount;
+        Debug.Log($"[TimeSystem] Start() -> Day {dayCount}");
+        EnterMorningCheck();
     }
 
-    private void Update()
+    /// <summary>
+    /// 玩家点击"结束今日营业"时调用
+    /// </summary>
+    public void EndShopPhase()
     {
-        if (dayEndedWaiting)
-            return;
+        Debug.Log($"[TimeSystem] EndShopPhase -> Day {dayCount}");
 
-        timer += Time.deltaTime;
+        savedDayCount = dayCount;
 
-        if (timer >= dayDuration)
-        {
-            if (waitUntilAllCustomersFinished && npcSpawner != null && !npcSpawner.CanEndDay)
-            {
-                return;
-            }
+        CurrentPhase = DayPhase.Night;
+        EventBus.PublishPhaseChanged(DayPhase.Night, dayCount);
+        OnPhaseChanged?.Invoke(DayPhase.Night, dayCount);
 
-            EndDay();
-        }
-    }
-
-    public void StartDay()
-    {
-        dayEndedWaiting = false;
-        timer = 0f;
-        Debug.Log($"[TimeSystem] StartDay -> Day {dayCount}");
-        EventBus.PublishDayStarted(dayCount);
-    }
-
-    public void EndDay()
-    {
-        dayEndedWaiting = true;
-        Debug.Log($"[TimeSystem] EndDay -> Day {dayCount}");
         EventBus.PublishDayEnded(dayCount);
-        OnDayEnded?.Invoke(dayCount);
 
-        dayCount++;
+        SceneManager.LoadScene(collectSceneName);
+    }
+
+    /// <summary>
+    /// 夜晚收集结束，进入下一天（由 CollectSceneController 调用）
+    /// 新 Cafe 场景加载后，TimeSystem.Start() 会读取 savedDayCount 并进入 MorningCheck
+    /// </summary>
+    public static void EndNightPhaseStatic()
+    {
+        savedDayCount++;
+        Debug.Log($"[TimeSystem] EndNightPhaseStatic -> Day {savedDayCount}");
+        SceneManager.LoadScene("Cafe");
+    }
+
+    /// <summary>
+    /// 进入清点阶段：显示清点面板，预构建NPC队列，等待玩家确认
+    /// </summary>
+    private void EnterMorningCheck()
+    {
+        CurrentPhase = DayPhase.MorningCheck;
+
+        Debug.Log($"[TimeSystem] EnterMorningCheck -> Day {dayCount}");
+
+        EventBus.PublishPhaseChanged(DayPhase.MorningCheck, dayCount);
+        OnPhaseChanged?.Invoke(DayPhase.MorningCheck, dayCount);
+    }
+
+    /// <summary>
+    /// 玩家点击"开始营业"时调用，正式进入营业阶段
+    /// </summary>
+    public void StartShopPhase()
+    {
+        CurrentPhase = DayPhase.Shop;
+
+        Debug.Log($"[TimeSystem] StartShopPhase -> Day {dayCount}");
+
+        EventBus.PublishPhaseChanged(DayPhase.Shop, dayCount);
+        OnPhaseChanged?.Invoke(DayPhase.Shop, dayCount);
+
+        EventBus.PublishDayStarted(dayCount);
     }
 }

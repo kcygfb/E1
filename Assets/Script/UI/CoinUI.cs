@@ -9,7 +9,7 @@ namespace KiKs.Core
     {
         [SerializeField] private ResourceData targetResource;
         [SerializeField] private TMP_Text displayText;
-        [SerializeField] private string format = "{0}";
+        [SerializeField] private string format = "Coin: {0}";
 
         private void OnEnable()
         {

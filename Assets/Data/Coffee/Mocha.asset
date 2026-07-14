@@ -23,3 +23,5 @@ MonoBehaviour:
   - item: {fileID: 11400000, guid: c5b3d0bfc7d3a2a4b9adbdb4cbe36d49, type: 2}
     amount: 1
   orderTicket: {fileID: -6670543404029826327, guid: b1af6cd66724b2743b44032ad4554408, type: 3}
+  locked: 1
+  unlockItem: {fileID: 11400000, guid: 64b0c409f5c1f754e80c342851a7e8b7, type: 2}

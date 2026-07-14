@@ -1,10 +1,18 @@
 using System;
 using UnityEngine;
 
+public enum DayPhase
+{
+    MorningCheck,
+    Shop,
+    Night
+}
+
 public static class EventBus
 {
     public static event Action<int> DayStarted;
     public static event Action<int> DayEnded;
+    public static event Action<DayPhase, int> PhaseChanged;
     public static event Action<OrderRuntime> OrderCreated;
     public static event Action<OrderRuntime> OrderCompleted;
 
@@ -30,5 +38,11 @@ public static class EventBus
     {
         Debug.Log($"[EventBus] OrderCompleted -> {order.npcName} got {order.coffeeName}");
         OrderCompleted?.Invoke(order);
+    }
+
+    public static void PublishPhaseChanged(DayPhase phase, int day)
+    {
+        Debug.Log($"[EventBus] PhaseChanged -> {phase}, Day {day}");
+        PhaseChanged?.Invoke(phase, day);
     }
 }

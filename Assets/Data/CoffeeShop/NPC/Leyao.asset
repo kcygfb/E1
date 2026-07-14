@@ -14,9 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::NPCData
   npcId: 2
   npcName: Leyao
-  possibleOrders:
-  - Latte
   portrait: {fileID: 4312824466976506394, guid: 761e8259328ec88498254a12bd8e2ae9, type: 3}
   portraitSize: {x: 500, y: 545.5}
+  willOrder: 1
   arrivalDialogue: {fileID: 11400000, guid: aff9429d91c9879468dbf8c0afbc47b5, type: 2}
   departureDialogue: {fileID: 11400000, guid: 35cac7a1d101d224b839e93cc6b7f13a, type: 2}
+  desiredCoffee: {fileID: 11400000, guid: c755fcb219eb9f647bdc06a9a9fc8278, type: 2}
+  lockedDialogue: {fileID: 0}
+  spawnOrder: 0

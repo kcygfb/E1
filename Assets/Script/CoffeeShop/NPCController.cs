@@ -24,6 +24,8 @@ public class NPCController : MonoBehaviour
 
     public Action<NPCController> OnLeftStore;
 
+    public NPCSpawner Spawner { get; set; }
+
     [Header("Movement")]
     public float moveSpeed = 500f;
 
@@ -48,7 +50,7 @@ public class NPCController : MonoBehaviour
 
 
     //==========================
-    // 初始化
+    // Init
     //==========================
 
     public void Initialize(
@@ -127,7 +129,7 @@ public class NPCController : MonoBehaviour
 
 
     //==========================
-    // 到达目标
+    // Arrived
     //==========================
 
     private void Arrived()
@@ -145,15 +147,72 @@ public class NPCController : MonoBehaviour
 
 
     //==========================
-    // 到达对话
+    // Arrival Dialogue
     //==========================
 
     private void StartArrivalDialogue()
     {
         ChangeState(NPCState.ArrivalDialogue);
 
-        DialogueData dialogue =
-            NPCData.arrivalDialogue ?? BuildFallbackDialogue(true);
+        // 回访检查：之前来过且咖啡是锁的
+        if (NPCData.desiredCoffee != null &&
+            Spawner != null &&
+            Spawner.HasPendingReturnVisit(NPCData))
+        {
+            bool unlocked = CoffeeUnlockManager.Instance != null &&
+                            CoffeeUnlockManager.Instance.IsUnlocked(NPCData.desiredCoffee);
+
+            if (unlocked)
+            {
+                GiveReturnReward();
+                Spawner.ClearReturnVisit(NPCData);
+
+                dialogueManager.StartDialogue(
+                    NPCData.returnFoundDialogue,
+                    onComplete: () =>
+                    {
+                        if (NPCData.willOrder)
+                        {
+                            MakeOrder();
+                            ChangeState(NPCState.WaitingForCoffee);
+                        }
+                        else
+                        {
+                            StartDepartureDialogue();
+                        }
+                    },
+                    null,
+                    NPCData.npcName
+                );
+            }
+            else
+            {
+                dialogueManager.StartDialogue(
+                    NPCData.returnNotFoundDialogue,
+                    onComplete: () => StartDepartureDialogue(true),
+                    null,
+                    NPCData.npcName
+                );
+            }
+            return;
+        }
+
+        // 首次到访：特殊NPC指定咖啡未解锁 → 走锁定对话 + 标记回访
+        if (NPCData.desiredCoffee != null &&
+            CoffeeUnlockManager.Instance != null &&
+            !CoffeeUnlockManager.Instance.IsUnlocked(NPCData.desiredCoffee))
+        {
+            if (Spawner != null)
+                Spawner.MarkReturnVisit(NPCData);
+
+            dialogueManager.StartDialogue(
+                NPCData.lockedDialogue,
+                onComplete: () => StartDepartureDialogue(true),
+                null,
+                NPCData.npcName
+            );
+            return;
+        }
 
         var tokens = new Dictionary<string, string>
         {
@@ -161,24 +220,39 @@ public class NPCController : MonoBehaviour
         };
 
         dialogueManager.StartDialogue(
-            dialogue,
-            onTrigger: (trigger) =>
-            {
-                if (trigger == DialogueTrigger.CreateOrder)
-                    MakeOrder();
-            },
+            NPCData.arrivalDialogue,
             onComplete: () =>
             {
-                ChangeState(NPCState.WaitingForCoffee);
+                if (NPCData.willOrder)
+                {
+                    MakeOrder();
+                    ChangeState(NPCState.WaitingForCoffee);
+                }
+                else
+                {
+                    StartDepartureDialogue();
+                }
             },
             tokens,
             NPCData.npcName
         );
     }
 
+    private void GiveReturnReward()
+    {
+        if (NPCData.returnReward <= 0) return;
+
+        var inv = KiKs.Core.InventorySystem.Instance;
+        if (inv != null)
+        {
+            inv.Add("gold", NPCData.returnReward);
+            Debug.Log($"[NPCController] {NPCData.npcName} return reward: +{NPCData.returnReward} gold");
+        }
+    }
+
 
     //==========================
-    // 点单（由对话 trigger 调用）
+    // Order (called after arrival dialogue)
     //==========================
 
     private void MakeOrder()
@@ -192,7 +266,7 @@ public class NPCController : MonoBehaviour
 
 
     //==========================
-    // 收到订单完成事件
+    // Order Completed
     //==========================
 
     private void OnOrderCompleted(OrderRuntime order)
@@ -208,19 +282,19 @@ public class NPCController : MonoBehaviour
 
 
     //==========================
-    // 离开对话
+    // Departure Dialogue
     //==========================
 
-    private void StartDepartureDialogue()
+    private void StartDepartureDialogue(bool locked = false)
     {
         ChangeState(NPCState.DepartureDialogue);
 
-        DialogueData dialogue =
-            NPCData.departureDialogue ?? BuildFallbackDialogue(false);
+        DialogueData dialogue = locked && NPCData.lockedDepartureDialogue != null
+            ? NPCData.lockedDepartureDialogue
+            : NPCData.departureDialogue;
 
         dialogueManager.StartDialogue(
             dialogue,
-            onTrigger: null,
             onComplete: () =>
             {
                 ChangeState(NPCState.Leaving);
@@ -234,33 +308,7 @@ public class NPCController : MonoBehaviour
 
 
     //==========================
-    // 兜底对话（无 DialogueData 时）
-    //==========================
-
-    private DialogueData BuildFallbackDialogue(bool withOrderTrigger)
-    {
-        var data = ScriptableObject.CreateInstance<DialogueData>();
-
-        data.lines = new DialogueLine[]
-        {
-            new DialogueLine
-            {
-                speaker = NPCData.npcName,
-
-                text = "1",
-
-                trigger = withOrderTrigger
-                    ? DialogueTrigger.CreateOrder
-                    : DialogueTrigger.None
-            }
-        };
-
-        return data;
-    }
-
-
-    //==========================
-    // 离开完成
+    // Leave Finished
     //==========================
 
     private void LeaveFinished()
@@ -276,7 +324,7 @@ public class NPCController : MonoBehaviour
 
 
     //==========================
-    // 状态改变
+    // State Change
     //==========================
 
     private void ChangeState(NPCState newState)
@@ -292,7 +340,7 @@ public class NPCController : MonoBehaviour
 
 
     //==========================
-    // 创建头顶文字
+    // Head Text
     //==========================
 
     [Header("Head Text Settings")]
@@ -302,60 +350,17 @@ public class NPCController : MonoBehaviour
 
     private void CreateHeadText()
     {
-        GameObject textObject =
-            new GameObject(
-                "NPC_Status_Text",
-                typeof(RectTransform),
-                typeof(Text)
-            );
-
-        textObject.transform.SetParent(
-            transform,
-            false
-        );
-
-        statusText =
-            textObject.GetComponent<Text>();
-
-        RefreshHeadText();
+        // Head text disabled
     }
 
     public void RefreshHeadText()
     {
-        if (statusText == null)
-            return;
-
-        var rt = statusText.GetComponent<RectTransform>();
-        rt.anchoredPosition =
-            new Vector2(0, headTextOffsetY);
-
-        rt.sizeDelta = new Vector2(300, 100);
-
-        statusText.fontSize = headTextFontSize;
-        statusText.alignment = TextAnchor.MiddleCenter;
-        statusText.color = Color.white;
-        statusText.horizontalOverflow = HorizontalWrapMode.Overflow;
-        statusText.verticalOverflow = VerticalWrapMode.Overflow;
-
-        if (statusText.font == null)
-            statusText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-
-        UpdateHeadText();
+        // Head text disabled
     }
 
 
-    //==========================
-    // 更新文字
-    //==========================
-
     private void UpdateHeadText()
     {
-        if (statusText == null)
-            return;
-
-        if (NPCData == null)
-            return;
-
-        statusText.text = State.ToString();
+        // Head text disabled
     }
 }

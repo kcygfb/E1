@@ -13,10 +13,13 @@ public class DialogueManager : MonoBehaviour
 
     private DialogueData currentDialogue;
     private int currentIndex;
-    private Action<DialogueTrigger> onTriggerCallback;
     private Action onCompleteCallback;
     private bool isRunning;
     private Dictionary<string, string> tokens = new();
+
+    private string speakerOverride;
+
+    public bool IsRunning => isRunning;
 
     private void Awake()
     {
@@ -30,13 +33,8 @@ public class DialogueManager : MonoBehaviour
             nextButton.onClick.RemoveListener(OnNextClicked);
     }
 
-    public bool IsRunning => isRunning;
-
-    private string speakerOverride;
-
     public void StartDialogue(
         DialogueData dialogue,
-        Action<DialogueTrigger> onTrigger,
         Action onComplete,
         Dictionary<string, string> tokens = null,
         string speakerOverride = null
@@ -44,14 +42,12 @@ public class DialogueManager : MonoBehaviour
     {
         if (dialogue == null || dialogue.lines == null || dialogue.lines.Length == 0)
         {
-            onTrigger?.Invoke(DialogueTrigger.None);
             onComplete?.Invoke();
             return;
         }
 
         currentDialogue = dialogue;
         currentIndex = 0;
-        onTriggerCallback = onTrigger;
         onCompleteCallback = onComplete;
         isRunning = true;
         this.tokens = tokens ?? new();
@@ -82,7 +78,6 @@ public class DialogueManager : MonoBehaviour
 
             if (speakerText != null)
             {
-                speakerText.text = "";
                 string speaker = !string.IsNullOrEmpty(speakerOverride) ? speakerOverride : line.speaker;
                 lineText.text = $"{speaker}：{text}";
             }
@@ -91,17 +86,12 @@ public class DialogueManager : MonoBehaviour
                 lineText.text = text;
             }
         }
-
-        if (line.trigger != DialogueTrigger.None)
-            onTriggerCallback?.Invoke(line.trigger);
     }
 
     private void OnNextClicked()
     {
         if (!isRunning || currentDialogue == null)
             return;
-
-        Debug.Log($"[DialogueManager] OnNextClicked called, currentIndex={currentIndex}, totalLines={currentDialogue.lines.Length}");
 
         int next = currentIndex + 1;
         if (next >= currentDialogue.lines.Length)

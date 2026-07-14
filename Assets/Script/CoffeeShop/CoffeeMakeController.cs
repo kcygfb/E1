@@ -15,6 +15,9 @@ public class CoffeeMakeController : MonoBehaviour
     [SerializeField] private GameObject deliverButton;
     [SerializeField] private Button deliverBtn;
 
+    [Header("Back")]
+    [SerializeField] private Button backButton;
+
     [Header("System")]
     [SerializeField] private OrderSystem orderSystem;
     [SerializeField] private CoffeeMachine coffeeMachine;
@@ -38,6 +41,9 @@ public class CoffeeMakeController : MonoBehaviour
 
         if (deliverBtn != null)
             deliverBtn.onClick.AddListener(OnDeliverClicked);
+
+        if (backButton != null)
+            backButton.onClick.AddListener(OnBackClicked);
 
         if (coffeeMakeGroup != null) coffeeMakeGroup.SetActive(false);
         if (deliverButton != null) deliverButton.SetActive(false);
@@ -95,6 +101,16 @@ public class CoffeeMakeController : MonoBehaviour
                 orderSystem.TryServeCoffee(selectedCoffee);
         }
 
+        if (coffeeMakeGroup != null) coffeeMakeGroup.SetActive(false);
+        if (deliverButton != null) deliverButton.SetActive(false);
+        if (coffeeListGroup != null) coffeeListGroup.SetActive(true);
+
+        selectedCoffee = null;
+        completedSteps.Clear();
+    }
+
+    private void OnBackClicked()
+    {
         if (coffeeMakeGroup != null) coffeeMakeGroup.SetActive(false);
         if (deliverButton != null) deliverButton.SetActive(false);
         if (coffeeListGroup != null) coffeeListGroup.SetActive(true);
