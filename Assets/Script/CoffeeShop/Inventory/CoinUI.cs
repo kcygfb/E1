@@ -1,21 +1,20 @@
 using UnityEngine;
-using UnityEngine.UI;
 using TMPro;
 
 public class CoinUI : MonoBehaviour
 {
-    [SerializeField] private ResourceData targetResource;
+    [SerializeField] private string targetResourceId = "gold";
     [SerializeField] private TMP_Text displayText;
     [SerializeField] private string format = "Coin: {0}";
 
-    private void OnEnable()
+    private void Start()
     {
         if (InventorySystem.Instance == null) return;
         InventorySystem.Instance.OnResourceChanged += HandleResourceChanged;
         RefreshDisplay();
     }
 
-    private void OnDisable()
+    private void OnDestroy()
     {
         if (InventorySystem.Instance != null)
             InventorySystem.Instance.OnResourceChanged -= HandleResourceChanged;
@@ -23,14 +22,13 @@ public class CoinUI : MonoBehaviour
 
     private void HandleResourceChanged(string resourceId, int newAmount)
     {
-        if (targetResource == null || resourceId != targetResource.ResourceId) return;
+        if (resourceId != targetResourceId) return;
         UpdateText(newAmount);
     }
 
     private void RefreshDisplay()
     {
-        if (targetResource != null && InventorySystem.Instance != null)
-            UpdateText(InventorySystem.Instance.GetAmount(targetResource));
+        UpdateText(InventorySystem.Instance.GetAmount(targetResourceId));
     }
 
     private void UpdateText(int amount)

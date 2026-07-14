@@ -1,0 +1,18 @@
+﻿{
+  "coffeeId": "Latte",
+  "coffeeName": "Latte",
+  "sellPrice": 14,
+  "locked": false,
+  "unlockItemId": "",
+  "unlockAmount": 1,
+  "recipe": [
+    {
+      "resourceId": "CoffeeBean",
+      "amount": 1
+    },
+    {
+      "resourceId": "Milk",
+      "amount": 1
+    }
+  ]
+}

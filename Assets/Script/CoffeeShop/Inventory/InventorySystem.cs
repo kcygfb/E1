@@ -6,7 +6,6 @@ public class InventorySystem : MonoBehaviour
 {
     public static InventorySystem Instance { get; private set; }
 
-    [SerializeField] private List<ResourceData> registeredResources = new();
     private readonly Dictionary<string, int> _amounts = new();
 
     public event Action<string, int> OnResourceChanged;
@@ -15,11 +14,23 @@ public class InventorySystem : MonoBehaviour
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
+        transform.SetParent(null);
         DontDestroyOnLoad(gameObject);
-        foreach (var resource in registeredResources)
+
+        // 直接从磁盘加载，不依赖 ResourceDataLoader.Instance 的初始化时机
+        var db = ResourceDataLoader.LoadDirect();
+        if (db != null)
         {
-            if (resource != null && !_amounts.ContainsKey(resource.ResourceId))
-                _amounts[resource.ResourceId] = resource.StartingAmount;
+            foreach (var res in db.resources)
+            {
+                if (!string.IsNullOrEmpty(res.id) && !_amounts.ContainsKey(res.id))
+                    _amounts[res.id] = res.startingAmount;
+            }
+            Debug.Log($"[InventorySystem] Initialized {_amounts.Count} resources.");
+        }
+        else
+        {
+            Debug.LogWarning("[InventorySystem] Failed to load resources from JSON.");
         }
     }
 
@@ -31,20 +42,12 @@ public class InventorySystem : MonoBehaviour
     public int GetAmount(string resourceId) =>
         _amounts.TryGetValue(resourceId, out var amount) ? amount : 0;
 
-    public int GetAmount(ResourceData resource) =>
-        resource != null ? GetAmount(resource.ResourceId) : 0;
-
     public void Add(string resourceId, int amount)
     {
         if (string.IsNullOrEmpty(resourceId) || amount == 0) return;
         _amounts.TryGetValue(resourceId, out var current);
         _amounts[resourceId] = current + amount;
         OnResourceChanged?.Invoke(resourceId, _amounts[resourceId]);
-    }
-
-    public void Add(ResourceData resource, int amount)
-    {
-        if (resource != null) Add(resource.ResourceId, amount);
     }
 
     public bool Spend(string resourceId, int amount)
@@ -55,9 +58,6 @@ public class InventorySystem : MonoBehaviour
         OnResourceChanged?.Invoke(resourceId, _amounts[resourceId]);
         return true;
     }
-
-    public bool Spend(ResourceData resource, int amount) =>
-        resource != null && Spend(resource.ResourceId, amount);
 
     public void SetAmount(string resourceId, int amount)
     {

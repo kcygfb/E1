@@ -1,0 +1,29 @@
+﻿{
+  "resources": [
+    {
+      "id": "CocoaPowder",
+      "displayName": "Cocoa Powder",
+      "startingAmount": 0
+    },
+    {
+      "id": "CoffeeBean",
+      "displayName": "Coffee Bean",
+      "startingAmount": 10
+    },
+    {
+      "id": "Milk",
+      "displayName": "Milk",
+      "startingAmount": 10
+    },
+    {
+      "id": "Sugar",
+      "displayName": "Sugar",
+      "startingAmount": 10
+    },
+    {
+      "id": "gold",
+      "displayName": "Gold",
+      "startingAmount": 0
+    }
+  ]
+}

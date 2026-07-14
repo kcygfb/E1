@@ -43,7 +43,11 @@ public class DialogueRepository : MonoBehaviour
         }
 
         Instance = this;
-        if (persistAcrossScenes) DontDestroyOnLoad(gameObject);
+        if (persistAcrossScenes)
+        {
+            transform.SetParent(null);
+            DontDestroyOnLoad(gameObject);
+        }
         if (autoLoadOnAwake) StartCoroutine(EnsureLoaded());
     }
 

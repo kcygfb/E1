@@ -11,7 +11,8 @@ public class CollectController : MonoBehaviour
     public Button returnButton;
 
     [Header("Collect Rewards")]
-    public ResourceData rewardItem;
+    [Tooltip("采集获得的资源 resourceId")]
+    public string rewardResourceId = "CocoaPowder";
     public int rewardAmount1 = 1;
     public int rewardAmount2 = 1;
 
@@ -30,14 +31,13 @@ public class CollectController : MonoBehaviour
 
     private void OnCollect(int index)
     {
-        if (rewardItem == null) return;
         int amount = index == 1 ? rewardAmount1 : rewardAmount2;
         if (InventorySystem.Instance != null)
         {
-            InventorySystem.Instance.Add(rewardItem.ResourceId, amount);
+            InventorySystem.Instance.Add(rewardResourceId, amount);
             if (index == 1) collected1++;
             else collected2++;
-            Debug.Log($"[CollectScene] Collected {amount}x {rewardItem.DisplayName}");
+            Debug.Log($"[CollectScene] Collected {amount}x {rewardResourceId}");
         }
     }
 

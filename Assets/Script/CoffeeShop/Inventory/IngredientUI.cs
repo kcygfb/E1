@@ -9,14 +9,14 @@ public class IngredientUI : MonoBehaviour
 
     private readonly Dictionary<string, int> cachedAmounts = new();
 
-    private void OnEnable()
+    private void Start()
     {
         if (InventorySystem.Instance == null) return;
         InventorySystem.Instance.OnResourceChanged += HandleResourceChanged;
         RefreshDisplay();
     }
 
-    private void OnDisable()
+    private void OnDestroy()
     {
         if (InventorySystem.Instance != null)
             InventorySystem.Instance.OnResourceChanged -= HandleResourceChanged;

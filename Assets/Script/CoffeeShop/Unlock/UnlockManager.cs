@@ -11,6 +11,7 @@ public class UnlockManager : MonoBehaviour
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
+        transform.SetParent(null);
         DontDestroyOnLoad(gameObject);
     }
 
@@ -25,10 +26,10 @@ public class UnlockManager : MonoBehaviour
         if (!coffee.locked) return true;
         if (unlockedIds.Contains(coffee.coffeeId)) return true;
 
-        if (coffee.unlockItem != null)
+        if (!string.IsNullOrEmpty(coffee.unlockItemId))
         {
             var inv = InventorySystem.Instance;
-            if (inv != null && inv.GetAmount(coffee.unlockItem.ResourceId) >= coffee.unlockAmount)
+            if (inv != null && inv.GetAmount(coffee.unlockItemId) >= coffee.unlockAmount)
             {
                 unlockedIds.Add(coffee.coffeeId);
                 Debug.Log($"[UnlockManager] Item unlocked: {coffee.coffeeName}");

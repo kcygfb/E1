@@ -14,6 +14,19 @@ public class CoffeeButton : MonoBehaviour
         button = GetComponent<Button>();
     }
 
+    private void Start()
+    {
+        // 运行时从 JSON 加载咖啡数据覆盖 SO 内容
+        if (coffeeData != null && CoffeeDataLoader.Instance != null && CoffeeDataLoader.Instance.IsLoaded)
+        {
+            var json = CoffeeDataLoader.Instance.GetCoffee(coffeeData.coffeeId);
+            if (json != null)
+            {
+                coffeeData.ApplyJson(json);
+            }
+        }
+    }
+
     private void OnEnable()
     {
         if (button == null) button = GetComponent<Button>();

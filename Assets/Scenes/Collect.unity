@@ -1017,7 +1017,7 @@ MonoBehaviour:
   collectButton1: {fileID: 445121699}
   collectButton2: {fileID: 481297164}
   returnButton: {fileID: 2003596009}
-  rewardItem: {fileID: 11400000, guid: 64b0c409f5c1f754e80c342851a7e8b7, type: 2}
+  rewardResourceId: CocoaPowder
   rewardAmount1: 1
   rewardAmount2: 1
 --- !u!4 &2098067744

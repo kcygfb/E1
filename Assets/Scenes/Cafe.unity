@@ -1574,6 +1574,53 @@ MonoBehaviour:
   exitPoint: {fileID: 181298184}
   endDayButton: {fileID: 398917924}
   morningCheckPanel: {fileID: 1966738963}
+--- !u!1 &453914901
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 453914902}
+  - component: {fileID: 453914903}
+  m_Layer: 0
+  m_Name: CoffeeDataLoader
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &453914902
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 453914901}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1596719260}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &453914903
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 453914901}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c1bbadd6850e8284ca9e6cd201d1c673, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CoffeeDataLoader
+  relativeDirectory: CoffeeData
+  autoLoadOnAwake: 1
+  persistAcrossScenes: 1
 --- !u!1 &481336599
 GameObject:
   m_ObjectHideFlags: 0
@@ -2552,11 +2599,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cb823349b04c1bc49a99351b8dc99989, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::KiKs.Core.InventorySystem
-  registeredResources:
-  - {fileID: 11400000, guid: d153db386aa1b2b43a056aaa0fa359e5, type: 2}
-  - {fileID: 11400000, guid: be2d562ad915c8a4e9e875e415d2ea04, type: 2}
-  - {fileID: 11400000, guid: c5b3d0bfc7d3a2a4b9adbdb4cbe36d49, type: 2}
-  - {fileID: 11400000, guid: 5ed17e6890ff86648bea08f49ffa7cb5, type: 2}
 --- !u!1 &1025238796
 GameObject:
   m_ObjectHideFlags: 0
@@ -3755,7 +3797,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 72986840d2d21e14babf540f9fddc5c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::KiKs.Core.CoinUI
-  targetResource: {fileID: 11400000, guid: 5ed17e6890ff86648bea08f49ffa7cb5, type: 2}
+  targetResourceId: gold
   displayText: {fileID: 1464622039}
   format: 'Coin: {0}'
 --- !u!1 &1472076477
@@ -3783,7 +3825,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1472076477}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -3951,7 +3993,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1571551005}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -3999,14 +4041,16 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1011240239}
   - {fileID: 739931611}
   - {fileID: 409946780}
   - {fileID: 391905252}
   - {fileID: 148957625}
   - {fileID: 1036488487}
+  - {fileID: 1011240239}
   - {fileID: 1571551006}
   - {fileID: 1472076478}
+  - {fileID: 2033226056}
+  - {fileID: 453914902}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1610187160
@@ -5429,6 +5473,52 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2025620138}
   m_CullTransparentMesh: 1
+--- !u!1 &2033226055
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2033226056}
+  - component: {fileID: 2033226057}
+  m_Layer: 0
+  m_Name: ResourceDataLoader
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2033226056
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2033226055}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1596719260}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2033226057
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2033226055}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dba0913fc6e600044adea36dc529aed2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ResourceDataLoader
+  autoLoadOnAwake: 1
+  persistAcrossScenes: 1
 --- !u!1 &2048482245
 GameObject:
   m_ObjectHideFlags: 0

@@ -32,9 +32,9 @@ public class CoffeeMachine : MonoBehaviour
     {
         var inv = InventorySystem.Instance;
         if (inv == null) return false;
-        foreach (var ingredient in coffee.recipe)
+        foreach (var ingredient in coffee.Recipe)
         {
-            if (inv.GetAmount(ingredient.item.ResourceId) < ingredient.amount)
+            if (inv.GetAmount(ingredient.resourceId) < ingredient.amount)
                 return false;
         }
         return true;
@@ -44,9 +44,9 @@ public class CoffeeMachine : MonoBehaviour
     {
         var inv = InventorySystem.Instance;
         if (inv == null) return false;
-        foreach (var ingredient in coffee.recipe)
+        foreach (var ingredient in coffee.Recipe)
         {
-            if (!inv.Spend(ingredient.item.ResourceId, ingredient.amount))
+            if (!inv.Spend(ingredient.resourceId, ingredient.amount))
                 return false;
         }
         return true;
