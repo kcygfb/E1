@@ -1,9 +1,9 @@
-﻿{
+{
   "dialogueId": "barddy_returnfound",
   "lines": [
     {
       "speaker": "Barddy",
-      "text": "昨天托你找的 Mocha 有了吗？"
+      "text": "昨天托你找的 Mocha Latte 有了吗？"
     },
     {
       "speaker": "Barddy",

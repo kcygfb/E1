@@ -9,10 +9,15 @@ public class CraftController : MonoBehaviour
     [SerializeField] private GameObject coffeeMakeGroup;
 
     [Header("Step Buttons")]
-    [SerializeField] private Button[] stepButtons;
+    [SerializeField] private Button grindBtn;
+    [SerializeField] private Button pourOverBtn;
+    [SerializeField] private Button extractBtn;
+    [SerializeField] private Button steamMilkBtn;
+    [SerializeField] private Button addWaterBtn;
+    [SerializeField] private Button addMilkBtn;
+    [SerializeField] private Button addSugarBtn;
 
     [Header("Deliver")]
-    [SerializeField] private GameObject deliverButton;
     [SerializeField] private Button deliverBtn;
 
     [Header("Back")]
@@ -23,19 +28,28 @@ public class CraftController : MonoBehaviour
     [SerializeField] private CoffeeMachine coffeeMachine;
 
     private CoffeeData selectedCoffee;
-    private readonly HashSet<int> completedSteps = new();
-    private int totalSteps;
+    private CraftStep[] currentSteps;
+    private int currentStepIndex;
+    private bool _craftFailed;
 
-    private void Start()
+    private readonly Dictionary<string, Button> _stepButtons = new();
+
+    private void Awake()
     {
-        totalSteps = stepButtons != null ? stepButtons.Length : 0;
+        _stepButtons["Grind"] = grindBtn;
+        _stepButtons["PourOver"] = pourOverBtn;
+        _stepButtons["Extract"] = extractBtn;
+        _stepButtons["SteamMilk"] = steamMilkBtn;
+        _stepButtons["AddWater"] = addWaterBtn;
+        _stepButtons["AddMilk"] = addMilkBtn;
+        _stepButtons["AddSugar"] = addSugarBtn;
 
-        if (stepButtons != null)
+        foreach (var kvp in _stepButtons)
         {
-            for (int i = 0; i < stepButtons.Length; i++)
+            if (kvp.Value != null)
             {
-                int index = i;
-                stepButtons[i].onClick.AddListener(() => OnStepClicked(index));
+                var stepId = kvp.Key;
+                kvp.Value.onClick.AddListener(() => OnStepClicked(stepId));
             }
         }
 
@@ -44,72 +58,97 @@ public class CraftController : MonoBehaviour
 
         if (backButton != null)
             backButton.onClick.AddListener(OnBackClicked);
-
-        if (coffeeMakeGroup != null) coffeeMakeGroup.SetActive(false);
-        if (deliverButton != null) deliverButton.SetActive(false);
-        if (coffeeListGroup != null) coffeeListGroup.SetActive(true);
     }
 
     public void OnCoffeeSelected(CoffeeData coffee)
     {
         selectedCoffee = coffee;
-        completedSteps.Clear();
+        currentStepIndex = 0;
+        currentSteps = coffee.Steps;
+        _craftFailed = false;
 
-        if (stepButtons != null)
-        {
-            foreach (var btn in stepButtons)
-                btn.interactable = true;
-        }
+        SetAllButtonsInteractable(true);
 
-        if (deliverButton != null) deliverButton.SetActive(false);
         if (coffeeListGroup != null) coffeeListGroup.SetActive(false);
         if (coffeeMakeGroup != null) coffeeMakeGroup.SetActive(true);
+
+        Debug.Log($"[CraftController] Start crafting: {coffee.coffeeName}, {currentSteps.Length} steps");
     }
 
-    private void OnStepClicked(int stepIndex)
+    private void OnStepClicked(string stepId)
     {
-        if (completedSteps.Contains(stepIndex)) return;
-        completedSteps.Add(stepIndex);
-        if (stepButtons != null && stepIndex < stepButtons.Length)
-            stepButtons[stepIndex].interactable = false;
-        if (completedSteps.Count >= totalSteps)
+        if (selectedCoffee == null || currentSteps == null) return;
+        if (currentStepIndex >= currentSteps.Length) return;
+
+        var step = currentSteps[currentStepIndex];
+
+        if (step.id != stepId)
         {
-            if (deliverButton != null) deliverButton.SetActive(true);
+            _craftFailed = true;
+            Debug.Log($"[CraftController] Wrong step! Expected '{step.id}', got '{stepId}'.");
+            return;
         }
+
+        if (!string.IsNullOrEmpty(step.resourceId) && step.amount > 0)
+        {
+            var inv = InventorySystem.Instance;
+            if (inv == null || !inv.Spend(step.resourceId, step.amount))
+            {
+                _craftFailed = true;
+                Debug.Log($"[CraftController] Not enough {step.resourceId} for step {step.id}.");
+                return;
+            }
+        }
+
+        currentStepIndex++;
+        Debug.Log($"[CraftController] Step {currentStepIndex}/{currentSteps.Length} ({step.id}) done");
     }
 
     private void OnDeliverClicked()
     {
-        if (selectedCoffee == null) return;
+        if (selectedCoffee == null || currentSteps == null) return;
 
-        if (coffeeMachine != null)
+        if (!_craftFailed && currentStepIndex >= currentSteps.Length)
         {
-            coffeeMachine.MakeCoffee(selectedCoffee);
-        }
-        else
-        {
+            Debug.Log($"[CraftController] Deliver success: {selectedCoffee.coffeeName}");
+
             if (orderSystem == null)
                 orderSystem = FindFirstObjectByType<OrderSystem>();
             if (orderSystem != null)
                 orderSystem.TryServeCoffee(selectedCoffee);
             else
                 GameEvent.Emit("CoffeeServed", selectedCoffee);
+
+            BackToList();
         }
+        else
+        {
+            Debug.Log($"[CraftController] Deliver failed: {(_craftFailed ? "wrong steps" : "incomplete")}");
+            BackToList();
+        }
+    }
 
+    private void BackToList()
+    {
         if (coffeeMakeGroup != null) coffeeMakeGroup.SetActive(false);
-        if (deliverButton != null) deliverButton.SetActive(false);
         if (coffeeListGroup != null) coffeeListGroup.SetActive(true);
-
         selectedCoffee = null;
-        completedSteps.Clear();
+        currentSteps = null;
+        currentStepIndex = 0;
+        _craftFailed = false;
     }
 
     private void OnBackClicked()
     {
-        if (coffeeMakeGroup != null) coffeeMakeGroup.SetActive(false);
-        if (deliverButton != null) deliverButton.SetActive(false);
-        if (coffeeListGroup != null) coffeeListGroup.SetActive(true);
-        selectedCoffee = null;
-        completedSteps.Clear();
+        BackToList();
+    }
+
+    private void SetAllButtonsInteractable(bool value)
+    {
+        foreach (var kvp in _stepButtons)
+        {
+            if (kvp.Value != null)
+                kvp.Value.interactable = value;
+        }
     }
 }

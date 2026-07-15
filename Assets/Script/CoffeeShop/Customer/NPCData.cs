@@ -27,8 +27,8 @@ public class NPCData : ScriptableObject
     public string departureDialogueId;
 
     [Header("Special NPC")]
-    [Tooltip("null = 普通NPC（随机选咖啡）；非null = 特殊NPC（指定咖啡）")]
-    public CoffeeData desiredCoffee;
+    [Tooltip("留空 = 普通NPC（随机选已解锁咖啡）；填写 = 指定咖啡ID，从JSON运行时解析")]
+    public string desiredCoffeeId;
 
     [Tooltip("当 desiredCoffee 未解锁时播放的到达对话ID")]
     public string lockedDialogueId;

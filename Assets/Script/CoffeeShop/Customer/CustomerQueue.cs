@@ -137,11 +137,25 @@ public class CustomerQueue : MonoBehaviour
         foreach (var npcId in pendingIds)
         {
             var npc = FindNPCById(npcId);
-            if (npc == null || npc.desiredCoffee == null) continue;
-            if (UnlockManager.Instance != null && UnlockManager.Instance.IsUnlocked(npc.desiredCoffee))
+            if (npc == null || string.IsNullOrEmpty(npc.desiredCoffeeId)) continue;
+            if (UnlockManager.Instance != null)
             {
-                returnVisitors.Add(npc);
-                pendingReturnVisits.Remove(npcId);
+                var loader = CoffeeDataLoader.Instance;
+                if (loader != null && loader.IsLoaded)
+                {
+                    var json = loader.GetCoffee(npc.desiredCoffeeId);
+                    if (json != null)
+                    {
+                        var tempData = ScriptableObject.CreateInstance<CoffeeData>();
+                        tempData.ApplyJson(json);
+                        if (UnlockManager.Instance.IsUnlocked(tempData))
+                        {
+                            returnVisitors.Add(npc);
+                            pendingReturnVisits.Remove(npcId);
+                        }
+                        Destroy(tempData);
+                    }
+                }
             }
         }
 
@@ -273,7 +287,22 @@ public class CustomerQueue : MonoBehaviour
 
     private CoffeeData PickCoffeeFor(NPCData npcData)
     {
-        if (npcData.desiredCoffee != null) return npcData.desiredCoffee;
+        if (!string.IsNullOrEmpty(npcData.desiredCoffeeId))
+        {
+            var loader = CoffeeDataLoader.Instance;
+            if (loader != null && loader.IsLoaded)
+            {
+                var json = loader.GetCoffee(npcData.desiredCoffeeId);
+                if (json != null)
+                {
+                    var coffee = ScriptableObject.CreateInstance<CoffeeData>();
+                    coffee.ApplyJson(json);
+                    return coffee;
+                }
+            }
+            return null;
+        }
+
         var unlocked = coffeePool.Where(c => UnlockManager.Instance != null && UnlockManager.Instance.IsUnlocked(c)).ToList();
         if (unlocked.Count == 0) return null;
         return unlocked[Random.Range(0, unlocked.Count)];

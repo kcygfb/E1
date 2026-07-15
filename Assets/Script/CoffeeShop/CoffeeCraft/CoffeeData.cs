@@ -8,6 +8,14 @@ public class RecipeEntry
     public int amount;
 }
 
+[Serializable]
+public class CraftStep
+{
+    public string id;
+    public string resourceId;
+    public int amount;
+}
+
 [CreateAssetMenu(fileName = "CoffeeData", menuName = "Game/Coffee Data")]
 public class CoffeeData : ScriptableObject
 {
@@ -29,6 +37,11 @@ public class CoffeeData : ScriptableObject
 
     public RecipeEntry[] Recipe => recipe;
 
+    [Header("Craft Steps (loaded from JSON at runtime)")]
+    [SerializeField] private CraftStep[] steps = Array.Empty<CraftStep>();
+
+    public CraftStep[] Steps => steps;
+
     /// <summary>运行时从 CoffeeDataLoader 加载 JSON 数据覆盖此 SO 实例</summary>
     public void ApplyJson(CoffeeDataJson json)
     {
@@ -49,6 +62,20 @@ public class CoffeeData : ScriptableObject
                 {
                     resourceId = json.recipe[i].resourceId,
                     amount = json.recipe[i].amount
+                };
+            }
+        }
+
+        if (json.steps != null)
+        {
+            steps = new CraftStep[json.steps.Count];
+            for (int i = 0; i < json.steps.Count; i++)
+            {
+                steps[i] = new CraftStep
+                {
+                    id = json.steps[i].id,
+                    resourceId = json.steps[i].resourceId ?? "",
+                    amount = json.steps[i].amount
                 };
             }
         }

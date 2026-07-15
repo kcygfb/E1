@@ -1,4 +1,4 @@
-﻿{
+{
   "coffeeId": "Espresso",
   "coffeeName": "Espresso",
   "sellPrice": 14,
@@ -9,6 +9,18 @@
     {
       "resourceId": "CoffeeBean",
       "amount": 1
+    }
+  ],
+  "steps": [
+    {
+      "id": "Grind",
+      "resourceId": "CoffeeBean",
+      "amount": 1
+    },
+    {
+      "id": "Extract",
+      "resourceId": "",
+      "amount": 0
     }
   ]
 }

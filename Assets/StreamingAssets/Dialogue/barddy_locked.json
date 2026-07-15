@@ -1,9 +1,9 @@
-﻿{
+{
   "dialogueId": "barddy_locked",
   "lines": [
     {
       "speaker": "Barddy",
-      "text": "听说你们这里能做 Mocha？"
+      "text": "听说你们这里能做 Mocha Latte？"
     },
     {
       "speaker": "Barddy",

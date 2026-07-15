@@ -1,0 +1,26 @@
+{
+  "coffeeId": "PourOver",
+  "coffeeName": "Pour Over",
+  "sellPrice": 14,
+  "locked": false,
+  "unlockItemId": "",
+  "unlockAmount": 1,
+  "recipe": [
+    {
+      "resourceId": "CoffeeBean",
+      "amount": 1
+    }
+  ],
+  "steps": [
+    {
+      "id": "Grind",
+      "resourceId": "CoffeeBean",
+      "amount": 1
+    },
+    {
+      "id": "PourOver",
+      "resourceId": "",
+      "amount": 0
+    }
+  ]
+}

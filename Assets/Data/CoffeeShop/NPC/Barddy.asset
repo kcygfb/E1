@@ -19,7 +19,7 @@ MonoBehaviour:
   willOrder: 1
   arrivalDialogueId: barddy_arrival
   departureDialogueId: barddy_departure
-  desiredCoffee: {fileID: 11400000, guid: 6901b4dffa703bd4e9c68fc92e3cdafa, type: 2}
+  desiredCoffeeId: MochaLatte
   lockedDialogueId: barddy_locked
   lockedDepartureDialogueId: barddy_lockeddeparture
   returnFoundDialogueId: barddy_returnfound

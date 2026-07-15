@@ -11,6 +11,14 @@ public class RecipeEntryJson
 }
 
 [Serializable]
+public class CraftStepJson
+{
+    public string id;
+    public string resourceId;
+    public int amount;
+}
+
+[Serializable]
 public class CoffeeDataJson
 {
     public string coffeeId;
@@ -20,6 +28,7 @@ public class CoffeeDataJson
     public string unlockItemId;
     public int unlockAmount;
     public List<RecipeEntryJson> recipe = new();
+    public List<CraftStepJson> steps = new();
 }
 
 [DisallowMultipleComponent]

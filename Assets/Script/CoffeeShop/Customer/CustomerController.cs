@@ -79,9 +79,9 @@ public class CustomerController : MonoBehaviour
         ChangeState(NPCState.ArrivalDialogue);
 
         // 回访检查
-        if (NPCData.desiredCoffee != null && Spawner != null && Spawner.HasPendingReturnVisit(NPCData))
+        if (!string.IsNullOrEmpty(NPCData.desiredCoffeeId) && Spawner != null && Spawner.HasPendingReturnVisit(NPCData))
         {
-            bool unlocked = UnlockManager.Instance != null && UnlockManager.Instance.IsUnlocked(NPCData.desiredCoffee);
+            bool unlocked = CoffeeData != null && (UnlockManager.Instance == null || UnlockManager.Instance.IsUnlocked(CoffeeData));
             if (unlocked)
             {
                 GiveReturnReward();
@@ -96,7 +96,7 @@ public class CustomerController : MonoBehaviour
         }
 
         // 首次到访：特殊NPC指定咖啡未解锁
-        if (NPCData.desiredCoffee != null && UnlockManager.Instance != null && !UnlockManager.Instance.IsUnlocked(NPCData.desiredCoffee))
+        if (!string.IsNullOrEmpty(NPCData.desiredCoffeeId) && CoffeeData != null && UnlockManager.Instance != null && !UnlockManager.Instance.IsUnlocked(CoffeeData))
         {
             if (Spawner != null) Spawner.MarkReturnVisit(NPCData);
             EmitDialogue(NPCData.lockedDialogueId, "locked_departure");
