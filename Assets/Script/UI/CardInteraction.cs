@@ -5,9 +5,6 @@ using DG.Tweening;
 
 namespace KiKs.UI
 {
-    /// <summary>
-    /// 卡牌悬浮、点击动效。依赖 DOTween。
-    /// </summary>
     [RequireComponent(typeof(RectTransform))]
     public class CardInteraction : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IPointerUpHandler
     {
@@ -42,10 +39,9 @@ namespace KiKs.UI
         private CardSkew _skew;
 
         private RectTransform _glowRect;
-        private Vector3 _glowOriginPos;
-        private Vector3 _glowOriginScale;
         private Image _glowImage;
         private CardSkew _glowSkew;
+        private bool _glowDestroyed;
 
         private Image _flashImage;
         private Sequence _currentSeq;
@@ -58,16 +54,14 @@ namespace KiKs.UI
             _originScale = _rect.localScale;
             _draggable = GetComponent<Draggable>();
 
-            // 清理旧版组件
             var oldOutline = GetComponent<Outline>();
             if (oldOutline != null) Destroy(oldOutline);
 
-            // 卡牌切变
             _skew = GetComponent<CardSkew>();
             if (_skew == null)
                 _skew = gameObject.AddComponent<CardSkew>();
 
-            // 高光边框：作为兄弟物体（渲染在卡牌后面）
+            // 高光边框：兄弟物体（渲染在卡牌后面），用 LateUpdate 同步位置
             var glowGo = new GameObject("GlowBorder", typeof(RectTransform), typeof(Image), typeof(CardSkew));
             glowGo.transform.SetParent(_rect.parent, false);
             glowGo.transform.SetSiblingIndex(_rect.GetSiblingIndex());
@@ -75,14 +69,7 @@ namespace KiKs.UI
             _glowRect.anchorMin = _rect.anchorMin;
             _glowRect.anchorMax = _rect.anchorMax;
             _glowRect.pivot = _rect.pivot;
-            _glowRect.anchoredPosition = _rect.anchoredPosition;
-            _glowRect.localRotation = _rect.localRotation;
-            _glowRect.localScale = _rect.localScale;
-            float expandX = glowExpand / Mathf.Abs(_originScale.x);
-            float expandY = glowExpand / Mathf.Abs(_originScale.y);
-            _glowRect.sizeDelta = _rect.sizeDelta + new Vector2(expandX * 2, expandY * 2);
-            _glowOriginPos = _glowRect.localPosition;
-            _glowOriginScale = _glowRect.localScale;
+            _glowRect.sizeDelta = _rect.sizeDelta + new Vector2(glowExpand * 2, glowExpand * 2);
             _glowImage = glowGo.GetComponent<Image>();
             _glowImage.color = new Color(glowColor.r, glowColor.g, glowColor.b, 0f);
             _glowImage.raycastTarget = false;
@@ -106,6 +93,7 @@ namespace KiKs.UI
 
         public void OnPointerEnter(PointerEventData eventData)
         {
+            if (!enabled) return;
             if (_draggable != null && _draggable.IsDragging) return;
 
             _currentSeq?.Kill();
@@ -115,16 +103,18 @@ namespace KiKs.UI
             _currentSeq.Join(_rect.DOLocalMoveY(_originPos.y + hoverLiftY, hoverDuration / speedMultiplier).SetEase(Ease.OutQuint));
             _currentSeq.Join(DOTween.To(() => _skew.Skew, v => _skew.Skew = v, hoverSkew, hoverDuration / speedMultiplier).SetEase(Ease.OutQuint));
 
-            _currentSeq.Join(_glowRect.DOScale(_glowOriginScale * hoverScale, hoverDuration / speedMultiplier).SetEase(Ease.OutQuint));
-            _currentSeq.Join(_glowRect.DOLocalMoveY(_glowOriginPos.y + hoverLiftY, hoverDuration / speedMultiplier).SetEase(Ease.OutQuint));
-            _currentSeq.Join(DOTween.To(() => _glowSkew.Skew, v => _glowSkew.Skew = v, -hoverSkew * glowSkewRatio, hoverDuration / speedMultiplier).SetEase(Ease.OutQuint));
-            _currentSeq.Join(_glowImage.DOFade(1f, glowFadeDuration / speedMultiplier));
+            if (!_glowDestroyed && _glowSkew != null)
+            {
+                _currentSeq.Join(DOTween.To(() => _glowSkew.Skew, v => _glowSkew.Skew = v, -hoverSkew * glowSkewRatio, hoverDuration / speedMultiplier).SetEase(Ease.OutQuint));
+                _currentSeq.Join(_glowImage.DOFade(1f, glowFadeDuration / speedMultiplier));
+            }
         }
 
         // ── 离开 ──────────────────────────────────────────────
 
         public void OnPointerExit(PointerEventData eventData)
         {
+            if (!enabled) return;
             if (_draggable != null && _draggable.IsDragging) return;
 
             _currentSeq?.Kill();
@@ -134,51 +124,83 @@ namespace KiKs.UI
             _currentSeq.Join(_rect.DOLocalMoveY(_originPos.y, hoverDuration / speedMultiplier).SetEase(Ease.OutQuint));
             _currentSeq.Join(DOTween.To(() => _skew.Skew, v => _skew.Skew = v, 0f, hoverDuration / speedMultiplier).SetEase(Ease.OutQuint));
 
-            _currentSeq.Join(_glowRect.DOScale(_glowOriginScale, hoverDuration / speedMultiplier).SetEase(Ease.OutQuint));
-            _currentSeq.Join(_glowRect.DOLocalMoveY(_glowOriginPos.y, hoverDuration / speedMultiplier).SetEase(Ease.OutQuint));
-            _currentSeq.Join(DOTween.To(() => _glowSkew.Skew, v => _glowSkew.Skew = v, 0f, hoverDuration / speedMultiplier).SetEase(Ease.OutQuint));
-            _currentSeq.Join(_glowImage.DOFade(0f, glowFadeDuration / speedMultiplier));
+            if (!_glowDestroyed && _glowSkew != null)
+            {
+                _currentSeq.Join(DOTween.To(() => _glowSkew.Skew, v => _glowSkew.Skew = v, 0f, hoverDuration / speedMultiplier).SetEase(Ease.OutQuint));
+                _currentSeq.Join(_glowImage.DOFade(0f, glowFadeDuration / speedMultiplier));
+            }
         }
 
         // ── 点击 ──────────────────────────────────────────────
 
         public void OnPointerDown(PointerEventData eventData)
         {
+            if (!enabled) return;
             if (_draggable != null && _draggable.IsDragging) return;
 
             _currentSeq?.Kill();
 
             _rect.DOScale(_originScale * clickScale, clickDuration / speedMultiplier).SetEase(Ease.InQuad);
-            _glowRect.DOScale(_glowOriginScale * clickScale, clickDuration / speedMultiplier).SetEase(Ease.InQuad);
 
-            // 形变归零
             DOTween.To(() => _skew.Skew, v => _skew.Skew = v, 0f, clickDuration / speedMultiplier).SetEase(Ease.OutQuint);
-            DOTween.To(() => _glowSkew.Skew, v => _glowSkew.Skew = v, 0f, clickDuration / speedMultiplier).SetEase(Ease.OutQuint);
+            if (!_glowDestroyed && _glowSkew != null)
+                DOTween.To(() => _glowSkew.Skew, v => _glowSkew.Skew = v, 0f, clickDuration / speedMultiplier).SetEase(Ease.OutQuint);
 
-            _flashImage.color = flashColor;
-            _flashImage.DOFade(0f, flashFadeDuration / speedMultiplier).SetEase(Ease.OutQuint);
+            if (_flashImage != null)
+            {
+                _flashImage.color = flashColor;
+                _flashImage.DOFade(0f, flashFadeDuration / speedMultiplier).SetEase(Ease.OutQuint);
+            }
         }
 
         public void OnPointerUp(PointerEventData eventData)
         {
+            if (!enabled) return;
             if (_draggable != null && _draggable.IsDragging) return;
 
             bool stillHovering = _rect.localPosition.y > _originPos.y + 1f;
             float targetScale = stillHovering ? hoverScale : 1f;
             _rect.DOScale(_originScale * targetScale, releaseDuration / speedMultiplier).SetEase(Ease.OutQuint);
-            _glowRect.DOScale(_glowOriginScale * targetScale, releaseDuration / speedMultiplier).SetEase(Ease.OutQuint);
 
-            // 如果还在悬浮，恢复形变
             if (stillHovering)
             {
                 DOTween.To(() => _skew.Skew, v => _skew.Skew = v, hoverSkew, releaseDuration / speedMultiplier).SetEase(Ease.OutQuint);
-                DOTween.To(() => _glowSkew.Skew, v => _glowSkew.Skew = v, -hoverSkew * glowSkewRatio, releaseDuration / speedMultiplier).SetEase(Ease.OutQuint);
+                if (!_glowDestroyed && _glowSkew != null)
+                    DOTween.To(() => _glowSkew.Skew, v => _glowSkew.Skew = v, -hoverSkew * glowSkewRatio, releaseDuration / speedMultiplier).SetEase(Ease.OutQuint);
             }
+        }
+
+        // ── 清理 ──────────────────────────────────────────────
+
+        public void DestroyGlow()
+        {
+            _currentSeq?.Kill(false);
+            _currentSeq = null;
+            if (_glowSkew != null) DOTween.Kill(_glowSkew, false);
+            if (_glowImage != null) DOTween.Kill(_glowImage, false);
+            if (_glowRect != null && _glowRect.gameObject != null)
+                Destroy(_glowRect.gameObject);
+            _glowRect = null;
+            _glowSkew = null;
+            _glowImage = null;
+            _glowDestroyed = true;
+        }
+
+        private void LateUpdate()
+        {
+            if (_glowRect == null) return;
+            _glowRect.position = _rect.position;
+            _glowRect.rotation = _rect.rotation;
+            _glowRect.localScale = _rect.localScale;
+            _glowRect.sizeDelta = _rect.sizeDelta + new Vector2(glowExpand * 2, glowExpand * 2);
         }
 
         private void OnDestroy()
         {
-            _currentSeq?.Kill();
+            _currentSeq?.Kill(false);
+            if (_glowSkew != null) DOTween.Kill(_glowSkew, false);
+            if (_glowImage != null) DOTween.Kill(_glowImage, false);
+            if (_flashImage != null) DOTween.Kill(_flashImage, false);
             if (_glowRect != null && _glowRect.gameObject != null)
                 Destroy(_glowRect.gameObject);
         }
