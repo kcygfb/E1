@@ -30,7 +30,6 @@ public class CraftController : MonoBehaviour
     private CoffeeData selectedCoffee;
     private CraftStep[] currentSteps;
     private int currentStepIndex;
-    private bool _craftFailed;
 
     private readonly Dictionary<string, Button> _stepButtons = new();
 
@@ -65,12 +64,12 @@ public class CraftController : MonoBehaviour
         selectedCoffee = coffee;
         currentStepIndex = 0;
         currentSteps = coffee.Steps;
-        _craftFailed = false;
-
-        SetAllButtonsInteractable(true);
 
         if (coffeeListGroup != null) coffeeListGroup.SetActive(false);
         if (coffeeMakeGroup != null) coffeeMakeGroup.SetActive(true);
+
+        GameEvent.Emit("CraftViewChanged", "CoffeeMake");
+        UpdateButtonStates();
 
         Debug.Log($"[CraftController] Start crafting: {coffee.coffeeName}, {currentSteps.Length} steps");
     }
@@ -81,20 +80,13 @@ public class CraftController : MonoBehaviour
         if (currentStepIndex >= currentSteps.Length) return;
 
         var step = currentSteps[currentStepIndex];
-
-        if (step.id != stepId)
-        {
-            _craftFailed = true;
-            Debug.Log($"[CraftController] Wrong step! Expected '{step.id}', got '{stepId}'.");
-            return;
-        }
+        if (step.id != stepId) return;
 
         if (!string.IsNullOrEmpty(step.resourceId) && step.amount > 0)
         {
             var inv = InventorySystem.Instance;
             if (inv == null || !inv.Spend(step.resourceId, step.amount))
             {
-                _craftFailed = true;
                 Debug.Log($"[CraftController] Not enough {step.resourceId} for step {step.id}.");
                 return;
             }
@@ -102,30 +94,47 @@ public class CraftController : MonoBehaviour
 
         currentStepIndex++;
         Debug.Log($"[CraftController] Step {currentStepIndex}/{currentSteps.Length} ({step.id}) done");
+        UpdateButtonStates();
+    }
+
+    /// <summary>只亮当前步骤对应的按钮，其他全灰</summary>
+    private void UpdateButtonStates()
+    {
+        // 先全灰
+        foreach (var kvp in _stepButtons)
+        {
+            if (kvp.Value != null)
+                kvp.Value.interactable = false;
+        }
+
+        // 交付按钮：全步骤完成才亮
+        if (deliverBtn != null)
+            deliverBtn.interactable = (currentStepIndex >= currentSteps.Length);
+
+        // 没完成时亮当前步骤对应的按钮
+        if (currentStepIndex < currentSteps.Length)
+        {
+            var currentStepId = currentSteps[currentStepIndex].id;
+            if (_stepButtons.TryGetValue(currentStepId, out var btn) && btn != null)
+                btn.interactable = true;
+        }
     }
 
     private void OnDeliverClicked()
     {
         if (selectedCoffee == null || currentSteps == null) return;
+        if (currentStepIndex < currentSteps.Length) return;
 
-        if (!_craftFailed && currentStepIndex >= currentSteps.Length)
-        {
-            Debug.Log($"[CraftController] Deliver success: {selectedCoffee.coffeeName}");
+        Debug.Log($"[CraftController] Deliver success: {selectedCoffee.coffeeName}");
 
-            if (orderSystem == null)
-                orderSystem = FindFirstObjectByType<OrderSystem>();
-            if (orderSystem != null)
-                orderSystem.TryServeCoffee(selectedCoffee);
-            else
-                GameEvent.Emit("CoffeeServed", selectedCoffee);
-
-            BackToList();
-        }
+        if (orderSystem == null)
+            orderSystem = FindFirstObjectByType<OrderSystem>();
+        if (orderSystem != null)
+            orderSystem.TryServeCoffee(selectedCoffee);
         else
-        {
-            Debug.Log($"[CraftController] Deliver failed: {(_craftFailed ? "wrong steps" : "incomplete")}");
-            BackToList();
-        }
+            GameEvent.Emit("CoffeeServed", selectedCoffee);
+
+        BackToList();
     }
 
     private void BackToList()
@@ -135,20 +144,12 @@ public class CraftController : MonoBehaviour
         selectedCoffee = null;
         currentSteps = null;
         currentStepIndex = 0;
-        _craftFailed = false;
+
+        GameEvent.Emit("CraftViewChanged", "Menu");
     }
 
     private void OnBackClicked()
     {
         BackToList();
-    }
-
-    private void SetAllButtonsInteractable(bool value)
-    {
-        foreach (var kvp in _stepButtons)
-        {
-            if (kvp.Value != null)
-                kvp.Value.interactable = value;
-        }
     }
 }

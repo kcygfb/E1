@@ -268,7 +268,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: "\u8403\u53D6"
+  m_Text: "\u6253\u5976\u6CE1"
 --- !u!222 &67009069
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1441,6 +1441,7 @@ RectTransform:
   - {fileID: 398917925}
   - {fileID: 1966738964}
   - {fileID: 2117631338}
+  - {fileID: 1500177845}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -1506,7 +1507,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 3319165483683776926, guid: c5ba9c4c1718e8e4abccc64baa24e1ab, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -3541,8 +3542,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: 196.79, y: 317}
-  m_SizeDelta: {x: 906.4178, y: 119.0451}
+  m_AnchoredPosition: {x: 18.95198, y: 317}
+  m_SizeDelta: {x: 1262.094, y: 119.0451}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!114 &1290630252
 MonoBehaviour:
@@ -4039,7 +4040,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: "\u624B\u51B2"
+  m_Text: "\u8403\u53D6"
 --- !u!222 &1382802337
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -4317,6 +4318,99 @@ MonoBehaviour:
   relativeDirectory: Dialogue
   autoLoadOnAwake: 1
   persistAcrossScenes: 1
+--- !u!1 &1500177844
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1500177845}
+  - component: {fileID: 1500177848}
+  - component: {fileID: 1500177847}
+  - component: {fileID: 1500177846}
+  m_Layer: 0
+  m_Name: PhaseDisplay
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1500177845
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1500177844}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 374551729}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 1}
+  m_AnchorMax: {x: 0.5, y: 1}
+  m_AnchoredPosition: {x: 0, y: -20}
+  m_SizeDelta: {x: 300, y: 40}
+  m_Pivot: {x: 0.5, y: 1}
+--- !u!114 &1500177846
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1500177844}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cb60dc13252380545913587e53902253, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PhaseDisplayUI
+  displayText: {fileID: 1500177847}
+--- !u!114 &1500177847
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1500177844}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Text
+  m_Material: {fileID: 0}
+  m_Color: {r: 0.9, g: 0.85, b: 0.6, a: 1}
+  m_RaycastTarget: 0
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_FontData:
+    m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
+    m_FontSize: 28
+    m_FontStyle: 0
+    m_BestFit: 0
+    m_MinSize: 10
+    m_MaxSize: 40
+    m_Alignment: 4
+    m_AlignByGeometry: 0
+    m_RichText: 1
+    m_HorizontalOverflow: 0
+    m_VerticalOverflow: 0
+    m_LineSpacing: 1
+  m_Text: MorningCheck
+--- !u!222 &1500177848
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1500177844}
+  m_CullTransparentMesh: 1
 --- !u!1 &1517162093
 GameObject:
   m_ObjectHideFlags: 0
@@ -5191,7 +5285,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: "\u6253\u5976\u6CE1"
+  m_Text: "\u624B\u51B2"
 --- !u!222 &1729593183
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -5234,7 +5328,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 1761, y: 288}
+  m_AnchoredPosition: {x: 1780.2, y: 460.31}
   m_SizeDelta: {x: 277.2587, y: 329.8645}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1732182886
@@ -5291,7 +5385,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1769967500
 RectTransform:
   m_ObjectHideFlags: 0
@@ -5304,10 +5398,10 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1686497175}
   - {fileID: 1314816684}
-  - {fileID: 249200775}
+  - {fileID: 1686497175}
   - {fileID: 2025620139}
+  - {fileID: 249200775}
   - {fileID: 120668945}
   - {fileID: 1517162094}
   - {fileID: 180797780}
@@ -5335,9 +5429,9 @@ MonoBehaviour:
   coffeeListGroup: {fileID: 1373476334}
   coffeeMakeGroup: {fileID: 1769967499}
   grindBtn: {fileID: 1686497176}
-  pourOverBtn: {fileID: 1314816685}
-  extractBtn: {fileID: 249200776}
-  steamMilkBtn: {fileID: 2025620140}
+  pourOverBtn: {fileID: 2025620140}
+  extractBtn: {fileID: 1314816685}
+  steamMilkBtn: {fileID: 249200776}
   addWaterBtn: {fileID: 180797777}
   addMilkBtn: {fileID: 399504992}
   addSugarBtn: {fileID: 1095471437}
