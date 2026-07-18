@@ -151,8 +151,6 @@ GameObject:
   - component: {fileID: 2443126535215713863}
   - component: {fileID: 1359886611707977755}
   - component: {fileID: 398413739180223214}
-  - component: {fileID: 4396186119914251640}
-  - component: {fileID: 6187362198854058732}
   m_Layer: 5
   m_Name: Card1
   m_TagString: Untagged
@@ -304,30 +302,3 @@ MonoBehaviour:
   returnDuration: 0.2
   constrainX: 0
   constrainY: 0
---- !u!114 &4396186119914251640
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8206539003280044786}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bde303b389bc1b24fa9bb3b6aa1522e1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::KiKs.Combat.CardData
-  cardType: 1
-  attack: 10
-  toughnessReduction: 20
---- !u!114 &6187362198854058732
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8206539003280044786}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b82f8e0a866f4844bb84db02e8a7eb09, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::KiKs.Combat.DragAttackCard
