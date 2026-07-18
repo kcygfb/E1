@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 960556f0c23ddf7479d7994860c3cd3f, type: 3}
+  m_Name: Barddy
+  m_EditorClassIdentifier: Assembly-CSharp::NPCData
+  npcId: 1
+  npcName: Barddy
+  portrait: {fileID: -4055902353284128174, guid: 761e8259328ec88498254a12bd8e2ae9, type: 3}
+  portraitSize: {x: 637.5, y: 695.5125}
+  willOrder: 1
+  arrivalDialogueId: barddy_arrival
+  departureDialogueId: barddy_departure
+  desiredCoffeeId: MochaLatte
+  lockedDialogueId: barddy_locked
+  lockedDepartureDialogueId: barddy_lockeddeparture
+  returnFoundDialogueId: barddy_returnfound
+  returnNotFoundDialogueId: barddy_returnnotfound
+  returnReward: 50
+  spawnOrder: 2

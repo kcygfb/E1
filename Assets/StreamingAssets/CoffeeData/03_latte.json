@@ -1,0 +1,40 @@
+{
+  "coffeeId": "Latte",
+  "coffeeName": "Latte",
+  "sellPrice": 14,
+  "locked": false,
+  "unlockItemId": "",
+  "unlockAmount": 1,
+  "recipe": [
+    {
+      "resourceId": "CoffeeBean",
+      "amount": 1
+    },
+    {
+      "resourceId": "Milk",
+      "amount": 1
+    }
+  ],
+  "steps": [
+    {
+      "id": "Grind",
+      "resourceId": "CoffeeBean",
+      "amount": 1
+    },
+    {
+      "id": "Extract",
+      "resourceId": "",
+      "amount": 0
+    },
+    {
+      "id": "AddMilk",
+      "resourceId": "Milk",
+      "amount": 1
+    },
+    {
+      "id": "SteamMilk",
+      "resourceId": "",
+      "amount": 0
+    }
+  ]
+}

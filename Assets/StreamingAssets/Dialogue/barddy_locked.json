@@ -1,0 +1,13 @@
+{
+  "dialogueId": "barddy_locked",
+  "lines": [
+    {
+      "speaker": "Barddy",
+      "text": "听说你们这里能做 Mocha Latte？"
+    },
+    {
+      "speaker": "Barddy",
+      "text": "还没解锁啊……那你先准备准备，我下次再来吧。"
+    }
+  ]
+}
