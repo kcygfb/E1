@@ -12,8 +12,8 @@ namespace KiKs.Combat
         public string DisplayNameZhCn { get; }
         public string DisplayNameEn { get; }
         public string DisplayName =>
-            !string.IsNullOrWhiteSpace(DisplayNameZhCn) ? DisplayNameZhCn :
-            !string.IsNullOrWhiteSpace(DisplayNameEn) ? DisplayNameEn : Id;
+            !string.IsNullOrWhiteSpace(DisplayNameEn) ? DisplayNameEn :
+            !string.IsNullOrWhiteSpace(DisplayNameZhCn) ? DisplayNameZhCn : Id;
         public string Category { get; }
         public CardResourceType CostResource { get; }
         public int CostAmount { get; }

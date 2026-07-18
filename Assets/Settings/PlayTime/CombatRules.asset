@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b0d881c869a58b408f9a21668b11121, type: 3}
+  m_Name: CombatRules
+  m_EditorClassIdentifier: KiKs.Combat::KiKs.Combat.CombatRulesConfig
+  baseActionPoints: 3
+  cardsDrawnPerTurn: 4
+  handLimit: 10
+  expectedInitialDeckSize: 15
+  startingMana: 3
+  maximumMana: 3
+  maximumManaSpendPerTurn: 1
+  cardUpgradeManaCost: 1
+  magicCardsPerTurn: 1
+  ultimateManaThreshold: 3
+  ultimateDamage: 0
+  ultimateStunTurns: 1
+  ultimateManaRefund: 3
+  eliteExecutionDamage: 0
+  eliteStunTurns: 0
+  bossExecutionDamage: 0
+  toughnessRestoreMode: 0
+  fixedToughnessRestoreAmount: 0

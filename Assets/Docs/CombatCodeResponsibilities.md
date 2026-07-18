@@ -80,3 +80,17 @@
 - 刷新界面：读取 `battleController.State` 并监听 `CombatEventRaised`
 
 UI 不应直接调用状态对象内部方法改变数值。
+
+
+## CombatTemp 现行职责
+
+`CombatTemp` 现在不再保存临时战斗规则，而是当前场景表现层适配器：
+
+- `CardData.cs`：把场景卡牌对象绑定到手牌中的 `CardInstance`；不保存攻击力、削韧或费用。
+- `DragAttackCard.cs`：识别拖拽落点上的敌人，然后调用 `BattleController.PlayCard`。
+- `ClickAttackCard.cs`：点击卡牌时通过同一个规则入口出牌。
+- `EnemyStats.cs`：名字暂时保留以维持场景 GUID；实际职责是把 `BattleState` 中的敌人只读数据转成 UnityEvent。
+- `StatBarUI.cs`：监听敌人只读视图，显示生命或韧性。
+- `EnemyHitFeedback.cs`：生命下降后播放 DOTween 受击表现。
+
+这些脚本都不能直接修改生命、韧性、行动点、魔法点或牌堆。

@@ -37,10 +37,7 @@ namespace KiKs.Combat
         private IEnumerator Start()
         {
             if (!autoStartBattle) yield break;
-            if (cardDatabase == null)
-                cardDatabase = CardDatabaseService.Instance != null
-                    ? CardDatabaseService.Instance
-                    : FindFirstObjectByType<CardDatabaseService>();
+            cardDatabase = ResolveCardDatabase();
             if (cardDatabase == null)
             {
                 Debug.LogError("No CardDatabaseService exists in the scene or persistent objects.", this);
@@ -48,9 +45,13 @@ namespace KiKs.Combat
             }
 
             yield return cardDatabase.EnsureLoaded();
-            if (!cardDatabase.IsLoaded)
+            cardDatabase = ResolveCardDatabase();
+            if (cardDatabase == null || !cardDatabase.IsLoaded)
             {
-                Debug.LogError("Battle cannot start because card JSON failed to load: " + cardDatabase.LastError, this);
+                var error = cardDatabase != null
+                    ? cardDatabase.LastError
+                    : "CardDatabaseService became unavailable during scene loading.";
+                Debug.LogError("Battle cannot start because card JSON failed to load: " + error, this);
                 yield break;
             }
 
@@ -63,6 +64,7 @@ namespace KiKs.Combat
             {
                 DisposeEngine();
 
+                cardDatabase = ResolveCardDatabase();
                 if (cardDatabase == null || !cardDatabase.IsLoaded)
                     throw new InvalidOperationException("CardDatabaseService must finish loading first.");
                 if (rulesConfig == null) throw new InvalidOperationException("CombatRulesConfig is not assigned.");
@@ -72,7 +74,8 @@ namespace KiKs.Combat
                 if (enemyDefinitions == null || enemyDefinitions.Count == 0)
                     throw new InvalidOperationException("At least one enemy definition is required.");
 
-                var selectedIds = BattleSession.HasSelectedDeck
+                var usesSelectedDeck = BattleSession.HasSelectedDeck;
+                var selectedIds = usesSelectedDeck
                     ? BattleSession.SelectedCardIds
                     : debugStartingCardIds;
                 if (selectedIds == null || selectedIds.Count == 0)
@@ -84,8 +87,13 @@ namespace KiKs.Combat
                 var cards = CreateCardInstances(selectedIds);
                 if (cards.Count != rules.ExpectedInitialDeckSize)
                 {
+                    if (usesSelectedDeck)
+                        throw new InvalidOperationException(
+                            "Selected deck contains " + cards.Count + " cards; rules require exactly " +
+                            rules.ExpectedInitialDeckSize + ".");
+
                     Debug.LogWarning(
-                        "Starting deck contains " + cards.Count + " cards; rules expect " +
+                        "Debug deck contains " + cards.Count + " cards; rules expect " +
                         rules.ExpectedInitialDeckSize + ".", this);
                 }
 
@@ -105,6 +113,8 @@ namespace KiKs.Combat
                     return false;
                 }
 
+                if (usesSelectedDeck)
+                    BattleSession.ClearSelectedDeck();
                 return true;
             }
             catch (Exception exception)
@@ -117,7 +127,20 @@ namespace KiKs.Combat
 
         public CombatResult PlayCard(string cardInstanceId, string targetId)
         {
-            return GetEngineOrThrow().PlayCard(cardInstanceId, targetId);
+            var engine = GetEngineOrThrow();
+            var card = engine.State.Deck.FindInHand(cardInstanceId);
+            var cardName = card != null ? card.Spec.DisplayName : cardInstanceId;
+            var playerId = engine.State.Player.Id;
+            var result = engine.PlayCard(cardInstanceId, targetId);
+
+            if (result.Success)
+            {
+                var actualDamage = SumDamage(result, playerId);
+                Debug.Log("[Combat] Player played card \"" + cardName +
+                          "\" and dealt " + actualDamage + " damage.", this);
+            }
+
+            return result;
         }
 
         public CombatResult UpgradeCard(string cardInstanceId, string preferredUltimateTargetId = null)
@@ -130,7 +153,19 @@ namespace KiKs.Combat
 
         public CombatResult ResolveEnemyAttack(string enemyId, int damage)
         {
-            return GetEngineOrThrow().ResolveEnemyAttack(enemyId, damage);
+            var engine = GetEngineOrThrow();
+            var enemy = engine.State.FindEnemy(enemyId);
+            var enemyName = enemy != null ? enemy.DisplayName : enemyId;
+            var result = engine.ResolveEnemyAttack(enemyId, damage);
+
+            if (result.Success)
+            {
+                var actualDamage = SumDamage(result, enemyId);
+                Debug.Log("[Combat] " + enemyName +
+                          " used \"Basic Attack\" and dealt " + actualDamage + " damage.", this);
+            }
+
+            return result;
         }
 
         public CombatResult CompleteEnemyTurn() { return GetEngineOrThrow().CompleteEnemyTurn(); }
@@ -138,6 +173,21 @@ namespace KiKs.Combat
         public void SetPlayerActionPointModifier(int modifier)
         {
             GetEngineOrThrow().State.Player.SetActionPointModifier(modifier);
+        }
+
+        private static int SumDamage(CombatResult result, string sourceId)
+        {
+            var total = 0;
+            foreach (var combatEvent in result.Events)
+            {
+                if (combatEvent.Type == CombatEventType.DamageApplied &&
+                    string.Equals(combatEvent.SourceId, sourceId, StringComparison.Ordinal))
+                {
+                    total += Math.Max(0, combatEvent.Amount);
+                }
+            }
+
+            return total;
         }
 
         private List<CombatantState> CreateEnemies()
@@ -164,6 +214,17 @@ namespace KiKs.Combat
             }
 
             return cards;
+        }
+
+        private CardDatabaseService ResolveCardDatabase()
+        {
+            if (CardDatabaseService.Instance != null)
+                return CardDatabaseService.Instance;
+
+            if (cardDatabase != null)
+                return cardDatabase;
+
+            return FindFirstObjectByType<CardDatabaseService>();
         }
 
         private CombatEngine GetEngineOrThrow()
