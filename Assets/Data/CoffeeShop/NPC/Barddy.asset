@@ -15,7 +15,7 @@ MonoBehaviour:
   npcId: 1
   npcName: Barddy
   portrait: {fileID: -4055902353284128174, guid: 761e8259328ec88498254a12bd8e2ae9, type: 3}
-  portraitSize: {x: 500, y: 545.5}
+  portraitSize: {x: 637.5, y: 695.5125}
   willOrder: 1
   arrivalDialogueId: barddy_arrival
   departureDialogueId: barddy_departure

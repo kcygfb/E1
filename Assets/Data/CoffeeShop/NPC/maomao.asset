@@ -15,11 +15,11 @@ MonoBehaviour:
   npcId: 4
   npcName: maomao
   portrait: {fileID: 0}
-  portraitSize: {x: 500, y: 545.5}
+  portraitSize: {x: 637.5, y: 695.5125}
   willOrder: 1
   arrivalDialogueId: generic_arrival
   departureDialogueId: generic_departure
-  desiredCoffee: {fileID: 0}
+  desiredCoffeeId: 
   lockedDialogueId: 
   lockedDepartureDialogueId: 
   returnFoundDialogueId: 

@@ -61,6 +61,12 @@ public class CraftController : MonoBehaviour
 
     public void OnCoffeeSelected(CoffeeData coffee)
     {
+        if (!IsCraftingAllowed())
+        {
+            Debug.Log("[CraftController] Cannot enter crafting: shop not open or no active order");
+            return;
+        }
+
         selectedCoffee = coffee;
         currentStepIndex = 0;
         currentSteps = coffee.Steps;
@@ -151,5 +157,19 @@ public class CraftController : MonoBehaviour
     private void OnBackClicked()
     {
         BackToList();
+    }
+
+    private bool IsCraftingAllowed()
+    {
+        var timeSystem = FindFirstObjectByType<TimeSystem>();
+        if (timeSystem != null && timeSystem.CurrentPhase != DayPhase.Shop)
+            return false;
+
+        if (orderSystem == null)
+            orderSystem = FindFirstObjectByType<OrderSystem>();
+        if (orderSystem != null && !orderSystem.HasActiveOrder)
+            return false;
+
+        return true;
     }
 }
