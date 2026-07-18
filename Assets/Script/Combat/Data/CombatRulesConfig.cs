@@ -12,8 +12,8 @@ namespace KiKs.Combat
         [Min(1)] [SerializeField] private int expectedInitialDeckSize = 15;
 
         [Header("Mana and in-battle upgrades")]
-        [Min(0)] [SerializeField] private int startingMana = 5;
-        [Min(0)] [SerializeField] private int maximumMana = 5;
+        [Min(0)] [SerializeField] private int startingMana = 3;
+        [Min(0)] [SerializeField] private int maximumMana = 3;
         [Min(0)] [SerializeField] private int maximumManaSpendPerTurn = 1;
         [Min(0)] [SerializeField] private int cardUpgradeManaCost = 1;
         [Min(0)] [SerializeField] private int magicCardsPerTurn = 1;

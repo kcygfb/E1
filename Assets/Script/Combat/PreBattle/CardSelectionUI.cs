@@ -8,11 +8,16 @@ namespace KiKs.Combat
 {
     public class CardSelectionUI : MonoBehaviour
     {
-        private const int MAX_DECK_SIZE = 16;
+        private const int DEFAULT_DECK_SIZE = 15;
+        private const string BATTLE_SCENE_NAME = "Card";
 
         [Header("Buttons")]
         [SerializeField] private Button cardButton;
         [SerializeField] private Button beginButton;
+        [SerializeField] private Button undoButton;
+
+        [Header("Rules")]
+        [SerializeField] private CombatRulesConfig rulesConfig;
 
         [Header("Popups")]
         [SerializeField] private GameObject cardPopup;
@@ -27,17 +32,36 @@ namespace KiKs.Combat
 
         private readonly List<string> selectedCardIds = new();
         private readonly List<CardSpec> allCards = new();
+        private bool _isStartingBattle;
+
+        private int RequiredDeckSize =>
+            rulesConfig != null ? rulesConfig.ExpectedInitialDeckSize : DEFAULT_DECK_SIZE;
 
         private void Start()
         {
+            ResolveUndoButton();
+
             if (cardButton != null)
                 cardButton.onClick.AddListener(OnCardButtonClicked);
             if (beginButton != null)
                 beginButton.onClick.AddListener(OnBeginClicked);
+            if (undoButton != null)
+                undoButton.onClick.AddListener(OnUndoClicked);
 
             BindCloseButton(cardPopup);
+            RefreshSelectionUI();
 
             StartCoroutine(LoadCardsAndPopulate());
+        }
+
+        private void OnDestroy()
+        {
+            if (cardButton != null)
+                cardButton.onClick.RemoveListener(OnCardButtonClicked);
+            if (beginButton != null)
+                beginButton.onClick.RemoveListener(OnBeginClicked);
+            if (undoButton != null)
+                undoButton.onClick.RemoveListener(OnUndoClicked);
         }
 
         private IEnumerator LoadCardsAndPopulate()
@@ -64,7 +88,7 @@ namespace KiKs.Combat
                 allCards.Add(card);
 
             PopulateCardGrid();
-            UpdateDeckLabel();
+            RefreshSelectionUI();
         }
 
         private void PopulateCardGrid()
@@ -130,15 +154,39 @@ namespace KiKs.Combat
 
         private void OnCardClicked(string cardId)
         {
-            if (selectedCardIds.Count >= MAX_DECK_SIZE)
+            if (_isStartingBattle) return;
+
+            if (selectedCardIds.Count >= RequiredDeckSize)
             {
                 Debug.Log("[CardSelectionUI] Deck is full.");
                 return;
             }
 
             selectedCardIds.Add(cardId);
+            RefreshSelectionUI();
+        }
+
+        private void OnUndoClicked()
+        {
+            if (_isStartingBattle || selectedCardIds.Count == 0)
+                return;
+
+            selectedCardIds.RemoveAt(selectedCardIds.Count - 1);
+            RefreshSelectionUI();
+        }
+
+        private void RefreshSelectionUI()
+        {
             UpdateDeckSlots();
             UpdateDeckLabel();
+
+            if (undoButton != null)
+                undoButton.interactable = !_isStartingBattle && selectedCardIds.Count > 0;
+            if (beginButton != null)
+                beginButton.interactable =
+                    !_isStartingBattle && selectedCardIds.Count == RequiredDeckSize;
+            if (cardButton != null)
+                cardButton.interactable = !_isStartingBattle;
         }
 
         private void UpdateDeckSlots()
@@ -148,6 +196,11 @@ namespace KiKs.Combat
             for (int i = 0; i < deckGridContent.childCount; i++)
             {
                 var slot = deckGridContent.GetChild(i);
+                var isRequiredSlot = i < RequiredDeckSize;
+                slot.gameObject.SetActive(isRequiredSlot);
+                if (!isRequiredSlot)
+                    continue;
+
                 var placeholder = slot.Find("Placeholder");
 
                 if (i < selectedCardIds.Count)
@@ -190,7 +243,35 @@ namespace KiKs.Combat
         private void UpdateDeckLabel()
         {
             if (deckLabel != null)
-                deckLabel.text = $"已选卡牌 ({selectedCardIds.Count}/{MAX_DECK_SIZE})";
+                deckLabel.text = $"已选卡牌 ({selectedCardIds.Count}/{RequiredDeckSize})";
+        }
+
+        private void ResolveUndoButton()
+        {
+            if (undoButton != null)
+                return;
+
+            var buttons = FindObjectsByType<Button>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            foreach (var button in buttons)
+            {
+                if (button == cardButton || button == beginButton)
+                    continue;
+
+                var objectName = button.gameObject.name;
+                var label = button.GetComponentInChildren<Text>(true);
+                var labelText = label != null ? label.text : string.Empty;
+
+                if (objectName == "UndoButton" || objectName == "UndoBtn" ||
+                    objectName == "RevokeButton" || objectName == "RevokeBtn" ||
+                    labelText.Contains("\u64A4\u9500") || labelText.Contains("\u9000\u9009") ||
+                    labelText.Contains("\u53D6\u6D88\u9009\u62E9"))
+                {
+                    undoButton = button;
+                    return;
+                }
+            }
+
+            Debug.LogWarning("[CardSelectionUI] Undo button is not assigned. Assign it in the Inspector or name it UndoButton.");
         }
 
         private void OnCardButtonClicked()
@@ -200,15 +281,44 @@ namespace KiKs.Combat
 
         private void OnBeginClicked()
         {
-            if (selectedCardIds.Count == 0)
+            if (_isStartingBattle)
+                return;
+
+            var requiredDeckSize = RequiredDeckSize;
+            if (selectedCardIds.Count != requiredDeckSize)
             {
-                Debug.LogWarning("[CardSelectionUI] No cards selected.");
+                Debug.LogWarning(
+                    $"[CardSelectionUI] Select exactly {requiredDeckSize} cards before starting.");
                 return;
             }
 
+            if (!Application.CanStreamedLevelBeLoaded(BATTLE_SCENE_NAME))
+            {
+                Debug.LogError(
+                    $"[CardSelectionUI] Scene '{BATTLE_SCENE_NAME}' is not included in the active build profile.");
+                return;
+            }
+
+            _isStartingBattle = true;
+            RefreshSelectionUI();
             BattleSession.SetSelectedDeck(selectedCardIds);
             Debug.Log($"[CardSelectionUI] Starting battle with {selectedCardIds.Count} cards.");
-            SceneManager.LoadScene("Card");
+            StartCoroutine(LoadBattleScene());
+        }
+
+        private IEnumerator LoadBattleScene()
+        {
+            var operation = SceneManager.LoadSceneAsync(BATTLE_SCENE_NAME, LoadSceneMode.Single);
+            if (operation == null)
+            {
+                _isStartingBattle = false;
+                RefreshSelectionUI();
+                Debug.LogError($"[CardSelectionUI] Failed to start loading scene '{BATTLE_SCENE_NAME}'.");
+                yield break;
+            }
+
+            while (!operation.isDone)
+                yield return null;
         }
 
         private void BindCloseButton(GameObject popup)
