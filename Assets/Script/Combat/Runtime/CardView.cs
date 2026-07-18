@@ -1,0 +1,152 @@
+using UnityEngine;
+using UnityEngine.EventSystems;
+using DG.Tweening;
+using System.Reflection;
+
+namespace KiKs.Combat
+{
+    [RequireComponent(typeof(RectTransform))]
+    public class CardView : MonoBehaviour, IPointerClickHandler
+    {
+        public string CardId { get; private set; }
+        public string InstanceId { get; private set; }
+        public CardSpec Spec { get; private set; }
+
+        public System.Action<CardView> OnPlayRequested;
+
+        private RectTransform _rect;
+        private bool _isAnimating;
+        private bool _wasDragged;
+        private Vector2 _dragStartPos;
+        private const float DRAG_THRESHOLD = 10f;
+
+        private void Awake()
+        {
+            _rect = GetComponent<RectTransform>();
+        }
+
+        public void Setup(CardSpec spec, string instanceId = null)
+        {
+            Spec = spec;
+            CardId = spec.Id;
+            InstanceId = instanceId ?? spec.Id;
+            gameObject.name = $"Card_{spec.Id}";
+            transform.localScale = Vector3.one;
+        }
+
+        public void OnPointerClick(PointerEventData eventData)
+        {
+            if (_isAnimating) return;
+            if (_wasDragged) return;
+            TryPlayCard();
+        }
+
+        public void OnBeginDrag(PointerEventData eventData)
+        {
+            _wasDragged = false;
+            _dragStartPos = eventData.position;
+        }
+
+        public void OnDrag(PointerEventData eventData)
+        {
+            if (Vector2.Distance(eventData.position, _dragStartPos) > DRAG_THRESHOLD)
+                _wasDragged = true;
+        }
+
+        public void OnEndDrag(PointerEventData eventData)
+        {
+            if (!_wasDragged) return;
+            _wasDragged = false;
+
+            if (eventData.position.y > Screen.height * 0.5f)
+            {
+                // 不在这里 kill DOTween，由 CardDealAnimator 根据出牌结果决定
+                TryPlayCard();
+            }
+        }
+
+        private void TryPlayCard()
+        {
+            OnPlayRequested?.Invoke(this);
+        }
+
+        /// <summary>出牌失败时，弹回手牌位置</summary>
+        public void ReturnToHand(Vector2 handPosition)
+        {
+            _rect.DOKill();
+            _rect.DOLocalMove(handPosition, 0.25f).SetEase(Ease.OutBack);
+        }
+
+        public void SyncCardInteraction()
+        {
+            var components = GetComponents<MonoBehaviour>();
+            foreach (var comp in components)
+            {
+                if (comp == null) continue;
+                if (comp.GetType().Name != "CardInteraction") continue;
+                SetField(comp, "_originPos", _rect.localPosition);
+                SetField(comp, "_originScale", _rect.localScale);
+            }
+        }
+
+        private static void SetField(object obj, string name, object value)
+        {
+            var f = obj.GetType().GetField(name, BindingFlags.NonPublic | BindingFlags.Instance);
+            f?.SetValue(obj, value);
+        }
+
+        public void PlayDrawAnimation(Vector2 deckPos, Vector2 targetPos, float duration, System.Action onComplete)
+        {
+            _isAnimating = true;
+            _rect.localPosition = deckPos;
+            _rect.localScale = Vector3.one * 0.3f;
+
+            var seq = DOTween.Sequence();
+            seq.Join(_rect.DOLocalMove(targetPos, duration).SetEase(Ease.OutCubic));
+            seq.Join(_rect.DOScale(1f, duration).SetEase(Ease.OutBack));
+            seq.OnComplete(() =>
+            {
+                _isAnimating = false;
+                SyncCardInteraction();
+                onComplete?.Invoke();
+            });
+        }
+
+        public void PlayDiscardAnimation(Vector3 targetWorldPos, System.Action onComplete)
+        {
+            _isAnimating = true;
+
+            // 先 kill 所有动画（包括 Draggable 的回归动画）
+            _rect.DOKill();
+
+            var components = GetComponents<MonoBehaviour>();
+            foreach (var comp in components)
+            {
+                if (comp == null) continue;
+                var name = comp.GetType().Name;
+                if (name == "CardInteraction" || name == "Draggable")
+                    comp.enabled = false;
+            }
+
+            foreach (var comp in components)
+            {
+                if (comp == null) continue;
+                if (comp.GetType().Name == "CardInteraction")
+                {
+                    var method = comp.GetType().GetMethod("DestroyGlow");
+                    method?.Invoke(comp, null);
+                }
+            }
+
+            var seq = DOTween.Sequence();
+            seq.AppendInterval(5f / 60f);
+            seq.Append(transform.DOScale(0.3f, 0.3f).SetEase(Ease.InCubic));
+            seq.Join(transform.DOMove(targetWorldPos, 0.3f).SetEase(Ease.InCubic));
+            seq.OnComplete(() =>
+            {
+                _isAnimating = false;
+                onComplete?.Invoke();
+            });
+        }
+    }
+}

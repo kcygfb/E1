@@ -1,0 +1,292 @@
+{
+  "schemaVersion": 1,
+  "category": "hidden_weapons",
+  "categoryName": "暗器",
+  "cards": [
+    {
+      "id": "hidden_crossbow",
+      "name": {
+        "zhCN": "弩",
+        "en": "crossbow"
+      },
+      "category": "hidden_weapons",
+      "cost": {
+        "resource": "action_point",
+        "amount": 1
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "damage",
+          "damageType": "normal",
+          "amount": {
+            "base": 4,
+            "upgraded": 6
+          },
+          "hits": {
+            "base": 3,
+            "upgraded": 3
+          },
+          "minimumDamagePerHit": 1
+        },
+        {
+          "type": "toughness_damage",
+          "unit": "percent",
+          "amount": {
+            "base": 1,
+            "upgraded": 2
+          },
+          "hits": {
+            "base": 3,
+            "upgraded": 3
+          }
+        },
+        {
+          "type": "bleed",
+          "durationTurns": {
+            "base": 5,
+            "upgraded": 7
+          },
+          "damagePerTurn": 2,
+          "damageType": "true",
+          "stackable": true
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "Sheet1",
+        "row": 38,
+        "rawLabel": "1 弩 crossbow"
+      },
+      "notes": []
+    },
+    {
+      "id": "hidden_kunai",
+      "name": {
+        "zhCN": "苦无",
+        "en": "kunai"
+      },
+      "category": "hidden_weapons",
+      "cost": {
+        "resource": "action_point",
+        "amount": 1
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "damage",
+          "damageType": "normal",
+          "amount": {
+            "base": 2,
+            "upgraded": 4
+          },
+          "hits": {
+            "base": 3,
+            "upgraded": 3
+          },
+          "minimumDamagePerHit": 1
+        },
+        {
+          "type": "bleed",
+          "durationTurns": {
+            "base": 2,
+            "upgraded": 4
+          },
+          "damagePerTurn": 2,
+          "damageType": "true",
+          "stackable": true
+        },
+        {
+          "type": "damage",
+          "damageType": "true",
+          "amount": {
+            "base": 2,
+            "upgraded": 4
+          },
+          "hits": {
+            "base": 3,
+            "upgraded": 3
+          }
+        },
+        {
+          "type": "poison",
+          "durationTurns": {
+            "base": 2,
+            "upgraded": 4
+          },
+          "damagePerTurn": 5,
+          "damageType": "normal",
+          "stackable": true
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "Sheet1",
+        "row": 39,
+        "rawLabel": "1 苦无 kunai"
+      },
+      "notes": []
+    },
+    {
+      "id": "hidden_smoke_bomb",
+      "name": {
+        "zhCN": "烟雾弹",
+        "en": "smoke bomb"
+      },
+      "category": "hidden_weapons",
+      "cost": {
+        "resource": "action_point",
+        "amount": 0
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "nullify_attacks",
+          "triggerCount": {
+            "base": 1,
+            "upgraded": 1
+          }
+        },
+        {
+          "type": "draw_cards",
+          "amount": {
+            "base": 3,
+            "upgraded": 5
+          }
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "Sheet1",
+        "row": 40,
+        "rawLabel": "0 烟雾弹smoke bomb"
+      },
+      "notes": []
+    },
+    {
+      "id": "hidden_poison_sting",
+      "name": {
+        "zhCN": "毒针",
+        "en": "poison sting"
+      },
+      "category": "hidden_weapons",
+      "cost": {
+        "resource": "action_point",
+        "amount": 1
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "bleed",
+          "durationTurns": {
+            "base": 3,
+            "upgraded": 6
+          },
+          "damagePerTurn": 2,
+          "damageType": "true",
+          "stackable": true
+        },
+        {
+          "type": "poison",
+          "durationTurns": {
+            "base": 5,
+            "upgraded": 8
+          },
+          "damagePerTurn": 5,
+          "damageType": "normal",
+          "stackable": true
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "Sheet1",
+        "row": 41,
+        "rawLabel": "1 毒针 poison sting"
+      },
+      "notes": []
+    },
+    {
+      "id": "hidden_hidden_blade",
+      "name": {
+        "zhCN": "袖剑",
+        "en": "hidden blade"
+      },
+      "category": "hidden_weapons",
+      "cost": {
+        "resource": "action_point",
+        "amount": 1
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "toughness_damage",
+          "unit": "percent",
+          "amount": {
+            "base": 1,
+            "upgraded": 3
+          },
+          "hits": {
+            "base": 1,
+            "upgraded": 1
+          }
+        },
+        {
+          "type": "bleed",
+          "durationTurns": {
+            "base": 8,
+            "upgraded": 12
+          },
+          "damagePerTurn": 2,
+          "damageType": "true",
+          "stackable": true
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "Sheet1",
+        "row": 42,
+        "rawLabel": "1 袖剑 hidden blade"
+      },
+      "notes": []
+    },
+    {
+      "id": "hidden_poisonous_gas",
+      "name": {
+        "zhCN": "毒粉",
+        "en": "poisonous gas"
+      },
+      "category": "hidden_weapons",
+      "cost": {
+        "resource": "action_point",
+        "amount": 0
+      },
+      "special": true,
+      "effects": [
+        {
+          "type": "poison",
+          "durationTurns": {
+            "base": 5,
+            "upgraded": 8
+          },
+          "damagePerTurn": 5,
+          "damageType": "normal",
+          "stackable": true
+        },
+        {
+          "type": "draw_cards",
+          "amount": {
+            "base": 2,
+            "upgraded": 3
+          }
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "Sheet1",
+        "row": 43,
+        "rawLabel": "0 毒粉 poisonous gas(特殊）"
+      },
+      "notes": []
+    }
+  ]
+}

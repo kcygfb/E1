@@ -1,0 +1,324 @@
+{
+  "schemaVersion": 1,
+  "category": "guns",
+  "categoryName": "枪",
+  "cards": [
+    {
+      "id": "gun_pistol",
+      "name": {
+        "zhCN": "手枪",
+        "en": "pistol"
+      },
+      "category": "guns",
+      "cost": {
+        "resource": "action_point",
+        "amount": 1
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "damage",
+          "damageType": "normal",
+          "amount": {
+            "base": 3,
+            "upgraded": 5
+          },
+          "hits": {
+            "base": 8,
+            "upgraded": 8
+          },
+          "minimumDamagePerHit": 1
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "Sheet1",
+        "row": 2,
+        "rawLabel": "1 手枪pistol"
+      },
+      "notes": []
+    },
+    {
+      "id": "gun_sniper_rifle",
+      "name": {
+        "zhCN": "狙击枪",
+        "en": "sniper rifle"
+      },
+      "category": "guns",
+      "cost": {
+        "resource": "action_point",
+        "amount": 2
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "damage",
+          "damageType": "true",
+          "amount": {
+            "base": 10,
+            "upgraded": 15
+          },
+          "hits": {
+            "base": 1,
+            "upgraded": 1
+          }
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "Sheet1",
+        "row": 3,
+        "rawLabel": "2 狙击枪sniper rifle"
+      },
+      "notes": []
+    },
+    {
+      "id": "gun_shotgun",
+      "name": {
+        "zhCN": "霰弹枪",
+        "en": "shotgun"
+      },
+      "category": "guns",
+      "cost": {
+        "resource": "action_point",
+        "amount": 2
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "damage",
+          "damageType": "normal",
+          "amount": {
+            "base": 7,
+            "upgraded": 10
+          },
+          "hits": {
+            "base": 3,
+            "upgraded": 3
+          }
+        },
+        {
+          "type": "toughness_damage",
+          "unit": "percent",
+          "amount": {
+            "base": 3,
+            "upgraded": 5
+          },
+          "hits": {
+            "base": 3,
+            "upgraded": 3
+          }
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "Sheet1",
+        "row": 4,
+        "rawLabel": "2 霰弹枪shotgun"
+      },
+      "notes": []
+    },
+    {
+      "id": "gun_rocket_launcher",
+      "name": {
+        "zhCN": "火箭筒",
+        "en": "rocket launcher"
+      },
+      "category": "guns",
+      "cost": {
+        "resource": "action_point",
+        "amount": 3
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "damage",
+          "damageType": "normal",
+          "amount": {
+            "base": 25,
+            "upgraded": 40
+          },
+          "hits": {
+            "base": 1,
+            "upgraded": 1
+          }
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "Sheet1",
+        "row": 5,
+        "rawLabel": "3 火箭筒rocket launcher"
+      },
+      "notes": []
+    },
+    {
+      "id": "gun_revolver",
+      "name": {
+        "zhCN": "左轮手枪",
+        "en": "revolver"
+      },
+      "category": "guns",
+      "cost": {
+        "resource": "action_point",
+        "amount": 1
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "damage",
+          "damageType": "normal",
+          "amount": {
+            "base": 4,
+            "upgraded": 7
+          },
+          "hits": {
+            "base": 6,
+            "upgraded": 6
+          },
+          "minimumDamagePerHit": 1
+        },
+        {
+          "type": "toughness_damage",
+          "unit": "percent",
+          "amount": {
+            "base": 2,
+            "upgraded": 4
+          },
+          "hits": {
+            "base": 6,
+            "upgraded": 6
+          }
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "Sheet1",
+        "row": 6,
+        "rawLabel": "1 左轮手枪revolver"
+      },
+      "notes": []
+    },
+    {
+      "id": "gun_submachine_gun",
+      "name": {
+        "zhCN": "冲锋枪",
+        "en": "submachine gun"
+      },
+      "category": "guns",
+      "cost": {
+        "resource": "action_point",
+        "amount": 1
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "damage",
+          "damageType": "normal",
+          "amount": {
+            "base": 3,
+            "upgraded": 5
+          },
+          "hits": {
+            "base": 15,
+            "upgraded": 15
+          },
+          "minimumDamagePerHit": 1
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "Sheet1",
+        "row": 7,
+        "rawLabel": "1 冲锋枪submachine gun"
+      },
+      "notes": []
+    },
+    {
+      "id": "gun_flamethrower",
+      "name": {
+        "zhCN": "火焰喷射器",
+        "en": "flamethrower"
+      },
+      "category": "guns",
+      "cost": {
+        "resource": "action_point",
+        "amount": 2
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "damage",
+          "damageType": "normal",
+          "amount": {
+            "base": 1,
+            "upgraded": 1
+          },
+          "hits": {
+            "base": 30,
+            "upgraded": 30
+          }
+        },
+        {
+          "type": "bleed",
+          "durationTurns": {
+            "base": 30,
+            "upgraded": 40
+          },
+          "damagePerTurn": 2,
+          "damageType": "true",
+          "stackable": true
+        },
+        {
+          "type": "vulnerability",
+          "durationTurns": {
+            "base": 3,
+            "upgraded": 4
+          },
+          "multiplier": 2
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "Sheet1",
+        "row": 8,
+        "rawLabel": "2 火焰喷射器flamethrower"
+      },
+      "notes": []
+    },
+    {
+      "id": "gun_grenade_launcher",
+      "name": {
+        "zhCN": "榴弹发射器",
+        "en": "grenade launcher"
+      },
+      "category": "guns",
+      "cost": {
+        "resource": "action_point",
+        "amount": 2
+      },
+      "special": true,
+      "effects": [
+        {
+          "type": "damage",
+          "damageType": "normal",
+          "amount": {
+            "base": 30,
+            "upgraded": 45
+          },
+          "hits": {
+            "base": 2,
+            "upgraded": 2
+          }
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "Sheet1",
+        "row": 9,
+        "rawLabel": "2 榴弹发射器grenade launcher(特殊）"
+      },
+      "notes": []
+    }
+  ]
+}
