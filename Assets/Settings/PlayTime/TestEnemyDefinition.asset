@@ -16,5 +16,5 @@ MonoBehaviour:
   displayName: "\u6D4B\u8BD5\u654C\u4EBA"
   side: 1
   enemyRank: 1
-  maxHealth: 100
+  maxHealth: 1000
   maxToughness: 100

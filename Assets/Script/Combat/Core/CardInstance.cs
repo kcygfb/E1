@@ -24,5 +24,10 @@ namespace KiKs.Combat
             IsUpgraded = true;
             return true;
         }
+
+        internal void ConsumeUpgrade()
+        {
+            IsUpgraded = false;
+        }
     }
 }

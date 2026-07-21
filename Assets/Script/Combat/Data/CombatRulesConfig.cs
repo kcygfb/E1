@@ -9,7 +9,7 @@ namespace KiKs.Combat
         [Min(0)] [SerializeField] private int baseActionPoints = 3;
         [Min(0)] [SerializeField] private int cardsDrawnPerTurn = 4;
         [Min(1)] [SerializeField] private int handLimit = 10;
-        [Min(1)] [SerializeField] private int expectedInitialDeckSize = 15;
+        [Min(1)] [SerializeField] private int expectedInitialDeckSize = 5;
 
         [Header("Mana and in-battle upgrades")]
         [Min(0)] [SerializeField] private int startingMana = 3;
@@ -22,7 +22,6 @@ namespace KiKs.Combat
         [Min(1)] [SerializeField] private int ultimateManaThreshold = 3;
         [Min(0)] [SerializeField] private int ultimateDamage = 0;
         [Min(0)] [SerializeField] private int ultimateStunTurns = 1;
-        [Min(0)] [SerializeField] private int ultimateManaRefund = 3;
 
         [Header("Execution values - pending final balance")]
         [Min(0)] [SerializeField] private int eliteExecutionDamage = 0;
@@ -57,8 +56,7 @@ namespace KiKs.Combat
                 magicCardsPerTurn,
                 ultimateManaThreshold,
                 ultimateDamage,
-                ultimateStunTurns,
-                ultimateManaRefund);
+                ultimateStunTurns);
         }
 
         private void OnValidate()

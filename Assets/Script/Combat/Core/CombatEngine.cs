@@ -108,6 +108,7 @@ namespace KiKs.Combat
                 "Played " + card.Spec.DisplayName + (card.IsUpgraded ? " (upgraded)." : ".")));
 
             var toughnessBroken = ResolveEffects(card, target, events);
+            card.ConsumeUpgrade();
             State.Deck.DiscardFromHand(card.InstanceId, out _);
             events.Add(new CombatEvent(
                 CombatEventType.CardDiscarded,
@@ -212,11 +213,12 @@ namespace KiKs.Combat
             return Complete(true, string.Empty, events);
         }
 
-        public CombatResult ResolveEnemyAttack(string enemyId, int damage)
+        public CombatResult ResolveEnemyAttack(string enemyId, int damage, int toughnessDamage = 0)
         {
             if (State.Phase != CombatPhase.EnemyTurn)
                 return Reject("Enemy attacks can only resolve during the enemy turn.");
             if (damage < 0) return Reject("Enemy damage cannot be negative.");
+            if (toughnessDamage < 0) return Reject("Enemy toughness damage cannot be negative.");
 
             var enemy = State.FindEnemy(enemyId);
             if (enemy == null || enemy.IsDead) return Reject("The attacking enemy is invalid.");
@@ -253,7 +255,8 @@ namespace KiKs.Combat
             }
 
             var reducedDamage = (int)Math.Ceiling(damage * (100 - State.Player.DamageReductionPercent) / 100d);
-            var actualDamage = State.Player.ApplyDamage(Math.Max(0, reducedDamage));
+            var blockedDamage = State.Player.ConsumeBlockPoints(Math.Max(0, reducedDamage));
+            var actualDamage = State.Player.ApplyDamage(Math.Max(0, reducedDamage - blockedDamage));
             events.Add(new CombatEvent(
                 CombatEventType.DamageApplied,
                 enemy.Id,
@@ -261,7 +264,43 @@ namespace KiKs.Combat
                 amount: actualDamage,
                 message: "Enemy attack resolved."));
 
+            if (blockedDamage > 0)
+            {
+                events.Add(new CombatEvent(
+                    CombatEventType.StatusApplied,
+                    State.Player.Id,
+                    State.Player.Id,
+                    amount: State.Player.BlockPoints,
+                    message: "Block absorbed " + blockedDamage + " damage."));
+            }
+
+            if (toughnessDamage > 0)
+            {
+                var actualToughnessDamage = State.Player.ReduceToughness(toughnessDamage);
+                events.Add(new CombatEvent(
+                    CombatEventType.ToughnessChanged,
+                    enemy.Id,
+                    State.Player.Id,
+                    amount: State.Player.CurrentToughness,
+                    message: "Enemy attack reduced player toughness by " +
+                             actualToughnessDamage + "."));
+            }
+
             if (State.Player.IsDead) events.Add(CreateDeathEvent(State.Player));
+
+            var reflectedDamage = State.Player.ConsumeReflectDamage();
+            if (reflectedDamage > 0 && !enemy.IsDead)
+            {
+                var actualReflectedDamage = enemy.ApplyDamage(reflectedDamage);
+                events.Add(new CombatEvent(
+                    CombatEventType.DamageApplied,
+                    State.Player.Id,
+                    enemy.Id,
+                    amount: actualReflectedDamage,
+                    message: "Player reflected damage to the attacker."));
+                if (enemy.IsDead) events.Add(CreateDeathEvent(enemy));
+            }
+
             EvaluateOutcome(events);
             return Complete(true, string.Empty, events);
         }
@@ -319,10 +358,36 @@ namespace KiKs.Combat
                     case CardEffectType.LifeStealMaxHealth:
                         ResolveLifeSteal(card, target, effect, events);
                         break;
+
+                    case CardEffectType.Bleed:
+                        var bleedStacks = effect.Amount.Resolve(card.IsUpgraded);
+                        if (bleedStacks == 0)
+                            bleedStacks = effect.DamagePerTurn.Resolve(card.IsUpgraded);
+                        target.AddBleedStacks(bleedStacks);
+                        AddStatusEvent(card, target, target.BleedStacks, "Bleed stacks applied.", events);
+                        break;
+                    case CardEffectType.BleedScaledDamage:
+                        ResolveBleedScaledDamage(card, target, effect, events);
+                        break;
+                    case CardEffectType.LifeSteal:
+                        ResolveFixedLifeSteal(card, target, effect, events);
+                        break;
+                    case CardEffectType.ReflectDamage:
+                        var reflectDamage = effect.Amount.Resolve(card.IsUpgraded);
+                        State.Player.AddReflectDamage(reflectDamage);
+                        AddStatusEvent(card, State.Player, State.Player.PendingReflectDamage,
+                            "Reflect damage prepared.", events);
+                        break;
+                    case CardEffectType.BlockDamage:
+                        var blockPoints = effect.Amount.Resolve(card.IsUpgraded);
+                        State.Player.AddBlockPoints(blockPoints);
+                        AddStatusEvent(card, State.Player, State.Player.BlockPoints,
+                            "Block points gained.", events);
+                        break;
                     case CardEffectType.GainResource:
                         ResolveGainResource(card, effect, events);
                         break;
-                    case CardEffectType.Bleed:
+
                     case CardEffectType.Poison:
                     case CardEffectType.Vulnerability:
                     case CardEffectType.Immunity:
@@ -380,6 +445,14 @@ namespace KiKs.Combat
                     events.Add(new CombatEvent(
                         CombatEventType.ToughnessBroken, State.Player.Id, target.Id,
                         card.InstanceId, message: "Target toughness was broken."));
+                    var restoredMana = State.Mana.RestoreToMaximum();
+                    if (restoredMana > 0)
+                    {
+                        events.Add(new CombatEvent(
+                            CombatEventType.ManaChanged, State.Player.Id, target.Id,
+                            card.InstanceId, State.Mana.Current,
+                            "Enemy toughness broken; restored " + restoredMana + " mana."));
+                    }
                     return true;
                 }
             }
@@ -403,6 +476,33 @@ namespace KiKs.Combat
             if (target.IsDead) events.Add(CreateDeathEvent(target));
         }
 
+        private void ResolveBleedScaledDamage(
+            CardInstance card, CombatantState target, CardEffectSpec effect, List<CombatEvent> events)
+        {
+            var requestedDamage = (int)Math.Ceiling(target.BleedStacks * effect.Multiplier);
+            var actualDamage = target.ApplyDamage(requestedDamage);
+            events.Add(new CombatEvent(
+                CombatEventType.DamageApplied, State.Player.Id, target.Id,
+                card.InstanceId, actualDamage,
+                "Bleed-scaled damage resolved from " + target.BleedStacks + " stacks."));
+            if (target.IsDead) events.Add(CreateDeathEvent(target));
+        }
+
+        private void ResolveFixedLifeSteal(
+            CardInstance card, CombatantState target, CardEffectSpec effect, List<CombatEvent> events)
+        {
+            var requestedDamage = effect.Amount.Resolve(card.IsUpgraded);
+            var actualDamage = target.ApplyDamage(requestedDamage);
+            var actualHealing = State.Player.Heal(actualDamage);
+            events.Add(new CombatEvent(
+                CombatEventType.DamageApplied, State.Player.Id, target.Id,
+                card.InstanceId, actualDamage, "Life steal dealt fixed damage."));
+            events.Add(new CombatEvent(
+                CombatEventType.HealingApplied, State.Player.Id, State.Player.Id,
+                card.InstanceId, actualHealing, "Life steal healed fixed health."));
+            if (target.IsDead) events.Add(CreateDeathEvent(target));
+        }
+
         private void ResolveGainResource(CardInstance card, CardEffectSpec effect, List<CombatEvent> events)
         {
             var amount = effect.Amount.Resolve(card.IsUpgraded);
@@ -416,11 +516,10 @@ namespace KiKs.Combat
             }
             else
             {
-                var gained = State.Mana.Refund(amount);
                 events.Add(new CombatEvent(
                     CombatEventType.ManaChanged, State.Player.Id,
                     cardInstanceId: card.InstanceId, amount: State.Mana.Current,
-                    message: "Gained " + gained + " mana."));
+                    message: "Mana gain ignored; mana is restored only by breaking enemy toughness."));
             }
         }
 
@@ -500,10 +599,6 @@ namespace KiKs.Combat
                 if (target.IsDead) events.Add(CreateDeathEvent(target));
             }
 
-            var refunded = State.Mana.Refund(State.Rules.UltimateManaRefund);
-            events.Add(new CombatEvent(
-                CombatEventType.ManaChanged, State.Player.Id,
-                amount: State.Mana.Current, message: "Ultimate refunded " + refunded + " mana."));
         }
 
         private void BeginPlayerTurn(List<CombatEvent> events)

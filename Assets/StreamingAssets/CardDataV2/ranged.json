@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 2,
+  "category": "ranged",
+  "categoryName": "射击牌",
+  "cards": [
+    {
+      "id": "ranged_pistol",
+      "name": { "zhCN": "手枪", "en": "pistol" },
+      "category": "ranged",
+      "copies": 2,
+      "cost": { "resource": "action_point", "amount": 1 },
+      "special": false,
+      "effects": [
+        { "type": "damage", "amount": { "base": 1, "upgraded": 2 }, "hits": 6 }
+      ],
+      "source": { "workbook": "Killkiss全套卡牌(2).xlsx", "sheet": "Sheet3", "row": 9, "upgradeRow": 11 },
+      "notes": []
+    },
+    {
+      "id": "ranged_sniper_rifle",
+      "name": { "zhCN": "狙击枪", "en": "sniper rifle" },
+      "category": "ranged",
+      "copies": 1,
+      "cost": { "resource": "action_point", "amount": 2 },
+      "special": false,
+      "effects": [
+        { "type": "damage", "amount": { "base": 12, "upgraded": 20 }, "hits": 1 }
+      ],
+      "source": { "workbook": "Killkiss全套卡牌(2).xlsx", "sheet": "Sheet3", "row": 10, "upgradeRow": 12 },
+      "notes": ["Sheet3 的‘真实伤害’列已按需求并入普通攻击力，不保留独立字段。"]
+    }
+  ]
+}

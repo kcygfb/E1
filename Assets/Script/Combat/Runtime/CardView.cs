@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using DG.Tweening;
 using System.Reflection;
+using TMPro;
 
 namespace KiKs.Combat
 {
@@ -11,8 +12,12 @@ namespace KiKs.Combat
         public string CardId { get; private set; }
         public string InstanceId { get; private set; }
         public CardSpec Spec { get; private set; }
+        public bool IsUpgraded { get; private set; }
 
         public System.Action<CardView> OnPlayRequested;
+
+        [Header("Card UI")]
+        [SerializeField] private TMP_Text cardNameText;
 
         private RectTransform _rect;
         private bool _isAnimating;
@@ -30,8 +35,25 @@ namespace KiKs.Combat
             Spec = spec;
             CardId = spec.Id;
             InstanceId = instanceId ?? spec.Id;
+            IsUpgraded = false;
             gameObject.name = $"Card_{spec.Id}";
             transform.localScale = Vector3.one;
+
+            if (cardNameText == null)
+                cardNameText = GetComponentInChildren<TMP_Text>(true);
+            RefreshCardName();
+        }
+
+        public void SetUpgraded(bool isUpgraded)
+        {
+            IsUpgraded = isUpgraded;
+            RefreshCardName();
+        }
+
+        private void RefreshCardName()
+        {
+            if (cardNameText != null && Spec != null)
+                cardNameText.text = Spec.DisplayName + (IsUpgraded ? " (UPGRADED)" : string.Empty);
         }
 
         public void OnPointerClick(PointerEventData eventData)

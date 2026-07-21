@@ -20,6 +20,9 @@ namespace KiKs.Combat
         public int DamageReductionPercent { get; private set; }
         public int DamageReductionTurns { get; private set; }
         public int SkipEnemyTurns { get; private set; }
+        public int BleedStacks { get; private set; }
+        public int BlockPoints { get; private set; }
+        public int PendingReflectDamage { get; private set; }
         public bool IsDead => CurrentHealth <= 0;
 
         public CombatantState(
@@ -167,6 +170,39 @@ namespace KiKs.Combat
             if (SkipEnemyTurns <= 0) return false;
             SkipEnemyTurns--;
             return true;
+        }
+
+        public void AddBleedStacks(int amount)
+        {
+            if (amount < 0) throw new ArgumentOutOfRangeException(nameof(amount));
+            BleedStacks += amount;
+        }
+
+        public void AddBlockPoints(int amount)
+        {
+            if (amount < 0) throw new ArgumentOutOfRangeException(nameof(amount));
+            BlockPoints += amount;
+        }
+
+        public int ConsumeBlockPoints(int incomingDamage)
+        {
+            if (incomingDamage < 0) throw new ArgumentOutOfRangeException(nameof(incomingDamage));
+            var blocked = Math.Min(BlockPoints, incomingDamage);
+            BlockPoints -= blocked;
+            return blocked;
+        }
+
+        public void AddReflectDamage(int amount)
+        {
+            if (amount < 0) throw new ArgumentOutOfRangeException(nameof(amount));
+            PendingReflectDamage += amount;
+        }
+
+        public int ConsumeReflectDamage()
+        {
+            var amount = PendingReflectDamage;
+            PendingReflectDamage = 0;
+            return amount;
         }
     }
 }

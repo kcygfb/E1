@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 2,
+  "category": "magic",
+  "categoryName": "魔法牌",
+  "cards": [
+    {
+      "id": "magic_blizzard",
+      "name": { "zhCN": "暴风雪", "en": "blizzard" },
+      "category": "magic",
+      "copies": 2,
+      "cost": { "resource": "mana", "amount": 1 },
+      "special": false,
+      "effects": [
+        { "type": "bleed_scaled_damage", "multiplier": 3 }
+      ],
+      "source": { "workbook": "Killkiss全套卡牌(2).xlsx", "sheet": "Sheet3", "row": 15 },
+      "notes": ["每层流血造成 3 点伤害；流血层数不会被消耗。"]
+    },
+    {
+      "id": "magic_lifesteal",
+      "name": { "zhCN": "吸血", "en": "lifesteal" },
+      "category": "magic",
+      "copies": 2,
+      "cost": { "resource": "mana", "amount": 1 },
+      "special": false,
+      "effects": [
+        { "type": "life_steal", "amount": 9 }
+      ],
+      "source": { "workbook": "Killkiss全套卡牌(2).xlsx", "sheet": "Sheet3", "row": 16 },
+      "notes": ["造成 9 点伤害，并按实际伤害回复至多 9 点生命。"]
+    }
+  ]
+}

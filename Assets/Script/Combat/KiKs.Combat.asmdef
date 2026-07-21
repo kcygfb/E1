@@ -1,7 +1,9 @@
 {
   "name": "KiKs.Combat",
   "rootNamespace": "KiKs.Combat",
-  "references": [],
+  "references": [
+    "Unity.TextMeshPro"
+  ],
   "includePlatforms": [],
   "excludePlatforms": [],
   "allowUnsafeCode": false,

@@ -1,4 +1,6 @@
+using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,31 +13,45 @@ namespace KiKs.Combat
     {
         [SerializeField] private BattleController battleController;
 
+        [Header("Battle UI")]
+        [SerializeField] private TMP_Text roundText;
+
         [Header("Enemy UI")]
         [SerializeField] private Image enemyHpFill;
-        [SerializeField] private Text enemyHpText;
+        [SerializeField] private TMP_Text enemyHpText;
         [SerializeField] private Image enemyToughnessFill;
-        [SerializeField] private Text enemyToughnessText;
+        [SerializeField] private TMP_Text enemyToughnessText;
 
         [Header("Player UI")]
         [SerializeField] private Image playerHpFill;
-        [SerializeField] private Text playerHpText;
+        [SerializeField] private TMP_Text playerHpText;
         [SerializeField] private Image playerToughnessFill;
-        [SerializeField] private Text playerToughnessText;
-        [SerializeField] private Text actionPointText;
-        [SerializeField] private Text manaText;
+        [SerializeField] private TMP_Text playerToughnessText;
+        [SerializeField] private TMP_Text actionPointText;
+        [SerializeField] private TMP_Text manaText;
 
         private int _enemyMaxHp;
         private int _enemyMaxToughness;
         private int _playerMaxHp;
         private int _playerMaxToughness;
 
-        private void Start()
+        private IEnumerator Start()
         {
+            ConfigureFillImage(enemyHpFill);
+            ConfigureFillImage(enemyToughnessFill);
+            ConfigureFillImage(playerHpFill);
+            ConfigureFillImage(playerToughnessFill);
+
             if (battleController == null)
                 battleController = FindFirstObjectByType<BattleController>();
-            if (battleController != null)
-                battleController.CombatEventRaised += OnCombatEvent;
+            if (battleController == null)
+                yield break;
+
+            battleController.CombatEventRaised += OnCombatEvent;
+            while (!battleController.IsInitialized)
+                yield return null;
+
+            RefreshUI();
         }
 
         private void OnDestroy()
@@ -45,6 +61,11 @@ namespace KiKs.Combat
         }
 
         private void OnCombatEvent(CombatEvent evt)
+        {
+            RefreshUI();
+        }
+
+        private void RefreshUI()
         {
             if (battleController == null || !battleController.IsInitialized) return;
 
@@ -62,13 +83,15 @@ namespace KiKs.Combat
                 _enemyMaxToughness = enemy.MaxToughness;
                 UpdateEnemyUI(enemy);
             }
-            else if (evt.Type == CombatEventType.CombatantDied || evt.Type == CombatEventType.Victory)
+            else
             {
                 if (enemyHpFill != null) enemyHpFill.fillAmount = 0;
                 if (enemyHpText != null) enemyHpText.text = "0 / " + _enemyMaxHp;
             }
 
             UpdatePlayerUI(state.Player);
+            if (roundText != null)
+                roundText.text = "ROUND " + state.TurnNumber;
         }
 
         private void UpdateEnemyUI(CombatantState enemy)
@@ -101,6 +124,14 @@ namespace KiKs.Combat
 
             if (manaText != null && battleController != null && battleController.IsInitialized)
                 manaText.text = "MAGIC POINT : " + battleController.State.Mana.Current;
+        }
+
+        private static void ConfigureFillImage(Image image)
+        {
+            if (image == null) return;
+            image.type = Image.Type.Filled;
+            image.fillMethod = Image.FillMethod.Horizontal;
+            image.fillOrigin = 0;
         }
     }
 }

@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 2,
+  "category": "melee",
+  "categoryName": "近战牌",
+  "cards": [
+    {
+      "id": "melee_fire_axe",
+      "name": { "zhCN": "消防斧", "en": "fire axe" },
+      "category": "melee",
+      "copies": 2,
+      "cost": { "resource": "action_point", "amount": 1 },
+      "special": false,
+      "effects": [
+        { "type": "damage", "amount": { "base": 3, "upgraded": 7 }, "hits": 1 },
+        { "type": "toughness_damage", "amount": { "base": 10, "upgraded": 15 }, "unit": "points" }
+      ],
+      "source": { "workbook": "Killkiss全套卡牌(2).xlsx", "sheet": "Sheet3", "row": 3, "upgradeRow": 5 },
+      "notes": []
+    },
+    {
+      "id": "melee_tachi",
+      "name": { "zhCN": "太刀", "en": "tachi" },
+      "category": "melee",
+      "copies": 2,
+      "cost": { "resource": "action_point", "amount": 1 },
+      "special": false,
+      "effects": [
+        { "type": "damage", "amount": { "base": 2, "upgraded": 4 }, "hits": 2 },
+        { "type": "bleed", "amount": { "base": 5, "upgraded": 8 } }
+      ],
+      "source": { "workbook": "Killkiss全套卡牌(2).xlsx", "sheet": "Sheet3", "row": 4, "upgradeRow": 6 },
+      "notes": []
+    }
+  ]
+}

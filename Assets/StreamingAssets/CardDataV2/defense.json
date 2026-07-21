@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 2,
+  "category": "defense",
+  "categoryName": "防御牌",
+  "cards": [
+    {
+      "id": "defense_reflect",
+      "name": { "zhCN": "反伤", "en": "counter" },
+      "category": "defense",
+      "copies": 2,
+      "cost": { "resource": "action_point", "amount": 1 },
+      "special": false,
+      "effects": [
+        { "type": "reflect_damage", "amount": { "base": 6, "upgraded": 13 } }
+      ],
+      "source": { "workbook": "Killkiss全套卡牌(2).xlsx", "sheet": "Sheet3", "row": 19, "upgradeRow": 21 },
+      "notes": ["下一次受到敌人攻击后反射固定伤害。"]
+    },
+    {
+      "id": "defense_block",
+      "name": { "zhCN": "格挡", "en": "block" },
+      "category": "defense",
+      "copies": 2,
+      "cost": { "resource": "action_point", "amount": 1 },
+      "special": false,
+      "effects": [
+        { "type": "block_damage", "amount": { "base": 12, "upgraded": 26 } }
+      ],
+      "source": { "workbook": "Killkiss全套卡牌(2).xlsx", "sheet": "Sheet3", "row": 20, "upgradeRow": 22 },
+      "notes": ["格挡值按实际吸收量消耗，未使用部分保留。"]
+    }
+  ]
+}

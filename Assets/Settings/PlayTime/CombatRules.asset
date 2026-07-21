@@ -15,7 +15,7 @@ MonoBehaviour:
   baseActionPoints: 3
   cardsDrawnPerTurn: 4
   handLimit: 10
-  expectedInitialDeckSize: 15
+  expectedInitialDeckSize: 5
   startingMana: 3
   maximumMana: 3
   maximumManaSpendPerTurn: 1
@@ -24,7 +24,6 @@ MonoBehaviour:
   ultimateManaThreshold: 3
   ultimateDamage: 0
   ultimateStunTurns: 1
-  ultimateManaRefund: 3
   eliteExecutionDamage: 0
   eliteStunTurns: 0
   bossExecutionDamage: 0

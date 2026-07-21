@@ -186,7 +186,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4eda6e22fc8567d40ab592ffd16a3230, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KiKs.Combat::KiKs.Combat.CardDatabaseService
-  relativeDirectory: CardData
+  relativeDirectory: CardDataV2
   autoLoadOnAwake: 1
   persistAcrossScenes: 1
 --- !u!4 &78002562
@@ -1079,7 +1079,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 449327847}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 80b9cf0a1ed4cbc4087e91a002cab055, type: 3}
   m_Name: 
@@ -1090,24 +1090,14 @@ MonoBehaviour:
   enemyDefinitions:
   - {fileID: 11400000, guid: 38af5df9514dad94d8d74b87d9eb5912, type: 2}
   debugStartingCardIds:
-  - defense_evade
+  - melee_fire_axe
+  - melee_tachi
+  - ranged_sniper_rifle
+  - magic_blizzard
   - defense_block
-  - defense_invisibility
-  - defense_immunity
-  - flexible_trip_chain
-  - flexible_morning_star_flail
-  - flexible_kusarigama
-  - flexible_rope_dart
-  - flexible_urumi
-  - flexible_chain_mace
-  - hidden_crossbow
-  - hidden_kunai
-  - hidden_smoke_bomb
-  - hidden_poison_sting
-  - hidden_hidden_blade
   randomSeed: 1
   shuffleAtBattleStart: 1
-  autoStartBattle: 1
+  autoStartBattle: 0
 --- !u!114 &449327852
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1120,7 +1110,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f24cbd03a8e148508d1f4607732e089b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KiKs.Combat::KiKs.Combat.SimpleEnemyAI
-  battleController: {fileID: 449327851}
+  battleController: {fileID: 875998994}
 --- !u!1 &467355309
 GameObject:
   m_ObjectHideFlags: 0
@@ -1209,7 +1199,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4eda6e22fc8567d40ab592ffd16a3230, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KiKs.Combat::KiKs.Combat.CardDatabaseService
-  relativeDirectory: CardData
+  relativeDirectory: CardDataV2
   autoLoadOnAwake: 1
   persistAcrossScenes: 1
 --- !u!1 &547004007
@@ -2058,15 +2048,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KiKs.Combat::KiKs.Combat.BattleController
   cardDatabase: {fileID: 78002561}
-  rulesConfig: {fileID: 11400000, guid: 58f495b6af05e874c9345676a219d6e6, type: 2}
-  playerDefinition: {fileID: 11400000, guid: d32e18b91081123499e3904741c69167, type: 2}
+  rulesConfig: {fileID: 11400000, guid: a3bb6ee28ee6f144aaf43b96d914eb96, type: 2}
+  playerDefinition: {fileID: 11400000, guid: 192373106e9cd45478816be416f17b41, type: 2}
   enemyDefinitions:
-  - {fileID: 11400000, guid: 37365789fb2ea24468c94f37191a010e, type: 2}
+  - {fileID: 11400000, guid: 38af5df9514dad94d8d74b87d9eb5912, type: 2}
   debugStartingCardIds:
-  - gun_pistol
-  - gun_sniper_rifle
-  - gun_shotgun
-  - blade_knight_sword
+  - melee_fire_axe
+  - melee_tachi
+  - ranged_sniper_rifle
+  - magic_blizzard
+  - defense_block
   randomSeed: 1
   shuffleAtBattleStart: 1
   autoStartBattle: 1
@@ -2552,8 +2543,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
-  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+    rgba: 4278190080
+  m_fontColor: {r: 0, g: 0, b: 0, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -3310,7 +3301,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d7b12936d02f43b89d4053e8be77d1a4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::KiKs.Combat.CombatResourceTextUI
-  battleController: {fileID: 449327851}
+  battleController: {fileID: 875998994}
   actionPointText: {fileID: 1215292252}
   manaText: {fileID: 549373250}
   actionPointFormat: 'ACT Point : {0}'
@@ -4542,7 +4533,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5d916cbe3c334f7c8b138e7d5b9c0201, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::KiKs.Combat.PlayerHealthBarUI
-  battleController: {fileID: 449327851}
+  battleController: {fileID: 875998994}
   fillImage: {fileID: 595424172}
   displayText: {fileID: 1019166904}
 --- !u!1 &1946663934
@@ -4688,8 +4679,8 @@ MonoBehaviour:
   - {fileID: 804531373}
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
-  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+    rgba: 4278190080
+  m_fontColor: {r: 0, g: 0, b: 0, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -5242,14 +5233,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KiKs.Combat::KiKs.Combat.BattleEventPresenter
   battleController: {fileID: 875998994}
+  roundText: {fileID: 2039852072}
   enemyHpFill: {fileID: 209022085}
-  enemyHpText: {fileID: 0}
+  enemyHpText: {fileID: 1443794274}
   enemyToughnessFill: {fileID: 932073744}
-  enemyToughnessText: {fileID: 0}
+  enemyToughnessText: {fileID: 1963077114}
   playerHpFill: {fileID: 595424172}
   playerHpText: {fileID: 0}
   playerToughnessFill: {fileID: 1698149730}
-  playerToughnessText: {fileID: 0}
+  playerToughnessText: {fileID: 1014113688}
   actionPointText: {fileID: 0}
   manaText: {fileID: 0}
 --- !u!1660057539 &9223372036854775807

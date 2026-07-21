@@ -15,6 +15,7 @@ namespace KiKs.Combat
             !string.IsNullOrWhiteSpace(DisplayNameEn) ? DisplayNameEn :
             !string.IsNullOrWhiteSpace(DisplayNameZhCn) ? DisplayNameZhCn : Id;
         public string Category { get; }
+        public int DeckCopies { get; }
         public CardResourceType CostResource { get; }
         public int CostAmount { get; }
         public bool IsSpecial { get; }
@@ -31,11 +32,13 @@ namespace KiKs.Combat
             int costAmount,
             bool isSpecial,
             CardTargetType targetType,
-            IEnumerable<CardEffectSpec> effects)
+            IEnumerable<CardEffectSpec> effects,
+            int deckCopies = 1)
         {
             if (string.IsNullOrWhiteSpace(id)) throw new ArgumentException("Card id is required.", nameof(id));
             if (string.IsNullOrWhiteSpace(category)) throw new ArgumentException("Card category is required.", nameof(category));
             if (costAmount < 0) throw new ArgumentOutOfRangeException(nameof(costAmount));
+            if (deckCopies <= 0) throw new ArgumentOutOfRangeException(nameof(deckCopies));
             if (effects == null) throw new ArgumentNullException(nameof(effects));
 
             var effectList = new List<CardEffectSpec>(effects);
@@ -46,6 +49,7 @@ namespace KiKs.Combat
             DisplayNameZhCn = displayNameZhCn ?? string.Empty;
             DisplayNameEn = displayNameEn ?? string.Empty;
             Category = category;
+            DeckCopies = deckCopies;
             CostResource = costResource;
             CostAmount = costAmount;
             IsSpecial = isSpecial;

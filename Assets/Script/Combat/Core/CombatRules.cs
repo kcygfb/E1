@@ -23,7 +23,6 @@ namespace KiKs.Combat
         public int UltimateManaThreshold { get; }
         public int UltimateDamage { get; }
         public int UltimateStunTurns { get; }
-        public int UltimateManaRefund { get; }
 
         public CombatRules(
             int baseActionPoints,
@@ -42,8 +41,7 @@ namespace KiKs.Combat
             int magicCardsPerTurn,
             int ultimateManaThreshold,
             int ultimateDamage,
-            int ultimateStunTurns,
-            int ultimateManaRefund)
+            int ultimateStunTurns)
         {
             if (baseActionPoints < 0) throw new ArgumentOutOfRangeException(nameof(baseActionPoints));
             if (cardsDrawnPerTurn < 0) throw new ArgumentOutOfRangeException(nameof(cardsDrawnPerTurn));
@@ -61,7 +59,6 @@ namespace KiKs.Combat
             if (ultimateManaThreshold <= 0) throw new ArgumentOutOfRangeException(nameof(ultimateManaThreshold));
             if (ultimateDamage < 0) throw new ArgumentOutOfRangeException(nameof(ultimateDamage));
             if (ultimateStunTurns < 0) throw new ArgumentOutOfRangeException(nameof(ultimateStunTurns));
-            if (ultimateManaRefund < 0) throw new ArgumentOutOfRangeException(nameof(ultimateManaRefund));
 
             BaseActionPoints = baseActionPoints;
             CardsDrawnPerTurn = cardsDrawnPerTurn;
@@ -80,7 +77,6 @@ namespace KiKs.Combat
             UltimateManaThreshold = ultimateManaThreshold;
             UltimateDamage = ultimateDamage;
             UltimateStunTurns = ultimateStunTurns;
-            UltimateManaRefund = ultimateManaRefund;
         }
 
         public int GetToughnessRestoreAmount(CombatantState target)
@@ -94,11 +90,11 @@ namespace KiKs.Combat
         public static CombatRules CreateDefault()
         {
             return new CombatRules(
-                3, 4, 10, 15,
+                3, 4, 10, 5,
                 0, 0, 0,
                 ToughnessRestoreMode.Full, 0,
                 5, 5, 1, 1, 1,
-                3, 0, 1, 3);
+                3, 0, 1);
         }
     }
 }

@@ -6,8 +6,8 @@ public class TimeSystem : MonoBehaviour
     public int dayCount = 1;
     public DayPhase CurrentPhase { get; private set; } = DayPhase.MorningCheck;
 
-    [Header("Night Phase")]
-    public string collectSceneName = "Collect";
+    [Header("Scene Flow")]
+    public string preBattleSceneName = "PreBattle";
 
     private static int savedDayCount = 1;
 
@@ -24,7 +24,7 @@ public class TimeSystem : MonoBehaviour
         CurrentPhase = DayPhase.Night;
         EmitPhaseChanged();
         GameEvent.Emit("DayEnded", dayCount);
-        SceneManager.LoadScene(collectSceneName);
+        SceneManager.LoadScene(preBattleSceneName);
     }
 
     public static void EndNightPhaseStatic()

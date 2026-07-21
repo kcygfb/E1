@@ -70,7 +70,82 @@ namespace KiKs.Combat.Tests
         }
 
         [Test]
-        public void UpgradeCard_SpendsManaInBattle_AndUsesUpgradedValue()
+        public void EnemyAttack_DamagesHealthAndReducesPlayerToughness()
+        {
+            var spec = CreateDamageCard("attack", 1, 1);
+            var cards = Enumerable.Range(0, 4)
+                .Select(index => new CardInstance(spec.Id + "#" + index, spec))
+                .ToList();
+            var player = new CombatantState(
+                "player", "Player", CombatantSide.Player, EnemyRank.None, 30, 100);
+            var enemy = new CombatantState(
+                "enemy", "Enemy", CombatantSide.Enemy, EnemyRank.Minion, 100, 5);
+            var engine = new CombatEngine(new BattleState(
+                CombatRules.CreateDefault(),
+                player,
+                new[] { enemy },
+                new DeckState(cards, 123, false)));
+
+            Assert.That(engine.StartBattle().Success, Is.True);
+            Assert.That(engine.EndPlayerTurn().Success, Is.True);
+
+            var result = engine.ResolveEnemyAttack("enemy", 20, 10);
+
+            Assert.That(result.Success, Is.True);
+            Assert.That(engine.State.Player.CurrentHealth, Is.EqualTo(10));
+            Assert.That(engine.State.Player.CurrentToughness, Is.EqualTo(90));
+            Assert.That(result.Events.Any(combatEvent =>
+                combatEvent.Type == CombatEventType.ToughnessChanged &&
+                combatEvent.Amount == 90), Is.True);
+        }
+
+        [Test]
+        public void BleedScaledDamage_DealsThreeDamagePerBleedStack()
+        {
+            var bleed = CreateCard("bleed", 0, CardResourceType.ActionPoint,
+                CreateEffect(CardEffectType.Bleed, amount: 5));
+            var blizzard = CreateCard("blizzard", 0, CardResourceType.ActionPoint,
+                CreateEffect(CardEffectType.BleedScaledDamage, multiplier: 3));
+            var engine = CreateEngine(new[] { bleed, blizzard, bleed, blizzard });
+            engine.StartBattle();
+
+            var bleedCard = engine.State.Deck.Hand.First(card => card.Spec.Id == "bleed");
+            Assert.That(engine.PlayCard(bleedCard.InstanceId, "enemy").Success, Is.True);
+            var blizzardCard = engine.State.Deck.Hand.First(card => card.Spec.Id == "blizzard");
+            Assert.That(engine.PlayCard(blizzardCard.InstanceId, "enemy").Success, Is.True);
+
+            Assert.That(engine.State.Enemies[0].BleedStacks, Is.EqualTo(5));
+            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(85));
+        }
+
+        [Test]
+        public void BlockAndReflect_ModifyTheNextEnemyAttack()
+        {
+            var block = CreateCard("block", 0, CardResourceType.ActionPoint,
+                CreateEffect(CardEffectType.BlockDamage, amount: 12));
+            var reflect = CreateCard("reflect", 0, CardResourceType.ActionPoint,
+                CreateEffect(CardEffectType.ReflectDamage, amount: 6));
+            var engine = CreateEngine(new[] { block, reflect, block, reflect });
+            engine.StartBattle();
+
+            Assert.That(engine.PlayCard(
+                engine.State.Deck.Hand.First(card => card.Spec.Id == "block").InstanceId,
+                null).Success, Is.True);
+            Assert.That(engine.PlayCard(
+                engine.State.Deck.Hand.First(card => card.Spec.Id == "reflect").InstanceId,
+                null).Success, Is.True);
+            Assert.That(engine.EndPlayerTurn().Success, Is.True);
+
+            Assert.That(engine.ResolveEnemyAttack("enemy", 20).Success, Is.True);
+
+            Assert.That(engine.State.Player.CurrentHealth, Is.EqualTo(22));
+            Assert.That(engine.State.Player.BlockPoints, Is.EqualTo(0));
+            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(94));
+            Assert.That(engine.State.Player.PendingReflectDamage, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void UpgradeCard_SpendsManaAndAppliesToTheNextPlayOnly()
         {
             var engine = CreateEngine(CreateDamageCard("upgradeable", 1, 3, 9));
             engine.StartBattle();
@@ -84,6 +159,7 @@ namespace KiKs.Combat.Tests
             Assert.That(engine.State.Player.CurrentActionPoints, Is.EqualTo(3));
             Assert.That(engine.PlayCard(card.InstanceId, "enemy").Success, Is.True);
             Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(91));
+            Assert.That(card.IsUpgraded, Is.False);
         }
 
         [Test]
@@ -106,7 +182,7 @@ namespace KiKs.Combat.Tests
         }
 
         [Test]
-        public void ThirdCumulativeManaSpend_TriggersUltimateAndRefundsThree()
+        public void ThirdCumulativeManaSpend_TriggersUltimateWithoutRefundingMana()
         {
             var engine = CreateEngine(CreateDamageCard("basic", 0, 0, 1), 12);
             engine.StartBattle();
@@ -128,9 +204,30 @@ namespace KiKs.Combat.Tests
                 }
             }
 
-            Assert.That(engine.State.Mana.Current, Is.EqualTo(5));
+            Assert.That(engine.State.Mana.Current, Is.EqualTo(2));
             Assert.That(engine.State.Mana.SpentTowardUltimate, Is.EqualTo(0));
             Assert.That(engine.State.Enemies[0].StunTurns, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void ToughnessBreak_RestoresManaToMaximum()
+        {
+            var upgradeable = CreateDamageCard("upgradeable", 0, 0, 1);
+            var breaker = CreateToughnessCard("breaker", 0, 5);
+            var engine = CreateEngine(new[] { upgradeable, breaker, upgradeable, breaker });
+            engine.StartBattle();
+
+            var cardToUpgrade = engine.State.Deck.Hand.First(card => card.Spec.Id == "upgradeable");
+            Assert.That(engine.UpgradeCard(cardToUpgrade.InstanceId).Success, Is.True);
+            Assert.That(engine.State.Mana.Current, Is.EqualTo(4));
+
+            var breakCard = engine.State.Deck.Hand.First(card => card.Spec.Id == "breaker");
+            var result = engine.PlayCard(breakCard.InstanceId, "enemy");
+
+            Assert.That(result.Success, Is.True);
+            Assert.That(engine.State.Mana.Current, Is.EqualTo(5));
+            Assert.That(result.Events.Any(combatEvent =>
+                combatEvent.Type == CombatEventType.ManaChanged && combatEvent.Amount == 5), Is.True);
         }
 
         [Test]
@@ -219,10 +316,39 @@ namespace KiKs.Combat.Tests
         {
             return new CardSpec(
                 id, id, id, "test", resource, cost, false,
-                effect.Type == CardEffectType.Damage || effect.Type == CardEffectType.ToughnessDamage
+                effect.Type == CardEffectType.Damage ||
+                effect.Type == CardEffectType.ToughnessDamage ||
+                effect.Type == CardEffectType.Bleed ||
+                effect.Type == CardEffectType.BleedScaledDamage ||
+                effect.Type == CardEffectType.LifeSteal
                     ? CardTargetType.SingleEnemy
                     : CardTargetType.Self,
                 new[] { effect });
+        }
+
+        private static CardEffectSpec CreateEffect(
+            CardEffectType type,
+            int amount = 0,
+            double multiplier = 1d)
+        {
+            return new CardEffectSpec(
+                type,
+                new UpgradeableNumber(amount, null),
+                UpgradeableNumber.One,
+                UpgradeableNumber.Zero,
+                UpgradeableNumber.Zero,
+                UpgradeableNumber.Zero,
+                DamageType.Normal,
+                ValueUnit.Points,
+                0,
+                false,
+                multiplier,
+                string.Empty,
+                0,
+                0,
+                CardResourceType.ActionPoint,
+                string.Empty,
+                string.Empty);
         }
     }
 }

@@ -148,7 +148,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4eda6e22fc8567d40ab592ffd16a3230, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KiKs.Combat::KiKs.Combat.CardDatabaseService
-  relativeDirectory: CardData
+  relativeDirectory: CardDataV2
   autoLoadOnAwake: 1
   persistAcrossScenes: 1
 --- !u!4 &15575305

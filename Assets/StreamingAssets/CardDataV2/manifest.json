@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 2,
+  "sourceWorkbook": "Killkiss全套卡牌(2).xlsx",
+  "sourceSheet": "Sheet3",
+  "cardCount": 8,
+  "deckCardCount": 15,
+  "schema": "card-data.schema.json",
+  "files": [
+    { "category": "melee", "file": "melee.json", "cardCount": 2 },
+    { "category": "ranged", "file": "ranged.json", "cardCount": 2 },
+    { "category": "magic", "file": "magic.json", "cardCount": 2 },
+    { "category": "defense", "file": "defense.json", "cardCount": 2 }
+  ]
+}

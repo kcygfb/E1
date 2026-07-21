@@ -112,6 +112,7 @@ namespace KiKs.Combat
             var cost = RequiredObject(card, "cost");
             var costResource = ParseResource(RequiredString(cost, "resource"));
             var costAmount = RequiredInt(cost, "amount");
+            var deckCopies = OptionalPositiveInt(card, "copies", 1);
             var special = OptionalBool(card, "special");
             var rawEffects = RequiredList(card, "effects");
             if (rawEffects.Count == 0) throw new FormatException(id + " has no effects.");
@@ -129,7 +130,8 @@ namespace KiKs.Combat
                 costAmount,
                 special,
                 InferTargetType(effects),
-                effects);
+                effects,
+                deckCopies);
         }
 
         private static CardEffectSpec ParseEffect(Dictionary<string, object> effect)
@@ -162,6 +164,8 @@ namespace KiKs.Combat
                 effect.Type == CardEffectType.ToughnessDamage ||
                 effect.Type == CardEffectType.Stun ||
                 effect.Type == CardEffectType.Bleed ||
+                effect.Type == CardEffectType.BleedScaledDamage ||
+                effect.Type == CardEffectType.LifeSteal ||
                 effect.Type == CardEffectType.Poison ||
                 effect.Type == CardEffectType.Vulnerability ||
                 effect.Type == CardEffectType.LifeStealMaxHealth)
@@ -186,6 +190,10 @@ namespace KiKs.Combat
                 case "immunity": return CardEffectType.Immunity;
                 case "summon_companion": return CardEffectType.SummonCompanion;
                 case "life_steal_max_health": return CardEffectType.LifeStealMaxHealth;
+                case "bleed_scaled_damage": return CardEffectType.BleedScaledDamage;
+                case "life_steal": return CardEffectType.LifeSteal;
+                case "reflect_damage": return CardEffectType.ReflectDamage;
+                case "block_damage": return CardEffectType.BlockDamage;
                 case "gain_resource": return CardEffectType.GainResource;
                 case "play_cards_from_discard": return CardEffectType.PlayCardsFromDiscard;
                 default: throw new FormatException("Unknown card effect type: " + value);
@@ -244,7 +252,19 @@ namespace KiKs.Combat
         private static void ValidateSchemaVersion(Dictionary<string, object> value, string source)
         {
             var version = RequiredInt(value, "schemaVersion");
-            if (version != 1) throw new FormatException(source + " uses unsupported schemaVersion " + version + ".");
+            if (version != 1 && version != 2)
+                throw new FormatException(source + " uses unsupported schemaVersion " + version + ".");
+        }
+
+        private static int OptionalPositiveInt(
+            Dictionary<string, object> owner,
+            string key,
+            int fallback)
+        {
+            if (!owner.TryGetValue(key, out var value) || value == null) return fallback;
+            var parsed = ConvertToInt(value, key);
+            if (parsed <= 0) throw new FormatException(key + " must be greater than zero.");
+            return parsed;
         }
 
         private static Dictionary<string, object> RequiredObject(Dictionary<string, object> owner, string key)

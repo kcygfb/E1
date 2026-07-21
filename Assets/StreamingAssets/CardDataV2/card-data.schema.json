@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "card-data-v2.schema.json",
+  "title": "Killkiss Sheet3 card data",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "category", "categoryName", "cards"],
+  "properties": {
+    "schemaVersion": { "const": 2 },
+    "category": { "enum": ["melee", "ranged", "magic", "defense"] },
+    "categoryName": { "type": "string", "minLength": 1 },
+    "cards": { "type": "array", "items": { "$ref": "#/$defs/card" } }
+  },
+  "$defs": {
+    "valuePair": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["base", "upgraded"],
+      "properties": {
+        "base": { "type": "integer", "minimum": 0 },
+        "upgraded": { "type": ["integer", "null"], "minimum": 0 }
+      }
+    },
+    "numberOrPair": {
+      "oneOf": [
+        { "type": "integer", "minimum": 0 },
+        { "$ref": "#/$defs/valuePair" }
+      ]
+    },
+    "card": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "category", "copies", "cost", "special", "effects", "source", "notes"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+        "name": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["zhCN", "en"],
+          "properties": {
+            "zhCN": { "type": "string", "minLength": 1 },
+            "en": { "type": ["string", "null"] }
+          }
+        },
+        "category": { "enum": ["melee", "ranged", "magic", "defense"] },
+        "copies": { "type": "integer", "minimum": 1 },
+        "cost": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["resource", "amount"],
+          "properties": {
+            "resource": { "enum": ["action_point", "mana"] },
+            "amount": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "special": { "type": "boolean" },
+        "effects": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/effect" } },
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["workbook", "sheet", "row"],
+          "properties": {
+            "workbook": { "type": "string" },
+            "sheet": { "type": "string" },
+            "row": { "type": "integer", "minimum": 1 },
+            "upgradeRow": { "type": "integer", "minimum": 1 }
+          }
+        },
+        "notes": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "effect": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "enum": [
+            "damage",
+            "toughness_damage",
+            "bleed",
+            "bleed_scaled_damage",
+            "life_steal",
+            "reflect_damage",
+            "block_damage"
+          ]
+        },
+        "amount": { "$ref": "#/$defs/numberOrPair" },
+        "hits": { "$ref": "#/$defs/numberOrPair" },
+        "unit": { "enum": ["points", "percent"] },
+        "multiplier": { "type": "number", "minimum": 0 }
+      }
+    }
+  }
+}

@@ -37,6 +37,10 @@ namespace KiKs.Combat
         Immunity,
         SummonCompanion,
         LifeStealMaxHealth,
+        BleedScaledDamage,
+        LifeSteal,
+        ReflectDamage,
+        BlockDamage,
         GainResource,
         PlayCardsFromDiscard
     }

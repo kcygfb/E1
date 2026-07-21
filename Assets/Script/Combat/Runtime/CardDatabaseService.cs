@@ -13,7 +13,7 @@ namespace KiKs.Combat
     [DisallowMultipleComponent]
     public sealed class CardDatabaseService : MonoBehaviour
     {
-        [SerializeField] private string relativeDirectory = "CardData";
+        [SerializeField] private string relativeDirectory = "CardDataV2";
         [SerializeField] private bool autoLoadOnAwake = true;
         [SerializeField] private bool persistAcrossScenes = true;
 

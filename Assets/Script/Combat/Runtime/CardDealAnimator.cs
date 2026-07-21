@@ -24,7 +24,7 @@ namespace KiKs.Combat
         public IReadOnlyList<CardView> HandCards => _handCards;
         public System.Func<CardView, bool> OnCardPlayed;
 
-        public CardView DrawCard(CardSpec spec, string instanceId = null)
+        public CardView DrawCard(CardSpec spec, string instanceId = null, bool isUpgraded = false)
         {
             if (cardPrefab == null)
             {
@@ -38,6 +38,7 @@ namespace KiKs.Combat
                 cardView = cardObj.AddComponent<CardView>();
 
             cardView.Setup(spec, instanceId);
+            cardView.SetUpgraded(isUpgraded);
             cardView.OnPlayRequested += HandleCardPlayed;
             _handCards.Add(cardView);
 

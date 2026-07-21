@@ -8,7 +8,7 @@ namespace KiKs.Combat
 {
     public class CardSelectionUI : MonoBehaviour
     {
-        private const int DEFAULT_DECK_SIZE = 15;
+        private const int DEFAULT_DECK_SIZE = 5;
         private const string BATTLE_SCENE_NAME = "Card";
 
         [Header("Buttons")]
@@ -141,7 +141,7 @@ namespace KiKs.Combat
 
             // Cost
             var costText = card.CostResource == CardResourceType.ActionPoint ? "AP" : "MP";
-            CreateText("CardCost", go.transform, $"{costText}: {card.CostAmount}", 14, new Color(0.8f, 0.6f, 0.3f, 1),
+            CreateText("CardCost", go.transform, $"{costText}: {card.CostAmount}  x{card.DeckCopies}", 14, new Color(0.8f, 0.6f, 0.3f, 1),
                 new Vector2(0, 0), new Vector2(1, 0), new Vector2(3, 3), new Vector2(-3, 20));
 
             // Effects summary
@@ -155,6 +155,20 @@ namespace KiKs.Combat
         private void OnCardClicked(string cardId)
         {
             if (_isStartingBattle) return;
+
+            var card = allCards.Find(candidate => candidate.Id == cardId);
+            if (card == null) return;
+
+            var selectedCopies = 0;
+            foreach (var selectedId in selectedCardIds)
+            {
+                if (selectedId == cardId) selectedCopies++;
+            }
+            if (selectedCopies >= card.DeckCopies)
+            {
+                Debug.Log("[CardSelectionUI] No more copies are available for " + card.DisplayName + ".");
+                return;
+            }
 
             if (selectedCardIds.Count >= RequiredDeckSize)
             {
@@ -356,6 +370,8 @@ namespace KiKs.Combat
                 "blades" => new Color(0.6f, 0.5f, 0.2f, 1),
                 "axes" => new Color(0.5f, 0.35f, 0.15f, 1),
                 "guns" => new Color(0.2f, 0.4f, 0.6f, 1),
+                "melee" => new Color(0.6f, 0.35f, 0.2f, 1),
+                "ranged" => new Color(0.2f, 0.4f, 0.6f, 1),
                 "flexible_weapons" => new Color(0.3f, 0.5f, 0.3f, 1),
                 "hidden_weapons" => new Color(0.4f, 0.3f, 0.5f, 1),
                 "defense" => new Color(0.2f, 0.5f, 0.5f, 1),
@@ -370,8 +386,15 @@ namespace KiKs.Combat
             foreach (var effect in card.Effects)
             {
                 var desc = effect.Type.ToString();
-                if (effect.Type == CardEffectType.Damage || effect.Type == CardEffectType.ToughnessDamage)
+                if (effect.Type == CardEffectType.Damage ||
+                    effect.Type == CardEffectType.ToughnessDamage ||
+                    effect.Type == CardEffectType.Bleed ||
+                    effect.Type == CardEffectType.LifeSteal ||
+                    effect.Type == CardEffectType.ReflectDamage ||
+                    effect.Type == CardEffectType.BlockDamage)
                     desc += $" x{effect.Amount.BaseValue}";
+                else if (effect.Type == CardEffectType.BleedScaledDamage)
+                    desc += $" x{effect.Multiplier:0.#}";
                 parts.Add(desc);
             }
             return string.Join(", ", parts);

@@ -151,18 +151,38 @@ namespace KiKs.Combat
         public CombatResult ConfirmExecution() { return GetEngineOrThrow().ConfirmExecution(); }
         public CombatResult EndPlayerTurn() { return GetEngineOrThrow().EndPlayerTurn(); }
 
-        public CombatResult ResolveEnemyAttack(string enemyId, int damage)
+        public CombatResult ResolveEnemyAttack(string enemyId, int damage, int toughnessDamage = 0)
         {
             var engine = GetEngineOrThrow();
             var enemy = engine.State.FindEnemy(enemyId);
             var enemyName = enemy != null ? enemy.DisplayName : enemyId;
-            var result = engine.ResolveEnemyAttack(enemyId, damage);
+            var toughnessBefore = engine.State.Player.CurrentToughness;
+            var result = engine.ResolveEnemyAttack(enemyId, damage, toughnessDamage);
 
             if (result.Success)
             {
-                var actualDamage = SumDamage(result, enemyId);
-                Debug.Log("[Combat] " + enemyName +
-                          " used \"Basic Attack\" and dealt " + actualDamage + " damage.", this);
+                CombatEvent skippedEvent = null;
+                foreach (var combatEvent in result.Events)
+                {
+                    if (combatEvent.Type != CombatEventType.EnemyActionSkipped) continue;
+                    skippedEvent = combatEvent;
+                    break;
+                }
+
+                if (skippedEvent != null)
+                {
+                    Debug.Log("[Combat] " + enemyName +
+                              " skipped \"Basic Attack\": " + skippedEvent.Message, this);
+                }
+                else
+                {
+                    var actualDamage = SumDamage(result, enemyId);
+                    var actualToughnessDamage =
+                        toughnessBefore - engine.State.Player.CurrentToughness;
+                    Debug.Log("[Combat] " + enemyName +
+                              " used \"Basic Attack\" and dealt " + actualDamage +
+                              " damage and " + actualToughnessDamage + " toughness damage.", this);
+                }
             }
 
             return result;

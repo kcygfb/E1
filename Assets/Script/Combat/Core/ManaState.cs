@@ -44,11 +44,10 @@ namespace KiKs.Combat
             MagicCardsPlayedThisTurn = 0;
         }
 
-        internal int Refund(int amount)
+        internal int RestoreToMaximum()
         {
-            if (amount < 0) throw new ArgumentOutOfRangeException(nameof(amount));
             var previous = Current;
-            Current = Math.Min(Maximum, Current + amount);
+            Current = Maximum;
             return Current - previous;
         }
 

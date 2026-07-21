@@ -18,6 +18,8 @@ namespace KiKs.Combat
             if (animator == null) animator = GetComponent<CardDealAnimator>();
             if (battleController == null) battleController = FindFirstObjectByType<BattleController>();
 
+            ConfigureMagicHandUpgradeBridge();
+
             if (animator != null)
                 animator.OnCardPlayed += OnCardPlayed;
 
@@ -51,7 +53,7 @@ namespace KiKs.Combat
 
             foreach (var cardInstance in hand)
             {
-                animator.DrawCard(cardInstance.Spec, cardInstance.InstanceId);
+                animator.DrawCard(cardInstance.Spec, cardInstance.InstanceId, cardInstance.IsUpgraded);
             }
         }
 
@@ -103,7 +105,22 @@ namespace KiKs.Combat
             Debug.Log($"[BattleCardBridge] New turn, drawing {hand.Count} cards");
 
             foreach (var cardInstance in hand)
-                animator.DrawCard(cardInstance.Spec, cardInstance.InstanceId);
+                animator.DrawCard(cardInstance.Spec, cardInstance.InstanceId, cardInstance.IsUpgraded);
+        }
+
+        private void ConfigureMagicHandUpgradeBridge()
+        {
+            var magicHand = GameObject.Find("PlayerPanel");
+            if (magicHand == null)
+            {
+                Debug.LogWarning("[BattleCardBridge] PlayerPanel magic hand was not found.", this);
+                return;
+            }
+
+            var upgradeBridge = magicHand.GetComponent<MagicHandUpgradeBridge>();
+            if (upgradeBridge == null)
+                upgradeBridge = magicHand.AddComponent<MagicHandUpgradeBridge>();
+            upgradeBridge.Configure(battleController, animator);
         }
     }
 }
