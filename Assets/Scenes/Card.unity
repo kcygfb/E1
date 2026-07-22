@@ -1952,6 +1952,7 @@ GameObject:
   - component: {fileID: 816479195}
   - component: {fileID: 816479197}
   - component: {fileID: 816479196}
+  - component: {fileID: 816479198}
   m_Layer: 5
   m_Name: EnemyHpBar
   m_TagString: Untagged
@@ -2018,6 +2019,27 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 816479194}
   m_CullTransparentMesh: 1
+--- !u!114 &816479198
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 816479194}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d916cbe3c334f7c8b138e7d5b9c0201, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::KiKs.Combat.PlayerHealthBarUI
+  battleController: {fileID: 875998994}
+  targetSide: 1
+  fillImage: {fileID: 209022085}
+  displayText: {fileID: 1443794274}
+  flashColor: {r: 1, g: 0, b: 0, a: 1}
+  flashDuration: 0.12
+  flashCount: 2
+  tweenDuration: 0.35
+  tweenEase: 9
 --- !u!1 &875998993
 GameObject:
   m_ObjectHideFlags: 0
@@ -4534,8 +4556,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::KiKs.Combat.PlayerHealthBarUI
   battleController: {fileID: 875998994}
+  targetSide: 0
   fillImage: {fileID: 595424172}
   displayText: {fileID: 1019166904}
+  flashColor: {r: 1, g: 0.0035663145, b: 0, a: 1}
+  flashDuration: 0.15
+  flashCount: 2
+  tweenDuration: 0.35
+  tweenEase: 9
 --- !u!1 &1946663934
 GameObject:
   m_ObjectHideFlags: 0
@@ -5234,11 +5262,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: KiKs.Combat::KiKs.Combat.BattleEventPresenter
   battleController: {fileID: 875998994}
   roundText: {fileID: 2039852072}
-  enemyHpFill: {fileID: 209022085}
-  enemyHpText: {fileID: 1443794274}
+  enemyHpFill: {fileID: 0}
+  enemyHpText: {fileID: 0}
   enemyToughnessFill: {fileID: 932073744}
   enemyToughnessText: {fileID: 1963077114}
-  playerHpFill: {fileID: 595424172}
+  playerHpFill: {fileID: 0}
   playerHpText: {fileID: 0}
   playerToughnessFill: {fileID: 1698149730}
   playerToughnessText: {fileID: 1014113688}
