@@ -367,13 +367,8 @@ namespace KiKs.Combat
         {
             return category switch
             {
-                "blades" => new Color(0.6f, 0.5f, 0.2f, 1),
-                "axes" => new Color(0.5f, 0.35f, 0.15f, 1),
-                "guns" => new Color(0.2f, 0.4f, 0.6f, 1),
                 "melee" => new Color(0.6f, 0.35f, 0.2f, 1),
                 "ranged" => new Color(0.2f, 0.4f, 0.6f, 1),
-                "flexible_weapons" => new Color(0.3f, 0.5f, 0.3f, 1),
-                "hidden_weapons" => new Color(0.4f, 0.3f, 0.5f, 1),
                 "defense" => new Color(0.2f, 0.5f, 0.5f, 1),
                 "magic" => new Color(0.5f, 0.2f, 0.5f, 1),
                 _ => new Color(0.4f, 0.4f, 0.4f, 1),

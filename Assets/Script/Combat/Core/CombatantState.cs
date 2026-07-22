@@ -178,6 +178,27 @@ namespace KiKs.Combat
             BleedStacks += amount;
         }
 
+        /// <summary>
+        /// Processes all ticking status effects (bleed, poison, etc.) and returns
+        /// a list of tick results. Call once per combatant per turn start.
+        /// </summary>
+        public System.Collections.Generic.List<StatusTickResult> ProcessStatusTicks()
+        {
+            var results = new System.Collections.Generic.List<StatusTickResult>();
+
+            // --- Bleed: damage = stacks, stacks-- ---
+            if (BleedStacks > 0)
+            {
+                results.Add(new StatusTickResult(StatusEffectType.Bleed, BleedStacks, BleedStacks - 1));
+                BleedStacks--;
+            }
+
+            // --- Poison hook (future): flat damage per stack, duration-- ---
+            // if (PoisonStacks > 0) { ... }
+
+            return results;
+        }
+
         public void AddBlockPoints(int amount)
         {
             if (amount < 0) throw new ArgumentOutOfRangeException(nameof(amount));
@@ -203,6 +224,23 @@ namespace KiKs.Combat
             var amount = PendingReflectDamage;
             PendingReflectDamage = 0;
             return amount;
+        }
+    }
+
+    /// <summary>
+    /// Result of one status effect tick, produced by <see cref="CombatantState.ProcessStatusTicks"/>.
+    /// </summary>
+    public readonly struct StatusTickResult
+    {
+        public StatusEffectType Type { get; }
+        public int DamageDealt { get; }
+        public int RemainingStacks { get; }
+
+        public StatusTickResult(StatusEffectType type, int damageDealt, int remainingStacks)
+        {
+            Type = type;
+            DamageDealt = damageDealt;
+            RemainingStacks = remainingStacks;
         }
     }
 }

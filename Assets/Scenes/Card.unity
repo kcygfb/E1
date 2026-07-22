@@ -2029,7 +2029,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5d916cbe3c334f7c8b138e7d5b9c0201, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::KiKs.Combat.PlayerHealthBarUI
   battleController: {fileID: 875998994}
   targetSide: 1
@@ -2156,7 +2156,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -3283276457543265120, guid: a78f28aee977efa45a6cf23bca3c9437, type: 3}
+  m_Sprite: {fileID: 2883308948960355391, guid: 5a963be43ecfbcd4789e76b340c6f88f, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -4591,7 +4591,7 @@ RectTransform:
   m_GameObject: {fileID: 1946663934}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 5.4235187, y: 5.849122, z: 0.91152656}
+  m_LocalScale: {x: 5.4235187, y: 6.2392583, z: 0.91152656}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1141623243}
@@ -4621,7 +4621,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 8811440255950684136, guid: 65de54a196a3f394da09426de4291b1b, type: 3}
+  m_Sprite: {fileID: -5992553719529964120, guid: edac12d6f92c628439e2ea881294589c, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1

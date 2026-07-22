@@ -330,27 +330,23 @@ namespace KiKs.Combat
                         if (ResolveToughnessDamage(card, target, effect, events)) return true;
                         break;
                     case CardEffectType.Stun:
-                        var stunTurns = effect.DurationTurns.Resolve(card.IsUpgraded);
-                        target.AddStun(stunTurns);
+                        target.AddStun(1);
                         events.Add(new CombatEvent(
                             CombatEventType.StunApplied, State.Player.Id, target.Id,
-                            card.InstanceId, stunTurns, "Stun applied."));
+                            card.InstanceId, 1, "Stun applied."));
                         break;
                     case CardEffectType.NullifyAttacks:
-                        var charges = effect.TriggerCount.Resolve(card.IsUpgraded);
-                        State.Player.AddNullifyAttackCharges(charges);
-                        AddStatusEvent(card, State.Player, charges, "Attack-nullify charges added.", events);
+                        State.Player.AddNullifyAttackCharges(1);
+                        AddStatusEvent(card, State.Player, 1, "Attack-nullify charges added.", events);
                         break;
                     case CardEffectType.DamageReduction:
                         var reduction = effect.Amount.Resolve(card.IsUpgraded);
-                        var reductionTurns = effect.DurationTurns.Resolve(card.IsUpgraded);
-                        State.Player.AddDamageReduction(reduction, reductionTurns);
+                        State.Player.AddDamageReduction(reduction, 1);
                         AddStatusEvent(card, State.Player, reduction, "Damage reduction applied.", events);
                         break;
                     case CardEffectType.SkipEnemyTurns:
-                        var skippedTurns = effect.DurationTurns.Resolve(card.IsUpgraded);
-                        State.Player.AddSkipEnemyTurns(skippedTurns);
-                        AddStatusEvent(card, State.Player, skippedTurns, "Enemy-turn skip applied.", events);
+                        State.Player.AddSkipEnemyTurns(1);
+                        AddStatusEvent(card, State.Player, 1, "Enemy-turn skip applied.", events);
                         break;
                     case CardEffectType.DrawCards:
                         DrawCards(effect.Amount.Resolve(card.IsUpgraded), events);
@@ -361,8 +357,6 @@ namespace KiKs.Combat
 
                     case CardEffectType.Bleed:
                         var bleedStacks = effect.Amount.Resolve(card.IsUpgraded);
-                        if (bleedStacks == 0)
-                            bleedStacks = effect.DamagePerTurn.Resolve(card.IsUpgraded);
                         target.AddBleedStacks(bleedStacks);
                         AddStatusEvent(card, target, target.BleedStacks, "Bleed stacks applied.", events);
                         break;
@@ -463,7 +457,7 @@ namespace KiKs.Combat
         private void ResolveLifeSteal(
             CardInstance card, CombatantState target, CardEffectSpec effect, List<CombatEvent> events)
         {
-            var percent = target.EnemyRank == EnemyRank.Boss ? effect.BossPercent : effect.NormalTargetPercent;
+            var percent = effect.Amount.Resolve(card.IsUpgraded);
             var requested = (int)Math.Ceiling(target.MaxHealth * percent / 100d);
             var damage = target.ApplyDamage(requested);
             var healing = State.Player.Heal(damage);
@@ -506,21 +500,11 @@ namespace KiKs.Combat
         private void ResolveGainResource(CardInstance card, CardEffectSpec effect, List<CombatEvent> events)
         {
             var amount = effect.Amount.Resolve(card.IsUpgraded);
-            if (effect.Resource == CardResourceType.ActionPoint)
-            {
-                State.Player.AddActionPoints(amount);
-                events.Add(new CombatEvent(
-                    CombatEventType.ActionPointsChanged, State.Player.Id,
-                    cardInstanceId: card.InstanceId, amount: State.Player.CurrentActionPoints,
-                    message: "Action points gained."));
-            }
-            else
-            {
-                events.Add(new CombatEvent(
-                    CombatEventType.ManaChanged, State.Player.Id,
-                    cardInstanceId: card.InstanceId, amount: State.Mana.Current,
-                    message: "Mana gain ignored; mana is restored only by breaking enemy toughness."));
-            }
+            State.Player.AddActionPoints(amount);
+            events.Add(new CombatEvent(
+                CombatEventType.ActionPointsChanged, State.Player.Id,
+                cardInstanceId: card.InstanceId, amount: State.Player.CurrentActionPoints,
+                message: "Action points gained."));
         }
 
         private void DrawCards(int count, List<CombatEvent> events)
@@ -614,6 +598,29 @@ namespace KiKs.Combat
                 amount: State.TurnNumber, message: "Player turn " + State.TurnNumber + " started."));
             if (EvaluateOutcome(events)) return;
 
+            // Process status-effect ticks (bleed, poison, etc.) for all living enemies.
+            foreach (var enemy in State.Enemies)
+            {
+                if (enemy.IsDead) continue;
+                foreach (var tick in enemy.ProcessStatusTicks())
+                {
+                    if (tick.DamageDealt <= 0) continue;
+                    var actualDamage = enemy.ApplyDamage(tick.DamageDealt);
+                    events.Add(new CombatEvent(
+                        CombatEventType.StatusTicked, State.Player.Id, enemy.Id,
+                        amount: actualDamage,
+                        message: tick.Type + " dealt " + actualDamage + " damage (" +
+                                 tick.RemainingStacks + " stacks remaining)."));
+                    if (enemy.IsDead)
+                    {
+                        events.Add(CreateDeathEvent(enemy));
+                        break;
+                    }
+                }
+            }
+
+            if (EvaluateOutcome(events)) return;
+
             State.Player.RestoreActionPoints(State.Rules.BaseActionPoints);
             events.Add(new CombatEvent(
                 CombatEventType.ActionPointsChanged, State.Player.Id,
@@ -652,6 +659,13 @@ namespace KiKs.Combat
                     break;
                 case EnemyRank.Boss:
                     actualDamage = target.ApplyDamage(State.Rules.BossExecutionDamage);
+                    if (!target.IsDead && State.Rules.BossStunTurns > 0)
+                    {
+                        target.AddStun(State.Rules.BossStunTurns);
+                        events.Add(new CombatEvent(
+                            CombatEventType.StunApplied, State.Player.Id, target.Id,
+                            amount: State.Rules.BossStunTurns, message: "Boss was stunned by execution."));
+                    }
                     break;
                 default:
                     actualDamage = 0;

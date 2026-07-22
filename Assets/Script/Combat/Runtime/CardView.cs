@@ -1,8 +1,9 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 using DG.Tweening;
-using System.Reflection;
 using TMPro;
+using KiKs.UI;
+using System.Reflection;
 
 namespace KiKs.Combat
 {
@@ -101,20 +102,16 @@ namespace KiKs.Combat
 
         public void SyncCardInteraction()
         {
-            var components = GetComponents<MonoBehaviour>();
-            foreach (var comp in components)
-            {
-                if (comp == null) continue;
-                if (comp.GetType().Name != "CardInteraction") continue;
-                SetField(comp, "_originPos", _rect.localPosition);
-                SetField(comp, "_originScale", _rect.localScale);
-            }
-        }
-
-        private static void SetField(object obj, string name, object value)
-        {
-            var f = obj.GetType().GetField(name, BindingFlags.NonPublic | BindingFlags.Instance);
-            f?.SetValue(obj, value);
+            var interaction = GetComponent<CardInteraction>();
+            if (interaction == null) return;
+            // Private-field access kept as typed reflection until CardInteraction exposes
+            // a public UpdateOrigin() method in its own assembly.
+            typeof(CardInteraction).GetField("_originPos",
+                    BindingFlags.NonPublic | BindingFlags.Instance)
+                ?.SetValue(interaction, _rect.localPosition);
+            typeof(CardInteraction).GetField("_originScale",
+                    BindingFlags.NonPublic | BindingFlags.Instance)
+                ?.SetValue(interaction, _rect.localScale);
         }
 
         public void PlayDrawAnimation(Vector2 deckPos, Vector2 targetPos, float duration, System.Action onComplete)
@@ -141,24 +138,12 @@ namespace KiKs.Combat
             // 先 kill 所有动画（包括 Draggable 的回归动画）
             _rect.DOKill();
 
-            var components = GetComponents<MonoBehaviour>();
-            foreach (var comp in components)
-            {
-                if (comp == null) continue;
-                var name = comp.GetType().Name;
-                if (name == "CardInteraction" || name == "Draggable")
-                    comp.enabled = false;
-            }
+            var interaction = GetComponent<CardInteraction>();
+            var draggable = GetComponent<Draggable>();
+            if (interaction != null) interaction.enabled = false;
+            if (draggable != null) draggable.enabled = false;
 
-            foreach (var comp in components)
-            {
-                if (comp == null) continue;
-                if (comp.GetType().Name == "CardInteraction")
-                {
-                    var method = comp.GetType().GetMethod("DestroyGlow");
-                    method?.Invoke(comp, null);
-                }
-            }
+            interaction?.DestroyGlow();
 
             var seq = DOTween.Sequence();
             seq.AppendInterval(5f / 60f);

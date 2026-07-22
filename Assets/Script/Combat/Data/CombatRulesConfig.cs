@@ -24,9 +24,10 @@ namespace KiKs.Combat
         [Min(0)] [SerializeField] private int ultimateStunTurns = 1;
 
         [Header("Execution values - pending final balance")]
-        [Min(0)] [SerializeField] private int eliteExecutionDamage = 0;
-        [Min(0)] [SerializeField] private int eliteStunTurns = 0;
-        [Min(0)] [SerializeField] private int bossExecutionDamage = 0;
+        [Min(0)] [SerializeField] private int eliteExecutionDamage = 40;
+        [Min(0)] [SerializeField] private int eliteStunTurns = 1;
+        [Min(0)] [SerializeField] private int bossExecutionDamage = 40;
+        [Min(0)] [SerializeField] private int bossStunTurns = 1;
 
         [Header("Toughness restore - pending final balance")]
         [SerializeField] private ToughnessRestoreMode toughnessRestoreMode = ToughnessRestoreMode.Full;
@@ -47,6 +48,7 @@ namespace KiKs.Combat
                 eliteExecutionDamage,
                 eliteStunTurns,
                 bossExecutionDamage,
+                bossStunTurns,
                 toughnessRestoreMode,
                 fixedToughnessRestoreAmount,
                 startingMana,

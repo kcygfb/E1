@@ -141,20 +141,8 @@ namespace KiKs.Combat
                 type,
                 OptionalUpgradeable(effect, "amount", UpgradeableNumber.Zero),
                 OptionalUpgradeable(effect, "hits", UpgradeableNumber.One),
-                OptionalUpgradeable(effect, "durationTurns", UpgradeableNumber.Zero),
-                OptionalUpgradeable(effect, "triggerCount", UpgradeableNumber.Zero),
-                OptionalUpgradeable(effect, "damagePerTurn", UpgradeableNumber.Zero),
-                ParseDamageType(OptionalString(effect, "damageType")),
                 ParseUnit(OptionalString(effect, "unit")),
-                OptionalInt(effect, "minimumDamagePerHit"),
-                OptionalBool(effect, "stackable"),
-                OptionalDouble(effect, "multiplier", 1d),
-                OptionalString(effect, "companionId"),
-                OptionalInt(effect, "normalTargetPercent"),
-                OptionalInt(effect, "bossPercent"),
-                ParseResource(OptionalString(effect, "resource")),
-                OptionalString(effect, "timing"),
-                OptionalString(effect, "selection"));
+                OptionalDouble(effect, "multiplier", 1d));
         }
 
         private static CardTargetType InferTargetType(IEnumerable<CardEffectSpec> effects)
@@ -162,13 +150,9 @@ namespace KiKs.Combat
             return effects.Any(effect =>
                 effect.Type == CardEffectType.Damage ||
                 effect.Type == CardEffectType.ToughnessDamage ||
-                effect.Type == CardEffectType.Stun ||
                 effect.Type == CardEffectType.Bleed ||
                 effect.Type == CardEffectType.BleedScaledDamage ||
-                effect.Type == CardEffectType.LifeSteal ||
-                effect.Type == CardEffectType.Poison ||
-                effect.Type == CardEffectType.Vulnerability ||
-                effect.Type == CardEffectType.LifeStealMaxHealth)
+                effect.Type == CardEffectType.LifeSteal)
                 ? CardTargetType.SingleEnemy
                 : CardTargetType.Self;
         }
@@ -208,17 +192,6 @@ namespace KiKs.Combat
                 case "action_point": return CardResourceType.ActionPoint;
                 case "mana": return CardResourceType.Mana;
                 default: throw new FormatException("Unknown resource: " + value);
-            }
-        }
-
-        private static DamageType ParseDamageType(string value)
-        {
-            switch (value)
-            {
-                case "":
-                case "normal": return DamageType.Normal;
-                case "true": return DamageType.True;
-                default: throw new FormatException("Unknown damage type: " + value);
             }
         }
 
@@ -304,11 +277,6 @@ namespace KiKs.Combat
         {
             if (!owner.TryGetValue(key, out var value)) throw new FormatException("Missing integer: " + key);
             return ConvertToInt(value, key);
-        }
-
-        private static int OptionalInt(Dictionary<string, object> owner, string key)
-        {
-            return owner.TryGetValue(key, out var value) && value != null ? ConvertToInt(value, key) : 0;
         }
 
         private static int ConvertToInt(object value, string context)

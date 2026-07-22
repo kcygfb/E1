@@ -170,6 +170,15 @@ namespace KiKs.UI
             }
         }
 
+        // ── 公开接口 ──────────────────────────────────────────
+
+        /// <summary>Used by <c>CardView.SyncCardInteraction</c> after a card is moved to the hand.</summary>
+        public void UpdateOrigin(Vector3 position, Vector3 scale)
+        {
+            _originPos = position;
+            _originScale = scale;
+        }
+
         // ── 清理 ──────────────────────────────────────────────
 
         public void DestroyGlow()

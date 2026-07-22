@@ -8,7 +8,7 @@ using UnityEngine.Networking;
 namespace KiKs.Combat
 {
     /// <summary>
-    /// Loads StreamingAssets/CardData once. Selection UI and battle setup share this repository.
+    /// Loads StreamingAssets/CardDataV2 once. Selection UI and battle setup share this repository.
     /// </summary>
     [DisallowMultipleComponent]
     public sealed class CardDatabaseService : MonoBehaviour

@@ -22,6 +22,12 @@ namespace KiKs.Combat
     public enum DamageType { Normal, True }
     public enum ValueUnit { Points, Percent }
 
+    /// <summary>
+    /// Status effects that tick every turn (e.g. bleed, poison).
+    /// New status types should be added here and handled in <see cref="CombatantState.ProcessStatusTicks"/>.
+    /// </summary>
+    public enum StatusEffectType { Bleed, Poison }
+
     public enum CardEffectType
     {
         Damage,
@@ -67,6 +73,7 @@ namespace KiKs.Combat
         StunApplied,
         EnemyActionSkipped,
         UltimateTriggered,
+        StatusTicked,
         EffectNotImplemented,
         CombatantDied,
         EnemyTurnStarted,
