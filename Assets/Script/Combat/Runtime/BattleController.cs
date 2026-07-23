@@ -148,6 +148,26 @@ namespace KiKs.Combat
             return GetEngineOrThrow().UpgradeCard(cardInstanceId, preferredUltimateTargetId);
         }
 
+        public CombatResult PlaySingleShot(string cardInstanceId, string targetId)
+        {
+            return GetEngineOrThrow().PlaySingleShot(cardInstanceId, targetId);
+        }
+
+        public CombatResult PlayRemainingShots(string cardInstanceId, string targetId)
+        {
+            return GetEngineOrThrow().PlayRemainingShots(cardInstanceId, targetId);
+        }
+
+        public bool IsShooting(string cardInstanceId)
+        {
+            return GetEngineOrThrow().IsShooting(cardInstanceId);
+        }
+
+        public CombatResult CancelShooting(string cardInstanceId)
+        {
+            return GetEngineOrThrow().CancelShooting(cardInstanceId);
+        }
+
         public CombatResult ConfirmExecution() { return GetEngineOrThrow().ConfirmExecution(); }
         public CombatResult EndPlayerTurn() { return GetEngineOrThrow().EndPlayerTurn(); }
 

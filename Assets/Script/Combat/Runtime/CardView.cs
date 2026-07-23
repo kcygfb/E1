@@ -7,7 +7,7 @@ using TMPro;
 namespace KiKs.Combat
 {
     [RequireComponent(typeof(RectTransform))]
-    public class CardView : MonoBehaviour, IPointerClickHandler
+    public class CardView : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
     {
         public string CardId { get; private set; }
         public string InstanceId { get; private set; }
@@ -15,6 +15,9 @@ namespace KiKs.Combat
         public bool IsUpgraded { get; private set; }
 
         public System.Action<CardView> OnPlayRequested;
+        public System.Action<CardView> OnShootRequested;
+        public System.Action<CardView> OnHoverEnter;
+        public System.Action<CardView> OnHoverExit;
 
         [Header("Card UI")]
         [SerializeField] private TMP_Text cardNameText;
@@ -24,6 +27,12 @@ namespace KiKs.Combat
         private bool _wasDragged;
         private Vector2 _dragStartPos;
         private const float DRAG_THRESHOLD = 10f;
+
+        private int _totalShots;
+        private int _remainingShots;
+
+        /// <summary>是否是多段射击的枪械卡</summary>
+        public bool IsMultiShot => _totalShots > 1 && _remainingShots > 0;
 
         private void Awake()
         {
@@ -39,6 +48,10 @@ namespace KiKs.Combat
             gameObject.name = $"Card_{spec.Id}";
             transform.localScale = Vector3.one;
 
+            // 检查是否是枪械多段射击卡
+            _totalShots = GetTotalShots(spec);
+            _remainingShots = _totalShots;
+
             if (cardNameText == null)
                 cardNameText = GetComponentInChildren<TMP_Text>(true);
             RefreshCardName();
@@ -53,13 +66,35 @@ namespace KiKs.Combat
         private void RefreshCardName()
         {
             if (cardNameText != null && Spec != null)
-                cardNameText.text = Spec.DisplayName + (IsUpgraded ? " (UPGRADED)" : string.Empty);
+            {
+                var name = Spec.DisplayName + (IsUpgraded ? " (UPGRADED)" : string.Empty);
+                if (_totalShots >= 1)
+                    name += $" [{_remainingShots}/{_totalShots}]";
+                cardNameText.text = name;
+            }
+        }
+
+        /// <summary>消耗一发子弹，返回是否是最后一发</summary>
+        public bool ConsumeShot()
+        {
+            _remainingShots--;
+            RefreshCardName();
+            return _remainingShots <= 0;
         }
 
         public void OnPointerClick(PointerEventData eventData)
         {
             if (_isAnimating) return;
             if (_wasDragged) return;
+
+            // 枪械多段射击：每次点击都走 OnShootRequested
+            if (IsMultiShot && _remainingShots > 0)
+            {
+                OnShootRequested?.Invoke(this);
+                return;
+            }
+
+            // 非多段卡：正常出牌
             TryPlayCard();
         }
 
@@ -82,7 +117,6 @@ namespace KiKs.Combat
 
             if (eventData.position.y > Screen.height * 0.5f)
             {
-                // 不在这里 kill DOTween，由 CardDealAnimator 根据出牌结果决定
                 TryPlayCard();
             }
         }
@@ -138,7 +172,6 @@ namespace KiKs.Combat
         {
             _isAnimating = true;
 
-            // 先 kill 所有动画（包括 Draggable 的回归动画）
             _rect.DOKill();
 
             var components = GetComponents<MonoBehaviour>();
@@ -169,6 +202,28 @@ namespace KiKs.Combat
                 _isAnimating = false;
                 onComplete?.Invoke();
             });
+        }
+
+        public void OnPointerEnter(PointerEventData eventData)
+        {
+            if (_isAnimating) return;
+            OnHoverEnter?.Invoke(this);
+        }
+
+        public void OnPointerExit(PointerEventData eventData)
+        {
+            OnHoverExit?.Invoke(this);
+        }
+
+        private static int GetTotalShots(CardSpec spec)
+        {
+            if (spec.Category != "ranged" && spec.Category != "guns") return 0;
+            foreach (var effect in spec.Effects)
+            {
+                if (effect.Type == CardEffectType.Damage)
+                    return effect.Hits.Resolve(false);
+            }
+            return 0;
         }
     }
 }

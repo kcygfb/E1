@@ -12,6 +12,7 @@ namespace KiKs.Combat
 
         private bool _initialHandDrawn;
         private bool _engineReady;
+        private PlayerAttackFeedback _playerAttackFeedback;
 
         private void Start()
         {
@@ -21,7 +22,10 @@ namespace KiKs.Combat
             ConfigureMagicHandUpgradeBridge();
 
             if (animator != null)
+            {
                 animator.OnCardPlayed += OnCardPlayed;
+                animator.OnCardShot += OnCardShot;
+            }
 
             StartCoroutine(WaitAndDrawInitialHand());
         }
@@ -29,7 +33,10 @@ namespace KiKs.Combat
         private void OnDestroy()
         {
             if (animator != null)
+            {
                 animator.OnCardPlayed -= OnCardPlayed;
+                animator.OnCardShot -= OnCardShot;
+            }
         }
 
         private IEnumerator WaitAndDrawInitialHand()
@@ -48,13 +55,35 @@ namespace KiKs.Combat
             if (_initialHandDrawn || battleController == null || animator == null) return;
             _initialHandDrawn = true;
 
+            _playerAttackFeedback = FindFirstObjectByType<PlayerAttackFeedback>();
+
             var hand = battleController.State.Deck.Hand;
             Debug.Log($"[BattleCardBridge] Drawing initial hand: {hand.Count} cards");
 
             foreach (var cardInstance in hand)
             {
-                animator.DrawCard(cardInstance.Spec, cardInstance.InstanceId, cardInstance.IsUpgraded);
+                var cardView = animator.DrawCard(cardInstance.Spec, cardInstance.InstanceId, cardInstance.IsUpgraded);
+                if (cardView != null)
+                    HookCardHover(cardView);
             }
+        }
+
+        private void HookCardHover(CardView cardView)
+        {
+            if (_playerAttackFeedback == null) return;
+            cardView.OnHoverEnter += OnCardHoverEnter;
+        }
+
+        private void OnCardHoverEnter(CardView cardView)
+        {
+            if (_playerAttackFeedback == null || cardView?.Spec == null) return;
+            var category = cardView.Spec.Category;
+            if (category == "ranged" || category == "guns")
+                _playerAttackFeedback.SwitchToRangedPose();
+            else if (category == "magic")
+                _playerAttackFeedback.SwitchToMagicPose();
+            else
+                _playerAttackFeedback.SwitchToMeleePose();
         }
 
         private bool OnCardPlayed(CardView cardView)
@@ -68,7 +97,24 @@ namespace KiKs.Combat
                 ? battleController.State?.FindFirstLivingEnemy()?.Id
                 : defaultTargetId;
 
-            var result = battleController.PlayCard(cardView.InstanceId, targetId);
+            // 如果正在多段射击中拖拽，一次性打完剩余子弹
+            CombatResult result;
+            if (battleController.IsShooting(cardView.InstanceId))
+            {
+                result = battleController.PlayRemainingShots(cardView.InstanceId, targetId);
+                if (!result.Success)
+                {
+                    Debug.LogWarning($"[BattleCardBridge] PlayRemainingShots failed: {result.Message}");
+                    return false;
+                }
+
+                // 播一次特效
+                if (_playerAttackFeedback != null)
+                    _playerAttackFeedback.PlayRangedSingleShot();
+                return true;
+            }
+
+            result = battleController.PlayCard(cardView.InstanceId, targetId);
             if (!result.Success)
             {
                 Debug.LogWarning($"[BattleCardBridge] PlayCard failed: {result.Message}");
@@ -78,10 +124,42 @@ namespace KiKs.Combat
             return true;
         }
 
+        private void OnCardShot(CardView cardView)
+        {
+            if (cardView == null) return;
+            if (!_engineReady || battleController == null || !battleController.IsInitialized) return;
+
+            var targetId = string.IsNullOrEmpty(defaultTargetId)
+                ? battleController.State?.FindFirstLivingEnemy()?.Id
+                : defaultTargetId;
+
+            var result = battleController.PlaySingleShot(cardView.InstanceId, targetId);
+            if (!result.Success)
+            {
+                Debug.LogWarning($"[BattleCardBridge] PlaySingleShot failed: {result.Message}");
+                return;
+            }
+
+            // 播放单发射击特效
+            if (_playerAttackFeedback != null)
+                _playerAttackFeedback.PlayRangedSingleShot();
+        }
+
         /// <summary>结束回合：回收手牌 + 引擎结束回合 + 抽新牌</summary>
         public void EndTurn()
         {
             if (!_engineReady || battleController == null || !battleController.IsInitialized) return;
+
+            // 0. 如果正在多段射击，先取消（强制弃牌剩余子弹）
+            var handCards = animator.HandCards;
+            foreach (var card in handCards)
+            {
+                if (card != null && battleController.IsShooting(card.InstanceId))
+                {
+                    var cancelResult = battleController.CancelShooting(card.InstanceId);
+                    Debug.Log("[BattleCardBridge] CancelShooting: " + (cancelResult.Success ? "success" : cancelResult.Message));
+                }
+            }
 
             // 1. 回收所有手牌到弃牌堆
             animator.DiscardAllCards();
@@ -105,12 +183,18 @@ namespace KiKs.Combat
             Debug.Log($"[BattleCardBridge] New turn, drawing {hand.Count} cards");
 
             foreach (var cardInstance in hand)
-                animator.DrawCard(cardInstance.Spec, cardInstance.InstanceId, cardInstance.IsUpgraded);
+            {
+                var cardView = animator.DrawCard(cardInstance.Spec, cardInstance.InstanceId, cardInstance.IsUpgraded);
+                if (cardView != null)
+                    HookCardHover(cardView);
+            }
         }
 
         private void ConfigureMagicHandUpgradeBridge()
         {
-            var magicHand = GameObject.Find("PlayerPanel");
+            var magicHand = GameObject.Find("Magichand");
+            if (magicHand == null)
+                magicHand = GameObject.Find("PlayerPanel");
             if (magicHand == null)
             {
                 Debug.LogWarning("[BattleCardBridge] PlayerPanel magic hand was not found.", this);

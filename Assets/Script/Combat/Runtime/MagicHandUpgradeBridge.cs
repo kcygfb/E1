@@ -5,15 +5,32 @@ namespace KiKs.Combat
 {
     /// <summary>Uses the draggable magic hand as an in-battle card-upgrade tool.</summary>
     [DisallowMultipleComponent]
-    public sealed class MagicHandUpgradeBridge : MonoBehaviour, IEndDragHandler
+    public sealed class MagicHandUpgradeBridge : MonoBehaviour,
+        IEndDragHandler, IPointerEnterHandler, IPointerExitHandler
     {
         private BattleController _battleController;
         private CardDealAnimator _animator;
+        private PlayerAttackFeedback _playerAttackFeedback;
 
         public void Configure(BattleController battleController, CardDealAnimator animator)
         {
             _battleController = battleController;
             _animator = animator;
+        }
+
+        public void OnPointerEnter(PointerEventData eventData)
+        {
+            if (_playerAttackFeedback == null)
+                _playerAttackFeedback = UnityEngine.Object.FindFirstObjectByType<PlayerAttackFeedback>();
+            if (_playerAttackFeedback != null)
+                _playerAttackFeedback.SwitchToMagicPose();
+            else
+                Debug.LogWarning("[MagicHandUpgradeBridge] PlayerAttackFeedback not found on hover enter");
+        }
+
+        public void OnPointerExit(PointerEventData eventData)
+        {
+            // 离开魔手时不自动恢复，等悬浮到其他牌时自然切换
         }
 
         public void OnEndDrag(PointerEventData eventData)

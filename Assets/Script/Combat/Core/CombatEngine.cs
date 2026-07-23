@@ -7,6 +7,8 @@ namespace KiKs.Combat
     /// <summary>Validates commands, mutates BattleState, and emits ordered presentation events.</summary>
     public sealed class CombatEngine
     {
+        private readonly Dictionary<string, int> _gunCardShotsRemaining = new();
+
         public BattleState State { get; }
         public event Action<CombatEvent> EventRaised;
 
@@ -724,6 +726,183 @@ namespace KiKs.Combat
             }
 
             return new CombatResult(success, message, events);
+        }
+
+        /// <summary>对枪械卡进行单发射击。首次射击扣费，每发造成1次伤害，最后一发弃牌。</summary>
+        public CombatResult PlaySingleShot(string cardInstanceId, string targetId)
+        {
+            if (State.Phase != CombatPhase.PlayerInput && State.Phase != CombatPhase.ResolvingCard)
+                return Reject("Cannot shoot during phase " + State.Phase + ".");
+
+            var card = State.Deck.FindInHand(cardInstanceId);
+            if (card == null) return Reject("The selected card is not in hand.");
+
+            var target = ResolveTarget(card.Spec.TargetType, targetId);
+            if (target == null) return Reject("The selected target is invalid.");
+            if (target.IsDead) return Reject("The selected target is already dead.");
+
+            var events = new List<CombatEvent>();
+
+            // 首次射击：扣费 + 初始化子弹计数
+            if (!_gunCardShotsRemaining.ContainsKey(cardInstanceId))
+            {
+                var totalShots = GetGunCardTotalShots(card);
+                if (totalShots <= 1)
+                    return PlayCard(cardInstanceId, targetId);
+
+                _gunCardShotsRemaining[cardInstanceId] = totalShots;
+                SetPhase(CombatPhase.ResolvingCard, events);
+
+                if (card.Spec.CostResource == CardResourceType.ActionPoint)
+                {
+                    if (!State.Player.TrySpendActionPoints(card.Spec.CostAmount))
+                    {
+                        _gunCardShotsRemaining.Remove(cardInstanceId);
+                        SetPhase(CombatPhase.PlayerInput, events);
+                        return Reject("Not enough action points.");
+                    }
+                    events.Add(new CombatEvent(
+                        CombatEventType.ActionPointsChanged,
+                        State.Player.Id,
+                        amount: State.Player.CurrentActionPoints,
+                        message: "Action points spent for gun card."));
+                }
+
+                events.Add(new CombatEvent(
+                    CombatEventType.CardPlayed,
+                    State.Player.Id,
+                    target.Id,
+                    card.InstanceId,
+                    card.Spec.CostAmount,
+                    "Started shooting " + card.Spec.DisplayName + "."));
+            }
+
+            // 造成1发伤害
+            var damagePerHit = GetGunCardDamagePerHit(card);
+            var actualDamage = target.ApplyDamage(damagePerHit);
+            events.Add(new CombatEvent(
+                CombatEventType.DamageApplied,
+                State.Player.Id,
+                target.Id,
+                card.InstanceId,
+                actualDamage,
+                "Gun shot resolved."));
+
+            if (target.IsDead)
+                events.Add(CreateDeathEvent(target));
+
+            _gunCardShotsRemaining[cardInstanceId]--;
+
+            // 最后一发：弃牌 + 回到 PlayerInput
+            if (_gunCardShotsRemaining[cardInstanceId] <= 0)
+            {
+                _gunCardShotsRemaining.Remove(cardInstanceId);
+                card.ConsumeUpgrade();
+                State.Deck.DiscardFromHand(cardInstanceId, out _);
+                events.Add(new CombatEvent(
+                    CombatEventType.CardDiscarded,
+                    State.Player.Id,
+                    cardInstanceId: card.InstanceId,
+                    message: "Gun card emptied and discarded."));
+
+                if (EvaluateOutcome(events)) return Complete(true, string.Empty, events);
+                SetPhase(CombatPhase.PlayerInput, events);
+            }
+
+            return Complete(true, string.Empty, events);
+        }
+
+        /// <summary>取消正在进行的射击（如回合结束时强制结束）。</summary>
+        public CombatResult CancelShooting(string cardInstanceId)
+        {
+            if (!_gunCardShotsRemaining.ContainsKey(cardInstanceId)) return Reject("Card is not being shot.");
+            _gunCardShotsRemaining.Remove(cardInstanceId);
+
+            var card = State.Deck.FindInHand(cardInstanceId);
+            if (card != null)
+            {
+                State.Deck.DiscardFromHand(cardInstanceId, out _);
+                var events = new List<CombatEvent>
+                {
+                    new CombatEvent(CombatEventType.CardDiscarded,
+                        State.Player.Id,
+                        cardInstanceId: card.InstanceId,
+                        message: "Gun card cancelled and discarded.")
+                };
+                SetPhase(CombatPhase.PlayerInput, events);
+                return Complete(true, string.Empty, events);
+            }
+            return Reject("Card not found in hand.");
+        }
+
+        /// <summary>一次性打完剩余子弹（拖拽中途清弹）。</summary>
+        public CombatResult PlayRemainingShots(string cardInstanceId, string targetId)
+        {
+            if (!_gunCardShotsRemaining.ContainsKey(cardInstanceId))
+                return PlayCard(cardInstanceId, targetId);
+
+            var remaining = _gunCardShotsRemaining[cardInstanceId];
+            var card = State.Deck.FindInHand(cardInstanceId);
+            if (card == null) return Reject("Card not in hand.");
+
+            var target = ResolveTarget(card.Spec.TargetType, targetId);
+            if (target == null || target.IsDead) return Reject("Invalid target.");
+
+            var events = new List<CombatEvent>();
+            var damagePerHit = GetGunCardDamagePerHit(card);
+
+            for (int i = 0; i < remaining && !target.IsDead; i++)
+            {
+                var actualDamage = target.ApplyDamage(damagePerHit);
+                events.Add(new CombatEvent(
+                    CombatEventType.DamageApplied,
+                    State.Player.Id,
+                    target.Id,
+                    card.InstanceId,
+                    actualDamage,
+                    "Gun shot (burst) resolved."));
+            }
+
+            if (target.IsDead)
+                events.Add(CreateDeathEvent(target));
+
+            _gunCardShotsRemaining.Remove(cardInstanceId);
+            card.ConsumeUpgrade();
+            State.Deck.DiscardFromHand(cardInstanceId, out _);
+            events.Add(new CombatEvent(
+                CombatEventType.CardDiscarded,
+                State.Player.Id,
+                cardInstanceId: card.InstanceId,
+                message: "Gun card burst-fired and discarded."));
+
+            if (EvaluateOutcome(events)) return Complete(true, string.Empty, events);
+            SetPhase(CombatPhase.PlayerInput, events);
+            return Complete(true, string.Empty, events);
+        }
+
+        private static int GetGunCardTotalShots(CardInstance card)
+        {
+            foreach (var effect in card.Spec.Effects)
+            {
+                if (effect.Type == CardEffectType.Damage)
+                    return effect.Hits.Resolve(card.IsUpgraded);
+            }
+            return 1;
+        }
+
+        private static int GetGunCardDamagePerHit(CardInstance card)
+        {
+            foreach (var effect in card.Spec.Effects)
+            {
+                if (effect.Type == CardEffectType.Damage)
+                    return effect.Amount.Resolve(card.IsUpgraded);
+            }
+            return 0;
+        }
+
+        public bool IsShooting(string cardInstanceId)
+        {
+            return _gunCardShotsRemaining.ContainsKey(cardInstanceId);
         }
     }
 }
