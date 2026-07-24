@@ -30,6 +30,10 @@ namespace KiKs.Combat
         [SerializeField] private TMP_Text actionPointText;
         [SerializeField] private TMP_Text manaText;
 
+        [Header("Deck UI")]
+        [SerializeField] private TMP_Text drawPileText;
+        [SerializeField] private TMP_Text discardPileText;
+
         private int _enemyMaxHp;
         private int _enemyMaxToughness;
         private int _playerMaxHp;
@@ -92,6 +96,11 @@ namespace KiKs.Combat
             UpdatePlayerUI(state.Player);
             if (roundText != null)
                 roundText.text = "ROUND " + state.TurnNumber;
+
+            if (drawPileText != null)
+                drawPileText.SendMessage("SetValue", state.Deck.DrawPile.Count, SendMessageOptions.DontRequireReceiver);
+            if (discardPileText != null)
+                discardPileText.SendMessage("SetValue", state.Deck.DiscardPile.Count, SendMessageOptions.DontRequireReceiver);
         }
 
         private void UpdateEnemyUI(CombatantState enemy)

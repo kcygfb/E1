@@ -23,6 +23,7 @@ namespace KiKs.Combat
         [SerializeField] private TMP_Text cardNameText;
 
         private RectTransform _rect;
+        private float _lastDragEndTime;
         private bool _isAnimating;
         private bool _wasDragged;
         private Vector2 _dragStartPos;
@@ -55,6 +56,17 @@ namespace KiKs.Combat
             if (cardNameText == null)
                 cardNameText = GetComponentInChildren<TMP_Text>(true);
             RefreshCardName();
+
+            // 根据卡牌类型设置高光颜色
+            SyncCardInteraction();
+            var components = GetComponents<MonoBehaviour>();
+            foreach (var comp in components)
+            {
+                if (comp == null) continue;
+                if (comp.GetType().Name != "CardInteraction") continue;
+                var method = comp.GetType().GetMethod("SetGlowColorByCategory");
+                method?.Invoke(comp, new object[] { spec.Category });
+            }
         }
 
         public void SetUpgraded(bool isUpgraded)
@@ -87,6 +99,10 @@ namespace KiKs.Combat
             if (_isAnimating) return;
             if (_wasDragged) return;
 
+            // 魔手拖拽释放在卡牌上时，EventSystem 可能误触发 Click —— 忽略拖拽期间及拖拽刚结束的点击
+            if (IsAnyDraggableActive()) return;
+            if (Time.realtimeSinceStartup - _lastDragEndTime < 0.2f) return;
+
             // 枪械多段射击：每次点击都走 OnShootRequested
             if (IsMultiShot && _remainingShots > 0)
             {
@@ -114,6 +130,7 @@ namespace KiKs.Combat
         {
             if (!_wasDragged) return;
             _wasDragged = false;
+            _lastDragEndTime = Time.realtimeSinceStartup;
 
             if (eventData.position.y > Screen.height * 0.5f)
             {
@@ -149,6 +166,16 @@ namespace KiKs.Combat
         {
             var f = obj.GetType().GetField(name, BindingFlags.NonPublic | BindingFlags.Instance);
             f?.SetValue(obj, value);
+        }
+
+        /// <summary>反射检查是否有任意 Draggable 正在拖拽（跨 asmdef，避免编译依赖）</summary>
+        private static bool IsAnyDraggableActive()
+        {
+            var type = System.Type.GetType("KiKs.UI.Draggable, Assembly-CSharp");
+            if (type == null) return false;
+            var prop = type.GetProperty("AnyDragging", BindingFlags.Public | BindingFlags.Static);
+            if (prop == null) return false;
+            return (bool)prop.GetValue(null);
         }
 
         public void PlayDrawAnimation(Vector2 deckPos, Vector2 targetPos, float duration, System.Action onComplete)

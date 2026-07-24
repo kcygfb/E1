@@ -20,6 +20,8 @@ namespace KiKs.UI
 
         [Header("高光边框")]
         [SerializeField] private Color glowColor = new(1f, 0.85f, 0.3f, 1f);
+        [SerializeField] private Color glowColorMagic = new(0.3f, 0.5f, 1f, 1f);
+        [SerializeField] private Color glowColorRanged = new(0.6f, 0.6f, 0.6f, 1f);
         [SerializeField] private float glowExpand = 6f;
         [SerializeField] private float glowFadeDuration = 0.05f;
         [SerializeField] private float glowSkewRatio = 0.5f;
@@ -193,6 +195,20 @@ namespace KiKs.UI
             _glowRect.rotation = _rect.rotation;
             _glowRect.localScale = _rect.localScale;
             _glowRect.sizeDelta = _rect.sizeDelta + new Vector2(glowExpand * 2, glowExpand * 2);
+        }
+
+        /// <summary>根据卡牌类型设置高光颜色，由 CardView.Setup 调用</summary>
+        public void SetGlowColorByCategory(string category)
+        {
+            var color = category switch
+            {
+                "magic" => glowColorMagic,
+                "ranged" or "guns" => glowColorRanged,
+                _ => glowColor
+            };
+
+            if (_glowImage != null && !_glowDestroyed)
+                _glowImage.color = new Color(color.r, color.g, color.b, _glowImage.color.a);
         }
 
         private void OnDestroy()

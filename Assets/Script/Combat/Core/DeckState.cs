@@ -120,6 +120,7 @@ namespace KiKs.Combat
             discardedCard = FindInHand(instanceId);
             if (discardedCard == null) return false;
 
+            discardedCard.ConsumeUpgrade();
             _hand.Remove(discardedCard);
             _discardPile.Add(discardedCard);
             return true;
@@ -131,6 +132,8 @@ namespace KiKs.Combat
         public IReadOnlyList<CardInstance> DiscardHand()
         {
             var discarded = new List<CardInstance>(_hand);
+            foreach (var card in discarded)
+                card.ConsumeUpgrade();
             _discardPile.AddRange(_hand);
             _hand.Clear();
             return discarded.AsReadOnly();

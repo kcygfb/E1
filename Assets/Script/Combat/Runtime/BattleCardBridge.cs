@@ -39,6 +39,16 @@ namespace KiKs.Combat
             }
         }
 
+        /// <summary>反射检查是否有任意 Draggable 正在拖拽（魔手拖拽时保持魔法姿态）</summary>
+        private static bool IsAnyDraggableActive()
+        {
+            var type = System.Type.GetType("KiKs.UI.Draggable, Assembly-CSharp");
+            if (type == null) return false;
+            var prop = type.GetProperty("AnyDragging", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+            if (prop == null) return false;
+            return (bool)prop.GetValue(null);
+        }
+
         private IEnumerator WaitAndDrawInitialHand()
         {
             while (battleController == null || !battleController.IsInitialized)
@@ -83,6 +93,10 @@ namespace KiKs.Combat
         private void OnCardHoverEnter(CardView cardView)
         {
             if (_playerAttackFeedback == null || cardView?.Spec == null) return;
+
+            // 魔手拖拽中：保持魔法预备姿态，不切换
+            if (IsAnyDraggableActive()) return;
+
             var category = cardView.Spec.Category;
             if (category == "ranged" || category == "guns")
                 _playerAttackFeedback.SwitchToRangedPose();
@@ -116,7 +130,7 @@ namespace KiKs.Combat
 
                 // 播一次特效
                 if (_playerAttackFeedback != null)
-                    _playerAttackFeedback.PlayRangedSingleShot();
+                    _playerAttackFeedback.PlayRangedSingleShot(cardView.IsUpgraded);
                 return true;
             }
 
@@ -148,7 +162,7 @@ namespace KiKs.Combat
 
             // 播放单发射击特效
             if (_playerAttackFeedback != null)
-                _playerAttackFeedback.PlayRangedSingleShot();
+                _playerAttackFeedback.PlayRangedSingleShot(cardView.IsUpgraded);
         }
 
         /// <summary>结束回合：回收手牌 + 引擎结束回合 + 抽新牌</summary>

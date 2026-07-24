@@ -21,6 +21,10 @@ namespace KiKs.UI
 
         public bool IsDragging { get; private set; }
 
+        /// <summary>全局：当前是否有任意 Draggable 正在拖拽（用于过滤误触发的 Click）</summary>
+        private static int s_activeDragCount;
+        public static bool AnyDragging => s_activeDragCount > 0;
+
         private RectTransform _rect;
         private RectTransform _dragParent;
         private Vector2 _originPos;
@@ -36,6 +40,7 @@ namespace KiKs.UI
         public void OnBeginDrag(PointerEventData eventData)
         {
             IsDragging = true;
+            s_activeDragCount++;
             _originPos = _rect.anchoredPosition;
 
             // Kill any running DOTween animations on this rect (e.g. from CardInteraction)
@@ -82,7 +87,11 @@ namespace KiKs.UI
 
         public void OnEndDrag(PointerEventData eventData)
         {
-            IsDragging = false;
+            if (IsDragging)
+            {
+                IsDragging = false;
+                s_activeDragCount = Mathf.Max(0, s_activeDragCount - 1);
+            }
 
             if (_group != null)
             {

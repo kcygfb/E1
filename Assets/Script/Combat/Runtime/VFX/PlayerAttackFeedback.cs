@@ -58,6 +58,8 @@ namespace KiKs.Combat
         [SerializeField] private AudioClip hitSfx;
         [Tooltip("开枪音效")]
         [SerializeField] private AudioClip rangedSfx;
+        [Tooltip("切换到射击姿态时的上膛音效")]
+        [SerializeField] private AudioClip gunPoseSfx;
         [SerializeField] private AudioSource audioSource;
 
         [Header("近战攻击图")]
@@ -77,6 +79,18 @@ namespace KiKs.Combat
         [SerializeField] private float magicSpriteScaleMultiplier = 1f;
         [Tooltip("魔法立绘位置偏移")]
         [SerializeField] private Vector2 magicSpriteOffset = Vector2.zero;
+
+        [Header("魔法释放特效")]
+        [Tooltip("魔法火 Sprite（白底特效图，用 Additive 混合）")]
+        [SerializeField] private Sprite magicFireSprite;
+        [Tooltip("魔法火大小")]
+        [SerializeField] private float magicFireSize = 400f;
+        [Tooltip("魔法火持续秒数")]
+        [SerializeField] private float magicFireDuration = 0.5f;
+        [Tooltip("魔法火位置偏移（立绘宽高比例，正值=右/上）")]
+        [SerializeField] private Vector2 magicFireOffset = new(0.3f, 0.3f);
+        [Tooltip("魔法火颜色")]
+        [SerializeField] private Color magicFireColor = new(0.5f, 0.8f, 1f, 1f);
 
         [Header("刀光特效")]
         [SerializeField] private Sprite slashSprite;
@@ -133,6 +147,7 @@ namespace KiKs.Combat
         private bool _useAnimator;
         private bool _isRangedPose;
         private bool _isMagicPose;
+        private bool _currentAttackUpgraded;
 
         /// <summary>攻击流程进行中时为 true，防止重复触发</summary>
         public bool IsBusy => _state != AttackState.Idle;
@@ -186,6 +201,7 @@ namespace KiKs.Combat
                 SwapSprite(rangedAttackSprite, rangedSpriteScaleMultiplier);
                 _rect.anchoredPosition += rangedSpriteOffset;
             }
+            PlaySfx(gunPoseSfx);
         }
 
         /// <summary>切换到魔法姿态（悬浮魔法牌/魔手时调用，保持住）</summary>
@@ -213,13 +229,14 @@ namespace KiKs.Combat
         }
 
         /// <summary>单发射击特效（多段射击时每发调用，不切立绘不走状态机）</summary>
-        public void PlayRangedSingleShot()
+        public void PlayRangedSingleShot(bool isUpgraded = false)
         {
             if (IsBusy) return;
             SpawnMuzzleFlash();
             TriggerEnemyHit();
             PlaySfx(rangedSfx);
             ShakeCanvas();
+            if (isUpgraded) FlashScreen();
         }
 
         private void OnCombatEvent(CombatEvent evt)
@@ -230,7 +247,7 @@ namespace KiKs.Combat
             if (evt.SourceId != battleController.State.Player.Id) return;
 
             int attackType = ResolveAttackType(evt.CardInstanceId);
-            PlayAttack(attackType);
+            PlayAttack(attackType, evt.IsUpgraded);
         }
 
         private int ResolveAttackType(string cardInstanceId)
@@ -255,8 +272,10 @@ namespace KiKs.Combat
         }
 
         /// <param name="attackType">0=近战, 1=远程, 2=魔法</param>
-        public void PlayAttack(int attackType = 0)
+        /// <param name="isUpgraded">是否强化卡牌（决定是否触发扩散特效）</param>
+        public void PlayAttack(int attackType = 0, bool isUpgraded = false)
         {
+            _currentAttackUpgraded = isUpgraded;
             // Animator 路径：交给动画控制器
             if (_useAnimator)
             {
@@ -310,7 +329,7 @@ namespace KiKs.Combat
             }
             SpawnSlash();
             TriggerEnemyHit();
-            FlashScreen();
+            if (_currentAttackUpgraded) FlashScreen();
             PlaySfx(hitSfx);
 
             // 卡肉：冻结时间 + 玩家放大 + 屏震
@@ -354,6 +373,7 @@ namespace KiKs.Combat
 
             SpawnMuzzleFlash();
             TriggerEnemyHit();
+            if (_currentAttackUpgraded) FlashScreen();
             PlaySfx(rangedSfx);
 
             // 短暂卡帧（比近战轻）
@@ -654,12 +674,14 @@ namespace KiKs.Combat
             seq.OnComplete(() => Destroy(obj));
         }
 
-        /// <summary>魔法兜底：原地前冲 + 回弹</summary>
+        /// <summary>魔法兜底：原地前冲 + 回弹 + 魔法火特效</summary>
         private void PlayLungeFallback()
         {
             StopAttack();
             _rect.anchoredPosition = _originPos;
             _rect.localScale = _originScale;
+
+            SpawnMagicFire();
 
             _tweenSeq = DOTween.Sequence();
             _tweenSeq.Append(_rect.DOLocalMoveX(_originPos.x + lungeDistance, lungeDuration)
@@ -670,6 +692,60 @@ namespace KiKs.Combat
                 .SetEase(Ease.OutQuart));
             _tweenSeq.Join(_rect.DOScale(_originScale, returnDuration)
                 .SetEase(Ease.OutQuart));
+        }
+
+        /// <summary>魔法释放特效：在玩家立绘前方播放魔法火</summary>
+        public void SpawnMagicFire()
+        {
+            if (vfxParent == null)
+                vfxParent = transform.root;
+
+            if (magicFireSprite == null) return;
+
+            var basePos = _rect.position;
+            var w = _rect.rect.width * _rect.localScale.x;
+            var h = _rect.rect.height * _rect.localScale.y;
+            var firePos = basePos;
+            firePos.x += w * magicFireOffset.x;
+            firePos.y += h * magicFireOffset.y;
+
+            var obj = new GameObject("MagicFire");
+            obj.transform.SetParent(vfxParent, true);
+            obj.transform.position = firePos;
+
+            var img = obj.AddComponent<UnityEngine.UI.Image>();
+            img.raycastTarget = false;
+
+            var rt = obj.GetComponent<RectTransform>();
+            var mat = GetAdditiveMaterial();
+
+            img.sprite = magicFireSprite;
+            img.material = mat;
+            img.color = magicFireColor;
+            img.type = UnityEngine.UI.Image.Type.Simple;
+
+            var sw = magicFireSprite.rect.width;
+            var sh = magicFireSprite.rect.height;
+            var s = magicFireSize / Mathf.Max(sw, sh);
+            rt.sizeDelta = new Vector2(sw * s, sh * s);
+
+            var seq = DOTween.Sequence();
+            seq.Append(obj.transform.DOScale(0.3f, 0f));
+            seq.Join(obj.transform.DOScale(1.2f, magicFireDuration * 0.3f).SetEase(Ease.OutQuart));
+
+            // 从下往上出现：用 Image 的 fillAmount 从 0→1
+            img.type = UnityEngine.UI.Image.Type.Filled;
+            img.fillMethod = UnityEngine.UI.Image.FillMethod.Vertical;
+            img.fillOrigin = 0; // 底部开始
+            img.fillAmount = 0f;
+            seq.Join(DOTween.To(() => img.fillAmount, v => img.fillAmount = v, 1f, magicFireDuration * 0.4f)
+                .SetEase(Ease.OutQuart));
+
+            // 整体淡出
+            seq.Join(DOTween.To(() => img.color, c => img.color = c,
+                new Color(magicFireColor.r, magicFireColor.g, magicFireColor.b, 0f),
+                magicFireDuration).SetEase(Ease.InQuart));
+            seq.OnComplete(() => Destroy(obj));
         }
 
         private void StopAttack()

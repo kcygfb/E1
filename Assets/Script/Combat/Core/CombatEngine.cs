@@ -419,7 +419,8 @@ namespace KiKs.Combat
                 var actualDamage = target.ApplyDamage(amount);
                 events.Add(new CombatEvent(
                     CombatEventType.DamageApplied, State.Player.Id, target.Id,
-                    card.InstanceId, actualDamage, "Damage hit " + (hit + 1) + " resolved."));
+                    card.InstanceId, actualDamage, "Damage hit " + (hit + 1) + " resolved.",
+                    isUpgraded: card.IsUpgraded));
                 if (target.IsDead) events.Add(CreateDeathEvent(target));
             }
         }
@@ -471,7 +472,8 @@ namespace KiKs.Combat
             var healing = State.Player.Heal(damage);
             events.Add(new CombatEvent(
                 CombatEventType.DamageApplied, State.Player.Id, target.Id,
-                card.InstanceId, damage, "Life steal dealt damage."));
+                card.InstanceId, damage, "Life steal dealt damage.",
+                isUpgraded: card.IsUpgraded));
             events.Add(new CombatEvent(
                 CombatEventType.HealingApplied, State.Player.Id, State.Player.Id,
                 card.InstanceId, healing, "Life steal healed the player."));
@@ -486,7 +488,8 @@ namespace KiKs.Combat
             events.Add(new CombatEvent(
                 CombatEventType.DamageApplied, State.Player.Id, target.Id,
                 card.InstanceId, actualDamage,
-                "Bleed-scaled damage resolved from " + target.BleedStacks + " stacks."));
+                "Bleed-scaled damage resolved from " + target.BleedStacks + " stacks.",
+                isUpgraded: card.IsUpgraded));
             if (target.IsDead) events.Add(CreateDeathEvent(target));
         }
 
@@ -498,7 +501,8 @@ namespace KiKs.Combat
             var actualHealing = State.Player.Heal(actualDamage);
             events.Add(new CombatEvent(
                 CombatEventType.DamageApplied, State.Player.Id, target.Id,
-                card.InstanceId, actualDamage, "Life steal dealt fixed damage."));
+                card.InstanceId, actualDamage, "Life steal dealt fixed damage.",
+                isUpgraded: card.IsUpgraded));
             events.Add(new CombatEvent(
                 CombatEventType.HealingApplied, State.Player.Id, State.Player.Id,
                 card.InstanceId, actualHealing, "Life steal healed fixed health."));
@@ -786,7 +790,8 @@ namespace KiKs.Combat
                 target.Id,
                 card.InstanceId,
                 actualDamage,
-                "Gun shot resolved."));
+                "Gun shot resolved.",
+                isUpgraded: card.IsUpgraded));
 
             if (target.IsDead)
                 events.Add(CreateDeathEvent(target));
@@ -860,7 +865,8 @@ namespace KiKs.Combat
                     target.Id,
                     card.InstanceId,
                     actualDamage,
-                    "Gun shot (burst) resolved."));
+                    "Gun shot (burst) resolved.",
+                    isUpgraded: card.IsUpgraded));
             }
 
             if (target.IsDead)

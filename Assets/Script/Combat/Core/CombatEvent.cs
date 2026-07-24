@@ -21,6 +21,8 @@ namespace KiKs.Combat
         public string CardInstanceId { get; }
         public int Amount { get; }
         public string Message { get; }
+        /// <summary>DamageApplied 事件中，该伤害是否来自强化卡牌（引擎在 ConsumeUpgrade 前设置）。</summary>
+        public bool IsUpgraded { get; }
 
         public CombatEvent(
             CombatEventType type,
@@ -28,7 +30,8 @@ namespace KiKs.Combat
             string targetId = null,
             string cardInstanceId = null,
             int amount = 0,
-            string message = null)
+            string message = null,
+            bool isUpgraded = false)
         {
             Type = type;
             SourceId = sourceId;
@@ -36,6 +39,7 @@ namespace KiKs.Combat
             CardInstanceId = cardInstanceId;
             Amount = amount;
             Message = message ?? string.Empty;
+            IsUpgraded = isUpgraded;
         }
     }
 
