@@ -89,10 +89,20 @@ namespace KiKs.Combat
         [SerializeField] private float rangedShootDuration = 0.2f;
         [Tooltip("枪口闪光颜色")]
         [SerializeField] private Color muzzleFlashColor = new(1f, 0.9f, 0.3f, 0.8f);
+        [Tooltip("枪口闪光贴图（替代纯色方块，Additive 混合）")]
+        [SerializeField] private Texture2D muzzleFlashTexture;
+        [Tooltip("枪口火花 Sprite（额外叠加的火花特效，Additive 混合）")]
+        [SerializeField] private Sprite muzzleSparkSprite;
         [Tooltip("枪口闪光大小")]
-        [SerializeField] private float muzzleFlashSize = 120f;
+        [SerializeField] private float muzzleFlashSize = 300f;
+        [Tooltip("枪口火花大小")]
+        [SerializeField] private float muzzleSparkSize = 300f;
         [Tooltip("枪口闪光持续秒数")]
-        [SerializeField] private float muzzleFlashDuration = 0.12f;
+        [SerializeField] private float muzzleFlashDuration = 0.15f;
+        [Tooltip("枪口闪光位置偏移（立绘宽高比例，正值=右/上）")]
+        [SerializeField] private Vector2 muzzleFlashOffset = new(0.4f, 0.1f);
+        [Tooltip("枪口火花位置偏移（立绘宽高比例，正值=右/上）")]
+        [SerializeField] private Vector2 muzzleSparkOffset = new(0.4f, 0.1f);
         [Tooltip("射击立绘位置偏移（修正脚部对齐）")]
         [SerializeField] private Vector2 rangedSpriteOffset = Vector2.zero;
 
@@ -359,34 +369,128 @@ namespace KiKs.Combat
             _attackRoutine = null;
         }
 
+        private static Material s_additiveMat;
+        private static Sprite s_cachedFlashSprite;
+
+        private static Material GetAdditiveMaterial()
+        {
+            if (s_additiveMat == null)
+            {
+                var shader = Shader.Find("UI/Additive");
+                if (shader != null)
+                    s_additiveMat = new Material(shader);
+            }
+            return s_additiveMat;
+        }
+
         private void SpawnMuzzleFlash()
         {
             if (vfxParent == null)
                 vfxParent = transform.root;
 
-            var muzzlePos = _rect.position;
-            muzzlePos.x += _rect.rect.width * _rect.localScale.x * 0.4f;
-            muzzlePos.y += _rect.rect.height * _rect.localScale.y * 0.1f;
+            var basePos = _rect.position;
+            var w = _rect.rect.width * _rect.localScale.x;
+            var h = _rect.rect.height * _rect.localScale.y;
 
-            var obj = new GameObject("MuzzleFlash");
+            // --- 主枪口闪光（crihit01 贴图或纯色方块） ---
+            var flashPos = basePos;
+            flashPos.x += w * muzzleFlashOffset.x;
+            flashPos.y += h * muzzleFlashOffset.y;
+            SpawnFlashObject(flashPos, muzzleFlashTexture, muzzleFlashSize, muzzleFlashColor, muzzleFlashDuration, "MuzzleFlash");
+
+            // --- 额外火花（射击火花.png，仅淡入淡出，无形变） ---
+            if (muzzleSparkSprite != null)
+            {
+                var sparkPos = basePos;
+                sparkPos.x += w * muzzleSparkOffset.x;
+                sparkPos.y += h * muzzleSparkOffset.y;
+                SpawnSparkObject(sparkPos, muzzleSparkSprite, muzzleSparkSize, muzzleFlashColor, muzzleFlashDuration, "MuzzleSpark");
+            }
+        }
+
+        private void SpawnFlashObject(Vector3 pos, Texture2D tex, float size, Color color, float duration, string name)
+        {
+            if (tex == null)
+            {
+                SpawnFlashObject(pos, (Sprite)null, size, color, duration, name);
+                return;
+            }
+            if (s_cachedFlashSprite == null || s_cachedFlashSprite.texture != tex)
+            {
+                s_cachedFlashSprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100f);
+            }
+            SpawnFlashObject(pos, s_cachedFlashSprite, size, color, duration, name);
+        }
+
+        private void SpawnFlashObject(Vector3 pos, Sprite sprite, float size, Color color, float duration, string name)
+        {
+            var obj = new GameObject(name);
             obj.transform.SetParent(vfxParent, true);
-            obj.transform.position = muzzlePos;
+            obj.transform.position = pos;
 
             var img = obj.AddComponent<UnityEngine.UI.Image>();
-            img.color = muzzleFlashColor;
             img.raycastTarget = false;
 
             var rt = obj.GetComponent<RectTransform>();
-            rt.sizeDelta = new Vector2(muzzleFlashSize, muzzleFlashSize);
+            var mat = GetAdditiveMaterial();
+
+            if (sprite != null)
+            {
+                img.sprite = sprite;
+                img.material = mat;
+                img.color = color;
+                img.type = UnityEngine.UI.Image.Type.Simple;
+
+                var sw = sprite.rect.width;
+                var sh = sprite.rect.height;
+                var s = size / Mathf.Max(sw, sh);
+                rt.sizeDelta = new Vector2(sw * s, sh * s);
+            }
+            else
+            {
+                img.color = color;
+                if (mat != null) img.material = mat;
+                rt.sizeDelta = new Vector2(size, size);
+            }
 
             var seq = DOTween.Sequence();
             seq.Append(obj.transform.DOScale(0.5f, 0f));
-            seq.Join(obj.transform.DOScale(1.5f, muzzleFlashDuration * 0.4f).SetEase(Ease.OutQuart));
-            seq.Join(obj.transform.DOLocalRotate(new Vector3(0, 0, 45f), muzzleFlashDuration)
+            seq.Join(obj.transform.DOScale(1.5f, duration * 0.4f).SetEase(Ease.OutQuart));
+            seq.Join(obj.transform.DOLocalRotate(new Vector3(0, 0, 45f), duration)
                 .SetEase(Ease.OutQuart));
             seq.Join(DOTween.To(() => img.color, c => img.color = c,
-                new Color(muzzleFlashColor.r, muzzleFlashColor.g, muzzleFlashColor.b, 0f),
-                muzzleFlashDuration).SetEase(Ease.InQuart));
+                new Color(color.r, color.g, color.b, 0f),
+                duration).SetEase(Ease.InQuart));
+            seq.OnComplete(() => Destroy(obj));
+        }
+
+        private void SpawnSparkObject(Vector3 pos, Sprite sprite, float size, Color color, float duration, string name)
+        {
+            var obj = new GameObject(name);
+            obj.transform.SetParent(vfxParent, true);
+            obj.transform.position = pos;
+
+            var img = obj.AddComponent<UnityEngine.UI.Image>();
+            img.raycastTarget = false;
+
+            var rt = obj.GetComponent<RectTransform>();
+            var mat = GetAdditiveMaterial();
+
+            img.sprite = sprite;
+            img.material = mat;
+            img.color = color;
+            img.type = UnityEngine.UI.Image.Type.Simple;
+
+            var sw = sprite.rect.width;
+            var sh = sprite.rect.height;
+            var s = size / Mathf.Max(sw, sh);
+            rt.sizeDelta = new Vector2(sw * s, sh * s);
+
+            // 仅淡出，无缩放/旋转
+            var seq = DOTween.Sequence();
+            seq.Join(DOTween.To(() => img.color, c => img.color = c,
+                new Color(color.r, color.g, color.b, 0f),
+                duration).SetEase(Ease.InQuart));
             seq.OnComplete(() => Destroy(obj));
         }
 

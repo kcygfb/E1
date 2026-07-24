@@ -66,6 +66,12 @@ namespace KiKs.Combat
                 if (cardView != null)
                     HookCardHover(cardView);
             }
+
+            // 卡牌生成后播放 BGM（避免 playOnAwake 阻塞卡牌生成）
+            var bgmObj = GameObject.Find("BattleBGM");
+            var bgmSource = bgmObj?.GetComponent<AudioSource>();
+            if (bgmSource != null && bgmSource.clip != null && !bgmSource.isPlaying)
+                bgmSource.Play();
         }
 
         private void HookCardHover(CardView cardView)

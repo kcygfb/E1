@@ -6,6 +6,7 @@
 
 ### Feedback
 - [2026-07-22 20:22:53] User had issues with CardInteraction GlowBorder alignment — the root cause was sprite pivot offset and GlowBorder being a sibling vs child object. Final solution: GlowBorder as sibling + LateUpdate position sync. This took many iterations; if touching CardInteraction again, be very careful with GlowBorder positioning logic.
+- [2026-07-24 00:26:30] Optimization lessons: (1) NEVER delete scene objects during code cleanup — git reset restores code but scene .unity may have stale references. (2) git checkout/restore of .unity file requires Unity scene reload to take effect — Unity caches scene in memory. (3) BGM DecompressOnLoad + preloadAudioData=False causes main thread block on first PlayMode after Library cache clear — must set preloadAudioData=True in .meta. (4) NEVER push without explicit user request. **Why:** multiple optimization attempts broke things, git resets caused scene reference loss and stale Unity cache. **How to apply:** only change .meta files for audio import; force reimport after git reset; always reload scene after git checkout of .unity files.
 
 ### Project
 - [2026-07-22 20:22:39] Unity project E1 (github.com/kcygfb/E1.git) — a card battle + coffee shop game. Three feature branches: feature/Card-Battle (combat), feature/CoffeeShop (cafe sim), dev/maomao (teammate's branch). Master now merges all three as of 2026-07-21.
