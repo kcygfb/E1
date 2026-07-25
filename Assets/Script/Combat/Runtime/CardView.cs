@@ -9,7 +9,7 @@ using System.Reflection;
 namespace KiKs.Combat
 {
     [RequireComponent(typeof(RectTransform))]
-    public class CardView : MonoBehaviour, IPointerClickHandler
+    public class CardView : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
     {
         public string CardId { get; private set; }
         public string InstanceId { get; private set; }
@@ -17,16 +17,26 @@ namespace KiKs.Combat
         public bool IsUpgraded { get; private set; }
 
         public System.Action<CardView> OnPlayRequested;
+        public System.Action<CardView> OnShootRequested;
+        public System.Action<CardView> OnHoverEnter;
+        public System.Action<CardView> OnHoverExit;
 
         [Header("Card UI")]
         [SerializeField] private TMP_Text cardNameText;
         [SerializeField] private Image cardArtImage;
 
         private RectTransform _rect;
+        private float _lastDragEndTime;
         private bool _isAnimating;
         private bool _wasDragged;
         private Vector2 _dragStartPos;
         private const float DRAG_THRESHOLD = 10f;
+
+        private int _totalShots;
+        private int _remainingShots;
+
+        /// <summary>是否是多段射击的枪械卡</summary>
+        public bool IsMultiShot => _totalShots > 1 && _remainingShots > 0;
 
         private void Awake()
         {
@@ -42,8 +52,17 @@ namespace KiKs.Combat
             gameObject.name = $"Card_{spec.Id}";
             transform.localScale = Vector3.one;
 
+            // 检查是否是枪械多段射击卡
+            _totalShots = GetTotalShots(spec);
+            _remainingShots = _totalShots;
+
             if (cardNameText == null)
                 cardNameText = GetComponentInChildren<TMP_Text>(true);
+            RefreshCardName();
+
+            // 根据卡牌类型设置高光颜色
+            SyncCardInteraction();
+            GetComponent<CardInteraction>()?.SetGlowColorByCategory(spec.Category);
             if (cardNameText != null)
                 cardNameText.gameObject.SetActive(false);
 
@@ -54,7 +73,27 @@ namespace KiKs.Combat
         public void SetUpgraded(bool isUpgraded)
         {
             IsUpgraded = isUpgraded;
+            RefreshCardName();
             RefreshCardArt();
+        }
+
+        private void RefreshCardName()
+        {
+            if (cardNameText != null && Spec != null)
+            {
+                var name = Spec.DisplayName + (IsUpgraded ? " (UPGRADED)" : string.Empty);
+                if (_totalShots >= 1)
+                    name += $" [{_remainingShots}/{_totalShots}]";
+                cardNameText.text = name;
+            }
+        }
+
+        /// <summary>消耗一发子弹，返回是否是最后一发</summary>
+        public bool ConsumeShot()
+        {
+            _remainingShots--;
+            RefreshCardName();
+            return _remainingShots <= 0;
         }
 
         private void EnsureCardArt()
@@ -99,6 +138,19 @@ namespace KiKs.Combat
         {
             if (_isAnimating) return;
             if (_wasDragged) return;
+
+            // 魔手拖拽释放在卡牌上时，EventSystem 可能误触发 Click —— 忽略拖拽期间及拖拽刚结束的点击
+            if (IsAnyDraggableActive()) return;
+            if (Time.realtimeSinceStartup - _lastDragEndTime < 0.2f) return;
+
+            // 枪械多段射击：每次点击都走 OnShootRequested
+            if (IsMultiShot && _remainingShots > 0)
+            {
+                OnShootRequested?.Invoke(this);
+                return;
+            }
+
+            // 非多段卡：正常出牌
             TryPlayCard();
         }
 
@@ -118,10 +170,10 @@ namespace KiKs.Combat
         {
             if (!_wasDragged) return;
             _wasDragged = false;
+            _lastDragEndTime = Time.realtimeSinceStartup;
 
             if (eventData.position.y > Screen.height * 0.5f)
             {
-                // 不在这里 kill DOTween，由 CardDealAnimator 根据出牌结果决定
                 TryPlayCard();
             }
         }
@@ -152,6 +204,12 @@ namespace KiKs.Combat
                 ?.SetValue(interaction, _rect.localScale);
         }
 
+        /// <summary>反射检查是否有任意 Draggable 正在拖拽（跨 asmdef，避免编译依赖）</summary>
+        private static bool IsAnyDraggableActive()
+        {
+            return Draggable.AnyDragging;
+        }
+
         public void PlayDrawAnimation(Vector2 deckPos, Vector2 targetPos, float duration, System.Action onComplete)
         {
             _isAnimating = true;
@@ -173,7 +231,6 @@ namespace KiKs.Combat
         {
             _isAnimating = true;
 
-            // 先 kill 所有动画（包括 Draggable 的回归动画）
             _rect.DOKill();
 
             var interaction = GetComponent<CardInteraction>();
@@ -192,6 +249,28 @@ namespace KiKs.Combat
                 _isAnimating = false;
                 onComplete?.Invoke();
             });
+        }
+
+        public void OnPointerEnter(PointerEventData eventData)
+        {
+            if (_isAnimating) return;
+            OnHoverEnter?.Invoke(this);
+        }
+
+        public void OnPointerExit(PointerEventData eventData)
+        {
+            OnHoverExit?.Invoke(this);
+        }
+
+        private static int GetTotalShots(CardSpec spec)
+        {
+            if (spec.Category != "ranged" && spec.Category != "guns") return 0;
+            foreach (var effect in spec.Effects)
+            {
+                if (effect.Type == CardEffectType.Damage)
+                    return effect.Hits.Resolve(false);
+            }
+            return 0;
         }
     }
 }

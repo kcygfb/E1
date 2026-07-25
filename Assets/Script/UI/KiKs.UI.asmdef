@@ -3,6 +3,7 @@
   "rootNamespace": "KiKs.UI",
   "references": [
     "UnityEngine.UI",
+    "Unity.TextMeshPro",
     "DOTween.Modules"
   ],
   "includePlatforms": [],

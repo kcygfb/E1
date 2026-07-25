@@ -23,6 +23,7 @@ namespace KiKs.Combat
 
         public IReadOnlyList<CardView> HandCards => _handCards;
         public System.Func<CardView, bool> OnCardPlayed;
+        public System.Action<CardView> OnCardShot;
 
         public CardView DrawCard(CardSpec spec, string instanceId = null, bool isUpgraded = false)
         {
@@ -40,6 +41,7 @@ namespace KiKs.Combat
             cardView.Setup(spec, instanceId);
             cardView.SetUpgraded(isUpgraded);
             cardView.OnPlayRequested += HandleCardPlayed;
+            cardView.OnShootRequested += HandleCardShot;
             _handCards.Add(cardView);
 
             // 计算 deck 在 handArea 空间下的 anchoredPosition
@@ -54,6 +56,7 @@ namespace KiKs.Combat
         {
             if (cardView == null || !_handCards.Contains(cardView)) return;
             cardView.OnPlayRequested -= HandleCardPlayed;
+            cardView.OnShootRequested -= HandleCardShot;
             _handCards.Remove(cardView);
 
             Vector3 discardWorld = discardArea != null ? discardArea.position : Vector3.zero;
@@ -144,6 +147,17 @@ namespace KiKs.Combat
                 var index = _handCards.IndexOf(cardView);
                 if (index >= 0)
                     cardView.ReturnToHand(GetCardAnchoredPosition(index));
+            }
+        }
+
+        private void HandleCardShot(CardView cardView)
+        {
+            OnCardShot?.Invoke(cardView);
+            var isLastShot = cardView.ConsumeShot();
+            if (isLastShot)
+            {
+                // 最后一发：PlaySingleShot 已在引擎层弃牌，这里只做视觉弃牌
+                DiscardCard(cardView);
             }
         }
 
