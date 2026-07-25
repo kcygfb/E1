@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 611b6ff6fdefdcb43b09fd01f9fe7e7a
+guid: 06feaf57d518760439d2451fa793af66
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 6204299327098930268
-    second: "\u901A\u7528\u9B54\u6CD5\u5361\u65E0\u5B57(1)_0"
+      213: 3866405808059555565
+    second: sniperrifle_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -100,13 +100,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: "\u901A\u7528\u9B54\u6CD5\u5361\u65E0\u5B57(1)_0"
+      name: sniperrifle_0
       rect:
         serializedVersion: 2
-        x: 37
-        y: 32
+        x: 0
+        y: 0
         width: 754
-        height: 1128
+        height: 1056
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: c544defbd591a1650800000000000000
-      internalID: 6204299327098930268
+      spriteID: dee95eae89b38a530800000000000000
+      internalID: 3866405808059555565
       vertices: []
       indices: 
       edges: []
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      "\u901A\u7528\u9B54\u6CD5\u5361\u65E0\u5B57(1)_0": 6204299327098930268
+      sniperrifle_0: 3866405808059555565
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

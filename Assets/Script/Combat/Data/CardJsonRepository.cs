@@ -114,6 +114,7 @@ namespace KiKs.Combat
             var costAmount = RequiredInt(cost, "amount");
             var deckCopies = OptionalPositiveInt(card, "copies", 1);
             var special = OptionalBool(card, "special");
+            var imagePath = OptionalString(card, "image");
             var rawEffects = RequiredList(card, "effects");
             if (rawEffects.Count == 0) throw new FormatException(id + " has no effects.");
 
@@ -131,7 +132,8 @@ namespace KiKs.Combat
                 special,
                 InferTargetType(effects),
                 effects,
-                deckCopies);
+                deckCopies,
+                imagePath);
         }
 
         private static CardEffectSpec ParseEffect(Dictionary<string, object> effect)

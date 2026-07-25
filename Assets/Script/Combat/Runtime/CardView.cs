@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 using DG.Tweening;
 using TMPro;
 using KiKs.UI;
@@ -19,6 +20,7 @@ namespace KiKs.Combat
 
         [Header("Card UI")]
         [SerializeField] private TMP_Text cardNameText;
+        [SerializeField] private Image cardArtImage;
 
         private RectTransform _rect;
         private bool _isAnimating;
@@ -42,19 +44,55 @@ namespace KiKs.Combat
 
             if (cardNameText == null)
                 cardNameText = GetComponentInChildren<TMP_Text>(true);
-            RefreshCardName();
+            if (cardNameText != null)
+                cardNameText.gameObject.SetActive(false);
+
+            EnsureCardArt();
+            RefreshCardArt();
         }
 
         public void SetUpgraded(bool isUpgraded)
         {
             IsUpgraded = isUpgraded;
-            RefreshCardName();
+            RefreshCardArt();
         }
 
-        private void RefreshCardName()
+        private void EnsureCardArt()
         {
-            if (cardNameText != null && Spec != null)
-                cardNameText.text = Spec.DisplayName + (IsUpgraded ? " (UPGRADED)" : string.Empty);
+            if (cardArtImage != null)
+                return;
+
+            var existing = transform.Find("CardArt");
+            if (existing != null)
+            {
+                cardArtImage = existing.GetComponent<Image>();
+                return;
+            }
+
+            var artGO = new GameObject("CardArt", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            artGO.transform.SetParent(transform, false);
+            artGO.transform.SetAsFirstSibling();
+
+            var rt = artGO.GetComponent<RectTransform>();
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.offsetMin = Vector2.zero;
+            rt.offsetMax = Vector2.zero;
+
+            cardArtImage = artGO.GetComponent<Image>();
+            cardArtImage.preserveAspect = true;
+        }
+
+        private void RefreshCardArt()
+        {
+            if (Spec == null || string.IsNullOrEmpty(Spec.ImagePath))
+                return;
+
+            var path = IsUpgraded
+                ? CardImageLoader.ResolveUpgradedPath(Spec.ImagePath) ?? Spec.ImagePath
+                : Spec.ImagePath;
+
+            CardImageLoader.ApplyToImage(cardArtImage, path);
         }
 
         public void OnPointerClick(PointerEventData eventData)

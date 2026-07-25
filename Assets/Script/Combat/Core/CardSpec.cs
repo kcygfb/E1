@@ -21,6 +21,7 @@ namespace KiKs.Combat
         public bool IsSpecial { get; }
         public CardTargetType TargetType { get; }
         public IReadOnlyList<CardEffectSpec> Effects { get; }
+        public string ImagePath { get; }
         public bool CanUpgrade => Effects.Any(effect => effect.HasUpgrade);
 
         public CardSpec(
@@ -33,7 +34,8 @@ namespace KiKs.Combat
             bool isSpecial,
             CardTargetType targetType,
             IEnumerable<CardEffectSpec> effects,
-            int deckCopies = 1)
+            int deckCopies = 1,
+            string imagePath = "")
         {
             if (string.IsNullOrWhiteSpace(id)) throw new ArgumentException("Card id is required.", nameof(id));
             if (string.IsNullOrWhiteSpace(category)) throw new ArgumentException("Card category is required.", nameof(category));
@@ -55,6 +57,7 @@ namespace KiKs.Combat
             IsSpecial = isSpecial;
             TargetType = targetType;
             Effects = new ReadOnlyCollection<CardEffectSpec>(effectList);
+            ImagePath = imagePath ?? string.Empty;
         }
     }
 }
