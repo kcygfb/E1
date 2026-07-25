@@ -1,0 +1,17 @@
+{
+  "name": "KiKs.UI",
+  "rootNamespace": "KiKs.UI",
+  "references": [
+    "UnityEngine.UI",
+    "DOTween.Modules"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

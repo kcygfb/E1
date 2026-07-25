@@ -2,7 +2,9 @@
   "name": "KiKs.Combat",
   "rootNamespace": "KiKs.Combat",
   "references": [
-    "Unity.TextMeshPro"
+    "Unity.TextMeshPro",
+    "KiKs.UI",
+    "DOTween.Modules"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

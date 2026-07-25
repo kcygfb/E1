@@ -26,68 +26,31 @@ namespace KiKs.Combat
     }
 
     /// <summary>
-    /// One JSON effect entry. Base/upgraded values are resolved against the battle card instance.
+    /// One JSON effect entry matching the V2 card-data schema.
+    /// Base/upgraded values are resolved against the battle card instance.
     /// </summary>
     public sealed class CardEffectSpec
     {
         public CardEffectType Type { get; }
         public UpgradeableNumber Amount { get; }
         public UpgradeableNumber Hits { get; }
-        public UpgradeableNumber DurationTurns { get; }
-        public UpgradeableNumber TriggerCount { get; }
-        public UpgradeableNumber DamagePerTurn { get; }
-        public DamageType DamageType { get; }
         public ValueUnit Unit { get; }
-        public int MinimumDamagePerHit { get; }
-        public bool Stackable { get; }
         public double Multiplier { get; }
-        public string CompanionId { get; }
-        public int NormalTargetPercent { get; }
-        public int BossPercent { get; }
-        public CardResourceType Resource { get; }
-        public string Timing { get; }
-        public string Selection { get; }
 
-        public bool HasUpgrade =>
-            Amount.HasUpgrade || Hits.HasUpgrade || DurationTurns.HasUpgrade ||
-            TriggerCount.HasUpgrade || DamagePerTurn.HasUpgrade;
+        public bool HasUpgrade => Amount.HasUpgrade || Hits.HasUpgrade;
 
         public CardEffectSpec(
             CardEffectType type,
             UpgradeableNumber amount,
             UpgradeableNumber hits,
-            UpgradeableNumber durationTurns,
-            UpgradeableNumber triggerCount,
-            UpgradeableNumber damagePerTurn,
-            DamageType damageType,
             ValueUnit unit,
-            int minimumDamagePerHit,
-            bool stackable,
-            double multiplier,
-            string companionId,
-            int normalTargetPercent,
-            int bossPercent,
-            CardResourceType resource,
-            string timing,
-            string selection)
+            double multiplier)
         {
             Type = type;
             Amount = amount;
             Hits = hits;
-            DurationTurns = durationTurns;
-            TriggerCount = triggerCount;
-            DamagePerTurn = damagePerTurn;
-            DamageType = damageType;
             Unit = unit;
-            MinimumDamagePerHit = Math.Max(0, minimumDamagePerHit);
-            Stackable = stackable;
             Multiplier = multiplier;
-            CompanionId = companionId ?? string.Empty;
-            NormalTargetPercent = Math.Max(0, normalTargetPercent);
-            BossPercent = Math.Max(0, bossPercent);
-            Resource = resource;
-            Timing = timing ?? string.Empty;
-            Selection = selection ?? string.Empty;
         }
     }
 }

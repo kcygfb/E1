@@ -8,6 +8,7 @@
       "name": { "zhCN": "消防斧", "en": "fire axe" },
       "category": "melee",
       "copies": 2,
+      "image": "Art/Cards/fireaxe.png",
       "cost": { "resource": "action_point", "amount": 1 },
       "special": false,
       "effects": [
@@ -22,6 +23,7 @@
       "name": { "zhCN": "太刀", "en": "tachi" },
       "category": "melee",
       "copies": 2,
+      "image": "Art/Cards/tachi.png",
       "cost": { "resource": "action_point", "amount": 1 },
       "special": false,
       "effects": [

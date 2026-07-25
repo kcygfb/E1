@@ -38,20 +38,8 @@ namespace KiKs.Combat.Tests
                 CardEffectType.Damage,
                 new UpgradeableNumber(1, 2),
                 UpgradeableNumber.One,
-                UpgradeableNumber.Zero,
-                UpgradeableNumber.Zero,
-                UpgradeableNumber.Zero,
-                DamageType.Normal,
                 ValueUnit.Points,
-                0,
-                false,
-                1,
-                string.Empty,
-                0,
-                0,
-                CardResourceType.ActionPoint,
-                string.Empty,
-                string.Empty);
+                1);
             var spec = new CardSpec(
                 "test", "Test", "Test", "test",
                 CardResourceType.ActionPoint, 1, false,

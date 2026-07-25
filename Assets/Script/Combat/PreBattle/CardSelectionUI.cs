@@ -30,6 +30,9 @@ namespace KiKs.Combat
         [SerializeField] private Transform deckGridContent;
         [SerializeField] private Text deckLabel;
 
+        [Header("Card Art")]
+        [SerializeField] private Vector2 cardArtSize = new Vector2(120, 100);
+
         private readonly List<string> selectedCardIds = new();
         private readonly List<CardSpec> allCards = new();
         private bool _isStartingBattle;
@@ -112,11 +115,36 @@ namespace KiKs.Combat
 
             item.name = card.Id;
 
+            // Add card art if using a prefab that doesn't have it yet
+            if (cardItemPrefab != null && !string.IsNullOrEmpty(card.ImagePath))
+            {
+                var existingArt = item.transform.Find("CardArt");
+                if (existingArt == null)
+                    AddCardArtChild(item, card);
+            }
+
             var btn = item.GetComponent<Button>();
             if (btn == null) btn = item.AddComponent<Button>();
 
             var cardId = card.Id;
             btn.onClick.AddListener(() => OnCardClicked(cardId));
+        }
+
+        private void AddCardArtChild(GameObject parent, CardSpec card)
+        {
+            var artGO = new GameObject("CardArt", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            artGO.transform.SetParent(parent.transform, false);
+            artGO.transform.SetAsFirstSibling();
+
+            var artRT = artGO.GetComponent<RectTransform>();
+            artRT.anchorMin = Vector2.zero;
+            artRT.anchorMax = Vector2.one;
+            artRT.offsetMin = Vector2.zero;
+            artRT.offsetMax = Vector2.zero;
+
+            var artImage = artGO.GetComponent<Image>();
+            artImage.preserveAspect = true;
+            CardImageLoader.ApplyToImage(artImage, card.ImagePath);
         }
 
         private GameObject CreateDefaultCardItem(CardSpec card)
@@ -127,13 +155,9 @@ namespace KiKs.Combat
             rt.sizeDelta = new Vector2(140, 190);
             go.GetComponent<Image>().color = new Color(0.18f, 0.16f, 0.14f, 1);
 
-            // Category color bar
-            var barGO = new GameObject("TypeBar", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
-            barGO.transform.SetParent(go.transform, false);
-            var barRT = barGO.GetComponent<RectTransform>();
-            barRT.anchorMin = new Vector2(0, 1); barRT.anchorMax = new Vector2(1, 1);
-            barRT.offsetMin = new Vector2(0, -25); barRT.offsetMax = Vector2.zero;
-            barGO.GetComponent<Image>().color = GetCategoryColor(card.Category);
+            // Card art image
+            if (!string.IsNullOrEmpty(card.ImagePath))
+                AddCardArtChild(go, card);
 
             // Card name
             CreateText("CardName", go.transform, card.DisplayName, 16, new Color(0.9f, 0.85f, 0.7f, 1),
@@ -367,13 +391,8 @@ namespace KiKs.Combat
         {
             return category switch
             {
-                "blades" => new Color(0.6f, 0.5f, 0.2f, 1),
-                "axes" => new Color(0.5f, 0.35f, 0.15f, 1),
-                "guns" => new Color(0.2f, 0.4f, 0.6f, 1),
                 "melee" => new Color(0.6f, 0.35f, 0.2f, 1),
                 "ranged" => new Color(0.2f, 0.4f, 0.6f, 1),
-                "flexible_weapons" => new Color(0.3f, 0.5f, 0.3f, 1),
-                "hidden_weapons" => new Color(0.4f, 0.3f, 0.5f, 1),
                 "defense" => new Color(0.2f, 0.5f, 0.5f, 1),
                 "magic" => new Color(0.5f, 0.2f, 0.5f, 1),
                 _ => new Color(0.4f, 0.4f, 0.4f, 1),

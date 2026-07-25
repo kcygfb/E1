@@ -8,6 +8,7 @@
       "name": { "zhCN": "暴风雪", "en": "blizzard" },
       "category": "magic",
       "copies": 2,
+      "image": "Art/Cards/blizzard.png",
       "cost": { "resource": "mana", "amount": 1 },
       "special": false,
       "effects": [
@@ -21,6 +22,7 @@
       "name": { "zhCN": "吸血", "en": "lifesteal" },
       "category": "magic",
       "copies": 2,
+      "image": "Art/Cards/lifesteal.png",
       "cost": { "resource": "mana", "amount": 1 },
       "special": false,
       "effects": [
