@@ -119,6 +119,143 @@ namespace KiKs.Combat.Tests
         }
 
         [Test]
+        public void Bleed_TicksEachTurnDecreasingDamageUntilZero()
+        {
+            var bleed = CreateCard("bleed", 0, CardResourceType.ActionPoint,
+                CreateEffect(CardEffectType.Bleed, amount: 5));
+            var engine = CreateEngine(bleed, 8);
+            engine.StartBattle();
+
+            // Apply 5 bleed stacks on turn 1, no tick yet on same turn
+            var bleedCard = engine.State.Deck.Hand.First(card => card.Spec.Id == "bleed");
+            Assert.That(engine.PlayCard(bleedCard.InstanceId, "enemy").Success, Is.True);
+            Assert.That(engine.State.Enemies[0].BleedStacks, Is.EqualTo(5));
+            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(100));
+
+            // Turn 2: bleed ticks for 5 damage, stacks become 4
+            engine.EndPlayerTurn();
+            engine.CompleteEnemyTurn();
+            Assert.That(engine.State.Enemies[0].BleedStacks, Is.EqualTo(4));
+            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(95));
+
+            // Turn 3: bleed ticks for 4 damage, stacks become 3
+            engine.EndPlayerTurn();
+            engine.CompleteEnemyTurn();
+            Assert.That(engine.State.Enemies[0].BleedStacks, Is.EqualTo(3));
+            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(91));
+
+            // Turn 4: bleed ticks for 3 damage, stacks become 2
+            engine.EndPlayerTurn();
+            engine.CompleteEnemyTurn();
+            Assert.That(engine.State.Enemies[0].BleedStacks, Is.EqualTo(2));
+            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(88));
+
+            // Turn 5: bleed ticks for 2 damage, stacks become 1
+            engine.EndPlayerTurn();
+            engine.CompleteEnemyTurn();
+            Assert.That(engine.State.Enemies[0].BleedStacks, Is.EqualTo(1));
+            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(86));
+
+            // Turn 6: bleed ticks for 1 damage, stacks become 0
+            engine.EndPlayerTurn();
+            engine.CompleteEnemyTurn();
+            Assert.That(engine.State.Enemies[0].BleedStacks, Is.EqualTo(0));
+            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(85));
+
+            // Turn 7: no more bleed, stacks stay 0
+            engine.EndPlayerTurn();
+            engine.CompleteEnemyTurn();
+            Assert.That(engine.State.Enemies[0].BleedStacks, Is.EqualTo(0));
+            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(85));
+        }
+
+        [Test]
+        public void Bleed_StackingMidBleedResetsWithCurrentRemaining()
+        {
+            var bleed = CreateCard("bleed", 0, CardResourceType.ActionPoint,
+                CreateEffect(CardEffectType.Bleed, amount: 5));
+            var engine = CreateEngine(bleed, 8);
+            engine.StartBattle();
+
+            // Apply 5 bleed on turn 1
+            var card1 = engine.State.Deck.Hand.First(card => card.Spec.Id == "bleed");
+            engine.PlayCard(card1.InstanceId, "enemy");
+
+            // Turn 2: bleed ticks 5, stacks = 4; then apply 3 more → stacks = 7
+            engine.EndPlayerTurn();
+            engine.CompleteEnemyTurn();
+            Assert.That(engine.State.Enemies[0].BleedStacks, Is.EqualTo(4));
+            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(95));
+
+            // Apply 3 more bleed stacks mid-bleed (simulating playing another bleed card)
+            engine.State.Enemies[0].AddBleedStacks(3);
+            Assert.That(engine.State.Enemies[0].BleedStacks, Is.EqualTo(7));
+
+            // Turn 3: bleed ticks 7, stacks = 6
+            engine.EndPlayerTurn();
+            engine.CompleteEnemyTurn();
+            Assert.That(engine.State.Enemies[0].BleedStacks, Is.EqualTo(6));
+            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(88));
+
+            // Turn 4: bleed ticks 6, stacks = 5
+            engine.EndPlayerTurn();
+            engine.CompleteEnemyTurn();
+            Assert.That(engine.State.Enemies[0].BleedStacks, Is.EqualTo(5));
+            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(82));
+        }
+
+        [Test]
+        public void Bleed_KillsEnemyWhenDamageExceedsRemainingHealth()
+        {
+            var bleed = CreateCard("bleed", 0, CardResourceType.ActionPoint,
+                CreateEffect(CardEffectType.Bleed, amount: 20));
+            var engine = CreateEngine(bleed, 8);
+            engine.StartBattle();
+
+            var card = engine.State.Deck.Hand.First(c => c.Spec.Id == "bleed");
+            engine.PlayCard(card.InstanceId, "enemy");
+            Assert.That(engine.State.Enemies[0].BleedStacks, Is.EqualTo(20));
+
+            // Enemy has 100 HP, bleed deals 20 → 80, 19 → 61, 18 → 43, 17 → 26, 16 → 10, 15 → dead
+            // Turn 2: tick 20
+            engine.EndPlayerTurn();
+            engine.CompleteEnemyTurn();
+            Assert.That(engine.State.Enemies[0].IsDead, Is.False);
+            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(80));
+
+            // Turn 3: tick 19
+            engine.EndPlayerTurn();
+            engine.CompleteEnemyTurn();
+            Assert.That(engine.State.Enemies[0].IsDead, Is.False);
+            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(61));
+
+            // Turn 4: tick 18
+            engine.EndPlayerTurn();
+            engine.CompleteEnemyTurn();
+            Assert.That(engine.State.Enemies[0].IsDead, Is.False);
+            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(43));
+
+            // Turn 5: tick 17
+            engine.EndPlayerTurn();
+            engine.CompleteEnemyTurn();
+            Assert.That(engine.State.Enemies[0].IsDead, Is.False);
+            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(26));
+
+            // Turn 6: tick 16
+            engine.EndPlayerTurn();
+            engine.CompleteEnemyTurn();
+            Assert.That(engine.State.Enemies[0].IsDead, Is.False);
+            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(10));
+
+            // Turn 7: tick 15 → kill
+            engine.EndPlayerTurn();
+            engine.CompleteEnemyTurn();
+            Assert.That(engine.State.Enemies[0].IsDead, Is.True);
+            Assert.That(engine.State.Enemies[0].BleedStacks, Is.EqualTo(14));
+            Assert.That(engine.State.Phase, Is.EqualTo(CombatPhase.Victory));
+        }
+
+        [Test]
         public void BlockAndReflect_ModifyTheNextEnemyAttack()
         {
             var block = CreateCard("block", 0, CardResourceType.ActionPoint,
@@ -231,6 +368,56 @@ namespace KiKs.Combat.Tests
         }
 
         [Test]
+        public void ExecutionOnElite_DealsFortyDamageAndStunsOneTurn()
+        {
+            var engine = CreateEngine(CreateToughnessCard("break", 1, 5), 4, EnemyRank.Elite);
+            engine.StartBattle();
+            var card = engine.State.Deck.Hand[0];
+
+            Assert.That(engine.PlayCard(card.InstanceId, "enemy").Success, Is.True);
+            Assert.That(engine.State.Phase, Is.EqualTo(CombatPhase.AwaitingExecutionConfirmation));
+
+            Assert.That(engine.ConfirmExecution().Success, Is.True);
+            Assert.That(engine.State.Enemies[0].IsDead, Is.False);
+            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(60)); // 100 - 40
+            Assert.That(engine.State.Enemies[0].StunTurns, Is.EqualTo(1));
+            Assert.That(engine.State.Phase, Is.EqualTo(CombatPhase.PlayerInput));
+
+            // Next turn: enemy should be stunned (cannot attack)
+            engine.EndPlayerTurn();
+            var attackResult = engine.ResolveEnemyAttack("enemy", 20);
+            Assert.That(attackResult.Success, Is.True);
+            Assert.That(attackResult.Events.Any(e => e.Type == CombatEventType.EnemyActionSkipped), Is.True);
+            Assert.That(engine.State.Enemies[0].StunTurns, Is.EqualTo(0));
+            Assert.That(engine.State.Player.CurrentHealth, Is.EqualTo(30)); // No damage taken
+        }
+
+        [Test]
+        public void ExecutionOnBoss_DealsFortyDamageAndStunsOneTurn()
+        {
+            var engine = CreateEngine(CreateToughnessCard("break", 1, 5), 4, EnemyRank.Boss);
+            engine.StartBattle();
+            var card = engine.State.Deck.Hand[0];
+
+            Assert.That(engine.PlayCard(card.InstanceId, "enemy").Success, Is.True);
+            Assert.That(engine.State.Phase, Is.EqualTo(CombatPhase.AwaitingExecutionConfirmation));
+
+            Assert.That(engine.ConfirmExecution().Success, Is.True);
+            Assert.That(engine.State.Enemies[0].IsDead, Is.False);
+            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(60)); // 100 - 40
+            Assert.That(engine.State.Enemies[0].StunTurns, Is.EqualTo(1));
+            Assert.That(engine.State.Phase, Is.EqualTo(CombatPhase.PlayerInput));
+
+            // Next turn: boss should be stunned (cannot attack)
+            engine.EndPlayerTurn();
+            var attackResult = engine.ResolveEnemyAttack("enemy", 20);
+            Assert.That(attackResult.Success, Is.True);
+            Assert.That(attackResult.Events.Any(e => e.Type == CombatEventType.EnemyActionSkipped), Is.True);
+            Assert.That(engine.State.Enemies[0].StunTurns, Is.EqualTo(0));
+            Assert.That(engine.State.Player.CurrentHealth, Is.EqualTo(30)); // No damage taken
+        }
+
+        [Test]
         public void ActionPointModifier_ChangesNextTurnRestoredAmount()
         {
             var engine = CreateEngine(CreateDamageCard("attack", 1, 1));
@@ -239,19 +426,19 @@ namespace KiKs.Combat.Tests
             Assert.That(engine.State.Player.CurrentActionPoints, Is.EqualTo(2));
         }
 
-        private static CombatEngine CreateEngine(CardSpec spec, int cardCount = 4)
+        private static CombatEngine CreateEngine(CardSpec spec, int cardCount = 4, EnemyRank enemyRank = EnemyRank.Minion)
         {
             var specs = new List<CardSpec>();
             for (var i = 0; i < cardCount; i++) specs.Add(spec);
-            return CreateEngine(specs);
+            return CreateEngine(specs, enemyRank);
         }
 
-        private static CombatEngine CreateEngine(IEnumerable<CardSpec> specs)
+        private static CombatEngine CreateEngine(IEnumerable<CardSpec> specs, EnemyRank enemyRank = EnemyRank.Minion)
         {
             var cards = specs.Select((spec, index) =>
                 new CardInstance(spec.Id + "#" + index, spec)).ToList();
             var player = new CombatantState("player", "Player", CombatantSide.Player, EnemyRank.None, 30, 0);
-            var enemy = new CombatantState("enemy", "Enemy", CombatantSide.Enemy, EnemyRank.Minion, 100, 5);
+            var enemy = new CombatantState("enemy", "Enemy", CombatantSide.Enemy, enemyRank, 100, 5);
             return new CombatEngine(new BattleState(
                 CombatRules.CreateDefault(),
                 player,
@@ -270,20 +457,8 @@ namespace KiKs.Combat.Tests
                 CardEffectType.Damage,
                 new UpgradeableNumber(baseDamage, upgradedDamage),
                 UpgradeableNumber.One,
-                UpgradeableNumber.Zero,
-                UpgradeableNumber.Zero,
-                UpgradeableNumber.Zero,
-                DamageType.Normal,
                 ValueUnit.Points,
-                0,
-                false,
-                1,
-                string.Empty,
-                0,
-                0,
-                CardResourceType.ActionPoint,
-                string.Empty,
-                string.Empty));
+                1));
         }
 
         private static CardSpec CreateToughnessCard(string id, int cost, int amount)
@@ -292,20 +467,8 @@ namespace KiKs.Combat.Tests
                 CardEffectType.ToughnessDamage,
                 new UpgradeableNumber(amount, null),
                 UpgradeableNumber.One,
-                UpgradeableNumber.Zero,
-                UpgradeableNumber.Zero,
-                UpgradeableNumber.Zero,
-                DamageType.Normal,
                 ValueUnit.Points,
-                0,
-                false,
-                1,
-                string.Empty,
-                0,
-                0,
-                CardResourceType.ActionPoint,
-                string.Empty,
-                string.Empty));
+                1));
         }
 
         private static CardSpec CreateCard(
@@ -335,20 +498,8 @@ namespace KiKs.Combat.Tests
                 type,
                 new UpgradeableNumber(amount, null),
                 UpgradeableNumber.One,
-                UpgradeableNumber.Zero,
-                UpgradeableNumber.Zero,
-                UpgradeableNumber.Zero,
-                DamageType.Normal,
                 ValueUnit.Points,
-                0,
-                false,
-                multiplier,
-                string.Empty,
-                0,
-                0,
-                CardResourceType.ActionPoint,
-                string.Empty,
-                string.Empty);
+                multiplier);
         }
     }
 }

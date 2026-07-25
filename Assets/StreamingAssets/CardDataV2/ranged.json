@@ -8,6 +8,7 @@
       "name": { "zhCN": "手枪", "en": "pistol" },
       "category": "ranged",
       "copies": 2,
+      "image": "Art/Cards/pistol.png",
       "cost": { "resource": "action_point", "amount": 1 },
       "special": false,
       "effects": [
@@ -21,6 +22,7 @@
       "name": { "zhCN": "狙击枪", "en": "sniper rifle" },
       "category": "ranged",
       "copies": 1,
+      "image": "Art/Cards/sniperrifle.png",
       "cost": { "resource": "action_point", "amount": 2 },
       "special": false,
       "effects": [

@@ -1,10 +1,8 @@
 {
-  "name": "KiKs.Combat",
-  "rootNamespace": "KiKs.Combat",
+  "name": "DOTween.Modules",
+  "rootNamespace": "DG.Tweening",
   "references": [
-    "Unity.TextMeshPro",
-    "KiKs.UI",
-    "DOTween.Modules"
+    "UnityEngine.UI"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

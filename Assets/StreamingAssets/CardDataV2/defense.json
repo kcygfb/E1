@@ -8,6 +8,7 @@
       "name": { "zhCN": "反伤", "en": "counter" },
       "category": "defense",
       "copies": 2,
+      "image": "Art/Cards/reflect.png",
       "cost": { "resource": "action_point", "amount": 1 },
       "special": false,
       "effects": [
@@ -21,6 +22,7 @@
       "name": { "zhCN": "格挡", "en": "block" },
       "category": "defense",
       "copies": 2,
+      "image": "Art/Cards/block.png",
       "cost": { "resource": "action_point", "amount": 1 },
       "special": false,
       "effects": [

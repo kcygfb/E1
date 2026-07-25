@@ -1,9 +1,9 @@
 {
-  "name": "KiKs.Combat",
-  "rootNamespace": "KiKs.Combat",
+  "name": "KiKs.UI",
+  "rootNamespace": "KiKs.UI",
   "references": [
+    "UnityEngine.UI",
     "Unity.TextMeshPro",
-    "KiKs.UI",
     "DOTween.Modules"
   ],
   "includePlatforms": [],

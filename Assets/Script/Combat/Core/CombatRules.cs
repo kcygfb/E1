@@ -12,6 +12,7 @@ namespace KiKs.Combat
         public int EliteExecutionDamage { get; }
         public int EliteStunTurns { get; }
         public int BossExecutionDamage { get; }
+        public int BossStunTurns { get; }
         public ToughnessRestoreMode RestoreMode { get; }
         public int FixedToughnessRestoreAmount { get; }
 
@@ -32,6 +33,7 @@ namespace KiKs.Combat
             int eliteExecutionDamage,
             int eliteStunTurns,
             int bossExecutionDamage,
+            int bossStunTurns,
             ToughnessRestoreMode toughnessRestoreMode,
             int fixedToughnessRestoreAmount,
             int startingMana,
@@ -50,6 +52,7 @@ namespace KiKs.Combat
             if (eliteExecutionDamage < 0) throw new ArgumentOutOfRangeException(nameof(eliteExecutionDamage));
             if (eliteStunTurns < 0) throw new ArgumentOutOfRangeException(nameof(eliteStunTurns));
             if (bossExecutionDamage < 0) throw new ArgumentOutOfRangeException(nameof(bossExecutionDamage));
+            if (bossStunTurns < 0) throw new ArgumentOutOfRangeException(nameof(bossStunTurns));
             if (fixedToughnessRestoreAmount < 0) throw new ArgumentOutOfRangeException(nameof(fixedToughnessRestoreAmount));
             if (maximumMana < 0) throw new ArgumentOutOfRangeException(nameof(maximumMana));
             if (startingMana < 0 || startingMana > maximumMana) throw new ArgumentOutOfRangeException(nameof(startingMana));
@@ -67,6 +70,7 @@ namespace KiKs.Combat
             EliteExecutionDamage = eliteExecutionDamage;
             EliteStunTurns = eliteStunTurns;
             BossExecutionDamage = bossExecutionDamage;
+            BossStunTurns = bossStunTurns;
             RestoreMode = toughnessRestoreMode;
             FixedToughnessRestoreAmount = fixedToughnessRestoreAmount;
             StartingMana = startingMana;
@@ -91,7 +95,7 @@ namespace KiKs.Combat
         {
             return new CombatRules(
                 3, 4, 10, 5,
-                0, 0, 0,
+                40, 1, 40, 1,
                 ToughnessRestoreMode.Full, 0,
                 5, 5, 1, 1, 1,
                 3, 0, 1);

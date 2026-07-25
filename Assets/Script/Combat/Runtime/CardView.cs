@@ -1,8 +1,10 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 using DG.Tweening;
-using System.Reflection;
 using TMPro;
+using KiKs.UI;
+using System.Reflection;
 
 namespace KiKs.Combat
 {
@@ -21,6 +23,7 @@ namespace KiKs.Combat
 
         [Header("Card UI")]
         [SerializeField] private TMP_Text cardNameText;
+        [SerializeField] private Image cardArtImage;
 
         private RectTransform _rect;
         private float _lastDragEndTime;
@@ -59,20 +62,19 @@ namespace KiKs.Combat
 
             // 根据卡牌类型设置高光颜色
             SyncCardInteraction();
-            var components = GetComponents<MonoBehaviour>();
-            foreach (var comp in components)
-            {
-                if (comp == null) continue;
-                if (comp.GetType().Name != "CardInteraction") continue;
-                var method = comp.GetType().GetMethod("SetGlowColorByCategory");
-                method?.Invoke(comp, new object[] { spec.Category });
-            }
+            GetComponent<CardInteraction>()?.SetGlowColorByCategory(spec.Category);
+            if (cardNameText != null)
+                cardNameText.gameObject.SetActive(false);
+
+            EnsureCardArt();
+            RefreshCardArt();
         }
 
         public void SetUpgraded(bool isUpgraded)
         {
             IsUpgraded = isUpgraded;
             RefreshCardName();
+            RefreshCardArt();
         }
 
         private void RefreshCardName()
@@ -92,6 +94,44 @@ namespace KiKs.Combat
             _remainingShots--;
             RefreshCardName();
             return _remainingShots <= 0;
+        }
+
+        private void EnsureCardArt()
+        {
+            if (cardArtImage != null)
+                return;
+
+            var existing = transform.Find("CardArt");
+            if (existing != null)
+            {
+                cardArtImage = existing.GetComponent<Image>();
+                return;
+            }
+
+            var artGO = new GameObject("CardArt", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            artGO.transform.SetParent(transform, false);
+            artGO.transform.SetAsFirstSibling();
+
+            var rt = artGO.GetComponent<RectTransform>();
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.offsetMin = Vector2.zero;
+            rt.offsetMax = Vector2.zero;
+
+            cardArtImage = artGO.GetComponent<Image>();
+            cardArtImage.preserveAspect = true;
+        }
+
+        private void RefreshCardArt()
+        {
+            if (Spec == null || string.IsNullOrEmpty(Spec.ImagePath))
+                return;
+
+            var path = IsUpgraded
+                ? CardImageLoader.ResolveUpgradedPath(Spec.ImagePath) ?? Spec.ImagePath
+                : Spec.ImagePath;
+
+            CardImageLoader.ApplyToImage(cardArtImage, path);
         }
 
         public void OnPointerClick(PointerEventData eventData)
@@ -152,30 +192,22 @@ namespace KiKs.Combat
 
         public void SyncCardInteraction()
         {
-            var components = GetComponents<MonoBehaviour>();
-            foreach (var comp in components)
-            {
-                if (comp == null) continue;
-                if (comp.GetType().Name != "CardInteraction") continue;
-                SetField(comp, "_originPos", _rect.localPosition);
-                SetField(comp, "_originScale", _rect.localScale);
-            }
-        }
-
-        private static void SetField(object obj, string name, object value)
-        {
-            var f = obj.GetType().GetField(name, BindingFlags.NonPublic | BindingFlags.Instance);
-            f?.SetValue(obj, value);
+            var interaction = GetComponent<CardInteraction>();
+            if (interaction == null) return;
+            // Private-field access kept as typed reflection until CardInteraction exposes
+            // a public UpdateOrigin() method in its own assembly.
+            typeof(CardInteraction).GetField("_originPos",
+                    BindingFlags.NonPublic | BindingFlags.Instance)
+                ?.SetValue(interaction, _rect.localPosition);
+            typeof(CardInteraction).GetField("_originScale",
+                    BindingFlags.NonPublic | BindingFlags.Instance)
+                ?.SetValue(interaction, _rect.localScale);
         }
 
         /// <summary>反射检查是否有任意 Draggable 正在拖拽（跨 asmdef，避免编译依赖）</summary>
         private static bool IsAnyDraggableActive()
         {
-            var type = System.Type.GetType("KiKs.UI.Draggable, Assembly-CSharp");
-            if (type == null) return false;
-            var prop = type.GetProperty("AnyDragging", BindingFlags.Public | BindingFlags.Static);
-            if (prop == null) return false;
-            return (bool)prop.GetValue(null);
+            return Draggable.AnyDragging;
         }
 
         public void PlayDrawAnimation(Vector2 deckPos, Vector2 targetPos, float duration, System.Action onComplete)
@@ -201,24 +233,12 @@ namespace KiKs.Combat
 
             _rect.DOKill();
 
-            var components = GetComponents<MonoBehaviour>();
-            foreach (var comp in components)
-            {
-                if (comp == null) continue;
-                var name = comp.GetType().Name;
-                if (name == "CardInteraction" || name == "Draggable")
-                    comp.enabled = false;
-            }
+            var interaction = GetComponent<CardInteraction>();
+            var draggable = GetComponent<Draggable>();
+            if (interaction != null) interaction.enabled = false;
+            if (draggable != null) draggable.enabled = false;
 
-            foreach (var comp in components)
-            {
-                if (comp == null) continue;
-                if (comp.GetType().Name == "CardInteraction")
-                {
-                    var method = comp.GetType().GetMethod("DestroyGlow");
-                    method?.Invoke(comp, null);
-                }
-            }
+            interaction?.DestroyGlow();
 
             var seq = DOTween.Sequence();
             seq.AppendInterval(5f / 60f);
