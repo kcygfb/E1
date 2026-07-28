@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using KiKs.UI;
 
 namespace KiKs.Combat
 {
@@ -341,7 +342,15 @@ namespace KiKs.Combat
             RefreshSelectionUI();
             BattleSession.SetSelectedDeck(selectedCardIds);
             Debug.Log($"[CardSelectionUI] Starting battle with {selectedCardIds.Count} cards.");
-            StartCoroutine(LoadBattleScene());
+
+            if (TransitionEffect.Instance != null)
+            {
+                TransitionEffect.Instance.TransitionTo(BATTLE_SCENE_NAME);
+            }
+            else
+            {
+                StartCoroutine(LoadBattleScene());
+            }
         }
 
         private IEnumerator LoadBattleScene()
