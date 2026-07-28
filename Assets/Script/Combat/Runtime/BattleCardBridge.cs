@@ -39,14 +39,13 @@ namespace KiKs.Combat
             }
         }
 
-        /// <summary>反射检查是否有任意 Draggable 正在拖拽（魔手拖拽时保持魔法姿态）</summary>
+        /// <summary>检查是否有任意 Draggable 正在拖拽（魔手拖拽时保持魔法姿态）</summary>
         private static bool IsAnyDraggableActive()
         {
-            var type = System.Type.GetType("KiKs.UI.Draggable, Assembly-CSharp");
-            if (type == null) return false;
-            var prop = type.GetProperty("AnyDragging", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
-            if (prop == null) return false;
-            return (bool)prop.GetValue(null);
+            var prop = typeof(KiKs.UI.Draggable).GetProperty(
+                "AnyDragging",
+                System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+            return prop != null && (bool)prop.GetValue(null);
         }
 
         private IEnumerator WaitAndDrawInitialHand()
