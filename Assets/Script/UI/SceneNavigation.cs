@@ -10,7 +10,10 @@ namespace KiKs.UI
     {
         public void LoadCafeScene()
         {
-            SceneManager.LoadScene("Cafe");
+            if (TransitionEffect.Instance != null)
+                TransitionEffect.Instance.TransitionTo("Cafe");
+            else
+                SceneManager.LoadScene("Cafe");
         }
     }
 }

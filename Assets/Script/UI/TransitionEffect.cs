@@ -63,8 +63,16 @@ namespace KiKs.UI
         [SerializeField] private Ease sliderEase = Ease.InOutCubic;
         [SerializeField] private Ease alphaEase = Ease.OutQuad;
 
+        [Header("入场设置")]
+        [SerializeField] private bool playEntranceAfterLoad = true;
+        [SerializeField] private float entranceSliderDuration = 1.2f;
+        [SerializeField] private float entranceAlphaDuration = 0.4f;
+        [SerializeField] private Ease entranceSliderEase = Ease.InOutCubic;
+        [SerializeField] private Ease entranceAlphaEase = Ease.OutQuad;
+
         private Sequence _sequence;
         private Material _runtimeMat;
+        private Action _pendingEntranceComplete;
 
         public bool IsPlaying => _sequence != null && _sequence.IsActive() && _sequence.IsPlaying();
 
@@ -76,6 +84,21 @@ namespace KiKs.UI
                 return;
             }
             Instance = this;
+            // 脱离父级，成为 root GameObject（DontDestroyOnLoad 要求）
+            // 注意：SetParent(null) 会导致 Canvas 自动切到 WorldSpace，需要记录并在之后恢复
+            if (transform.parent != null)
+            {
+                var cv = GetComponent<Canvas>();
+                var savedRenderMode = cv != null ? cv.renderMode : RenderMode.ScreenSpaceOverlay;
+                var savedSortingOrder = cv != null ? cv.sortingOrder : 100;
+                transform.SetParent(null);
+                if (cv != null)
+                {
+                    cv.renderMode = savedRenderMode;
+                    cv.sortingOrder = savedSortingOrder;
+                    cv.overrideSorting = true;
+                }
+            }
             DontDestroyOnLoad(gameObject);
 
             var sourceMat = transitionMaterial != null ? transitionMaterial : transitionImage?.material;
@@ -102,13 +125,22 @@ namespace KiKs.UI
             TransitionTo(sceneName, null, onComplete);
         }
 
-        /// <summary>转场并加载场景（自定义参数）。</summary>
+        /// <summary>转场并加载场景（自定义参数）。出场动画完成后加载场景，场景加载后自动播放入场动画。</summary>
         public void TransitionTo(string sceneName, TransitionConfig config, Action onComplete = null)
         {
             Play(config, () =>
             {
                 onComplete?.Invoke();
-                SceneManager.LoadScene(sceneName);
+                if (playEntranceAfterLoad)
+                {
+                    _pendingEntranceComplete = null;
+                    SceneManager.sceneLoaded += OnSceneLoadedEntrance;
+                    SceneManager.LoadScene(sceneName);
+                }
+                else
+                {
+                    SceneManager.LoadScene(sceneName);
+                }
             });
         }
 
@@ -215,6 +247,64 @@ namespace KiKs.UI
                 var c = centerImage.color; c.a = 0f; centerImage.color = c;
                 centerImage.transform.localScale = Vector3.zero;
             }
+        }
+
+        // ─── 入场动画 ───
+
+        private void OnSceneLoadedEntrance(Scene scene, LoadSceneMode mode)
+        {
+            SceneManager.sceneLoaded -= OnSceneLoadedEntrance;
+            if (this == null) return;
+            // 延迟一帧确保新场景 UI 初始化完成
+            System.Collections.IEnumerator DelayEntrance()
+            {
+                yield return null;
+                PlayEntrance(_pendingEntranceComplete);
+            }
+            StartCoroutine(DelayEntrance());
+        }
+
+        /// <summary>播放入场动画：从遮罩状态反向溶解，揭示新场景。</summary>
+        public void PlayEntrance(Action onComplete = null)
+        {
+            _sequence?.Kill();
+
+            var mat = _runtimeMat;
+            if (mat == null) { Debug.LogError("[TransitionEffect] material not found for entrance"); return; }
+
+            // 当前处于出场结束状态: alpha=1, slider=target
+            var startSlider = mat.GetFloat("_Slider");
+            var startAlpha = mat.GetFloat("_Trans_After_Alpha");
+
+            _sequence = DOTween.Sequence();
+
+            // Phase 1: 反向 slider (target→0)
+            var slider = startSlider;
+            _sequence.Append(DOTween.To(
+                () => slider, v => { slider = v; mat.SetFloat("_Slider", v); },
+                0f, entranceSliderDuration).SetEase(entranceSliderEase));
+
+            // Phase 2: 中间图片消失 (和 slider 并行)
+            if (centerImage != null && centerImage.gameObject.activeSelf)
+            {
+                _sequence.Join(centerImage.DOFade(0f, entranceAlphaDuration));
+                _sequence.Join(centerImage.transform.DOScale(0f, entranceAlphaDuration).SetEase(Ease.InBack));
+            }
+
+            // Phase 3: alpha 1→0 (揭示新场景)
+            var alpha = startAlpha;
+            _sequence.Append(DOTween.To(
+                () => alpha, v => { alpha = v; mat.SetFloat("_Trans_After_Alpha", v); },
+                0f, entranceAlphaDuration).SetEase(entranceAlphaEase));
+
+            _sequence.OnComplete(() =>
+            {
+                _sequence = null;
+                mat.SetFloat("_Trans_After_Alpha", 0f);
+                mat.SetFloat("_Slider", 0f);
+                if (centerImage != null) centerImage.gameObject.SetActive(false);
+                onComplete?.Invoke();
+            });
         }
     }
 }
