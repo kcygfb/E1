@@ -14,13 +14,17 @@
   "steps": [
     {
       "id": "Grind",
+      "displayName": "研磨咖啡豆",
       "resourceId": "CoffeeBean",
-      "amount": 1
+      "amount": 1,
+      "qteType": "RotationStop"
     },
     {
       "id": "PourOver",
+      "displayName": "手冲注水",
       "resourceId": "",
-      "amount": 0
+      "amount": 0,
+      "qteType": "HoldRelease"
     }
   ]
 }

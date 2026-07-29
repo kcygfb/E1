@@ -1004,10 +1004,11 @@ MonoBehaviour:
   transitionImage: {fileID: 410360477}
   transitionMaterial: {fileID: 0}
   centerImage: {fileID: 1297780568}
-  centerImageScale: 1
+  centerImageScale: 2
   alphaDuration: 0.5
   centerFadeInDuration: 0.3
   sliderDuration: 2
+  sliderTarget: 2
   endHoldDuration: 0.2
   sliderEase: 17
   alphaEase: 6

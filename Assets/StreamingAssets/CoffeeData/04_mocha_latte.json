@@ -22,28 +22,38 @@
   "steps": [
     {
       "id": "Grind",
+      "displayName": "研磨咖啡豆",
       "resourceId": "CoffeeBean",
-      "amount": 1
+      "amount": 1,
+      "qteType": "RotationStop"
     },
     {
       "id": "Extract",
+      "displayName": "萃取浓缩",
       "resourceId": "",
-      "amount": 0
+      "amount": 0,
+      "qteType": "DropStop"
     },
     {
       "id": "AddMilk",
+      "displayName": "加入牛奶",
       "resourceId": "Milk",
-      "amount": 1
+      "amount": 1,
+      "qteType": ""
     },
     {
       "id": "SteamMilk",
+      "displayName": "打发奶泡",
       "resourceId": "",
-      "amount": 0
+      "amount": 0,
+      "qteType": "RhythmTap"
     },
     {
       "id": "AddSugar",
+      "displayName": "加入糖浆",
       "resourceId": "Sugar",
-      "amount": 1
+      "amount": 1,
+      "qteType": ""
     }
   ]
 }

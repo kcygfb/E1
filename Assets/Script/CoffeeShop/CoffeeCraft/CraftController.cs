@@ -27,9 +27,18 @@ public class CraftController : MonoBehaviour
     [SerializeField] private OrderSystem orderSystem;
     [SerializeField] private CoffeeMachine coffeeMachine;
 
+    [Header("QTE Controllers (拖到 Canvas 下的 QTE GameObject)")]
+    [SerializeField] private RhythmTapQTE rhythmTapQTE;
+    [SerializeField] private HoldReleaseQTE holdReleaseQTE;
+    [SerializeField] private RapidTapQTE rapidTapQTE;
+    [SerializeField] private RotationStopQTE rotationStopQTE;
+    [SerializeField] private DropStopQTE dropStopQTE;
+
     private CoffeeData selectedCoffee;
     private CraftStep[] currentSteps;
     private int currentStepIndex;
+    private QTEScoreResult _qteScore;
+    private bool _waitingForQTE;
 
     private readonly Dictionary<string, Button> _stepButtons = new();
 
@@ -57,6 +66,18 @@ public class CraftController : MonoBehaviour
 
         if (backButton != null)
             backButton.onClick.AddListener(OnBackClicked);
+
+        // 注册 QTE 完成回调
+        if (rhythmTapQTE != null)
+            rhythmTapQTE.OnQTEDone.AddListener(r => OnQTEComplete(r));
+        if (holdReleaseQTE != null)
+            holdReleaseQTE.OnQTEDone.AddListener(r => OnQTEComplete(r));
+        if (rapidTapQTE != null)
+            rapidTapQTE.OnQTEDone.AddListener(r => OnQTEComplete(r));
+        if (rotationStopQTE != null)
+            rotationStopQTE.OnQTEDone.AddListener(r => OnQTEComplete(r));
+        if (dropStopQTE != null)
+            dropStopQTE.OnQTEDone.AddListener(r => OnQTEComplete(r));
     }
 
     public void OnCoffeeSelected(CoffeeData coffee)
@@ -70,6 +91,8 @@ public class CraftController : MonoBehaviour
         selectedCoffee = coffee;
         currentStepIndex = 0;
         currentSteps = coffee.Steps;
+        _qteScore = new QTEScoreResult();
+        _waitingForQTE = false;
 
         if (coffeeListGroup != null) coffeeListGroup.SetActive(false);
         if (coffeeMakeGroup != null) coffeeMakeGroup.SetActive(true);
@@ -84,6 +107,7 @@ public class CraftController : MonoBehaviour
     {
         if (selectedCoffee == null || currentSteps == null) return;
         if (currentStepIndex >= currentSteps.Length) return;
+        if (_waitingForQTE) return;
 
         var step = currentSteps[currentStepIndex];
         if (step.id != stepId) return;
@@ -98,8 +122,59 @@ public class CraftController : MonoBehaviour
             }
         }
 
+        // 启动 QTE（如果有配置）
+        if (!string.IsNullOrEmpty(step.qteType))
+        {
+            _waitingForQTE = true;
+            LaunchQTE(step.qteType, step.id);
+        }
+        else
+        {
+            // 无 QTE 的步骤直接推进
+            AdvanceStep();
+        }
+    }
+
+    private void LaunchQTE(string qteType, string stepId)
+    {
+        QTEBase qte = qteType switch
+        {
+            "RhythmTap" => rhythmTapQTE,
+            "HoldRelease" => holdReleaseQTE,
+            "RapidTap" => rapidTapQTE,
+            "RotationStop" => rotationStopQTE,
+            "DropStop" => dropStopQTE,
+            _ => null
+        };
+
+        if (qte == null)
+        {
+            Debug.LogWarning($"[CraftController] QTE type '{qteType}' not assigned, skipping.");
+            AdvanceStep();
+            return;
+        }
+
+        string displayName = currentSteps[currentStepIndex].displayName;
+        Debug.Log($"[CraftController] Launch QTE: {qteType} for step {stepId} ({displayName})");
+        qte.Show(stepId, displayName);
+    }
+
+    private void OnQTEComplete(QTERating rating)
+    {
+        if (!_waitingForQTE || selectedCoffee == null || currentSteps == null) return;
+
+        var step = currentSteps[currentStepIndex];
+        _qteScore.Record(step.id, rating);
+        Debug.Log($"[CraftController] QTE result for {step.id}: {rating}");
+
+        _waitingForQTE = false;
+        AdvanceStep();
+    }
+
+    private void AdvanceStep()
+    {
         currentStepIndex++;
-        Debug.Log($"[CraftController] Step {currentStepIndex}/{currentSteps.Length} ({step.id}) done");
+        Debug.Log($"[CraftController] Step {currentStepIndex}/{currentSteps.Length} done");
         UpdateButtonStates();
     }
 
@@ -112,6 +187,9 @@ public class CraftController : MonoBehaviour
             if (kvp.Value != null)
                 kvp.Value.interactable = false;
         }
+
+        // QTE 进行中不亮任何按钮
+        if (_waitingForQTE) return;
 
         // 交付按钮：全步骤完成才亮
         if (deliverBtn != null)
@@ -135,6 +213,15 @@ public class CraftController : MonoBehaviour
 
         if (orderSystem == null)
             orderSystem = FindFirstObjectByType<OrderSystem>();
+
+        if (orderSystem != null && orderSystem.HasActiveOrder)
+        {
+            // 将 QTE 评分附加到订单
+            var order = orderSystem.ActiveOrder;
+            if (order != null && _qteScore != null)
+                order.QTEScore = _qteScore;
+        }
+
         if (orderSystem != null)
             orderSystem.TryServeCoffee(selectedCoffee);
         else
@@ -150,6 +237,8 @@ public class CraftController : MonoBehaviour
         selectedCoffee = null;
         currentSteps = null;
         currentStepIndex = 0;
+        _qteScore = null;
+        _waitingForQTE = false;
 
         GameEvent.Emit("CraftViewChanged", "Menu");
     }

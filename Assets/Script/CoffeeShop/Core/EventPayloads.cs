@@ -17,6 +17,9 @@ public class OrderTicket
     public Sprite TicketSprite { get; }
     public CustomerController Owner { get; }
 
+    /// <summary>QTE 评分结果，由 CraftController 在交付时填充</summary>
+    public QTEScoreResult QTEScore { get; set; }
+
     public OrderTicket(string orderId, string npcId, string npcName,
         string coffeeId, string coffeeName, int coffeePrice,
         Sprite ticketSprite, CustomerController owner)

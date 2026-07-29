@@ -12,8 +12,12 @@ public class RecipeEntry
 public class CraftStep
 {
     public string id;
+    /// <summary>步骤显示名称（中文），如 "研磨咖啡豆"</summary>
+    public string displayName;
     public string resourceId;
     public int amount;
+    /// <summary>QTE 类型: "RhythmTap" | "HoldRelease" | "RapidTap" | "RotationStop" | "DropStop" | "" (none)</summary>
+    public string qteType;
 }
 
 [CreateAssetMenu(fileName = "CoffeeData", menuName = "Game/Coffee Data")]
@@ -74,8 +78,10 @@ public class CoffeeData : ScriptableObject
                 steps[i] = new CraftStep
                 {
                     id = json.steps[i].id,
+                    displayName = json.steps[i].displayName ?? "",
                     resourceId = json.steps[i].resourceId ?? "",
-                    amount = json.steps[i].amount
+                    amount = json.steps[i].amount,
+                    qteType = json.steps[i].qteType ?? ""
                 };
             }
         }

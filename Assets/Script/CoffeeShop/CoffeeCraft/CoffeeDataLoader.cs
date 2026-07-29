@@ -14,8 +14,10 @@ public class RecipeEntryJson
 public class CraftStepJson
 {
     public string id;
+    public string displayName;
     public string resourceId;
     public int amount;
+    public string qteType;
 }
 
 [Serializable]

@@ -16,7 +16,21 @@ public class Rewarder : MonoBehaviour
     {
         if (payload is not OrderTicket order) return;
         if (InventorySystem.Instance == null) return;
-        InventorySystem.Instance.Add("gold", order.CoffeePrice);
-        Debug.Log($"[Rewarder] Gold +{order.CoffeePrice} from {order.CoffeeName}");
+
+        float multiplier = 1f;
+        bool allPerfect = false;
+
+        if (order.QTEScore != null)
+        {
+            multiplier = order.QTEScore.GetMultiplier();
+            allPerfect = order.QTEScore.IsAllPerfect();
+            if (allPerfect) multiplier *= 1.5f;
+        }
+
+        int gold = Mathf.RoundToInt(order.CoffeePrice * multiplier);
+        InventorySystem.Instance.Add("gold", gold);
+
+        string bonusTag = allPerfect ? " [ALL PERFECT!]" : "";
+        Debug.Log($"[Rewarder] Gold +{gold} ({multiplier:F1}x) from {order.CoffeeName}{bonusTag}");
     }
 }
