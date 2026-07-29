@@ -6,6 +6,7 @@ public class PhaseDisplayUI : MonoBehaviour
     [SerializeField] private Text displayText;
 
     private bool dialogueActive;
+    private bool hasOrder;
     private DayPhase currentPhase = DayPhase.MorningCheck;
 
     private void OnEnable()
@@ -14,6 +15,8 @@ public class PhaseDisplayUI : MonoBehaviour
         GameEvent.On("CraftViewChanged", OnCraftViewChanged);
         GameEvent.On("DialogueRequested", OnDialogueRequested);
         GameEvent.On("DialogueEnded", OnDialogueEnded);
+        GameEvent.On("OrderCreated", OnOrderCreated);
+        GameEvent.On("OrderCompleted", OnOrderCompleted);
     }
 
     private void OnDisable()
@@ -22,12 +25,15 @@ public class PhaseDisplayUI : MonoBehaviour
         GameEvent.Off("CraftViewChanged", OnCraftViewChanged);
         GameEvent.Off("DialogueRequested", OnDialogueRequested);
         GameEvent.Off("DialogueEnded", OnDialogueEnded);
+        GameEvent.Off("OrderCreated", OnOrderCreated);
+        GameEvent.Off("OrderCompleted", OnOrderCompleted);
     }
 
     private void OnPhaseChanged(object payload)
     {
         if (payload is not PhaseChangedPayload p) return;
         currentPhase = p.Phase;
+        hasOrder = false; // 新阶段重置
 
         switch (p.Phase)
         {
@@ -55,6 +61,18 @@ public class PhaseDisplayUI : MonoBehaviour
         }
     }
 
+    private void OnOrderCreated(object payload)
+    {
+        hasOrder = true;
+        UpdateVisibility();
+    }
+
+    private void OnOrderCompleted(object payload)
+    {
+        hasOrder = false;
+        UpdateVisibility();
+    }
+
     private void OnDialogueRequested(object payload)
     {
         dialogueActive = true;
@@ -69,9 +87,18 @@ public class PhaseDisplayUI : MonoBehaviour
 
     private void UpdateVisibility()
     {
-        bool shouldShow = currentPhase != DayPhase.Shop || !dialogueActive;
-        if (displayText != null)
-            displayText.enabled = shouldShow;
+        // Shop阶段：有订单才显示Menu文本
+        if (currentPhase == DayPhase.Shop)
+        {
+            bool shouldShow = hasOrder && !dialogueActive;
+            if (displayText != null)
+                displayText.enabled = shouldShow;
+        }
+        else
+        {
+            if (displayText != null)
+                displayText.enabled = !dialogueActive;
+        }
     }
 
     private void SetText(string text)

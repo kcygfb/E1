@@ -6,38 +6,43 @@ using DG.Tweening;
 namespace KiKs.UI
 {
     /// <summary>
-    /// 鼠标悬停时显示一个选中框图片，离开时隐藏。
-    /// 挂到按钮上，在 Inspector 里把选中框的 Image 拖到 selectionFrame 字段即可。
+    /// 通用按钮动效：悬停缩放 + 按压反馈。
+    /// 挂到任意带 RectTransform 的对象上即可生效，零配置。
+    /// 可选：选中框帧动画（拖入 selectionFrame + animator 即可启用）。
     /// </summary>
-    public class ButtonHoverHighlight : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IPointerUpHandler
+    [RequireComponent(typeof(RectTransform))]
+    public class ButtonFeedback : MonoBehaviour,
+        IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IPointerUpHandler
     {
-        [Header("选中框")]
-        [SerializeField] private Image selectionFrame;
-        [SerializeField] private Animator animator;
-        [SerializeField] private string playStateName = "选中框";
-
-        [Header("淡入淡出")]
-        [SerializeField] private float fadeInDuration = 0.12f;
-        [SerializeField] private float fadeOutDuration = 0.08f;
-        [SerializeField] private Ease ease = Ease.OutCubic;
-        [Tooltip("播放速度倍率，1=正常速度")]
-        [SerializeField] private float playSpeed = 1f;
-
-        [Header("缩放")]
-        [Tooltip("悬停时的缩放倍率")]
+        [Header("悬停缩放")]
         [SerializeField] private float hoverScale = 1.1f;
-        [SerializeField] private float scaleDuration = 0.15f;
-        [Tooltip("按下时的额外缩放")]
+        [SerializeField] private float hoverDuration = 0.15f;
+
+        [Header("按压缩放")]
         [SerializeField] private float pressScale = 0.9f;
         [SerializeField] private float pressDuration = 0.08f;
 
-        private Tween _currentFade;
-        private Tween _currentScale;
+        [Header("缓动")]
+        [SerializeField] private Ease ease = Ease.OutCubic;
+
+        [Header("选中框（可选）")]
+        [Tooltip("不填则只走缩放动效")]
+        [SerializeField] private Image selectionFrame;
+        [SerializeField] private Animator animator;
+        [SerializeField] private string playStateName = "选中框";
+        [Tooltip("帧动画播放速度倍率")]
+        [SerializeField] private float playSpeed = 1f;
+        [SerializeField] private float fadeInDuration = 0.12f;
+        [SerializeField] private float fadeOutDuration = 0.08f;
+
+        private Tween _scaleTween;
+        private Tween _fadeTween;
         private Vector3 _originalScale;
-        private bool _isPointerDown;
 
         private void Awake()
         {
+            _originalScale = transform.localScale;
+
             if (selectionFrame != null)
             {
                 var c = selectionFrame.color;
@@ -49,63 +54,60 @@ namespace KiKs.UI
                 animator.Play(playStateName, 0, 0f);
                 animator.speed = 0f;
             }
-            _originalScale = transform.localScale;
         }
 
         public void OnPointerEnter(PointerEventData eventData)
         {
             if (!enabled) return;
-            _isPointerDown = false;
+            ScaleTo(_originalScale * hoverScale, hoverDuration);
+
             if (selectionFrame != null)
             {
-                _currentFade?.Kill();
-                _currentFade = selectionFrame.DOFade(1f, fadeInDuration).SetEase(ease);
+                _fadeTween?.Kill();
+                _fadeTween = selectionFrame.DOFade(1f, fadeInDuration).SetEase(ease);
             }
             if (animator != null)
             {
                 animator.Play(playStateName, 0, 0f);
                 animator.speed = playSpeed;
             }
-            ScaleTo(_originalScale * hoverScale, scaleDuration);
         }
 
         public void OnPointerExit(PointerEventData eventData)
         {
             if (!enabled) return;
-            _isPointerDown = false;
+            ScaleTo(_originalScale, hoverDuration);
+
             if (selectionFrame != null)
             {
-                _currentFade?.Kill();
-                _currentFade = selectionFrame.DOFade(0f, fadeOutDuration).SetEase(ease)
+                _fadeTween?.Kill();
+                _fadeTween = selectionFrame.DOFade(0f, fadeOutDuration).SetEase(ease)
                     .OnComplete(() => { if (animator != null) animator.speed = 0f; });
             }
-            ScaleTo(_originalScale, scaleDuration);
         }
 
         public void OnPointerDown(PointerEventData eventData)
         {
             if (!enabled) return;
-            _isPointerDown = true;
             ScaleTo(_originalScale * hoverScale * pressScale, pressDuration);
         }
 
         public void OnPointerUp(PointerEventData eventData)
         {
             if (!enabled) return;
-            _isPointerDown = false;
             ScaleTo(_originalScale * hoverScale, pressDuration);
         }
 
         private void ScaleTo(Vector3 target, float duration)
         {
-            _currentScale?.Kill();
-            _currentScale = transform.DOScale(target, duration).SetEase(ease);
+            _scaleTween?.Kill();
+            _scaleTween = transform.DOScale(target, duration).SetEase(ease);
         }
 
         private void OnDestroy()
         {
-            _currentFade?.Kill();
-            _currentScale?.Kill();
+            _scaleTween?.Kill();
+            _fadeTween?.Kill();
         }
     }
 }
