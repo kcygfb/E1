@@ -28,10 +28,27 @@ namespace KiKs.Combat
         [Header("Lifecycle")]
         [SerializeField] private bool autoStartBattle = true;
 
+        [Header("Hunt rewards")]
+        [Min(0)] [SerializeField] private int huntGoldReward = 100;
+        [SerializeField] private List<HuntLootReward> huntLootRewards = new List<HuntLootReward>
+        {
+            new HuntLootReward("CocoaPowder", "Cocoa Powder", 1)
+        };
+        [Min(0)] [SerializeField] private int huntRewardCardCount = 3;
+        [Tooltip("Empty means draw from every card in CardDataV2.")]
+        [SerializeField] private List<string> huntRewardCardPool = new List<string>();
+        [Min(0f)] [SerializeField] private float huntResultDelay = 0.75f;
+
         private CombatEngine _engine;
 
         public BattleState State => _engine?.State;
         public bool IsInitialized => _engine != null;
+        public int HuntGoldReward => huntGoldReward;
+        public IReadOnlyList<HuntLootReward> HuntLootRewards => huntLootRewards;
+        public int HuntRewardCardCount => huntRewardCardCount;
+        public IReadOnlyList<string> HuntRewardCardPool => huntRewardCardPool;
+        public float HuntResultDelay => huntResultDelay;
+        internal CardJsonRepository CardRepository => cardDatabase != null ? cardDatabase.Repository : null;
         public event Action<CombatEvent> CombatEventRaised;
 
         private IEnumerator Start()
@@ -112,6 +129,11 @@ namespace KiKs.Combat
                     DisposeEngine();
                     return false;
                 }
+
+                var huntResultPresenter = GetComponent<HuntResultPresenter>();
+                if (huntResultPresenter == null)
+                    huntResultPresenter = gameObject.AddComponent<HuntResultPresenter>();
+                huntResultPresenter.Configure(this);
 
                 if (usesSelectedDeck)
                     BattleSession.ClearSelectedDeck();

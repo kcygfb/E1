@@ -53,7 +53,36 @@ public class OrderRequest
 }
 
 /// <summary>
-/// DialogueRequested 事件的 payload。
+/// A completed order's awarded revenue. Rewarder emits this after the gold has
+/// been added so end-of-day UI does not duplicate the reward calculation.
+/// </summary>
+[Serializable]
+public class RevenueAwardedPayload
+{
+    public string OrderId { get; }
+    public string CoffeeName { get; }
+    public int CoffeeRevenue { get; }
+    public int PerfectBonus { get; }
+    public int TotalRevenue { get; }
+    public bool IsPerfect { get; }
+
+    public RevenueAwardedPayload(
+        string orderId,
+        string coffeeName,
+        int coffeeRevenue,
+        int perfectBonus,
+        bool isPerfect)
+    {
+        OrderId = orderId;
+        CoffeeName = coffeeName;
+        CoffeeRevenue = coffeeRevenue;
+        PerfectBonus = perfectBonus;
+        TotalRevenue = coffeeRevenue + perfectBonus;
+        IsPerfect = isPerfect;
+    }
+}
+/// <summary>
+/// DialogueRequested event payload.
 /// </summary>
 public class DialogueRequest
 {

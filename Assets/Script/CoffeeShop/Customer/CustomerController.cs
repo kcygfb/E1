@@ -77,6 +77,7 @@ public class CustomerController : MonoBehaviour
     private void StartArrivalDialogue()
     {
         ChangeState(NPCState.ArrivalDialogue);
+        GameEvent.Emit("CustomerArrived", NPCData);
 
         // 回访检查
         if (!string.IsNullOrEmpty(NPCData.desiredCoffeeId) && Spawner != null && Spawner.HasPendingReturnVisit(NPCData))

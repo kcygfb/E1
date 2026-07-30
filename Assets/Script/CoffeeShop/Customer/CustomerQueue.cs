@@ -106,6 +106,7 @@ public class CustomerQueue : MonoBehaviour
             if (morningCheckPanel != null) morningCheckPanel.SetActive(false);
             if (endDayButton != null) endDayButton.SetActive(false);
             TrySpawnNextNpc();
+            NotifyIfReadyToClose();
         }
     }
 
@@ -283,6 +284,13 @@ public class CustomerQueue : MonoBehaviour
             currentNpc = null;
         }
         TrySpawnNextNpc();
+        NotifyIfReadyToClose();
+    }
+
+    private void NotifyIfReadyToClose()
+    {
+        if (CanEndDay)
+            GameEvent.Emit("ShopReadyToClose");
     }
 
     private CoffeeData PickCoffeeFor(NPCData npcData)

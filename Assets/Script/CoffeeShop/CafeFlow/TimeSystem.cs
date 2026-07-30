@@ -10,6 +10,15 @@ public class TimeSystem : MonoBehaviour
     public string preBattleSceneName = "PreBattle";
 
     private static int savedDayCount = 1;
+    private DailyRevenueSummary dailyRevenueSummary;
+    private bool isEndingShop;
+
+    private void Awake()
+    {
+        dailyRevenueSummary = GetComponent<DailyRevenueSummary>();
+        if (dailyRevenueSummary == null)
+            dailyRevenueSummary = gameObject.AddComponent<DailyRevenueSummary>();
+    }
 
     private void Start()
     {
@@ -20,6 +29,17 @@ public class TimeSystem : MonoBehaviour
 
     public void EndShopPhase()
     {
+        if (isEndingShop) return;
+        if (dailyRevenueSummary != null && dailyRevenueSummary.ShowSummary())
+            return;
+
+        CompleteEndShopPhase();
+    }
+
+    public void CompleteEndShopPhase()
+    {
+        if (isEndingShop) return;
+        isEndingShop = true;
         savedDayCount = dayCount;
         CurrentPhase = DayPhase.Night;
         EmitPhaseChanged();

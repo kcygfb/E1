@@ -2,6 +2,8 @@ using UnityEngine;
 
 public class Rewarder : MonoBehaviour
 {
+    [SerializeField, Min(0)] private int perfectCraftBonus = 250;
+
     private void OnEnable()
     {
         GameEvent.On("OrderCompleted", OnOrderCompleted);
@@ -17,20 +19,22 @@ public class Rewarder : MonoBehaviour
         if (payload is not OrderTicket order) return;
         if (InventorySystem.Instance == null) return;
 
-        float multiplier = 1f;
-        bool allPerfect = false;
+        bool allPerfect = order.QTEScore != null && order.QTEScore.IsAllPerfect();
+        int coffeeRevenue = Mathf.Max(0, order.CoffeePrice);
+        int bonus = allPerfect ? perfectCraftBonus : 0;
+        int total = coffeeRevenue + bonus;
 
-        if (order.QTEScore != null)
-        {
-            multiplier = order.QTEScore.GetMultiplier();
-            allPerfect = order.QTEScore.IsAllPerfect();
-            if (allPerfect) multiplier *= 1.5f;
-        }
+        InventorySystem.Instance.Add("gold", total);
+        GameEvent.Emit(
+            "RevenueAwarded",
+            new RevenueAwardedPayload(
+                order.OrderId,
+                order.CoffeeName,
+                coffeeRevenue,
+                bonus,
+                allPerfect));
 
-        int gold = Mathf.RoundToInt(order.CoffeePrice * multiplier);
-        InventorySystem.Instance.Add("gold", gold);
-
-        string bonusTag = allPerfect ? " [ALL PERFECT!]" : "";
-        Debug.Log($"[Rewarder] Gold +{gold} ({multiplier:F1}x) from {order.CoffeeName}{bonusTag}");
+        string bonusTag = allPerfect ? $" + {bonus} perfect bonus" : "";
+        Debug.Log($"[Rewarder] Gold +{total} from {order.CoffeeName}{bonusTag}");
     }
 }
