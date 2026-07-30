@@ -14,14 +14,25 @@ public class RotationStopQTE : QTEBase, IPointerClickHandler
     [SerializeField] private float targetZoneCenter = 0f;        // 目标区中心角度 (0=顶部, 0~1=0~360度)
     [SerializeField] private float targetZoneHalfWidth = 0.12f;   // 目标区半宽 (0~1, 0.12≈43度)
 
-    private RectTransform _circle;
-    private RectTransform _pointer;
-    private Image _targetZoneImg;
+    [Header("图片资源 (留空用默认纯色)")]
+    [SerializeField] private Sprite circleSprite;
+    [SerializeField] private Color circleColor = new Color(0.2f, 0.2f, 0.25f, 1f);
+    [SerializeField] private Sprite pointerSprite;
+    [SerializeField] private Color pointerColor = Color.cyan;
+    [SerializeField] private Sprite targetZoneSprite;
+    [SerializeField] private Color targetZoneColor = new Color(0.2f, 0.8f, 0.2f, 0.5f);
+    [SerializeField] private Sprite perfectZoneSprite;
+    [SerializeField] private Color perfectZoneColor = new Color(1f, 0.84f, 0f, 0.6f);
+
+    [SerializeField] private RectTransform _circle;
+    [SerializeField] private RectTransform _pointer;
+    [SerializeField] private Image _targetZoneImg;
     private float _currentAngle; // 0~1 对应 0~360度
     private bool _rotating;
 
     protected override void BuildSpecificUI(RectTransform panel)
     {
+        if (_circle != null) return; // 已在 Inspector 赋值
         // 标题
         var titleObj = new GameObject("Title", typeof(RectTransform), typeof(Text));
         titleObj.transform.SetParent(panel, false);
@@ -45,14 +56,16 @@ public class RotationStopQTE : QTEBase, IPointerClickHandler
         _circle.sizeDelta = new Vector2(200, 200);
         _circle.anchoredPosition = new Vector2(0, 10);
         var circleImg = circleObj.GetComponent<Image>();
-        circleImg.color = new Color(0.2f, 0.2f, 0.25f, 1f);
+        if (circleSprite != null) circleImg.sprite = circleSprite;
+        circleImg.color = circleColor;
         circleImg.raycastTarget = true;
 
         // 目标区域弧形 (用绿色扇形图片简化为圆形扇区)
         var zoneObj = new GameObject("TargetZone", typeof(RectTransform), typeof(Image));
         zoneObj.transform.SetParent(_circle, false);
         _targetZoneImg = zoneObj.GetComponent<Image>();
-        _targetZoneImg.color = new Color(0.2f, 0.8f, 0.2f, 0.5f);
+        if (targetZoneSprite != null) _targetZoneImg.sprite = targetZoneSprite;
+        _targetZoneImg.color = targetZoneColor;
         _targetZoneImg.raycastTarget = false;
         var zoneRect = zoneObj.GetComponent<RectTransform>();
         zoneRect.sizeDelta = new Vector2(40, 100);
@@ -67,7 +80,8 @@ public class RotationStopQTE : QTEBase, IPointerClickHandler
         var perfectObj = new GameObject("PerfectZone", typeof(RectTransform), typeof(Image));
         perfectObj.transform.SetParent(_circle, false);
         var perfectImg = perfectObj.GetComponent<Image>();
-        perfectImg.color = new Color(1f, 0.84f, 0f, 0.6f);
+        if (perfectZoneSprite != null) perfectImg.sprite = perfectZoneSprite;
+        perfectImg.color = perfectZoneColor;
         perfectImg.raycastTarget = false;
         var perfectRect = perfectObj.GetComponent<RectTransform>();
         perfectRect.sizeDelta = new Vector2(20, 100);
@@ -87,7 +101,8 @@ public class RotationStopQTE : QTEBase, IPointerClickHandler
         _pointer.pivot = new Vector2(0.5f, 0f);
         _pointer.anchoredPosition = new Vector2(0, 0);
         var ptrImg = ptrObj.GetComponent<Image>();
-        ptrImg.color = Color.cyan;
+        if (pointerSprite != null) ptrImg.sprite = pointerSprite;
+        ptrImg.color = pointerColor;
         ptrImg.raycastTarget = false;
     }
 

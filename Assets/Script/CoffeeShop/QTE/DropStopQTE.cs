@@ -15,14 +15,25 @@ public class DropStopQTE : QTEBase, IPointerClickHandler
     [SerializeField] private float targetZoneMin = 0.55f;  // 目标区上界 (0=顶, 1=底)
     [SerializeField] private float targetZoneMax = 0.72f;  // 目标区下界
 
-    private RectTransform _track;
-    private RectTransform _pointer;
-    private Image _targetZoneImg;
+    [Header("图片资源 (留空用默认纯色)")]
+    [SerializeField] private Sprite trackSprite;
+    [SerializeField] private Color trackColor = new Color(0.2f, 0.2f, 0.25f, 1f);
+    [SerializeField] private Sprite pointerSprite;
+    [SerializeField] private Color pointerColor = Color.cyan;
+    [SerializeField] private Sprite targetZoneSprite;
+    [SerializeField] private Color targetZoneColor = new Color(0.2f, 0.8f, 0.2f, 0.5f);
+    [SerializeField] private Sprite perfectZoneSprite;
+    [SerializeField] private Color perfectZoneColor = new Color(1f, 0.84f, 0f, 0.6f);
+
+    [SerializeField] private RectTransform _track;
+    [SerializeField] private RectTransform _pointer;
+    [SerializeField] private Image _targetZoneImg;
     private float _pointerPos; // 0=顶, 1=底
     private bool _dropping;
 
     protected override void BuildSpecificUI(RectTransform panel)
     {
+        if (_track != null) return; // 已在 Inspector 赋值
         // 标题
         var titleObj = new GameObject("Title", typeof(RectTransform), typeof(Text));
         titleObj.transform.SetParent(panel, false);
@@ -46,14 +57,16 @@ public class DropStopQTE : QTEBase, IPointerClickHandler
         _track.sizeDelta = new Vector2(60, 200);
         _track.anchoredPosition = new Vector2(0, 10);
         var trackImg = trackObj.GetComponent<Image>();
-        trackImg.color = new Color(0.2f, 0.2f, 0.25f, 1f);
+        if (trackSprite != null) trackImg.sprite = trackSprite;
+        trackImg.color = trackColor;
         trackImg.raycastTarget = true;
 
         // 目标区域 (绿色)
         var zoneObj = new GameObject("TargetZone", typeof(RectTransform), typeof(Image));
         zoneObj.transform.SetParent(_track, false);
         _targetZoneImg = zoneObj.GetComponent<Image>();
-        _targetZoneImg.color = new Color(0.2f, 0.8f, 0.2f, 0.5f);
+        if (targetZoneSprite != null) _targetZoneImg.sprite = targetZoneSprite;
+        _targetZoneImg.color = targetZoneColor;
         _targetZoneImg.raycastTarget = false;
         var zoneRect = zoneObj.GetComponent<RectTransform>();
         zoneRect.anchorMin = new Vector2(0, 1f - targetZoneMax);
@@ -67,7 +80,8 @@ public class DropStopQTE : QTEBase, IPointerClickHandler
         var perfectObj = new GameObject("PerfectZone", typeof(RectTransform), typeof(Image));
         perfectObj.transform.SetParent(_track, false);
         var perfectImg = perfectObj.GetComponent<Image>();
-        perfectImg.color = new Color(1f, 0.84f, 0f, 0.6f);
+        if (perfectZoneSprite != null) perfectImg.sprite = perfectZoneSprite;
+        perfectImg.color = perfectZoneColor;
         perfectImg.raycastTarget = false;
         var perfectRect = perfectObj.GetComponent<RectTransform>();
         perfectRect.anchorMin = new Vector2(0, 1f - (perfectCenter + perfectHalf));
@@ -85,7 +99,8 @@ public class DropStopQTE : QTEBase, IPointerClickHandler
         _pointer.pivot = new Vector2(0.5f, 0.5f);
         _pointer.anchoredPosition = new Vector2(0, 0);
         var ptrImg = ptrObj.GetComponent<Image>();
-        ptrImg.color = Color.cyan;
+        if (pointerSprite != null) ptrImg.sprite = pointerSprite;
+        ptrImg.color = pointerColor;
         ptrImg.raycastTarget = false;
     }
 

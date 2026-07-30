@@ -37,6 +37,8 @@ public class CustomerQueue : MonoBehaviour
     public Transform spawnPoint;
     public Transform counterPoint;
     public Transform exitPoint;
+    [Tooltip("NPC移动速度，数值越大出场越快")]
+    public float npcMoveSpeed = 500f;
 
     [Header("End Day Button")]
     public GameObject endDayButton;
@@ -220,6 +222,7 @@ public class CustomerQueue : MonoBehaviour
         currentNpc = npcObj.GetComponent<CustomerController>();
         currentNpc.OnLeftStore += HandleNpcLeft;
         currentNpc.Spawner = this;
+        currentNpc.moveSpeed = npcMoveSpeed;
         currentNpc.Initialize(request.npcData, request.coffeeData, GetCounterPosition(), GetExitPosition());
     }
 

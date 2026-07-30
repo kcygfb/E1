@@ -110,7 +110,7 @@ public class DialoguePlayer : MonoBehaviour
         }
     }
 
-    private void OnNextClicked()
+    public void OnNextClicked()
     {
         if (!isRunning || currentDialogue == null) return;
         int next = currentIndex + 1;
