@@ -14,13 +14,24 @@ public class RhythmTapQTE : QTEBase, IPointerClickHandler
     [SerializeField] private float targetZoneMin = 0.35f;
     [SerializeField] private float targetZoneMax = 0.55f;
 
-    private RectTransform _bar;
-    private RectTransform _pointer;
+    [Header("图片资源 (留空用默认纯色)")]
+    [SerializeField] private Sprite barSprite;
+    [SerializeField] private Color barColor = new Color(0.2f, 0.2f, 0.25f, 1f);
+    [SerializeField] private Sprite pointerSprite;
+    [SerializeField] private Color pointerColor = Color.cyan;
+    [SerializeField] private Sprite targetZoneSprite;
+    [SerializeField] private Color targetZoneColor = new Color(0.2f, 0.8f, 0.2f, 0.5f);
+    [SerializeField] private Sprite perfectZoneSprite;
+    [SerializeField] private Color perfectZoneColor = new Color(1f, 0.84f, 0f, 0.7f);
+
+    [SerializeField] private RectTransform _bar;
+    [SerializeField] private RectTransform _pointer;
     private float _pointerPos; // 0~1, 0=最左, 1=最右
     private float _barHalfWidth;
 
     protected override void BuildSpecificUI(RectTransform panel)
     {
+        if (_bar != null) return; // 已在 Inspector 赋值
         // 标题
         var titleObj = new GameObject("Title", typeof(RectTransform), typeof(Text));
         titleObj.transform.SetParent(panel, false);
@@ -44,14 +55,16 @@ public class RhythmTapQTE : QTEBase, IPointerClickHandler
         _bar.sizeDelta = new Vector2(500, 50);
         _bar.anchoredPosition = new Vector2(0, 20);
         var barImg = barObj.GetComponent<Image>();
-        barImg.color = new Color(0.2f, 0.2f, 0.25f, 1f);
+        if (barSprite != null) barImg.sprite = barSprite;
+        barImg.color = barColor;
         barImg.raycastTarget = true;
 
         // Good 区域 (绿色, 完整目标区)
         var zoneObj = new GameObject("TargetZone", typeof(RectTransform), typeof(Image));
         zoneObj.transform.SetParent(_bar, false);
         var zoneImg = zoneObj.GetComponent<Image>();
-        zoneImg.color = new Color(0.2f, 0.8f, 0.2f, 0.5f);
+        if (targetZoneSprite != null) zoneImg.sprite = targetZoneSprite;
+        zoneImg.color = targetZoneColor;
         zoneImg.raycastTarget = false;
         var zoneRect = zoneObj.GetComponent<RectTransform>();
         zoneRect.anchorMin = new Vector2(targetZoneMin, 0);
@@ -65,7 +78,8 @@ public class RhythmTapQTE : QTEBase, IPointerClickHandler
         var perfectObj = new GameObject("PerfectZone", typeof(RectTransform), typeof(Image));
         perfectObj.transform.SetParent(_bar, false);
         var perfectImg = perfectObj.GetComponent<Image>();
-        perfectImg.color = new Color(1f, 0.84f, 0f, 0.7f);
+        if (perfectZoneSprite != null) perfectImg.sprite = perfectZoneSprite;
+        perfectImg.color = perfectZoneColor;
         perfectImg.raycastTarget = false;
         var perfectRect = perfectObj.GetComponent<RectTransform>();
         perfectRect.anchorMin = new Vector2(perfectCenter - perfectHalf, 0);
@@ -83,7 +97,8 @@ public class RhythmTapQTE : QTEBase, IPointerClickHandler
         _pointer.pivot = new Vector2(0.5f, 0.5f);
         _pointer.anchoredPosition = Vector2.zero;
         var ptrImg = ptrObj.GetComponent<Image>();
-        ptrImg.color = Color.cyan;
+        if (pointerSprite != null) ptrImg.sprite = pointerSprite;
+        ptrImg.color = pointerColor;
         ptrImg.raycastTarget = false;
     }
 

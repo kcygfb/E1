@@ -1,0 +1,19 @@
+[2026-07-27T14:38:45.170Z] LiveUpdateForge: AfterToolExec flush
+[2026-07-27T14:38:45.187Z] InitialReadForge.onBeforeSend: SKIP (fr=true syn=false hasRead=true)
+[2026-07-27T14:38:45.607Z] LiveUpdateForge: pending external change on D:\Unity\E1\CODELY.md
+[2026-07-27T14:38:45.605Z] LiveUpdateForge: pending external change on D:\Unity\E1\CODELY.md
+[2026-07-27T14:39:11.811Z] LiveUpdateForge: EndTurn fallback flush
+[2026-07-27T14:39:11.812Z] LiveUpdateForge: enqueuing 1 diff notification(s)
+[2026-07-27T14:39:11.812Z] onEndTurn: naturalStop=false toolCalls=3 nudgeMsg=no
+[2026-07-27T14:39:14.769Z] LiveUpdateForge: pending external change on D:\Unity\E1\CODELY.md
+[2026-07-27T14:39:14.775Z] LiveUpdateForge: pending external change on D:\Unity\E1\CODELY.md
+[2026-07-27T14:39:19.159Z] LiveUpdateForge: pending external change on D:\Unity\E1\CODELY.md
+[2026-07-27T14:39:19.156Z] LiveUpdateForge: pending external change on D:\Unity\E1\CODELY.md
+[2026-07-27T14:39:25.779Z] LiveUpdateForge: AfterToolExec flush
+[2026-07-27T14:39:25.800Z] InitialReadForge.onBeforeSend: SKIP (fr=true syn=false hasRead=true)
+[2026-07-27T14:39:53.919Z] LiveUpdateForge: EndTurn fallback flush
+[2026-07-27T14:39:53.919Z] onEndTurn: naturalStop=false toolCalls=4 nudgeMsg=no
+[2026-07-27T14:39:55.543Z] LiveUpdateForge: AfterToolExec flush
+[2026-07-27T14:39:55.559Z] InitialReadForge.onBeforeSend: SKIP (fr=true syn=false hasRead=true)
+[2026-07-27T14:40:00.399Z] LiveUpdateForge: EndTurn fallback flush
+[2026-07-27T14:40:00.399Z] onEndTurn: naturalStop=true toolCalls=5 nudgeMsg=no

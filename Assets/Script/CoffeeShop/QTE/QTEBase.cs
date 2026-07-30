@@ -15,13 +15,18 @@ public abstract class QTEBase : MonoBehaviour
     [Header("通用设置")]
     [SerializeField] protected float panelFadeDuration = 0.15f;
 
+    [Header("通用图片资源 (留空用默认纯色)")]
+    [SerializeField] protected Sprite panelSprite;
+    [SerializeField] protected Color panelColor = new Color(0.15f, 0.15f, 0.2f, 0.9f);
+    [SerializeField] protected Color dimColor = new Color(0, 0, 0, 0.4f);
+
     /// <summary>QTE 完成时触发，参数为评级</summary>
     public UnityEvent<QTERating> OnQTEDone { get; } = new();
 
-    protected GameObject _dimOverlay;
-    protected RectTransform _panel;
-    protected Text _stepTitleText;
-    protected Text _resultText;
+    [SerializeField] protected GameObject _dimOverlay;
+    [SerializeField] protected RectTransform _panel;
+    [SerializeField] protected Text _stepTitleText;
+    [SerializeField] protected Text _resultText;
     protected bool _isActive;
     protected bool _uiBuilt;
 
@@ -106,18 +111,44 @@ public abstract class QTEBase : MonoBehaviour
     protected void Complete(QTERating rating)
     {
         if (!_isActive) return;
+        _isActive = false;
 
         string label = rating switch
         {
-            QTERating.Perfect => "<color=#FFD700>Perfect!</color>",
-            QTERating.Good => "<color=#90EE90>Good</color>",
-            QTERating.Miss => "<color=#FF6B6B>Miss...</color>",
+            QTERating.Perfect => "<b>Perfect!</b>",
+            QTERating.Good => "<b>Good</b>",
+            QTERating.Miss => "<b>Miss...</b>",
             _ => ""
         };
         _resultText.text = label;
+        _resultText.color = Color.white;
+        _resultText.transform.localScale = Vector3.zero;
+        _resultText.transform.DOScale(Vector3.one * 1.3f, 0.2f).SetEase(Ease.OutBack).SetId(this)
+            .OnComplete(() => _resultText.transform.DOScale(Vector3.one, 0.1f).SetId(this));
 
-        // 短暂展示结果后隐藏
-        DOVirtual.DelayedCall(0.5f, () =>
+        // 面板颜色闪烁反馈
+        if (_panel != null)
+        {
+            var panelImg = _panel.GetComponent<Image>();
+            if (panelImg != null)
+            {
+                Color flashColor = rating switch
+                {
+                    QTERating.Perfect => new Color(1f, 0.84f, 0f, 0.9f),
+                    QTERating.Good => new Color(0.2f, 0.8f, 0.2f, 0.9f),
+                    QTERating.Miss => new Color(0.8f, 0.2f, 0.2f, 0.9f),
+                    _ => panelColor
+                };
+                var origColor = panelImg.color;
+                panelImg.color = flashColor;
+                DOTween.Sequence().SetId(this)
+                    .AppendInterval(1.0f)
+                    .Append(panelImg.DOColor(origColor, 0.3f));
+            }
+        }
+
+        // 展示结果后隐藏
+        DOVirtual.DelayedCall(1.2f, () =>
         {
             Hide();
             OnQTEDone?.Invoke(rating);
@@ -133,62 +164,71 @@ public abstract class QTEBase : MonoBehaviour
         rect.offsetMin = Vector2.zero;
         rect.offsetMax = Vector2.zero;
 
-        // 背景遮罩
-        _dimOverlay = new GameObject("QTE_Dim", typeof(Image));
-        _dimOverlay.transform.SetParent(transform, false);
-        var dimRect = _dimOverlay.GetComponent<RectTransform>();
-        dimRect.anchorMin = Vector2.zero;
-        dimRect.anchorMax = Vector2.one;
-        dimRect.offsetMin = Vector2.zero;
-        dimRect.offsetMax = Vector2.zero;
-        var dimImg = _dimOverlay.GetComponent<Image>();
-        dimImg.color = new Color(0, 0, 0, 0.4f);
-        dimImg.raycastTarget = true;
+        if (_dimOverlay == null)
+        {
+            _dimOverlay = new GameObject("QTE_Dim", typeof(Image));
+            _dimOverlay.transform.SetParent(transform, false);
+            var dimRect = _dimOverlay.GetComponent<RectTransform>();
+            dimRect.anchorMin = Vector2.zero;
+            dimRect.anchorMax = Vector2.one;
+            dimRect.offsetMin = Vector2.zero;
+            dimRect.offsetMax = Vector2.zero;
+            var dimImg = _dimOverlay.GetComponent<Image>();
+            dimImg.color = dimColor;
+            dimImg.raycastTarget = true;
+        }
 
-        // 主面板
-        _panel = new GameObject("QTE_Panel", typeof(RectTransform), typeof(CanvasGroup)).GetComponent<RectTransform>();
-        _panel.SetParent(transform, false);
-        _panel.sizeDelta = new Vector2(600, 300);
-        _panel.anchoredPosition = Vector2.zero;
-        var panelImg = _panel.gameObject.AddComponent<Image>();
-        panelImg.color = new Color(0.15f, 0.15f, 0.2f, 0.9f);
-        panelImg.raycastTarget = true;
+        if (_panel == null)
+        {
+            _panel = new GameObject("QTE_Panel", typeof(RectTransform), typeof(CanvasGroup)).GetComponent<RectTransform>();
+            _panel.SetParent(transform, false);
+            _panel.sizeDelta = new Vector2(600, 300);
+            _panel.anchoredPosition = Vector2.zero;
+            var panelImg = _panel.gameObject.AddComponent<Image>();
+            if (panelSprite != null) panelImg.sprite = panelSprite;
+            panelImg.color = panelColor;
+            panelImg.raycastTarget = true;
+        }
 
-        // 步骤标题文字 (面板顶部)
-        var stepTitleObj = new GameObject("StepTitle", typeof(RectTransform), typeof(Text));
-        stepTitleObj.transform.SetParent(_panel, false);
-        _stepTitleText = stepTitleObj.GetComponent<Text>();
-        var stepTitleRect = stepTitleObj.GetComponent<RectTransform>();
-        stepTitleRect.anchorMin = new Vector2(0.5f, 1f);
-        stepTitleRect.anchorMax = new Vector2(0.5f, 1f);
-        stepTitleRect.pivot = new Vector2(0.5f, 1f);
-        stepTitleRect.anchoredPosition = new Vector2(0, -10);
-        stepTitleRect.sizeDelta = new Vector2(500, 30);
-        _stepTitleText.alignment = TextAnchor.MiddleCenter;
-        _stepTitleText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-        _stepTitleText.fontSize = 22;
-        _stepTitleText.color = new Color(0.8f, 0.8f, 0.9f);
-        _stepTitleText.raycastTarget = false;
+        if (_stepTitleText == null)
+        {
+            var stepTitleObj = new GameObject("StepTitle", typeof(RectTransform), typeof(Text));
+            stepTitleObj.transform.SetParent(_panel, false);
+            _stepTitleText = stepTitleObj.GetComponent<Text>();
+            var stepTitleRect = stepTitleObj.GetComponent<RectTransform>();
+            stepTitleRect.anchorMin = new Vector2(0.5f, 1f);
+            stepTitleRect.anchorMax = new Vector2(0.5f, 1f);
+            stepTitleRect.pivot = new Vector2(0.5f, 1f);
+            stepTitleRect.anchoredPosition = new Vector2(0, -10);
+            stepTitleRect.sizeDelta = new Vector2(500, 30);
+            _stepTitleText.alignment = TextAnchor.MiddleCenter;
+            _stepTitleText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            _stepTitleText.fontSize = 22;
+            _stepTitleText.color = new Color(0.8f, 0.8f, 0.9f);
+            _stepTitleText.raycastTarget = false;
+        }
 
-        // 结果文字
-        var resultObj = new GameObject("ResultText", typeof(RectTransform), typeof(Text));
-        resultObj.transform.SetParent(_panel, false);
-        _resultText = resultObj.GetComponent<Text>();
-        var resultRect = resultObj.GetComponent<RectTransform>();
-        resultRect.anchorMin = new Vector2(0.5f, 0f);
-        resultRect.anchorMax = new Vector2(0.5f, 0f);
-        resultRect.pivot = new Vector2(0.5f, 0f);
-        resultRect.anchoredPosition = new Vector2(0, 20);
-        resultRect.sizeDelta = new Vector2(400, 60);
-        _resultText.alignment = TextAnchor.MiddleCenter;
-        _resultText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-        _resultText.fontSize = 36;
-        _resultText.raycastTarget = false;
-        _resultText.supportRichText = true;
+        if (_resultText == null)
+        {
+            var resultObj = new GameObject("ResultText", typeof(RectTransform), typeof(Text));
+            resultObj.transform.SetParent(_panel, false);
+            _resultText = resultObj.GetComponent<Text>();
+            var resultRect = resultObj.GetComponent<RectTransform>();
+            resultRect.anchorMin = new Vector2(0.5f, 0f);
+            resultRect.anchorMax = new Vector2(0.5f, 0f);
+            resultRect.pivot = new Vector2(0.5f, 0f);
+            resultRect.anchoredPosition = new Vector2(0, 20);
+            resultRect.sizeDelta = new Vector2(400, 60);
+            _resultText.alignment = TextAnchor.MiddleCenter;
+            _resultText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            _resultText.fontSize = 36;
+            _resultText.raycastTarget = false;
+            _resultText.supportRichText = true;
+        }
 
         BuildSpecificUI(_panel);
     }
 
-    /// <summary>子类实现：在面板内创建 QTE 专属 UI 元素</summary>
-    protected abstract void BuildSpecificUI(RectTransform panel);
+    /// <summary>子类实现：在面板内创建 QTE 专属 UI 元素（如已在 Inspector 赋值则跳过）</summary>
+    protected virtual void BuildSpecificUI(RectTransform panel) { }
 }

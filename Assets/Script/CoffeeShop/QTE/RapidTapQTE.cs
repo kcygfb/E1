@@ -14,17 +14,24 @@ public class RapidTapQTE : QTEBase, IPointerClickHandler
     [SerializeField] private int perfectThreshold = 8;
     [SerializeField] private int goodThreshold = 5;
 
-    private RectTransform _progressBar;
-    private RectTransform _progressFill;
-    private Image _fillImg;
-    private Text _countText;
-    private Text _timerText;
+    [Header("图片资源 (留空用默认纯色)")]
+    [SerializeField] private Sprite barSprite;
+    [SerializeField] private Color barColor = new Color(0.2f, 0.2f, 0.25f, 1f);
+    [SerializeField] private Sprite fillSprite;
+    [SerializeField] private Color fillColor = new Color(0.3f, 0.8f, 0.3f, 0.8f);
+
+    [SerializeField] private RectTransform _progressBar;
+    [SerializeField] private RectTransform _progressFill;
+    [SerializeField] private Image _fillImg;
+    [SerializeField] private Text _countText;
+    [SerializeField] private Text _timerText;
     private int _tapCount;
     private float _elapsed;
     private bool _timing;
 
     protected override void BuildSpecificUI(RectTransform panel)
     {
+        if (_progressBar != null) return; // 已在 Inspector 赋值
         // 标题
         var titleObj = new GameObject("Title", typeof(RectTransform), typeof(Text));
         titleObj.transform.SetParent(panel, false);
@@ -48,7 +55,8 @@ public class RapidTapQTE : QTEBase, IPointerClickHandler
         _progressBar.sizeDelta = new Vector2(400, 40);
         _progressBar.anchoredPosition = new Vector2(0, 30);
         var barImg = barObj.GetComponent<Image>();
-        barImg.color = new Color(0.2f, 0.2f, 0.25f, 1f);
+        if (barSprite != null) barImg.sprite = barSprite;
+        barImg.color = barColor;
         barImg.raycastTarget = true;
 
         // 进度条填充
@@ -61,7 +69,8 @@ public class RapidTapQTE : QTEBase, IPointerClickHandler
         _progressFill.offsetMax = Vector2.zero;
         _progressFill.sizeDelta = new Vector2(0, 0);
         _fillImg = fillObj.GetComponent<Image>();
-        _fillImg.color = new Color(0.3f, 0.8f, 0.3f, 0.8f);
+        if (fillSprite != null) _fillImg.sprite = fillSprite;
+        _fillImg.color = fillColor;
         _fillImg.raycastTarget = false;
 
         // 计数文字

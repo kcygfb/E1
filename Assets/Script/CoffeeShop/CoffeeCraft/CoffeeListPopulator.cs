@@ -10,6 +10,8 @@ public class CoffeeListPopulator : MonoBehaviour
     [SerializeField] private Transform content;
     [SerializeField] private CraftController craftController;
     [SerializeField] private Sprite coffeeIconSprite;
+    [Tooltip("咖啡按钮模板 Prefab，留空则用代码生成")]
+    [SerializeField] private GameObject itemPrefab;
 
     [Header("Item Layout")]
     [SerializeField] private Vector2 itemSize = new(180, 180);
@@ -67,17 +69,41 @@ public class CoffeeListPopulator : MonoBehaviour
 
     private void CreateCoffeeItem(CoffeeDataJson coffeeJson)
     {
-        var go = new GameObject(coffeeJson.coffeeId, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button), typeof(ButtonFeedback));
-        go.transform.SetParent(content, false);
-        var rt = go.GetComponent<RectTransform>();
-        rt.sizeDelta = itemSize;
+        GameObject go;
+        if (itemPrefab != null)
+        {
+            go = Instantiate(itemPrefab, content, false);
+            go.name = coffeeJson.coffeeId;
+        }
+        else
+        {
+            go = new GameObject(coffeeJson.coffeeId, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button), typeof(ButtonFeedback));
+            go.transform.SetParent(content, false);
+            var rt = go.GetComponent<RectTransform>();
+            rt.sizeDelta = itemSize;
 
-        var image = go.GetComponent<Image>();
-        image.sprite = coffeeIconSprite;
-        image.type = Image.Type.Simple;
-        image.preserveAspect = true;
+            var img = go.GetComponent<Image>();
+            img.sprite = coffeeIconSprite;
+            img.type = Image.Type.Simple;
+            img.preserveAspect = true;
 
-        var button = go.GetComponent<Button>();
+            var textGo = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
+            textGo.transform.SetParent(go.transform, false);
+            var textRT = textGo.GetComponent<RectTransform>();
+            textRT.anchorMin = new Vector2(textAnchorX, textAnchorY);
+            textRT.anchorMax = new Vector2(textAnchorX, textAnchorY);
+            textRT.pivot = new Vector2(textAnchorX, textAnchorY);
+            textRT.anchoredPosition = textOffset;
+            textRT.sizeDelta = textSize;
+
+            var tmp = textGo.AddComponent<TextMeshProUGUI>();
+            if (fontAsset != null) tmp.font = fontAsset;
+            tmp.fontSize = fontSize;
+            tmp.fontWeight = fontWeight;
+            tmp.enableAutoSizing = false;
+            tmp.alignment = TextAlignmentOptions.Center;
+            tmp.raycastTarget = false;
+        }
 
         bool locked = coffeeJson.locked;
         if (locked && UnlockManager.Instance != null)
@@ -91,31 +117,22 @@ public class CoffeeListPopulator : MonoBehaviour
             Destroy(tempData);
         }
 
+        var image = go.GetComponent<Image>();
+        if (coffeeIconSprite != null) image.sprite = coffeeIconSprite;
         image.color = locked ? lockedColor : normalColor;
 
-        // 锁定按钮禁用动效
         var feedback = go.GetComponent<ButtonFeedback>();
         if (feedback != null) feedback.enabled = !locked;
 
-        var textGo = new GameObject("Text", typeof(RectTransform), typeof(CanvasRenderer));
-        textGo.transform.SetParent(go.transform, false);
-        var textRT = textGo.GetComponent<RectTransform>();
-        textRT.anchorMin = new Vector2(textAnchorX, textAnchorY);
-        textRT.anchorMax = new Vector2(textAnchorX, textAnchorY);
-        textRT.pivot = new Vector2(textAnchorX, textAnchorY);
-        textRT.anchoredPosition = textOffset;
-        textRT.sizeDelta = textSize;
+        // 设置文字（Prefab 模式下找已有 Text 子物体，代码生成模式下在上面已创建）
+        var text = go.GetComponentInChildren<TextMeshProUGUI>();
+        if (text != null)
+        {
+            text.text = coffeeJson.coffeeName;
+            text.color = locked ? lockedTextColor : textColor;
+        }
 
-        var text = textGo.AddComponent<TextMeshProUGUI>();
-        if (fontAsset != null) text.font = fontAsset;
-        text.text = coffeeJson.coffeeName;
-        text.fontSize = fontSize;
-        text.fontWeight = fontWeight;
-        text.enableAutoSizing = false;
-        text.color = locked ? lockedTextColor : textColor;
-        text.alignment = TextAlignmentOptions.Center;
-        text.raycastTarget = false;
-
+        var button = go.GetComponent<Button>();
         if (!locked)
         {
             var captured = coffeeJson;

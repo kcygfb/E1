@@ -18,17 +18,28 @@ public class HoldReleaseQTE : QTEBase, IPointerDownHandler, IPointerUpHandler
     [SerializeField] private float goodMax = 0.95f;
     [SerializeField] private float timeoutDuration = 2.5f;
 
-    private RectTransform _fillBar;
-    private RectTransform _fill;
-    private Image _fillImg;
-    private Image _targetZone;
-    private Text _hintText;
+    [Header("图片资源 (留空用默认纯色)")]
+    [SerializeField] private Sprite barSprite;
+    [SerializeField] private Color barColor = new Color(0.15f, 0.15f, 0.2f, 1f);
+    [SerializeField] private Sprite fillSprite;
+    [SerializeField] private Color fillColor = new Color(0.3f, 0.6f, 1f, 0.8f);
+    [SerializeField] private Sprite targetZoneSprite;
+    [SerializeField] private Color targetZoneColor = new Color(0.2f, 0.8f, 0.2f, 0.35f);
+    [SerializeField] private Sprite perfectZoneSprite;
+    [SerializeField] private Color perfectZoneColor = new Color(1f, 0.84f, 0f, 0.5f);
+
+    [SerializeField] private RectTransform _fillBar;
+    [SerializeField] private RectTransform _fill;
+    [SerializeField] private Image _fillImg;
+    [SerializeField] private Image _targetZone;
+    [SerializeField] private Text _hintText;
     private float _fillAmount;
     private bool _isHolding;
     private float _timer;
 
     protected override void BuildSpecificUI(RectTransform panel)
     {
+        if (_fillBar != null) return; // 已在 Inspector 赋值
         // 标题
         var titleObj = new GameObject("Title", typeof(RectTransform), typeof(Text));
         titleObj.transform.SetParent(panel, false);
@@ -52,14 +63,16 @@ public class HoldReleaseQTE : QTEBase, IPointerDownHandler, IPointerUpHandler
         _fillBar.sizeDelta = new Vector2(60, 180);
         _fillBar.anchoredPosition = new Vector2(0, 10);
         var barImg = barObj.GetComponent<Image>();
-        barImg.color = new Color(0.15f, 0.15f, 0.2f, 1f);
+        if (barSprite != null) barImg.sprite = barSprite;
+        barImg.color = barColor;
         barImg.raycastTarget = true;
 
         // 目标区间标记
         var zoneObj = new GameObject("TargetZone", typeof(RectTransform), typeof(Image));
         zoneObj.transform.SetParent(_fillBar, false);
         _targetZone = zoneObj.GetComponent<Image>();
-        _targetZone.color = new Color(0.2f, 0.8f, 0.2f, 0.35f);
+        if (targetZoneSprite != null) _targetZone.sprite = targetZoneSprite;
+        _targetZone.color = targetZoneColor;
         _targetZone.raycastTarget = false;
         var zoneRect = zoneObj.GetComponent<RectTransform>();
         zoneRect.anchorMin = new Vector2(0, goodMin);
@@ -71,7 +84,8 @@ public class HoldReleaseQTE : QTEBase, IPointerDownHandler, IPointerUpHandler
         var perfectObj = new GameObject("PerfectZone", typeof(RectTransform), typeof(Image));
         perfectObj.transform.SetParent(_fillBar, false);
         var perfectImg = perfectObj.GetComponent<Image>();
-        perfectImg.color = new Color(1f, 0.84f, 0f, 0.5f);
+        if (perfectZoneSprite != null) perfectImg.sprite = perfectZoneSprite;
+        perfectImg.color = perfectZoneColor;
         perfectImg.raycastTarget = false;
         var perfectRect = perfectObj.GetComponent<RectTransform>();
         perfectRect.anchorMin = new Vector2(0, perfectMin);
@@ -89,7 +103,8 @@ public class HoldReleaseQTE : QTEBase, IPointerDownHandler, IPointerUpHandler
         _fill.anchoredPosition = new Vector2(0, 0);
         _fill.sizeDelta = new Vector2(0, 0);
         _fillImg = fillObj.GetComponent<Image>();
-        _fillImg.color = new Color(0.3f, 0.6f, 1f, 0.8f);
+        if (fillSprite != null) _fillImg.sprite = fillSprite;
+        _fillImg.color = fillColor;
         _fillImg.raycastTarget = false;
 
         // 提示文字
@@ -136,6 +151,7 @@ public class HoldReleaseQTE : QTEBase, IPointerDownHandler, IPointerUpHandler
             if (_fillAmount >= 1f)
             {
                 _fillAmount = 1f;
+                _isHolding = false;
                 // 到顶不松手 = Miss
                 Complete(QTERating.Miss);
                 return;
