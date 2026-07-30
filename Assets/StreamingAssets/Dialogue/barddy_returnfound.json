@@ -2,11 +2,11 @@
   "dialogueId": "barddy_returnfound",
   "lines": [
     {
-      "speaker": "Barddy",
+      "speaker": "神秘快递员",
       "text": "昨天托你找的 Mocha Latte 有了吗？"
     },
     {
-      "speaker": "Barddy",
+      "speaker": "神秘快递员",
       "text": "太好了！终于有了！给你，这是给你的奖励！"
     }
   ]

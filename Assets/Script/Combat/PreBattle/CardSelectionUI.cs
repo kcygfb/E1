@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -41,8 +42,10 @@ namespace KiKs.Combat
         private int RequiredDeckSize =>
             rulesConfig != null ? rulesConfig.ExpectedInitialDeckSize : DEFAULT_DECK_SIZE;
 
-        private void Start()
+        private IEnumerator Start()
         {
+            yield return TransitionEffect.WaitEntrance();
+
             ResolveUndoButton();
 
             if (cardButton != null)

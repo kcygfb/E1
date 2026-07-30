@@ -70,7 +70,7 @@ namespace KiKs.UI
             var startSlider = mat.GetFloat("_Slider");
             var startAlpha = mat.GetFloat("_Trans_After_Alpha");
 
-            _sequence = DOTween.Sequence();
+            _sequence = DOTween.Sequence().SetUpdate(true);
 
             // Phase 1: slider 0→target（与出场同向，BL→TR 溶解）
             var slider = startSlider;
