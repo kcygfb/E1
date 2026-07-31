@@ -114,8 +114,53 @@ namespace KiKs.Combat.Tests
             var blizzardCard = engine.State.Deck.Hand.First(card => card.Spec.Id == "blizzard");
             Assert.That(engine.PlayCard(blizzardCard.InstanceId, "enemy").Success, Is.True);
 
-            Assert.That(engine.State.Enemies[0].BleedStacks, Is.EqualTo(5));
+            Assert.That(engine.State.Enemies[0].BleedStacks, Is.EqualTo(0));
             Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(85));
+        }
+
+        [Test]
+        public void Poison_CanBeAppliedAndTicksPerTurn()
+        {
+            var poison = CreateCard("poison", 0, CardResourceType.ActionPoint,
+                CreateEffect(CardEffectType.Poison, amount: 4));
+            var engine = CreateEngine(poison, 8);
+            engine.StartBattle();
+
+            // Apply 4 poison stacks using PlayCard
+            var poisonCard = engine.State.Deck.Hand.First(card => card.Spec.Id == "poison");
+            Assert.That(engine.PlayCard(poisonCard.InstanceId, "enemy").Success, Is.True);
+            Assert.That(engine.State.Enemies[0].PoisonStacks, Is.EqualTo(4));
+            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(100));
+
+            // Turn 2: poison ticks 4 damage, stacks become 3
+            engine.EndPlayerTurn();
+            engine.CompleteEnemyTurn();
+            Assert.That(engine.State.Enemies[0].PoisonStacks, Is.EqualTo(3));
+            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(96));
+
+            // Turn 3: poison ticks 3 damage, stacks become 2
+            engine.EndPlayerTurn();
+            engine.CompleteEnemyTurn();
+            Assert.That(engine.State.Enemies[0].PoisonStacks, Is.EqualTo(2));
+            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(93));
+
+            // Turn 4: poison ticks 2 damage, stacks become 1
+            engine.EndPlayerTurn();
+            engine.CompleteEnemyTurn();
+            Assert.That(engine.State.Enemies[0].PoisonStacks, Is.EqualTo(1));
+            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(91));
+
+            // Turn 5: poison ticks 1 damage, stacks become 0
+            engine.EndPlayerTurn();
+            engine.CompleteEnemyTurn();
+            Assert.That(engine.State.Enemies[0].PoisonStacks, Is.EqualTo(0));
+            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(90));
+
+            // Turn 6: no more poison
+            engine.EndPlayerTurn();
+            engine.CompleteEnemyTurn();
+            Assert.That(engine.State.Enemies[0].PoisonStacks, Is.EqualTo(0));
+            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(90));
         }
 
         [Test]
@@ -483,7 +528,8 @@ namespace KiKs.Combat.Tests
                 effect.Type == CardEffectType.ToughnessDamage ||
                 effect.Type == CardEffectType.Bleed ||
                 effect.Type == CardEffectType.BleedScaledDamage ||
-                effect.Type == CardEffectType.LifeSteal
+                effect.Type == CardEffectType.LifeSteal ||
+                effect.Type == CardEffectType.Poison
                     ? CardTargetType.SingleEnemy
                     : CardTargetType.Self,
                 new[] { effect });

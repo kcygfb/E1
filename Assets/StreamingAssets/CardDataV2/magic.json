@@ -1,4 +1,4 @@
-{
+﻿{
   "schemaVersion": 2,
   "category": "magic",
   "categoryName": "魔法牌",
@@ -8,28 +8,58 @@
       "name": { "zhCN": "暴风雪", "en": "blizzard" },
       "category": "magic",
       "copies": 2,
-      "image": "Art/Cards/blizzard.png",
+      "image": "Art/Cards/placeholder.png",
       "cost": { "resource": "mana", "amount": 1 },
       "special": false,
       "effects": [
-        { "type": "bleed_scaled_damage", "multiplier": 3 }
+        { "type": "bleed_scaled_damage", "multiplier": 2 }
       ],
-      "source": { "workbook": "Killkiss全套卡牌(2).xlsx", "sheet": "Sheet3", "row": 15 },
-      "notes": ["每层流血造成 3 点伤害；流血层数不会被消耗。"]
+      "source": { "workbook": "Killkiss全套卡牌.xlsx", "sheet": "卡牌全套x5数值", "row": 179, "upgradeRow": 179 },
+      "notes": ["每层流血造成 2 点伤害，结算后清除所有流血层数。"]
+    },
+    {
+      "id": "magic_tornado",
+      "name": { "zhCN": "龙卷风", "en": "tornado" },
+      "category": "magic",
+      "copies": 2,
+      "image": "Art/Cards/placeholder.png",
+      "cost": { "resource": "mana", "amount": 1 },
+      "special": false,
+      "effects": [
+        { "type": "damage", "amount": 5, "hits": 8 },
+        { "type": "toughness_damage", "amount": 5, "unit": "points" },
+        { "type": "nullify_attacks", "amount": 3 }
+      ],
+      "source": { "workbook": "Killkiss全套卡牌.xlsx", "sheet": "卡牌全套x5数值", "row": 180, "upgradeRow": 180 },
+      "notes": []
+    },
+    {
+      "id": "magic_summon",
+      "name": { "zhCN": "召唤", "en": "summon" },
+      "category": "magic",
+      "copies": 2,
+      "image": "Art/Cards/placeholder.png",
+      "cost": { "resource": "mana", "amount": 1 },
+      "special": false,
+      "effects": [
+        { "type": "summon_companion", "amount": 3 }
+      ],
+      "source": { "workbook": "Killkiss全套卡牌.xlsx", "sheet": "卡牌全套x5数值", "row": 181, "upgradeRow": 181 },
+      "notes": ["召唤另一只魔手持续3回合。"]
     },
     {
       "id": "magic_lifesteal",
       "name": { "zhCN": "吸血", "en": "lifesteal" },
       "category": "magic",
       "copies": 2,
-      "image": "Art/Cards/lifesteal.png",
+      "image": "Art/Cards/placeholder.png",
       "cost": { "resource": "mana", "amount": 1 },
       "special": false,
       "effects": [
-        { "type": "life_steal", "amount": 9 }
+        { "type": "life_steal", "amount": 45 }
       ],
-      "source": { "workbook": "Killkiss全套卡牌(2).xlsx", "sheet": "Sheet3", "row": 16 },
-      "notes": ["造成 9 点伤害，并按实际伤害回复至多 9 点生命。"]
+      "source": { "workbook": "Killkiss全套卡牌.xlsx", "sheet": "卡牌全套x5数值", "row": 182, "upgradeRow": 182 },
+      "notes": ["造成 45 点伤害，并按实际伤害回复至多 45 点生命。"]
     }
   ]
 }

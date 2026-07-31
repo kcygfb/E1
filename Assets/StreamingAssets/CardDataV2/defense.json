@@ -1,35 +1,78 @@
-{
+﻿{
   "schemaVersion": 2,
   "category": "defense",
   "categoryName": "防御牌",
   "cards": [
     {
-      "id": "defense_reflect",
-      "name": { "zhCN": "反伤", "en": "counter" },
+      "id": "defense_evade",
+      "name": { "zhCN": "闪避", "en": "evade" },
       "category": "defense",
-      "copies": 2,
-      "image": "Art/Cards/reflect.png",
-      "cost": { "resource": "action_point", "amount": 1 },
+      "copies": 1,
+      "image": "Art/Cards/placeholder.png",
+      "cost": { "resource": "action_point", "amount": 0 },
       "special": false,
       "effects": [
-        { "type": "reflect_damage", "amount": { "base": 6, "upgraded": 13 } }
+        { "type": "nullify_attacks", "amount": { "base": 1, "upgraded": 2 } }
       ],
-      "source": { "workbook": "Killkiss全套卡牌(2).xlsx", "sheet": "Sheet3", "row": 19, "upgradeRow": 21 },
-      "notes": ["下一次受到敌人攻击后反射固定伤害。"]
+      "source": { "workbook": "Killkiss全套卡牌.xlsx", "sheet": "卡牌全套x5数值", "row": 172, "upgradeRow": 172 },
+      "notes": []
     },
     {
       "id": "defense_block",
       "name": { "zhCN": "格挡", "en": "block" },
       "category": "defense",
       "copies": 2,
-      "image": "Art/Cards/block.png",
+      "image": "Art/Cards/placeholder.png",
       "cost": { "resource": "action_point", "amount": 1 },
       "special": false,
       "effects": [
-        { "type": "block_damage", "amount": { "base": 12, "upgraded": 26 } }
+        { "type": "block_damage", "amount": { "base": 60, "upgraded": 130 } }
       ],
-      "source": { "workbook": "Killkiss全套卡牌(2).xlsx", "sheet": "Sheet3", "row": 20, "upgradeRow": 22 },
-      "notes": ["格挡值按实际吸收量消耗，未使用部分保留。"]
+      "source": { "workbook": "Killkiss全套卡牌.xlsx", "sheet": "卡牌全套x5数值", "row": 173, "upgradeRow": 173 },
+      "notes": ["获得临时防御值，按实际吸收量消耗。"]
+    },
+    {
+      "id": "defense_invisibility",
+      "name": { "zhCN": "隐身", "en": "invisibility" },
+      "category": "defense",
+      "copies": 2,
+      "image": "Art/Cards/placeholder.png",
+      "cost": { "resource": "action_point", "amount": 2 },
+      "special": true,
+      "effects": [
+        { "type": "skip_enemy_turns", "amount": { "base": 1, "upgraded": 1 } }
+      ],
+      "source": { "workbook": "Killkiss全套卡牌.xlsx", "sheet": "卡牌全套x5数值", "row": 174, "upgradeRow": 174 },
+      "notes": ["怪跳过当前回合。"]
+    },
+    {
+      "id": "defense_immune",
+      "name": { "zhCN": "免疫", "en": "immune" },
+      "category": "defense",
+      "copies": 2,
+      "image": "Art/Cards/placeholder.png",
+      "cost": { "resource": "action_point", "amount": 2 },
+      "special": true,
+      "effects": [
+        { "type": "block_damage", "amount": { "base": 250, "upgraded": 500 } }
+      ],
+      "source": { "workbook": "Killkiss全套卡牌.xlsx", "sheet": "卡牌全套x5数值", "row": 175, "upgradeRow": 175 },
+      "notes": []
+    },
+    {
+      "id": "defense_reflect",
+      "name": { "zhCN": "反伤", "en": "reflect" },
+      "category": "defense",
+      "copies": 2,
+      "image": "Art/Cards/placeholder.png",
+      "cost": { "resource": "action_point", "amount": 1 },
+      "special": false,
+      "effects": [
+        { "type": "block_damage", "amount": { "base": 30, "upgraded": 65 } },
+        { "type": "reflect_damage", "amount": { "base": 30, "upgraded": 65 } }
+      ],
+      "source": { "workbook": "Killkiss全套卡牌.xlsx", "sheet": "卡牌全套x5数值", "row": 176, "upgradeRow": 176 },
+      "notes": ["增加x点临时防御值，被攻击时对敌人造成x点伤害。"]
     }
   ]
 }

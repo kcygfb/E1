@@ -21,6 +21,7 @@ namespace KiKs.Combat
         public int DamageReductionTurns { get; private set; }
         public int SkipEnemyTurns { get; private set; }
         public int BleedStacks { get; private set; }
+        public int PoisonStacks { get; private set; }
         public int BlockPoints { get; private set; }
         public int PendingReflectDamage { get; private set; }
         public bool IsDead => CurrentHealth <= 0;
@@ -178,6 +179,17 @@ namespace KiKs.Combat
             BleedStacks += amount;
         }
 
+        public void ClearBleedStacks()
+        {
+            BleedStacks = 0;
+        }
+
+        public void AddPoisonStacks(int amount)
+        {
+            if (amount < 0) throw new ArgumentOutOfRangeException(nameof(amount));
+            PoisonStacks += amount;
+        }
+
         /// <summary>
         /// Processes all ticking status effects (bleed, poison, etc.) and returns
         /// a list of tick results. Call once per combatant per turn start.
@@ -193,8 +205,12 @@ namespace KiKs.Combat
                 BleedStacks--;
             }
 
-            // --- Poison hook (future): flat damage per stack, duration-- ---
-            // if (PoisonStacks > 0) { ... }
+            // --- Poison: damage = stacks, stacks-- ---
+            if (PoisonStacks > 0)
+            {
+                results.Add(new StatusTickResult(StatusEffectType.Poison, PoisonStacks, PoisonStacks - 1));
+                PoisonStacks--;
+            }
 
             return results;
         }
