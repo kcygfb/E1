@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using DG.Tweening;
@@ -45,6 +46,16 @@ namespace KiKs.UI
     public class TransitionEffect : MonoBehaviour
     {
         public static TransitionEffect Instance { get; private set; }
+
+        /// <summary>入场动画是否正在播放。其他脚本可在 Start 中检查此标志。</summary>
+        public static bool IsEntrancePlaying { get; private set; }
+
+        /// <summary>协程：等待入场动画播完。在任何场景的 Start 中调用 yield return TransitionEffect.WaitEntrance();</summary>
+        public static System.Collections.IEnumerator WaitEntrance()
+        {
+            while (IsEntrancePlaying)
+                yield return null;
+        }
 
         [Header("面板引用")]
         [SerializeField] private TransitionExitPanel exitPanel;
@@ -153,6 +164,9 @@ namespace KiKs.UI
             entrancePanel?.Reset();
         }
 
+        private static bool _wasTimeScaleFrozen;
+        private static List<AudioSource> _pausedAudio = new();
+
         // ─── 入场动画 ───
 
         private void OnSceneLoadedEntrance(Scene scene, LoadSceneMode mode)
@@ -169,7 +183,32 @@ namespace KiKs.UI
                 {
                     entrancePanel.SetFullCover();
                     exitPanel?.Reset();
-                    entrancePanel.PlayEntrance(_pendingEntranceComplete);
+                    IsEntrancePlaying = true;
+                    Time.timeScale = 0;
+
+                    // 暂停所有正在播放的 AudioSource
+                    _pausedAudio.Clear();
+                    foreach (var src in FindObjectsByType<AudioSource>(FindObjectsSortMode.None))
+                    {
+                        if (src.isPlaying)
+                        {
+                            _pausedAudio.Add(src);
+                            src.Pause();
+                        }
+                    }
+
+                    entrancePanel.PlayEntrance(() =>
+                    {
+                        IsEntrancePlaying = false;
+                        Time.timeScale = 1;
+                        // 恢复所有被暂停的 AudioSource
+                        foreach (var src in _pausedAudio)
+                        {
+                            if (src != null) src.UnPause();
+                        }
+                        _pausedAudio.Clear();
+                        _pendingEntranceComplete?.Invoke();
+                    });
                 }
                 else
                 {

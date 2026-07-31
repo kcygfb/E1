@@ -16,16 +16,16 @@ public sealed class DailyRevenueSummary : MonoBehaviour
     private readonly HashSet<string> recordedOrderIds = new();
 
     private TimeSystem timeSystem;
-    private GameObject popupRoot;
-    private CanvasGroup popupCanvasGroup;
-    private CanvasGroup panelCanvasGroup;
-    private Image dimmer;
-    private RectTransform panel;
-    private TMP_Text guestText;
-    private TMP_Text revenueListText;
-    private TMP_Text perfectText;
-    private TMP_Text totalText;
-    private Button confirmButton;
+    [SerializeField] private GameObject popupRoot;
+    [SerializeField] private CanvasGroup popupCanvasGroup;
+    [SerializeField] private CanvasGroup panelCanvasGroup;
+    [SerializeField] private Image dimmer;
+    [SerializeField] private RectTransform panel;
+    [SerializeField] private TMP_Text guestText;
+    [SerializeField] private TMP_Text revenueListText;
+    [SerializeField] private TMP_Text perfectText;
+    [SerializeField] private TMP_Text totalText;
+    [SerializeField] private Button confirmButton;
 
     private int guestCount;
     private bool isShowing;
@@ -40,7 +40,9 @@ public sealed class DailyRevenueSummary : MonoBehaviour
     private void Awake()
     {
         timeSystem = GetComponent<TimeSystem>();
-        BuildPlaceholderUI();
+        if (popupRoot == null) BuildPlaceholderUI();
+        if (confirmButton != null)
+            confirmButton.onClick.AddListener(OnConfirmClicked);
     }
 
     private void OnEnable()
@@ -102,7 +104,10 @@ public sealed class DailyRevenueSummary : MonoBehaviour
         RefreshText();
         popupRoot.SetActive(true);
         popupRoot.transform.SetAsLastSibling();
-        StartCoroutine(ShowRoutine());
+        if (popupCanvasGroup != null)
+            StartCoroutine(ShowRoutine());
+        else
+            confirmButton.interactable = true;
         return true;
     }
 

@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -20,10 +21,11 @@ public class TimeSystem : MonoBehaviour
             dailyRevenueSummary = gameObject.AddComponent<DailyRevenueSummary>();
     }
 
-    private void Start()
+    private IEnumerator Start()
     {
         dayCount = savedDayCount;
         Debug.Log($"[TimeSystem] Start() -> Day {dayCount}");
+        yield return KiKs.UI.TransitionEffect.WaitEntrance();
         EnterMorningCheck();
     }
 

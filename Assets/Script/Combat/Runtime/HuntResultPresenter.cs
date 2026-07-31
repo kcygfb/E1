@@ -61,16 +61,16 @@ namespace KiKs.Combat
         private readonly List<CardSpec> rewardCards = new();
 
         private BattleController battleController;
-        private GameObject popupRoot;
-        private CanvasGroup rootCanvasGroup;
-        private CanvasGroup panelCanvasGroup;
-        private Image dimmer;
-        private RectTransform panel;
-        private RectTransform cardArea;
-        private TMP_Text lootText;
-        private TMP_Text goldText;
-        private TMP_Text extraCardsText;
-        private Button confirmButton;
+        [SerializeField] private GameObject popupRoot;
+        [SerializeField] private CanvasGroup rootCanvasGroup;
+        [SerializeField] private CanvasGroup panelCanvasGroup;
+        [SerializeField] private Image dimmer;
+        [SerializeField] private RectTransform panel;
+        [SerializeField] private RectTransform cardArea;
+        [SerializeField] private TMP_Text lootText;
+        [SerializeField] private TMP_Text goldText;
+        [SerializeField] private TMP_Text extraCardsText;
+        [SerializeField] private Button confirmButton;
 
         private bool victoryQueued;
         private bool rewardsGranted;
@@ -92,7 +92,7 @@ namespace KiKs.Combat
             if (battleController != null)
                 battleController.CombatEventRaised += OnCombatEvent;
 
-            BuildPlaceholderUI();
+            if (popupRoot == null) BuildPlaceholderUI();
         }
 
         private void OnDestroy()
@@ -121,7 +121,10 @@ namespace KiKs.Combat
 
             popupRoot.SetActive(true);
             popupRoot.transform.SetAsLastSibling();
-            yield return ShowRoutine();
+            if (rootCanvasGroup != null)
+                yield return ShowRoutine();
+            else if (confirmButton != null)
+                confirmButton.interactable = true;
         }
 
         private void GrantRewardsOnce()

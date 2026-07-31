@@ -98,15 +98,12 @@ public class DialoguePlayer : MonoBehaviour
             foreach (var kvp in tokens)
                 text = text.Replace($"{{{kvp.Key}}}", kvp.Value);
 
+            string speaker = !string.IsNullOrEmpty(line.speaker) ? line.speaker : (speakerOverride ?? "");
+
             if (speakerText != null)
-            {
-                string speaker = !string.IsNullOrEmpty(speakerOverride) ? speakerOverride : line.speaker;
-                lineText.text = $"{speaker}：{text}";
-            }
-            else
-            {
-                lineText.text = text;
-            }
+                speakerText.text = speaker;
+
+            lineText.text = text;
         }
     }
 
