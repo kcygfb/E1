@@ -40,7 +40,10 @@ namespace KiKs.UI
                 _runtimeMat.SetFloat("_Trans_After_Alpha", 0f);
                 _runtimeMat.SetFloat("_Slider", 0f);
                 if (transitionImage != null)
+                {
                     transitionImage.material = _runtimeMat;
+                    var c = transitionImage.color; c.a = 0f; transitionImage.color = c;
+                }
             }
 
         }
@@ -56,6 +59,10 @@ namespace KiKs.UI
             {
                 mat.SetFloat("_Trans_After_Alpha", 1f);
                 mat.SetFloat("_Slider", 0f);
+            }
+            if (transitionImage != null)
+            {
+                var c = transitionImage.color; c.a = 1f; transitionImage.color = c;
             }
         }
 
@@ -103,6 +110,10 @@ namespace KiKs.UI
             {
                 mat.SetFloat("_Trans_After_Alpha", 0f);
                 mat.SetFloat("_Slider", 0f);
+            }
+            if (transitionImage != null)
+            {
+                var c = transitionImage.color; c.a = 0f; transitionImage.color = c;
             }
         }
 

@@ -14,6 +14,17 @@ public class TimeSystem : MonoBehaviour
     private DailyRevenueSummary dailyRevenueSummary;
     private bool isEndingShop;
 
+    private void Update()
+    {
+        if (UnityEngine.InputSystem.Keyboard.current != null
+            && UnityEngine.InputSystem.Keyboard.current[UnityEngine.InputSystem.Key.F9].wasPressedThisFrame
+            && !isEndingShop)
+        {
+            Debug.Log("[TimeSystem] F9 debug skip -> CompleteEndShopPhase");
+            CompleteEndShopPhase();
+        }
+    }
+
     private void Awake()
     {
         dailyRevenueSummary = GetComponent<DailyRevenueSummary>();
@@ -46,7 +57,10 @@ public class TimeSystem : MonoBehaviour
         CurrentPhase = DayPhase.Night;
         EmitPhaseChanged();
         GameEvent.Emit("DayEnded", dayCount);
-        SceneManager.LoadScene(preBattleSceneName);
+        if (KiKs.UI.TransitionEffect.Instance != null)
+            KiKs.UI.TransitionEffect.Instance.TransitionTo(preBattleSceneName);
+        else
+            SceneManager.LoadScene(preBattleSceneName);
     }
 
     public static void EndNightPhaseStatic()
