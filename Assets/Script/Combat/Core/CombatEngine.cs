@@ -338,8 +338,9 @@ namespace KiKs.Combat
                             card.InstanceId, 1, "Stun applied."));
                         break;
                     case CardEffectType.NullifyAttacks:
-                        State.Player.AddNullifyAttackCharges(1);
-                        AddStatusEvent(card, State.Player, 1, "Attack-nullify charges added.", events);
+                        var nullifyCharges = effect.Amount.Resolve(card.IsUpgraded);
+                        State.Player.AddNullifyAttackCharges(nullifyCharges);
+                        AddStatusEvent(card, State.Player, nullifyCharges, "Attack-nullify charges added.", events);
                         break;
                     case CardEffectType.DamageReduction:
                         var reduction = effect.Amount.Resolve(card.IsUpgraded);
@@ -364,6 +365,12 @@ namespace KiKs.Combat
                         break;
                     case CardEffectType.BleedScaledDamage:
                         ResolveBleedScaledDamage(card, target, effect, events);
+                        target.ClearBleedStacks();
+                        break;
+                    case CardEffectType.Poison:
+                        var poisonStacks = effect.Amount.Resolve(card.IsUpgraded);
+                        target.AddPoisonStacks(poisonStacks);
+                        AddStatusEvent(card, target, target.PoisonStacks, "Poison stacks applied.", events);
                         break;
                     case CardEffectType.LifeSteal:
                         ResolveFixedLifeSteal(card, target, effect, events);
@@ -384,7 +391,6 @@ namespace KiKs.Combat
                         ResolveGainResource(card, effect, events);
                         break;
 
-                    case CardEffectType.Poison:
                     case CardEffectType.Vulnerability:
                     case CardEffectType.Immunity:
                     case CardEffectType.SummonCompanion:

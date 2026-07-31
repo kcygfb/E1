@@ -1,4 +1,4 @@
-{
+﻿{
   "schemaVersion": 2,
   "category": "ranged",
   "categoryName": "射击牌",
@@ -8,13 +8,13 @@
       "name": { "zhCN": "手枪", "en": "pistol" },
       "category": "ranged",
       "copies": 2,
-      "image": "Art/Cards/pistol.png",
+      "image": "Art/Cards/placeholder.png",
       "cost": { "resource": "action_point", "amount": 1 },
       "special": false,
       "effects": [
-        { "type": "damage", "amount": { "base": 1, "upgraded": 2 }, "hits": 6 }
+        { "type": "damage", "amount": { "base": 5, "upgraded": 10 }, "hits": 6 }
       ],
-      "source": { "workbook": "Killkiss全套卡牌(2).xlsx", "sheet": "Sheet3", "row": 9, "upgradeRow": 11 },
+      "source": { "workbook": "Killkiss全套卡牌.xlsx", "sheet": "卡牌全套x5数值", "row": 128, "upgradeRow": 128 },
       "notes": []
     },
     {
@@ -22,14 +22,101 @@
       "name": { "zhCN": "狙击枪", "en": "sniper rifle" },
       "category": "ranged",
       "copies": 1,
-      "image": "Art/Cards/sniperrifle.png",
+      "image": "Art/Cards/placeholder.png",
       "cost": { "resource": "action_point", "amount": 2 },
       "special": false,
       "effects": [
-        { "type": "damage", "amount": { "base": 12, "upgraded": 20 }, "hits": 1 }
+        { "type": "damage", "amount": { "base": 60, "upgraded": 100 }, "hits": 1 }
       ],
-      "source": { "workbook": "Killkiss全套卡牌(2).xlsx", "sheet": "Sheet3", "row": 10, "upgradeRow": 12 },
-      "notes": ["Sheet3 的‘真实伤害’列已按需求并入普通攻击力，不保留独立字段。"]
+      "source": { "workbook": "Killkiss全套卡牌.xlsx", "sheet": "卡牌全套x5数值", "row": 129, "upgradeRow": 129 },
+      "notes": []
+    },
+    {
+      "id": "ranged_shotgun",
+      "name": { "zhCN": "霰弹枪", "en": "shotgun" },
+      "category": "ranged",
+      "copies": 2,
+      "image": "Art/Cards/placeholder.png",
+      "cost": { "resource": "action_point", "amount": 2 },
+      "special": false,
+      "effects": [
+        { "type": "damage", "amount": { "base": 25, "upgraded": 40 }, "hits": 2 },
+        { "type": "toughness_damage", "amount": { "base": 15, "upgraded": 25 }, "unit": "points" }
+      ],
+      "source": { "workbook": "Killkiss全套卡牌.xlsx", "sheet": "卡牌全套x5数值", "row": 130, "upgradeRow": 130 },
+      "notes": []
+    },
+    {
+      "id": "ranged_rocket_launcher",
+      "name": { "zhCN": "火箭筒", "en": "rocket launcher" },
+      "category": "ranged",
+      "copies": 1,
+      "image": "Art/Cards/placeholder.png",
+      "cost": { "resource": "action_point", "amount": 3 },
+      "special": false,
+      "effects": [
+        { "type": "damage", "amount": { "base": 90, "upgraded": 150 }, "hits": 1 }
+      ],
+      "source": { "workbook": "Killkiss全套卡牌.xlsx", "sheet": "卡牌全套x5数值", "row": 131, "upgradeRow": 131 },
+      "notes": []
+    },
+    {
+      "id": "ranged_revolver",
+      "name": { "zhCN": "左轮手枪", "en": "revolver" },
+      "category": "ranged",
+      "copies": 1,
+      "image": "Art/Cards/placeholder.png",
+      "cost": { "resource": "action_point", "amount": 1 },
+      "special": false,
+      "effects": [
+        { "type": "damage", "amount": { "base": 5, "upgraded": 10 }, "hits": 3 },
+        { "type": "toughness_damage", "amount": { "base": 15, "upgraded": 30 }, "unit": "points" }
+      ],
+      "source": { "workbook": "Killkiss全套卡牌.xlsx", "sheet": "卡牌全套x5数值", "row": 132, "upgradeRow": 132 },
+      "notes": []
+    },
+    {
+      "id": "ranged_submachine_gun",
+      "name": { "zhCN": "冲锋枪", "en": "submachine gun" },
+      "category": "ranged",
+      "copies": 1,
+      "image": "Art/Cards/placeholder.png",
+      "cost": { "resource": "action_point", "amount": 1 },
+      "special": false,
+      "effects": [
+        { "type": "damage", "amount": { "base": 5, "upgraded": 10 }, "hits": 8 }
+      ],
+      "source": { "workbook": "Killkiss全套卡牌.xlsx", "sheet": "卡牌全套x5数值", "row": 133, "upgradeRow": 133 },
+      "notes": []
+    },
+    {
+      "id": "ranged_flamethrower",
+      "name": { "zhCN": "火焰喷射器", "en": "flamethrower" },
+      "category": "ranged",
+      "copies": 2,
+      "image": "Art/Cards/placeholder.png",
+      "cost": { "resource": "action_point", "amount": 2 },
+      "special": false,
+      "effects": [
+        { "type": "damage", "amount": { "base": 5, "upgraded": 5 }, "hits": { "base": 8, "upgraded": 15 } },
+        { "type": "bleed", "amount": { "base": 15, "upgraded": 20 } }
+      ],
+      "source": { "workbook": "Killkiss全套卡牌.xlsx", "sheet": "卡牌全套x5数值", "row": 134, "upgradeRow": 134 },
+      "notes": []
+    },
+    {
+      "id": "ranged_grenade_launcher",
+      "name": { "zhCN": "榴弹发射器", "en": "grenade launcher" },
+      "category": "ranged",
+      "copies": 2,
+      "image": "Art/Cards/placeholder.png",
+      "cost": { "resource": "action_point", "amount": 2 },
+      "special": true,
+      "effects": [
+        { "type": "damage", "amount": { "base": 8, "upgraded": 13 }, "hits": 2 }
+      ],
+      "source": { "workbook": "Killkiss全套卡牌.xlsx", "sheet": "卡牌全套x5数值", "row": 135, "upgradeRow": 135 },
+      "notes": []
     }
   ]
 }

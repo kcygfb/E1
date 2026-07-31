@@ -154,7 +154,8 @@ namespace KiKs.Combat
                 effect.Type == CardEffectType.ToughnessDamage ||
                 effect.Type == CardEffectType.Bleed ||
                 effect.Type == CardEffectType.BleedScaledDamage ||
-                effect.Type == CardEffectType.LifeSteal)
+                effect.Type == CardEffectType.LifeSteal ||
+                effect.Type == CardEffectType.Poison)
                 ? CardTargetType.SingleEnemy
                 : CardTargetType.Self;
         }

@@ -82,7 +82,19 @@
             "bleed_scaled_damage",
             "life_steal",
             "reflect_damage",
-            "block_damage"
+            "block_damage",
+            "stun",
+            "poison",
+            "vulnerability",
+            "nullify_attacks",
+            "damage_reduction",
+            "skip_enemy_turns",
+            "draw_cards",
+            "immunity",
+            "summon_companion",
+            "life_steal_max_health",
+            "gain_resource",
+            "play_cards_from_discard"
           ]
         },
         "amount": { "$ref": "#/$defs/numberOrPair" },
