@@ -20,6 +20,8 @@ namespace KiKs.Combat
     public sealed class BattleState
     {
         private readonly List<CombatantState> _enemies;
+        private readonly Dictionary<string, DeckState> _enemyDecks = new();
+        private readonly Dictionary<string, int> _enemyBaseActionPoints = new();
 
         public CombatRules Rules { get; }
         public CombatantState Player { get; }
@@ -31,6 +33,8 @@ namespace KiKs.Combat
         public int TurnNumber { get; internal set; }
         public PendingExecutionState PendingExecution { get; internal set; }
         public bool IsCurrentEnemyTurnSkipped { get; internal set; }
+        public IReadOnlyDictionary<string, DeckState> EnemyDecks => _enemyDecks;
+        public IReadOnlyDictionary<string, int> EnemyBaseActionPoints => _enemyBaseActionPoints;
 
         public BattleState(
             CombatRules rules,
@@ -74,6 +78,30 @@ namespace KiKs.Combat
         public CombatantState FindFirstLivingEnemy()
         {
             return _enemies.Find(enemy => !enemy.IsDead);
+        }
+
+        public DeckState GetEnemyDeck(string enemyId)
+        {
+            if (string.IsNullOrWhiteSpace(enemyId)) return null;
+            return _enemyDecks.TryGetValue(enemyId, out var deck) ? deck : null;
+        }
+
+        internal void RegisterEnemyDeck(string enemyId, DeckState deck)
+        {
+            if (string.IsNullOrWhiteSpace(enemyId) || deck == null) return;
+            _enemyDecks[enemyId] = deck;
+        }
+
+        internal void RegisterEnemyBaseActionPoints(string enemyId, int baseAP)
+        {
+            if (string.IsNullOrWhiteSpace(enemyId)) return;
+            _enemyBaseActionPoints[enemyId] = baseAP;
+        }
+
+        public int GetEnemyBaseActionPoints(string enemyId)
+        {
+            if (string.IsNullOrWhiteSpace(enemyId)) return 0;
+            return _enemyBaseActionPoints.TryGetValue(enemyId, out var ap) ? ap : 0;
         }
     }
 }

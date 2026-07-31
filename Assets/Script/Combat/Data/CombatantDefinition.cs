@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace KiKs.Combat
@@ -18,10 +19,35 @@ namespace KiKs.Combat
         [Min(1)] [SerializeField] private int maxHealth = 100;
         [Min(0)] [SerializeField] private int maxToughness = 100;
 
+        [Header("Enemy Deck")]
+        [Tooltip("卡牌ID列表，和玩家共用同一套 CardDataV2 JSON。如 melee_long_axe, defense_block 等")]
+        [SerializeField] private List<string> enemyCardIds = new();
+        [Tooltip("每回合抽几张牌")]
+        [Min(1)] [SerializeField] private int cardsPerTurn = 2;
+        [Tooltip("手牌上限")]
+        [Min(1)] [SerializeField] private int enemyHandLimit = 5;
+        [Tooltip("每回合行动次数（出几张牌）")]
+        [Min(1)] [SerializeField] private int enemyActionsPerTurn = 1;
+        [Tooltip("没牌或没行动时的固定伤害")]
+        [Min(0)] [SerializeField] private int fallbackDamage = 20;
+        [Tooltip("没牌时的固定破甲伤害")]
+        [Min(0)] [SerializeField] private int fallbackToughnessDamage = 10;
+        [Tooltip("怪物每回合的行动点")]
+        [Min(0)] [SerializeField] private int baseActionPoints = 2;
+
         public string CombatantId => combatantId;
         public string DisplayName => displayName;
         public CombatantSide Side => side;
         public EnemyRank EnemyRank => enemyRank;
+        public IReadOnlyList<string> EnemyCardIds => enemyCardIds;
+        public int CardsPerTurn => cardsPerTurn;
+        public int EnemyHandLimit => enemyHandLimit;
+        public int EnemyActionsPerTurn => enemyActionsPerTurn;
+        public int FallbackDamage => fallbackDamage;
+        public int FallbackToughnessDamage => fallbackToughnessDamage;
+        public int BaseActionPoints => baseActionPoints;
+
+        public bool HasEnemyDeck => enemyCardIds != null && enemyCardIds.Count > 0;
 
         public CombatantState CreateRuntimeState()
         {

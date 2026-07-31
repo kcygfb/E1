@@ -18,3 +18,16 @@ MonoBehaviour:
   enemyRank: 1
   maxHealth: 50
   maxToughness: 50
+  enemyCardIds:
+  - melee_dagger
+  - melee_dagger
+  - melee_throwing_knife
+  - melee_throwing_knife
+  - defense_block
+  - melee_fire_axe
+  cardsPerTurn: 2
+  enemyHandLimit: 5
+  enemyActionsPerTurn: 2
+  fallbackDamage: 15
+  fallbackToughnessDamage: 8
+  baseActionPoints: 2

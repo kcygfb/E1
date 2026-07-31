@@ -760,6 +760,41 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 209022083}
   m_CullTransparentMesh: 1
+--- !u!1 &210231061
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 210231062}
+  m_Layer: 0
+  m_Name: EnemyHandArea
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &210231062
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 210231061}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2104238183}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 1}
+  m_AnchorMax: {x: 0.5, y: 1}
+  m_AnchoredPosition: {x: 0, y: -150}
+  m_SizeDelta: {x: 800, y: 200}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &228769368
 GameObject:
   m_ObjectHideFlags: 0
@@ -1672,8 +1707,8 @@ GameObject:
   - component: {fileID: 449327850}
   - component: {fileID: 449327849}
   - component: {fileID: 449327851}
-  - component: {fileID: 449327852}
   - component: {fileID: 449327853}
+  - component: {fileID: 449327854}
   m_Layer: 5
   m_Name: BattleRoot/HandCardPanel
   m_TagString: Untagged
@@ -1772,19 +1807,6 @@ MonoBehaviour:
   huntRewardCardCount: 3
   huntRewardCardPool: []
   huntResultDelay: 0.75
---- !u!114 &449327852
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 449327847}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f24cbd03a8e148508d1f4607732e089b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: KiKs.Combat::KiKs.Combat.SimpleEnemyAI
-  battleController: {fileID: 875998994}
 --- !u!114 &449327853
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1807,6 +1829,24 @@ MonoBehaviour:
   goldText: {fileID: 1997413818}
   extraCardsText: {fileID: 946558172}
   confirmButton: {fileID: 159614893}
+--- !u!114 &449327854
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 449327847}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fbeac5b692a9bf14db626fe55cfd109a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KiKs.Combat::KiKs.Combat.CardEnemyAI
+  battleController: {fileID: 449327851}
+  strategy: {fileID: 0}
+  useFallbackIfNoStrategy: 1
+  fallbackDamage: 20
+  fallbackToughnessDamage: 10
+  fallbackDelay: 0.3
 --- !u!1 &467355309
 GameObject:
   m_ObjectHideFlags: 0
@@ -3049,6 +3089,8 @@ GameObject:
   m_Component:
   - component: {fileID: 875998995}
   - component: {fileID: 875998994}
+  - component: {fileID: 875998996}
+  - component: {fileID: 875998997}
   m_Layer: 0
   m_Name: BattleController
   m_TagString: Untagged
@@ -3072,7 +3114,7 @@ MonoBehaviour:
   rulesConfig: {fileID: 11400000, guid: a3bb6ee28ee6f144aaf43b96d914eb96, type: 2}
   playerDefinition: {fileID: 11400000, guid: 192373106e9cd45478816be416f17b41, type: 2}
   enemyDefinitions:
-  - {fileID: 11400000, guid: 38af5df9514dad94d8d74b87d9eb5912, type: 2}
+  - {fileID: 11400000, guid: 37365789fb2ea24468c94f37191a010e, type: 2}
   debugStartingCardIds:
   - melee_fire_axe
   - melee_tachi
@@ -3106,6 +3148,47 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &875998996
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 875998993}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fbeac5b692a9bf14db626fe55cfd109a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KiKs.Combat::KiKs.Combat.CardEnemyAI
+  battleController: {fileID: 875998994}
+  strategy: {fileID: 0}
+  useFallbackIfNoStrategy: 1
+  fallbackDamage: 20
+  fallbackToughnessDamage: 10
+  fallbackDelay: 0.3
+--- !u!114 &875998997
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 875998993}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f77bf56da1c21474a93766ebe9382ccd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KiKs.Combat::KiKs.Combat.EnemyCardPresenter
+  battleController: {fileID: 875998994}
+  cardPrefab: {fileID: 3607185994323948659, guid: ea658d957d9b555449247467be68dfe8, type: 3}
+  enemyHandArea: {fileID: 210231062}
+  enemyDeckArea: {fileID: 1334531475}
+  enemyDiscardArea: {fileID: 2020813302}
+  playerArea: {fileID: 1141623243}
+  drawDuration: 0.4
+  playDuration: 0.5
+  discardDuration: 0.3
+  cardSpacing: 140
+  cardScale: 0.6
 --- !u!1 &890833836
 GameObject:
   m_ObjectHideFlags: 0
@@ -5192,6 +5275,41 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1332729259}
   m_CullTransparentMesh: 1
+--- !u!1 &1334531474
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1334531475}
+  m_Layer: 0
+  m_Name: EnemyDeckArea
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1334531475
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1334531474}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2104238183}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 1, y: 1}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: -100, y: -150}
+  m_SizeDelta: {x: 60, y: 80}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1420308290
 GameObject:
   m_ObjectHideFlags: 0
@@ -7404,6 +7522,41 @@ MonoBehaviour:
   victoryPrefab: {fileID: 0}
   defeatPrefab: {fileID: 0}
   vfxLifetime: 2
+--- !u!1 &2020813301
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2020813302}
+  m_Layer: 0
+  m_Name: EnemyDiscardArea
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &2020813302
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2020813301}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2104238183}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 100, y: -150}
+  m_SizeDelta: {x: 60, y: 80}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &2039852070
 GameObject:
   m_ObjectHideFlags: 0
@@ -7870,6 +8023,9 @@ RectTransform:
   - {fileID: 2000332673}
   - {fileID: 1246080162}
   - {fileID: 1641691385}
+  - {fileID: 210231062}
+  - {fileID: 1334531475}
+  - {fileID: 2020813302}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}

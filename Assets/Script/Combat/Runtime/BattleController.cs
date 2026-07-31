@@ -120,6 +120,8 @@ namespace KiKs.Combat
                     CreateEnemies(),
                     new DeckState(cards, randomSeed, shuffleAtBattleStart));
 
+                CreateEnemyDecks(state);
+
                 _engine = new CombatEngine(state);
                 _engine.EventRaised += ForwardEvent;
                 var result = _engine.StartBattle();
@@ -232,6 +234,56 @@ namespace KiKs.Combat
 
         public CombatResult CompleteEnemyTurn() { return GetEngineOrThrow().CompleteEnemyTurn(); }
 
+        // ─── Enemy card system forwarding ───
+
+        public DeckDrawResult DrawEnemyCards(string enemyId, int count, int handLimit)
+        {
+            return GetEngineOrThrow().DrawEnemyCards(enemyId, count, handLimit);
+        }
+
+        public CombatResult PlayEnemyCard(string enemyId, string cardInstanceId)
+        {
+            var engine = GetEngineOrThrow();
+            var deck = engine.State.GetEnemyDeck(enemyId);
+            var card = deck?.FindInHand(cardInstanceId);
+            var cardName = card != null ? card.Spec.DisplayName : cardInstanceId;
+            var result = engine.PlayEnemyCard(enemyId, cardInstanceId);
+
+            if (result.Success)
+            {
+                var enemy = engine.State.FindEnemy(enemyId);
+                var enemyName = enemy != null ? enemy.DisplayName : enemyId;
+                var actualDamage = SumDamage(result, enemyId);
+                Debug.Log("[Combat] " + enemyName + " played card \"" + cardName +
+                          "\" and dealt " + actualDamage + " damage.", this);
+            }
+
+            return result;
+        }
+
+        public void DiscardEnemyHand(string enemyId)
+        {
+            GetEngineOrThrow().DiscardEnemyHand(enemyId);
+        }
+
+        public CombatantDefinition FindEnemyDefinitionById(string combatantId)
+        {
+            if (enemyDefinitions == null) return null;
+            foreach (var def in enemyDefinitions)
+            {
+                if (def != null && def.CombatantId == combatantId)
+                    return def;
+            }
+            return null;
+        }
+
+        public DeckState GetEnemyDeck(string enemyId)
+        {
+            return _engine?.State.GetEnemyDeck(enemyId);
+        }
+
+        public CombatEngine GetEngineInternal() => _engine;
+
         public void SetPlayerActionPointModifier(int modifier)
         {
             GetEngineOrThrow().State.Player.SetActionPointModifier(modifier);
@@ -266,13 +318,29 @@ namespace KiKs.Combat
             return enemies;
         }
 
-        private List<CardInstance> CreateCardInstances(IReadOnlyList<string> cardIds)
+        private void CreateEnemyDecks(BattleState state)
+        {
+            for (var i = 0; i < enemyDefinitions.Count; i++)
+            {
+                var definition = enemyDefinitions[i];
+                if (definition == null || !definition.HasEnemyDeck) continue;
+
+                var enemy = state.Enemies[i];
+                var enemyCards = CreateCardInstances(definition.EnemyCardIds, enemy.Id + "_");
+                var enemySeed = randomSeed + i + 1;
+                var enemyDeck = new DeckState(enemyCards, enemySeed, shuffleAtBattleStart);
+                state.RegisterEnemyDeck(enemy.Id, enemyDeck);
+                state.RegisterEnemyBaseActionPoints(enemy.Id, definition.BaseActionPoints);
+            }
+        }
+
+        private List<CardInstance> CreateCardInstances(IReadOnlyList<string> cardIds, string instanceIdPrefix = "")
         {
             var cards = new List<CardInstance>(cardIds.Count);
             for (var i = 0; i < cardIds.Count; i++)
             {
                 var spec = cardDatabase.Repository.GetRequiredCard(cardIds[i]);
-                cards.Add(new CardInstance(spec.Id + "#" + (i + 1).ToString("D2"), spec));
+                cards.Add(new CardInstance(instanceIdPrefix + spec.Id + "#" + (i + 1).ToString("D2"), spec));
             }
 
             return cards;
