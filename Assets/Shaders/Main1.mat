@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Mat_In
+  m_Name: Main1
   m_Shader: {fileID: -6465566751694194690, guid: 7b559cc85111b9e40a6c4ae9421db8cf, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -28,11 +28,11 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _Trans_After:
-        m_Texture: {fileID: 2800000, guid: 50f7c0023625bed4f9748ecdec8890d9, type: 3}
+        m_Texture: {fileID: 2800000, guid: c5686fc134eb3fa409174ae060c3a592, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _Trans_Before:
-        m_Texture: {fileID: 2800000, guid: 263be9bb61c6dfd4da4638520e91840b, type: 3}
+        m_Texture: {fileID: 2800000, guid: 8d87a49ec2bf4e7418e9dddea5ace8aa, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - unity_Lightmaps:
@@ -50,18 +50,18 @@ Material:
     m_Ints: []
     m_Floats:
     - _ColorMask: 15
-    - _Dgree: 0.4
+    - _Dgree: 0
     - _Slider: 0
     - _Stencil: 0
     - _StencilComp: 8
     - _StencilOp: 0
     - _StencilReadMask: 255
     - _StencilWriteMask: 255
-    - _Trans_After_Alpha: 1
+    - _Trans_After_Alpha: 0
     - _UIMaskSoftnessX: 1
     - _UIMaskSoftnessY: 1
     m_Colors:
     - _ClipRect: {r: 0, g: 0, b: 0, a: 0}
-    - _GridX_Y: {r: 1, g: 1, b: 0, a: 0}
+    - _GridX_Y: {r: 32, g: 16, b: 0, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

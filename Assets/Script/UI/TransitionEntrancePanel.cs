@@ -15,6 +15,7 @@ namespace KiKs.UI
         [Header("Shader 目标")]
         [SerializeField] private Image transitionImage;
         [SerializeField] private Material transitionMaterial;
+        internal Material SourceMaterial => transitionMaterial != null ? transitionMaterial : transitionImage?.material;
 
         [Header("入场时间设置")]
         [SerializeField] private float sliderDuration = 1.2f;
@@ -45,7 +46,22 @@ namespace KiKs.UI
                     var c = transitionImage.color; c.a = 0f; transitionImage.color = c;
                 }
             }
+        }
 
+        /// <summary>从源材质创建新 runtime 材质并应用到 Image。
+        /// 先禁用 Image 防止中间状态闪屏，换完再由 SetFullCover 启用。</summary>
+        public void CopyMaterialFrom(Material srcMat)
+        {
+            if (srcMat == null || transitionImage == null) return;
+
+            // 禁用 Image，防止换材质时的中间帧闪屏
+            transitionImage.enabled = false;
+
+            var oldMat = _runtimeMat;
+            _runtimeMat = new Material(srcMat);
+            transitionImage.material = _runtimeMat;
+
+            if (oldMat != null) Destroy(oldMat);
         }
 
         /// <summary>设置为完全覆盖状态（入场动画开始前调用）。</summary>
@@ -62,6 +78,7 @@ namespace KiKs.UI
             }
             if (transitionImage != null)
             {
+                transitionImage.enabled = true;
                 var c = transitionImage.color; c.a = 1f; transitionImage.color = c;
             }
         }

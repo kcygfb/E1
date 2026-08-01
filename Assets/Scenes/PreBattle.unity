@@ -217,7 +217,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KiKs.UI::KiKs.UI.TransitionEntrancePanel
   transitionImage: {fileID: 25272785}
-  transitionMaterial: {fileID: 2100000, guid: 588e2fbae7413874ca9b87c11251b5fa, type: 2}
+  transitionMaterial: {fileID: 2100000, guid: f578b9a9cb1521847ae64b7735a322fa, type: 2}
   sliderDuration: 0.7
   alphaDuration: 0.1
   sliderTarget: 2
@@ -235,8 +235,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
-  m_Material: {fileID: 2100000, guid: 588e2fbae7413874ca9b87c11251b5fa, type: 2}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Material: {fileID: 2100000, guid: f578b9a9cb1521847ae64b7735a322fa, type: 2}
+  m_Color: {r: 1, g: 1, b: 1, a: 0}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -1186,7 +1186,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KiKs.UI::KiKs.UI.TransitionExitPanel
   transitionImage: {fileID: 417508962}
-  transitionMaterial: {fileID: 2100000, guid: be5cb1cd3be2dc745a4974ce731a1041, type: 2}
+  transitionMaterial: {fileID: 2100000, guid: 3cbf1627a1a755c419d4fa7e190d103e, type: 2}
   centerImage: {fileID: 1297780568}
   centerImageScale: 2
   alphaDuration: 0.5
@@ -1208,8 +1208,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
-  m_Material: {fileID: 2100000, guid: be5cb1cd3be2dc745a4974ce731a1041, type: 2}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Material: {fileID: 2100000, guid: 3cbf1627a1a755c419d4fa7e190d103e, type: 2}
+  m_Color: {r: 1, g: 1, b: 1, a: 0}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1

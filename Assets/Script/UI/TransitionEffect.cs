@@ -2,28 +2,19 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 using DG.Tweening;
 
 namespace KiKs.UI
 {
-    /// <summary>
-    /// 转场配置：每次播放时可以覆盖默认值。
-    /// 不传则用 Inspector 上的默认值。
-    /// </summary>
     [Serializable]
     public class TransitionConfig
     {
-        /// <summary>替换中间图片，null 则保持原图片</summary>
         public Sprite centerSprite;
-        /// <summary>中间图片颜色（含 alpha 基色）</summary>
         public Color? centerColor;
-        /// <summary>中间图片缩放</summary>
         public float? centerScale;
-        /// <summary>替换 Trans_Before 贴图</summary>
         public Texture2D beforeTexture;
-        /// <summary>替换 Trans_After 贴图</summary>
         public Texture2D afterTexture;
-        /// <summary>材质整体染色（shader 的 _Color）</summary>
         public Color? tintColor;
         public float? alphaDuration;
         public float? centerFadeInDuration;
@@ -36,21 +27,15 @@ namespace KiKs.UI
 
     /// <summary>
     /// 全局转场效果控制器（DontDestroyOnLoad 单例）。
-    /// 协调出场面板 (TransitionExitPanel) 和入场面板 (TransitionEntrancePanel)。
-    /// 出场和入场各自拥有独立的 Image、材质和代码。
-    ///
-    /// 流程: ExitPanel 覆盖屏幕 → 加载场景 → EntrancePanel 揭示新场景
-    /// 用法: TransitionEffect.Instance.TransitionTo("Card");
-    ///       TransitionEffect.Instance.TransitionTo("Card", new TransitionConfig { ... });
+    /// 单例持有自己的面板，场景加载时从新场景的 Teans2 提取材质资产引用。
+    /// 材质更新全部延迟到 OnSceneLoadedEntrance / TransitionTo，不在 Awake 阶段碰单例面板。
     /// </summary>
     public class TransitionEffect : MonoBehaviour
     {
         public static TransitionEffect Instance { get; private set; }
 
-        /// <summary>入场动画是否正在播放。其他脚本可在 Start 中检查此标志。</summary>
         public static bool IsEntrancePlaying { get; private set; }
 
-        /// <summary>协程：等待入场动画播完。在任何场景的 Start 中调用 yield return TransitionEffect.WaitEntrance();</summary>
         public static System.Collections.IEnumerator WaitEntrance()
         {
             while (IsEntrancePlaying)
@@ -66,6 +51,11 @@ namespace KiKs.UI
 
         private Action _pendingEntranceComplete;
 
+        // 暂存的源材质资产（跨场景存活，不依赖场景内 GameObject）
+        private Material _pendingExitSourceMat;
+        private Sprite _pendingExitCenterSprite;
+        private Material _pendingEntranceSourceMat;
+
         public bool IsPlaying =>
             (exitPanel != null && exitPanel.IsPlaying) ||
             (entrancePanel != null && entrancePanel.IsPlaying);
@@ -74,13 +64,13 @@ namespace KiKs.UI
         {
             if (Instance != null && Instance != this)
             {
+                // 新场景加载：只暂存源材质引用，不碰单例面板
+                Instance.CaptureSourceMaterials(exitPanel, entrancePanel);
                 Destroy(gameObject);
                 return;
             }
             Instance = this;
 
-            // 脱离父级，成为 root GameObject（DontDestroyOnLoad 要求）
-            // 注意：SetParent(null) 会导致 Canvas 自动切到 WorldSpace，需要记录并在之后恢复
             if (transform.parent != null)
             {
                 var cv = GetComponent<UnityEngine.Canvas>();
@@ -96,9 +86,22 @@ namespace KiKs.UI
             }
             DontDestroyOnLoad(gameObject);
 
-            // 初始化两个面板的运行时材质
             if (exitPanel != null) exitPanel.Init();
             if (entrancePanel != null) entrancePanel.Init();
+        }
+
+        /// <summary>从新场景的面板提取源材质引用。只存储，不应用。</summary>
+        private void CaptureSourceMaterials(TransitionExitPanel sceneExit, TransitionEntrancePanel sceneEntrance)
+        {
+            if (sceneExit != null)
+            {
+                _pendingExitSourceMat = sceneExit.SourceMaterial;
+                _pendingExitCenterSprite = sceneExit.CenterImage?.sprite;
+            }
+            if (sceneEntrance != null)
+            {
+                _pendingEntranceSourceMat = sceneEntrance.SourceMaterial;
+            }
         }
 
         private void OnDestroy()
@@ -106,19 +109,29 @@ namespace KiKs.UI
             if (Instance == this) Instance = null;
         }
 
-        /// <summary>转场并加载场景（用 Inspector 默认参数）。</summary>
         public void TransitionTo(string sceneName, Action onComplete = null)
         {
             TransitionTo(sceneName, null, onComplete);
         }
 
-        /// <summary>转场并加载场景（自定义参数）。出场动画完成后加载场景，场景加载后自动播放入场动画。</summary>
         public void TransitionTo(string sceneName, TransitionConfig config, Action onComplete = null)
         {
             if (exitPanel == null)
             {
                 Debug.LogError("[TransitionEffect] exitPanel not assigned");
                 return;
+            }
+
+            // 应用上一个场景暂存的 exit 材质（供本次出场使用）
+            if (_pendingExitSourceMat != null)
+            {
+                exitPanel.CopyMaterialFrom(_pendingExitSourceMat);
+                _pendingExitSourceMat = null;
+            }
+            if (_pendingExitCenterSprite != null && exitPanel.CenterImage != null)
+            {
+                exitPanel.CenterImage.sprite = _pendingExitCenterSprite;
+                _pendingExitCenterSprite = null;
             }
 
             exitPanel.PlayExit(config, () =>
@@ -137,37 +150,42 @@ namespace KiKs.UI
             });
         }
 
-        /// <summary>只播放出场效果（用 Inspector 默认参数）。</summary>
         public void Play(Action onComplete = null)
         {
             Play(null, onComplete);
         }
 
-        /// <summary>只播放出场效果（自定义参数）。</summary>
         public void Play(TransitionConfig config, Action onComplete = null)
         {
-            if (exitPanel != null)
-                exitPanel.PlayExit(config, onComplete);
+            if (exitPanel == null) return;
+
+            if (_pendingExitSourceMat != null)
+            {
+                exitPanel.CopyMaterialFrom(_pendingExitSourceMat);
+                _pendingExitSourceMat = null;
+            }
+            if (_pendingExitCenterSprite != null && exitPanel.CenterImage != null)
+            {
+                exitPanel.CenterImage.sprite = _pendingExitCenterSprite;
+                _pendingExitCenterSprite = null;
+            }
+
+            exitPanel.PlayExit(config, onComplete);
         }
 
-        /// <summary>播放入场动画：溶解揭示新场景。</summary>
         public void PlayEntrance(Action onComplete = null)
         {
             if (entrancePanel != null)
                 entrancePanel.PlayEntrance(onComplete);
         }
 
-        /// <summary>立即重置所有面板到转场前状态。</summary>
         public void Reset()
         {
             exitPanel?.Reset();
             entrancePanel?.Reset();
         }
 
-        private static bool _wasTimeScaleFrozen;
         private static List<AudioSource> _pausedAudio = new();
-
-        // ─── 入场动画 ───
 
         private void OnSceneLoadedEntrance(Scene scene, LoadSceneMode mode)
         {
@@ -178,15 +196,17 @@ namespace KiKs.UI
             {
                 yield return null;
 
-                // 先让入场面板接管覆盖，再隐藏出场面板（无缝衔接）
                 if (entrancePanel != null)
                 {
+                    // 不应用新场景的 entrance 材质！
+                    // 入场动画用的是出发场景的材质（Init 时已设置好）
+                    // 新场景的 entrance 材质等入场动画播完后才应用，供下次转场使用
+
                     entrancePanel.SetFullCover();
                     exitPanel?.Reset();
                     IsEntrancePlaying = true;
                     Time.timeScale = 0;
 
-                    // 暂停所有正在播放的 AudioSource
                     _pausedAudio.Clear();
                     foreach (var src in FindObjectsByType<AudioSource>(FindObjectsSortMode.None))
                     {
@@ -201,13 +221,19 @@ namespace KiKs.UI
                     {
                         IsEntrancePlaying = false;
                         Time.timeScale = 1;
-                        // 恢复所有被暂停的 AudioSource
                         foreach (var src in _pausedAudio)
                         {
                             if (src != null) src.UnPause();
                         }
                         _pausedAudio.Clear();
                         _pendingEntranceComplete?.Invoke();
+
+                        // 入场动画播完后，应用新场景的 entrance 材质，供下次转场使用
+                        if (_pendingEntranceSourceMat != null)
+                        {
+                            entrancePanel.CopyMaterialFrom(_pendingEntranceSourceMat);
+                            _pendingEntranceSourceMat = null;
+                        }
                     });
                 }
                 else

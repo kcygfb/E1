@@ -14,10 +14,13 @@ namespace KiKs.UI
         [Header("Shader 目标")]
         [SerializeField] private Image transitionImage;
         [SerializeField] private Material transitionMaterial;
+        internal Material SourceMaterial => transitionMaterial != null ? transitionMaterial : transitionImage?.material;
 
         [Header("中间图片")]
         [SerializeField] private Image centerImage;
         [SerializeField] private float centerImageScale = 1f;
+        /// <summary>供 TransitionEffect.SyncFromScenePanels 读取</summary>
+        internal Image CenterImage => centerImage;
 
         [Header("时间设置")]
         [SerializeField] private float alphaDuration = 0.5f;
@@ -50,6 +53,20 @@ namespace KiKs.UI
                     var c = transitionImage.color; c.a = 0f; transitionImage.color = c;
                 }
             }
+        }
+
+        /// <summary>从源材质创建新 runtime 材质并应用到 Image。</summary>
+        public void CopyMaterialFrom(Material srcMat)
+        {
+            if (srcMat == null || transitionImage == null) return;
+
+            transitionImage.enabled = false;
+
+            var oldMat = _runtimeMat;
+            _runtimeMat = new Material(srcMat);
+            transitionImage.material = _runtimeMat;
+
+            if (oldMat != null) Destroy(oldMat);
         }
 
         /// <summary>播放出场动画（用 Inspector 默认参数）。</summary>
@@ -90,6 +107,7 @@ namespace KiKs.UI
 
             if (transitionImage != null)
             {
+                transitionImage.enabled = true;
                 var c = transitionImage.color; c.a = 1f; transitionImage.color = c;
             }
 

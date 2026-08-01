@@ -51,9 +51,9 @@ namespace KiKs.Combat
                 return;
             }
 
-            cardView.SetUpgraded(true);
             if (_playerAttackFeedback != null)
                 _playerAttackFeedback.SpawnMagicFire();
+            cardView.PlayUpgradeFlip();
             Debug.Log("[MagicHandUpgradeBridge] Upgraded " + cardView.Spec.DisplayName + ".", this);
         }
 

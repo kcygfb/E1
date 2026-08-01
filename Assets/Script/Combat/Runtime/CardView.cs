@@ -77,6 +77,42 @@ namespace KiKs.Combat
             RefreshCardArt();
         }
 
+        /// <summary>强化翻转动画：Y轴翻转，中途切换为强化精灵图</summary>
+        public void PlayUpgradeFlip(System.Action onComplete = null)
+        {
+            IsUpgraded = true;
+            RefreshCardName();
+
+            _isAnimating = true;
+            _rect.DOKill();
+
+            // 暂时禁用交互，防止悬浮动画干扰翻转
+            var interaction = GetComponent<CardInteraction>();
+            if (interaction != null) interaction.enabled = false;
+            var skew = GetComponent<CardSkew>();
+            if (skew != null) skew.Skew = 0f;
+
+            var originScale = _rect.localScale;
+
+            var seq = DOTween.Sequence();
+            // 前半段：Y轴旋转 0→90°（卡牌侧转消失）
+            seq.Append(_rect.DOLocalRotate(new Vector3(0, 90, 0), 0.18f).SetEase(Ease.InCubic));
+            // 中点：切换为强化精灵图
+            seq.AppendCallback(RefreshCardArt);
+            // 后半段：Y轴旋转 90→0°（翻回正面，显示强化图）
+            seq.Append(_rect.DOLocalRotate(Vector3.zero, 0.18f).SetEase(Ease.OutCubic));
+            // 翻转时轻微放大，结束回弹
+            seq.Join(_rect.DOScale(originScale * 1.08f, 0.18f).SetEase(Ease.OutCubic));
+            seq.Append(_rect.DOScale(originScale, 0.1f).SetEase(Ease.OutQuint));
+            seq.OnComplete(() =>
+            {
+                _isAnimating = false;
+                if (interaction != null) interaction.enabled = true;
+                SyncCardInteraction();
+                onComplete?.Invoke();
+            });
+        }
+
         private void RefreshCardName()
         {
             if (cardNameText != null && Spec != null)
