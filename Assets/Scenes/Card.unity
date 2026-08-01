@@ -2389,7 +2389,7 @@ AudioSource:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 673101655}
-  m_Enabled: 0
+  m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
@@ -7002,6 +7002,7 @@ GameObject:
   - component: {fileID: 1946663936}
   - component: {fileID: 1946663938}
   - component: {fileID: 1946663939}
+  - component: {fileID: 1946663940}
   m_Layer: 5
   m_Name: PlayerPortrait
   m_TagString: Untagged
@@ -7018,15 +7019,15 @@ RectTransform:
   m_GameObject: {fileID: 1946663934}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 5.4235187, y: 5.849122, z: 0.91152656}
+  m_LocalScale: {x: 5.4235187, y: 5.849122, z: 0.9115266}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1141623243}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -83, y: -173}
-  m_SizeDelta: {x: 39.958, y: 61.746}
+  m_AnchoredPosition: {x: -86.443, y: -179.91}
+  m_SizeDelta: {x: 42.368, y: 65.471}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1946663936
 MonoBehaviour:
@@ -7082,7 +7083,7 @@ MonoBehaviour:
   attackTrigger: Attack
   attackTypeParam: AttackType
   meleeDashTarget: {fileID: 970831848}
-  dashDuration: 0.07
+  dashDuration: 0.15
   slashDelay: 0.12
   returnDuration: 0.25
   dashOffsetX: -320
@@ -7147,6 +7148,28 @@ MonoBehaviour:
   shakeDuration: 0.25
   shakeVibrato: 20
   battleController: {fileID: 449327851}
+--- !u!95 &1946663940
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1946663934}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 4e514aa98d1ef95419fe88dd81223e24, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &1963077112
 GameObject:
   m_ObjectHideFlags: 0

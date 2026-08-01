@@ -156,7 +156,7 @@ namespace KiKs.Combat
                 }
             }
 
-            _seq.OnComplete(() => Destroy(gameObject));
+            _seq.OnComplete(() => { if (this != null) Destroy(gameObject); });
         }
 
         private void OnDestroy()

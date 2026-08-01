@@ -192,15 +192,9 @@ namespace KiKs.Combat
         public void SwitchToRangedPose()
         {
             if (IsBusy || _isRangedPose) return;
-            // 先从魔法姿态恢复
-            if (_isMagicPose) RestoreSprite();
             _isMagicPose = false;
             _isRangedPose = true;
-            if (rangedAttackSprite != null)
-            {
-                SwapSprite(rangedAttackSprite, rangedSpriteScaleMultiplier);
-                _rect.anchoredPosition += rangedSpriteOffset;
-            }
+            if (_useAnimator) animator.SetInteger("Pose", 1);
             PlaySfx(gunPoseSfx);
         }
 
@@ -208,15 +202,9 @@ namespace KiKs.Combat
         public void SwitchToMagicPose()
         {
             if (IsBusy || _isMagicPose) return;
-            // 先从远程姿态恢复
-            if (_isRangedPose) RestoreSprite();
             _isRangedPose = false;
             _isMagicPose = true;
-            if (magicPoseSprite != null)
-            {
-                SwapSprite(magicPoseSprite, magicSpriteScaleMultiplier);
-                _rect.anchoredPosition += magicSpriteOffset;
-            }
+            if (_useAnimator) animator.SetInteger("Pose", 2);
         }
 
         /// <summary>切换回近战姿态（悬浮近战牌时调用）</summary>
@@ -225,7 +213,7 @@ namespace KiKs.Combat
             if (IsBusy || (!_isRangedPose && !_isMagicPose)) return;
             _isRangedPose = false;
             _isMagicPose = false;
-            RestoreSprite();
+            if (_useAnimator) animator.SetInteger("Pose", 0);
         }
 
         /// <summary>单发射击特效（多段射击时每发调用，不切立绘不走状态机）</summary>
@@ -276,14 +264,20 @@ namespace KiKs.Combat
         public void PlayAttack(int attackType = 0, bool isUpgraded = false)
         {
             _currentAttackUpgraded = isUpgraded;
-            // Animator 路径：交给动画控制器
+
+            // === Animator 路径 ===
             if (_useAnimator)
             {
+                // 所有攻击类型：Animator 全权管理，代码只触发
+                StopAttack();
+                animator.ResetTrigger(attackTrigger);
                 if (!string.IsNullOrEmpty(attackTypeParam))
                     animator.SetInteger(attackTypeParam, attackType);
                 animator.SetTrigger(attackTrigger);
                 return;
             }
+
+            // === DOTween fallback（无 Animator 时用）===
 
             // 近战路径：状态机
             if (attackType == 0 && meleeDashTarget != null)
@@ -304,8 +298,29 @@ namespace KiKs.Combat
             // 魔法路径：简单前冲
             PlayLungeFallback();
         }
+        // ======== Animation Event 方法（Animation 窗口里选这些方法名）========
 
-        /// <summary>近战攻击状态机：Dashing → Slashing → Returning → Idle</summary>
+        /// <summary>近战命中帧（Animation Event）→ 刀光+敌人受击+音效+震屏+卡肉</summary>
+        public void OnMeleeHitFrame()
+        {
+            SpawnSlash();
+            TriggerEnemyHit();
+            PlaySfx(hitSfx);
+            ShakeCanvas();
+            if (_currentAttackUpgraded) FlashScreen();
+            // 卡肉：暂停动画
+            StartCoroutine(MeleeHitstopRoutine());
+        }
+
+        /// <summary>近战卡肉：暂停 animator 后恢复</summary>
+        private IEnumerator MeleeHitstopRoutine()
+        {
+            if (animator != null) animator.speed = 0f;
+            yield return new WaitForSecondsRealtime(hitstopDuration);
+            if (animator != null) animator.speed = 1f;
+        }
+
+        /// <summary>近战攻击状态机：Dashing → Slashing → Returning → Idle（DOTween fallback）</summary>
         private IEnumerator MeleeAttackRoutine()
         {
             // --- Dashing：冲刺到敌人面前 ---
@@ -756,20 +771,37 @@ namespace KiKs.Combat
                 _attackRoutine = null;
             }
             Time.timeScale = 1f;
+            if (animator != null) animator.speed = 1f;
             _tweenSeq?.Kill();
             _tweenSeq = null;
             if (_canvasRect != null)
                 _canvasRect.DOKill();
-            if (_image != null && _originSprite != null)
-                RestoreSprite();
             _state = AttackState.Idle;
         }
 
-        /// <summary>动画播放完毕后由 Animation Event 调用，恢复位置</summary>
+        /// <summary>远程动画到达射击帧时调用（Animation Event）</summary>
+        public void OnRangedShootFrame()
+        {
+            SpawnMuzzleFlash();
+            TriggerEnemyHit();
+            PlaySfx(rangedSfx);
+            ShakeCanvas();
+            if (_currentAttackUpgraded) FlashScreen();
+        }
+
+        /// <summary>魔法动画到达释放帧时调用（Animation Event）</summary>
+        public void OnMagicCastFrame()
+        {
+            SpawnMagicFire();
+            TriggerEnemyHit();
+            ShakeCanvas();
+        }
+
+        /// <summary>远程/魔法攻击动画结束时调用（Animation Event，放在最后一帧）</summary>
         public void OnAttackAnimationEnd()
         {
-            _rect.anchoredPosition = _originPos;
-            _rect.localScale = _originScale;
+            _state = AttackState.Idle;
+            _attackRoutine = null;
         }
     }
 }
