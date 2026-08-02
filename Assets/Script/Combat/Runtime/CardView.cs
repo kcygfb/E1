@@ -90,7 +90,8 @@ namespace KiKs.Combat
             var interaction = GetComponent<CardInteraction>();
             if (interaction != null) interaction.enabled = false;
             var skew = GetComponent<CardSkew>();
-            if (skew != null) skew.Skew = 0f;
+            float originalSkew = skew != null ? skew.Skew : 0f;
+            if (skew != null) { skew.Skew = 0f; skew.enabled = false; }
 
             var originScale = _rect.localScale;
 
@@ -108,6 +109,7 @@ namespace KiKs.Combat
             {
                 _isAnimating = false;
                 if (interaction != null) interaction.enabled = true;
+                if (skew != null) { skew.enabled = true; skew.Skew = originalSkew; }
                 SyncCardInteraction();
                 onComplete?.Invoke();
             });

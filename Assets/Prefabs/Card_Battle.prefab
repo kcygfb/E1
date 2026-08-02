@@ -312,6 +312,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: KiKs.Combat::KiKs.Combat.CardView
   cardNameText: {fileID: 0}
   cardArtImage: {fileID: 0}
+  upgradeFireMaterial: {fileID: 2100000, guid: bb9020a99937e9a4c9870fd88d2c4b1b, type: 2}
+  fireGlowScale: 1.3
 --- !u!114 &-2227453872126264739
 MonoBehaviour:
   m_ObjectHideFlags: 0

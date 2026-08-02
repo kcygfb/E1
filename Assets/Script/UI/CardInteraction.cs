@@ -39,6 +39,7 @@ namespace KiKs.UI
         private Vector3 _originPos;
         private Vector3 _originScale;
         private CardSkew _skew;
+        private CardSkew _artSkew; // CardArt 子对象的 skew
 
         private RectTransform _glowRect;
         private Image _glowImage;
@@ -62,6 +63,15 @@ namespace KiKs.UI
             _skew = GetComponent<CardSkew>();
             if (_skew == null)
                 _skew = gameObject.AddComponent<CardSkew>();
+
+            // CardArt 子对象也加 CardSkew，让图片跟着白色底一起斜切
+            var artTransform = transform.Find("CardArt");
+            if (artTransform != null)
+            {
+                _artSkew = artTransform.GetComponent<CardSkew>();
+                if (_artSkew == null)
+                    _artSkew = artTransform.gameObject.AddComponent<CardSkew>();
+            }
 
             // 高光边框：兄弟物体（渲染在卡牌后面），用 LateUpdate 同步位置
             var glowGo = new GameObject("GlowBorder", typeof(RectTransform), typeof(Image), typeof(CardSkew));
@@ -103,7 +113,7 @@ namespace KiKs.UI
             _currentSeq = DOTween.Sequence();
             _currentSeq.Join(_rect.DOScale(_originScale * hoverScale, hoverDuration / speedMultiplier).SetEase(Ease.OutQuint));
             _currentSeq.Join(_rect.DOLocalMoveY(_originPos.y + hoverLiftY, hoverDuration / speedMultiplier).SetEase(Ease.OutQuint));
-            _currentSeq.Join(DOTween.To(() => _skew.Skew, v => _skew.Skew = v, hoverSkew, hoverDuration / speedMultiplier).SetEase(Ease.OutQuint));
+            _currentSeq.Join(DOTween.To(() => _skew.Skew, v => { _skew.Skew = v; if (_artSkew != null) _artSkew.Skew = v; }, hoverSkew, hoverDuration / speedMultiplier).SetEase(Ease.OutQuint));
 
             if (!_glowDestroyed && _glowSkew != null)
             {
@@ -124,7 +134,7 @@ namespace KiKs.UI
             _currentSeq = DOTween.Sequence();
             _currentSeq.Join(_rect.DOScale(_originScale, hoverDuration / speedMultiplier).SetEase(Ease.OutQuint));
             _currentSeq.Join(_rect.DOLocalMoveY(_originPos.y, hoverDuration / speedMultiplier).SetEase(Ease.OutQuint));
-            _currentSeq.Join(DOTween.To(() => _skew.Skew, v => _skew.Skew = v, 0f, hoverDuration / speedMultiplier).SetEase(Ease.OutQuint));
+            _currentSeq.Join(DOTween.To(() => _skew.Skew, v => { _skew.Skew = v; if (_artSkew != null) _artSkew.Skew = v; }, 0f, hoverDuration / speedMultiplier).SetEase(Ease.OutQuint));
 
             if (!_glowDestroyed && _glowSkew != null)
             {
@@ -144,7 +154,7 @@ namespace KiKs.UI
 
             _rect.DOScale(_originScale * clickScale, clickDuration / speedMultiplier).SetEase(Ease.InQuad);
 
-            DOTween.To(() => _skew.Skew, v => _skew.Skew = v, 0f, clickDuration / speedMultiplier).SetEase(Ease.OutQuint);
+            DOTween.To(() => _skew.Skew, v => { _skew.Skew = v; if (_artSkew != null) _artSkew.Skew = v; }, 0f, clickDuration / speedMultiplier).SetEase(Ease.OutQuint);
             if (!_glowDestroyed && _glowSkew != null)
                 DOTween.To(() => _glowSkew.Skew, v => _glowSkew.Skew = v, 0f, clickDuration / speedMultiplier).SetEase(Ease.OutQuint);
 
@@ -166,7 +176,7 @@ namespace KiKs.UI
 
             if (stillHovering)
             {
-                DOTween.To(() => _skew.Skew, v => _skew.Skew = v, hoverSkew, releaseDuration / speedMultiplier).SetEase(Ease.OutQuint);
+                DOTween.To(() => _skew.Skew, v => { _skew.Skew = v; if (_artSkew != null) _artSkew.Skew = v; }, hoverSkew, releaseDuration / speedMultiplier).SetEase(Ease.OutQuint);
                 if (!_glowDestroyed && _glowSkew != null)
                     DOTween.To(() => _glowSkew.Skew, v => _glowSkew.Skew = v, -hoverSkew * glowSkewRatio, releaseDuration / speedMultiplier).SetEase(Ease.OutQuint);
             }
