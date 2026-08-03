@@ -224,7 +224,7 @@ namespace KiKs.Combat
             TriggerEnemyHit();
             PlaySfx(rangedSfx);
             ShakeCanvas();
-            if (isUpgraded) FlashScreen();
+            FlashScreen();
         }
 
         private void OnCombatEvent(CombatEvent evt)
@@ -307,7 +307,7 @@ namespace KiKs.Combat
             TriggerEnemyHit();
             PlaySfx(hitSfx);
             ShakeCanvas();
-            if (_currentAttackUpgraded) FlashScreen();
+            FlashScreen();
             // 卡肉：暂停动画
             StartCoroutine(MeleeHitstopRoutine());
         }
@@ -344,7 +344,7 @@ namespace KiKs.Combat
             }
             SpawnSlash();
             TriggerEnemyHit();
-            if (_currentAttackUpgraded) FlashScreen();
+            FlashScreen();
             PlaySfx(hitSfx);
 
             // 卡肉：冻结时间 + 玩家放大 + 屏震
@@ -388,7 +388,7 @@ namespace KiKs.Combat
 
             SpawnMuzzleFlash();
             TriggerEnemyHit();
-            if (_currentAttackUpgraded) FlashScreen();
+            FlashScreen();
             PlaySfx(rangedSfx);
 
             // 短暂卡帧（比近战轻）
@@ -786,7 +786,7 @@ namespace KiKs.Combat
             TriggerEnemyHit();
             PlaySfx(rangedSfx);
             ShakeCanvas();
-            if (_currentAttackUpgraded) FlashScreen();
+            FlashScreen();
         }
 
         /// <summary>魔法动画到达释放帧时调用（Animation Event）</summary>
