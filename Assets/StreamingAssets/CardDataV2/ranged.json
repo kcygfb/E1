@@ -12,9 +12,9 @@
       "cost": { "resource": "action_point", "amount": 1 },
       "special": false,
       "effects": [
-        { "type": "damage", "amount": { "base": 5, "upgraded": 10 }, "hits": 6 }
+        { "type": "damage", "amount": { "base": 1, "upgraded": 2 }, "hits": 6 }
       ],
-      "source": { "workbook": "Killkiss全套卡牌.xlsx", "sheet": "卡牌全套x5数值", "row": 128, "upgradeRow": 128 },
+      "source": { "workbook": "Killkiss全套卡牌.xlsx", "sheet": "卡牌全套小数值", "row": 2, "upgradeRow": 2 },
       "notes": []
     },
     {
@@ -26,9 +26,9 @@
       "cost": { "resource": "action_point", "amount": 2 },
       "special": false,
       "effects": [
-        { "type": "damage", "amount": { "base": 60, "upgraded": 100 }, "hits": 1 }
+        { "type": "damage", "amount": { "base": 12, "upgraded": 20 }, "hits": 1 }
       ],
-      "source": { "workbook": "Killkiss全套卡牌.xlsx", "sheet": "卡牌全套x5数值", "row": 129, "upgradeRow": 129 },
+      "source": { "workbook": "Killkiss全套卡牌.xlsx", "sheet": "卡牌全套小数值", "row": 3, "upgradeRow": 3 },
       "notes": []
     },
     {
@@ -40,10 +40,10 @@
       "cost": { "resource": "action_point", "amount": 2 },
       "special": false,
       "effects": [
-        { "type": "damage", "amount": { "base": 25, "upgraded": 40 }, "hits": 2 },
-        { "type": "toughness_damage", "amount": { "base": 15, "upgraded": 25 }, "unit": "points" }
+        { "type": "damage", "amount": { "base": 5, "upgraded": 8 }, "hits": 2 },
+        { "type": "toughness_damage", "amount": { "base": 3, "upgraded": 5 }, "unit": "points" }
       ],
-      "source": { "workbook": "Killkiss全套卡牌.xlsx", "sheet": "卡牌全套x5数值", "row": 130, "upgradeRow": 130 },
+      "source": { "workbook": "Killkiss全套卡牌.xlsx", "sheet": "卡牌全套小数值", "row": 4, "upgradeRow": 4 },
       "notes": []
     },
     {
@@ -55,9 +55,9 @@
       "cost": { "resource": "action_point", "amount": 3 },
       "special": false,
       "effects": [
-        { "type": "damage", "amount": { "base": 90, "upgraded": 150 }, "hits": 1 }
+        { "type": "damage", "amount": { "base": 18, "upgraded": 30 }, "hits": 1 }
       ],
-      "source": { "workbook": "Killkiss全套卡牌.xlsx", "sheet": "卡牌全套x5数值", "row": 131, "upgradeRow": 131 },
+      "source": { "workbook": "Killkiss全套卡牌.xlsx", "sheet": "卡牌全套小数值", "row": 5, "upgradeRow": 5 },
       "notes": []
     },
     {
@@ -69,10 +69,10 @@
       "cost": { "resource": "action_point", "amount": 1 },
       "special": false,
       "effects": [
-        { "type": "damage", "amount": { "base": 5, "upgraded": 10 }, "hits": 3 },
-        { "type": "toughness_damage", "amount": { "base": 15, "upgraded": 30 }, "unit": "points" }
+        { "type": "damage", "amount": { "base": 1, "upgraded": 2 }, "hits": 3 },
+        { "type": "toughness_damage", "amount": { "base": 3, "upgraded": 6 }, "unit": "points" }
       ],
-      "source": { "workbook": "Killkiss全套卡牌.xlsx", "sheet": "卡牌全套x5数值", "row": 132, "upgradeRow": 132 },
+      "source": { "workbook": "Killkiss全套卡牌.xlsx", "sheet": "卡牌全套小数值", "row": 6, "upgradeRow": 6 },
       "notes": []
     },
     {
@@ -84,9 +84,9 @@
       "cost": { "resource": "action_point", "amount": 1 },
       "special": false,
       "effects": [
-        { "type": "damage", "amount": { "base": 5, "upgraded": 10 }, "hits": 8 }
+        { "type": "damage", "amount": { "base": 1, "upgraded": 2 }, "hits": 8 }
       ],
-      "source": { "workbook": "Killkiss全套卡牌.xlsx", "sheet": "卡牌全套x5数值", "row": 133, "upgradeRow": 133 },
+      "source": { "workbook": "Killkiss全套卡牌.xlsx", "sheet": "卡牌全套小数值", "row": 7, "upgradeRow": 7 },
       "notes": []
     },
     {
@@ -98,10 +98,10 @@
       "cost": { "resource": "action_point", "amount": 2 },
       "special": false,
       "effects": [
-        { "type": "damage", "amount": { "base": 5, "upgraded": 5 }, "hits": { "base": 8, "upgraded": 15 } },
-        { "type": "bleed", "amount": { "base": 15, "upgraded": 20 } }
+        { "type": "damage", "amount": { "base": 1, "upgraded": 1 }, "hits": { "base": 8, "upgraded": 15 } },
+        { "type": "bleed", "amount": { "base": 5, "upgraded": 8 } }
       ],
-      "source": { "workbook": "Killkiss全套卡牌.xlsx", "sheet": "卡牌全套x5数值", "row": 134, "upgradeRow": 134 },
+      "source": { "workbook": "Killkiss全套卡牌.xlsx", "sheet": "卡牌全套小数值", "row": 8, "upgradeRow": 8 },
       "notes": []
     },
     {
@@ -115,7 +115,7 @@
       "effects": [
         { "type": "damage", "amount": { "base": 8, "upgraded": 13 }, "hits": 2 }
       ],
-      "source": { "workbook": "Killkiss全套卡牌.xlsx", "sheet": "卡牌全套x5数值", "row": 135, "upgradeRow": 135 },
+      "source": { "workbook": "Killkiss全套卡牌.xlsx", "sheet": "卡牌全套小数值", "row": 9, "upgradeRow": 9 },
       "notes": []
     }
   ]

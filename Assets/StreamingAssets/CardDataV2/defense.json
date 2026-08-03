@@ -14,7 +14,7 @@
       "effects": [
         { "type": "nullify_attacks", "amount": { "base": 1, "upgraded": 2 } }
       ],
-      "source": { "workbook": "Killkiss全套卡牌.xlsx", "sheet": "卡牌全套x5数值", "row": 172, "upgradeRow": 172 },
+      "source": { "workbook": "Killkiss全套卡牌.xlsx", "sheet": "卡牌全套小数值", "row": 46, "upgradeRow": 46 },
       "notes": []
     },
     {
@@ -26,9 +26,9 @@
       "cost": { "resource": "action_point", "amount": 1 },
       "special": false,
       "effects": [
-        { "type": "block_damage", "amount": { "base": 60, "upgraded": 130 } }
+        { "type": "block_damage", "amount": { "base": 12, "upgraded": 26 } }
       ],
-      "source": { "workbook": "Killkiss全套卡牌.xlsx", "sheet": "卡牌全套x5数值", "row": 173, "upgradeRow": 173 },
+      "source": { "workbook": "Killkiss全套卡牌.xlsx", "sheet": "卡牌全套小数值", "row": 47, "upgradeRow": 47 },
       "notes": ["获得临时防御值，按实际吸收量消耗。"]
     },
     {
@@ -42,7 +42,7 @@
       "effects": [
         { "type": "skip_enemy_turns", "amount": { "base": 1, "upgraded": 1 } }
       ],
-      "source": { "workbook": "Killkiss全套卡牌.xlsx", "sheet": "卡牌全套x5数值", "row": 174, "upgradeRow": 174 },
+      "source": { "workbook": "Killkiss全套卡牌.xlsx", "sheet": "卡牌全套小数值", "row": 48, "upgradeRow": 48 },
       "notes": ["怪跳过当前回合。"]
     },
     {
@@ -54,9 +54,9 @@
       "cost": { "resource": "action_point", "amount": 2 },
       "special": true,
       "effects": [
-        { "type": "block_damage", "amount": { "base": 250, "upgraded": 500 } }
+        { "type": "block_damage", "amount": { "base": 50, "upgraded": 100 } }
       ],
-      "source": { "workbook": "Killkiss全套卡牌.xlsx", "sheet": "卡牌全套x5数值", "row": 175, "upgradeRow": 175 },
+      "source": { "workbook": "Killkiss全套卡牌.xlsx", "sheet": "卡牌全套小数值", "row": 49, "upgradeRow": 49 },
       "notes": []
     },
     {
@@ -68,10 +68,10 @@
       "cost": { "resource": "action_point", "amount": 1 },
       "special": false,
       "effects": [
-        { "type": "block_damage", "amount": { "base": 30, "upgraded": 65 } },
-        { "type": "reflect_damage", "amount": { "base": 30, "upgraded": 65 } }
+        { "type": "block_damage", "amount": { "base": 6, "upgraded": 13 } },
+        { "type": "reflect_damage", "amount": { "base": 6, "upgraded": 13 } }
       ],
-      "source": { "workbook": "Killkiss全套卡牌.xlsx", "sheet": "卡牌全套x5数值", "row": 176, "upgradeRow": 176 },
+      "source": { "workbook": "Killkiss全套卡牌.xlsx", "sheet": "卡牌全套小数值", "row": 50, "upgradeRow": 50 },
       "notes": ["增加x点临时防御值，被攻击时对敌人造成x点伤害。"]
     }
   ]

@@ -1,0 +1,13 @@
+{
+  "id": "deepseek-v4-flash",
+  "baseUrl": "https://api.deepseek.com/chat/completions",
+  "apiType": "OpenAICompletion",
+  "apiKey": "sk-6ebe92a50344455fa05683d90df83c05",
+  "temperature": 0,
+  "primaryModel": {
+    "id": "deepseek-v4-pro"
+  },
+  "fasterModel": {
+    "id": "deepseek-v4-flash"
+  }
+}
