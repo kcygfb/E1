@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 2,
+  "category": "enemy_dog",
+  "categoryName": "狗",
+  "cards": [
+    {
+      "id": "enemy_dog_tearing",
+      "name": { "zhCN": "撕咬", "en": "tearing" },
+      "category": "enemy_dog",
+      "copies": 1,
+      "image": "Art/Cards/placeholder.png",
+      "cost": { "resource": "action_point", "amount": 1 },
+      "special": false,
+      "effects": [
+        { "type": "damage", "amount": { "base": 6 }, "hits": 1 },
+        { "type": "toughness_damage", "amount": { "base": 2 }, "unit": "points" }
+      ],
+      "source": { "workbook": "Killkiss全套卡牌.xlsx", "sheet": "怪", "row": 3 },
+      "notes": []
+    },
+    {
+      "id": "enemy_dog_scratching",
+      "name": { "zhCN": "抓挠", "en": "scratching" },
+      "category": "enemy_dog",
+      "copies": 1,
+      "image": "Art/Cards/placeholder.png",
+      "cost": { "resource": "action_point", "amount": 1 },
+      "special": false,
+      "effects": [
+        { "type": "damage", "amount": { "base": 2 }, "hits": 3 },
+        { "type": "bleed", "amount": { "base": 2 } }
+      ],
+      "source": { "workbook": "Killkiss全套卡牌.xlsx", "sheet": "怪", "row": 4 },
+      "notes": []
+    },
+    {
+      "id": "enemy_dog_double_hit",
+      "name": { "zhCN": "双重打击", "en": "double hit" },
+      "category": "enemy_dog",
+      "copies": 1,
+      "image": "Art/Cards/placeholder.png",
+      "cost": { "resource": "action_point", "amount": 2 },
+      "special": false,
+      "effects": [
+        { "type": "damage", "amount": { "base": 7 }, "hits": 2 },
+        { "type": "toughness_damage", "amount": { "base": 2 }, "unit": "points" }
+      ],
+      "source": { "workbook": "Killkiss全套卡牌.xlsx", "sheet": "怪", "row": 5 },
+      "notes": []
+    }
+  ]
+}

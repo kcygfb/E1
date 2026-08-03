@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 2,
+  "category": "enemy_big_eye",
+  "categoryName": "大眼（隐藏boss）",
+  "cards": [
+    {
+      "id": "enemy_big_eye_eye_beam",
+      "name": { "zhCN": "眼棱", "en": "eye beam" },
+      "category": "enemy_big_eye",
+      "copies": 1,
+      "image": "Art/Cards/placeholder.png",
+      "cost": { "resource": "action_point", "amount": 1 },
+      "special": false,
+      "effects": [
+        { "type": "damage", "amount": { "base": 14 }, "hits": 1 }
+      ],
+      "source": { "workbook": "Killkiss全套卡牌.xlsx", "sheet": "怪", "row": 56 },
+      "notes": []
+    },
+    {
+      "id": "enemy_big_eye_scratch",
+      "name": { "zhCN": "抓挠", "en": "scratch" },
+      "category": "enemy_big_eye",
+      "copies": 1,
+      "image": "Art/Cards/placeholder.png",
+      "cost": { "resource": "action_point", "amount": 1 },
+      "special": false,
+      "effects": [
+        { "type": "damage", "amount": { "base": 7 }, "hits": 2 },
+        { "type": "toughness_damage", "amount": { "base": 2 }, "unit": "points" }
+      ],
+      "source": { "workbook": "Killkiss全套卡牌.xlsx", "sheet": "怪", "row": 57 },
+      "notes": []
+    },
+    {
+      "id": "enemy_big_eye_mind_control",
+      "name": { "zhCN": "精神控制", "en": "mind control" },
+      "category": "enemy_big_eye",
+      "copies": 1,
+      "image": "Art/Cards/placeholder.png",
+      "cost": { "resource": "action_point", "amount": 2 },
+      "special": false,
+      "effects": [
+        { "type": "damage_reduction", "amount": { "base": 3 } }
+      ],
+      "source": { "workbook": "Killkiss全套卡牌.xlsx", "sheet": "怪", "row": 58 },
+      "notes": ["攻击无效（nullify_attacks 6次）效果暂不实现"]
+    },
+    {
+      "id": "enemy_big_eye_suffocate",
+      "name": { "zhCN": "窒息", "en": "suffocate" },
+      "category": "enemy_big_eye",
+      "copies": 1,
+      "image": "Art/Cards/placeholder.png",
+      "cost": { "resource": "action_point", "amount": 2 },
+      "special": false,
+      "effects": [
+        { "type": "damage", "amount": { "base": 20 }, "hits": 1 },
+        { "type": "toughness_damage", "amount": { "base": 10 }, "unit": "points" }
+      ],
+      "source": { "workbook": "Killkiss全套卡牌.xlsx", "sheet": "怪", "row": 59 },
+      "notes": []
+    },
+    {
+      "id": "enemy_big_eye_ten_thousand_hands",
+      "name": { "zhCN": "万手缠身", "en": "ten thousand hands" },
+      "category": "enemy_big_eye",
+      "copies": 1,
+      "image": "Art/Cards/placeholder.png",
+      "cost": { "resource": "action_point", "amount": 5 },
+      "special": true,
+      "effects": [
+        { "type": "damage", "amount": { "base": 3 }, "hits": 10 },
+        { "type": "toughness_damage", "amount": { "base": 5 }, "unit": "points" },
+        { "type": "bleed", "amount": { "base": 5 } }
+      ],
+      "source": { "workbook": "Killkiss全套卡牌.xlsx", "sheet": "怪", "row": 60 },
+      "notes": ["第12回合必定使用"]
+    }
+  ]
+}

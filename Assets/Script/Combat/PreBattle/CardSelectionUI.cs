@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -10,7 +9,7 @@ namespace KiKs.Combat
 {
     public class CardSelectionUI : MonoBehaviour
     {
-        private const int DEFAULT_DECK_SIZE = 5;
+        private const int DEFAULT_DECK_SIZE = 15;
         private const string BATTLE_SCENE_NAME = "Card";
 
         [Header("Buttons")]
@@ -92,7 +91,7 @@ namespace KiKs.Combat
 
             allCards.Clear();
             foreach (var card in db.Repository.Cards)
-                allCards.Add(card);
+                if (!card.IsEnemyCard) allCards.Add(card);
 
             PopulateCardGrid();
             RefreshSelectionUI();

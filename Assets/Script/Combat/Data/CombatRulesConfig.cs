@@ -9,7 +9,7 @@ namespace KiKs.Combat
         [Min(0)] [SerializeField] private int baseActionPoints = 3;
         [Min(0)] [SerializeField] private int cardsDrawnPerTurn = 4;
         [Min(1)] [SerializeField] private int handLimit = 10;
-        [Min(1)] [SerializeField] private int expectedInitialDeckSize = 5;
+        [Min(1)] [SerializeField] private int expectedInitialDeckSize = 15;
 
         [Header("Mana and in-battle upgrades")]
         [Min(0)] [SerializeField] private int startingMana = 3;
@@ -17,17 +17,39 @@ namespace KiKs.Combat
         [Min(0)] [SerializeField] private int maximumManaSpendPerTurn = 1;
         [Min(0)] [SerializeField] private int cardUpgradeManaCost = 1;
         [Min(0)] [SerializeField] private int magicCardsPerTurn = 1;
+        [Header("Enemy cards - Minion")]
+        [Min(1)] [SerializeField] private int minionDeckSize = 3;
+        [Min(0)] [SerializeField] private int minionActionPoints = 3;
+        [Min(0)] [SerializeField] private int minionCardsDrawnPerTurn = 1;
+        [Min(0)] [SerializeField] private int minionCardsPlayedPerTurn = 1;
+
+        [Header("Enemy cards - Elite")]
+        [Min(1)] [SerializeField] private int eliteDeckSize = 4;
+        [Min(0)] [SerializeField] private int eliteActionPoints = 4;
+        [Min(0)] [SerializeField] private int eliteCardsDrawnPerTurn = 2;
+        [Min(0)] [SerializeField] private int eliteCardsPlayedPerTurn = 2;
+
+        [Header("Enemy cards - Boss")]
+        [Min(1)] [SerializeField] private int bossDeckSize = 4;
+        [Min(0)] [SerializeField] private int bossActionPoints = 5;
+        [Min(0)] [SerializeField] private int bossCardsDrawnPerTurn = 2;
+        [Min(0)] [SerializeField] private int bossCardsPlayedPerTurn = 2;
+        [Min(1)] [SerializeField] private int bossBerserkTurn = 12;
+
+        [Header("Enemy cards - Shared")]
+        [Min(1)] [SerializeField] private int enemyHandLimit = 5;
+        [Tooltip("Elite/Boss: inspect this many most recently played cards.")]
+        [Min(1)] [SerializeField] private int expensiveCardWindowSize = 5;
+        [Tooltip("Elite/Boss: maximum number of 2-AP cards within the recent-card window.")]
+        [Min(0)] [SerializeField] private int maxTwoCostCardsInWindow = 2;
+
 
         [Header("Automatic ultimate")]
         [Min(1)] [SerializeField] private int ultimateManaThreshold = 3;
-        [Min(0)] [SerializeField] private int ultimateDamage = 0;
-        [Min(0)] [SerializeField] private int ultimateStunTurns = 1;
+        [Min(0)] [SerializeField] private int ultimateDamage = 30;
 
-        [Header("Execution values - pending final balance")]
-        [Min(0)] [SerializeField] private int eliteExecutionDamage = 40;
-        [Min(0)] [SerializeField] private int eliteStunTurns = 1;
-        [Min(0)] [SerializeField] private int bossExecutionDamage = 40;
-        [Min(0)] [SerializeField] private int bossStunTurns = 1;
+        [Header("Automatic execution")]
+        [Min(0)] [SerializeField] private int executionDamage = 60;
 
         [Header("Toughness restore - pending final balance")]
         [SerializeField] private ToughnessRestoreMode toughnessRestoreMode = ToughnessRestoreMode.Full;
@@ -45,10 +67,7 @@ namespace KiKs.Combat
                 cardsDrawnPerTurn,
                 handLimit,
                 expectedInitialDeckSize,
-                eliteExecutionDamage,
-                eliteStunTurns,
-                bossExecutionDamage,
-                bossStunTurns,
+                executionDamage,
                 toughnessRestoreMode,
                 fixedToughnessRestoreAmount,
                 startingMana,
@@ -58,7 +77,29 @@ namespace KiKs.Combat
                 magicCardsPerTurn,
                 ultimateManaThreshold,
                 ultimateDamage,
-                ultimateStunTurns);
+                new EnemyTurnRules(
+                    minionDeckSize,
+                    minionActionPoints,
+                    minionCardsDrawnPerTurn,
+                    minionCardsPlayedPerTurn,
+                    enemyHandLimit),
+                new EnemyTurnRules(
+                    eliteDeckSize,
+                    eliteActionPoints,
+                    eliteCardsDrawnPerTurn,
+                    eliteCardsPlayedPerTurn,
+                    enemyHandLimit,
+                    expensiveCardWindowSize,
+                    maxTwoCostCardsInWindow),
+                new EnemyTurnRules(
+                    bossDeckSize,
+                    bossActionPoints,
+                    bossCardsDrawnPerTurn,
+                    bossCardsPlayedPerTurn,
+                    enemyHandLimit,
+                    expensiveCardWindowSize,
+                    maxTwoCostCardsInWindow,
+                    bossBerserkTurn));
         }
 
         private void OnValidate()

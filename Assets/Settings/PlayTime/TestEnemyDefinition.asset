@@ -18,3 +18,5 @@ MonoBehaviour:
   enemyRank: 1
   maxHealth: 1000
   maxToughness: 100
+  enemyArchetype: 1
+  enemyCardIds: []

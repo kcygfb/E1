@@ -11791,11 +11791,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: KiKs.UI::KiKs.UI.CafeBGMPlayer
   audioSource: {fileID: 0}
   bgmClips:
-  - {fileID: 8300000, guid: b40dc8889c2b0fb4a91f35f6ecf8dd97, type: 3}
-  - {fileID: 8300000, guid: b65815af491bccc499ec869cf2f65339, type: 3}
-  - {fileID: 8300000, guid: 5b24be27cb0c5294082cd2c564d186a7, type: 3}
-  - {fileID: 8300000, guid: 1bcf3d2c073083a4eadf007f2cdbedbd, type: 3}
-  - {fileID: 8300000, guid: a5befb6c1caa3a540acf88ad3f274bfe, type: 3}
+  - {fileID: 8300000, guid: 5dafe2ed7624bee47827df19a88ecf47, type: 3}
+  - {fileID: 8300000, guid: 981ccf1e53754e648bc59d7e32b974c8, type: 3}
+  - {fileID: 8300000, guid: 967ebd7a30634ec4d976aaddd36fdc7d, type: 3}
+  - {fileID: 8300000, guid: 23e9f1bf8fc5e6e4cb183164aa42bceb, type: 3}
+  - {fileID: 8300000, guid: c274f2d816a734c4097a7e647a2c2103, type: 3}
   mainButton: {fileID: 535284715}
   panel: {fileID: 57127207}
   playPauseButton: {fileID: 2006738369}

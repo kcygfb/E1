@@ -4,17 +4,6 @@ using System.Collections.ObjectModel;
 
 namespace KiKs.Combat
 {
-    public sealed class PendingExecutionState
-    {
-        public string TargetId { get; }
-        public string SourceCardInstanceId { get; }
-
-        public PendingExecutionState(string targetId, string sourceCardInstanceId)
-        {
-            TargetId = targetId ?? throw new ArgumentNullException(nameof(targetId));
-            SourceCardInstanceId = sourceCardInstanceId;
-        }
-    }
 
     /// <summary>Complete mutable state for one battle. Only CombatEngine advances the rules.</summary>
     public sealed class BattleState
@@ -22,6 +11,7 @@ namespace KiKs.Combat
         private readonly List<CombatantState> _enemies;
         private readonly Dictionary<string, DeckState> _enemyDecks = new();
         private readonly Dictionary<string, int> _enemyBaseActionPoints = new();
+        private readonly Dictionary<string, CardInstance> _enemySpecialCards = new();
 
         public CombatRules Rules { get; }
         public CombatantState Player { get; }
@@ -31,7 +21,6 @@ namespace KiKs.Combat
         public CombatPhase Phase { get; internal set; }
         public BattleOutcome Outcome { get; internal set; }
         public int TurnNumber { get; internal set; }
-        public PendingExecutionState PendingExecution { get; internal set; }
         public bool IsCurrentEnemyTurnSkipped { get; internal set; }
         public IReadOnlyDictionary<string, DeckState> EnemyDecks => _enemyDecks;
         public IReadOnlyDictionary<string, int> EnemyBaseActionPoints => _enemyBaseActionPoints;
@@ -80,16 +69,64 @@ namespace KiKs.Combat
             return _enemies.Find(enemy => !enemy.IsDead);
         }
 
+        public CombatantState FindCombatant(string combatantId)
+        {
+            if (string.IsNullOrWhiteSpace(combatantId)) return null;
+            if (Player.Id == combatantId) return Player;
+            return FindEnemy(combatantId);
+        }
+
+        public CombatantState FindFirstLivingOpponent(CombatantState source)
+        {
+            if (source == null) return null;
+            return source.Side == CombatantSide.Player
+                ? FindFirstLivingEnemy()
+                : !Player.IsDead ? Player : null;
+        }
+
+        public DeckState GetDeck(string combatantId)
+        {
+            if (string.IsNullOrWhiteSpace(combatantId)) return null;
+            return Player.Id == combatantId ? Deck : GetEnemyDeck(combatantId);
+        }
+
         public DeckState GetEnemyDeck(string enemyId)
         {
             if (string.IsNullOrWhiteSpace(enemyId)) return null;
             return _enemyDecks.TryGetValue(enemyId, out var deck) ? deck : null;
         }
 
+        public CardInstance GetEnemySpecialCard(string enemyId)
+        {
+            if (string.IsNullOrWhiteSpace(enemyId)) return null;
+            return _enemySpecialCards.TryGetValue(enemyId, out var card) ? card : null;
+        }
+
+        internal void RegisterEnemySpecialCard(string enemyId, CardInstance card)
+        {
+            if (string.IsNullOrWhiteSpace(enemyId) || card == null) return;
+            _enemySpecialCards[enemyId] = card;
+        }
+
+        public void RegisterCombatantDeck(string combatantId, DeckState deck)
+        {
+            if (Phase != CombatPhase.NotStarted)
+                throw new InvalidOperationException("Combatant decks can only be registered before battle start.");
+            if (string.IsNullOrWhiteSpace(combatantId))
+                throw new ArgumentException("Combatant id is required.", nameof(combatantId));
+            if (deck == null) throw new ArgumentNullException(nameof(deck));
+            if (combatantId == Player.Id)
+                throw new ArgumentException("The player deck is supplied by the BattleState constructor.",
+                    nameof(combatantId));
+            if (FindEnemy(combatantId) == null)
+                throw new ArgumentException("Unknown combatant id: " + combatantId, nameof(combatantId));
+
+            _enemyDecks[combatantId] = deck;
+        }
+
         internal void RegisterEnemyDeck(string enemyId, DeckState deck)
         {
-            if (string.IsNullOrWhiteSpace(enemyId) || deck == null) return;
-            _enemyDecks[enemyId] = deck;
+            RegisterCombatantDeck(enemyId, deck);
         }
 
         internal void RegisterEnemyBaseActionPoints(string enemyId, int baseAP)

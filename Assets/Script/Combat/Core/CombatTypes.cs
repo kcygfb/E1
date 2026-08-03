@@ -6,7 +6,6 @@ namespace KiKs.Combat
         PlayerTurnStart,
         PlayerInput,
         ResolvingCard,
-        AwaitingExecutionConfirmation,
         PlayerTurnEnd,
         EnemyTurn,
         Victory,
@@ -16,6 +15,7 @@ namespace KiKs.Combat
     public enum BattleOutcome { None, Victory, Defeat }
     public enum CombatantSide { Player, Enemy }
     public enum EnemyRank { None, Minion, Elite, Boss }
+    public enum EnemyArchetype { None, Dog, LittleGirl, BigEye }
     public enum CardTargetType { Self, SingleEnemy }
     public enum ToughnessRestoreMode { Full, FixedAmount }
     public enum CardResourceType { ActionPoint, Mana }
@@ -68,9 +68,10 @@ namespace KiKs.Combat
         ToughnessChanged,
         ToughnessBroken,
         StatusApplied,
-        ExecutionConfirmationRequired,
         ExecutionResolved,
         StunApplied,
+        ActionNullified,
+        CombatantTurnSkipped,
         EnemyActionSkipped,
         UltimateTriggered,
         StatusTicked,

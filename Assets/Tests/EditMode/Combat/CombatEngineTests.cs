@@ -14,7 +14,7 @@ namespace KiKs.Combat.Tests
 
             Assert.That(result.Success, Is.True);
             Assert.That(engine.State.Player.CurrentActionPoints, Is.EqualTo(3));
-            Assert.That(engine.State.Mana.Current, Is.EqualTo(5));
+            Assert.That(engine.State.Mana.Current, Is.EqualTo(3));
             Assert.That(engine.State.Deck.Hand.Count, Is.EqualTo(4));
             Assert.That(engine.State.Phase, Is.EqualTo(CombatPhase.PlayerInput));
         }
@@ -35,23 +35,23 @@ namespace KiKs.Combat.Tests
         }
 
         [Test]
-        public void ToughnessBreak_RequiresConfirmation_AndMinionExecutionIsExtraDamageNotExtraTurn()
+        public void ToughnessBreak_AutomaticallyDealsSixtyExecutionDamage_AndKeepsPlayerTurn()
         {
             var engine = CreateEngine(CreateToughnessCard("break", 1, 5));
             engine.StartBattle();
             var card = engine.State.Deck.Hand[0];
 
-            Assert.That(engine.PlayCard(card.InstanceId, "enemy").Success, Is.True);
-            Assert.That(engine.State.Phase, Is.EqualTo(CombatPhase.AwaitingExecutionConfirmation));
-            Assert.That(engine.State.Player.CurrentActionPoints, Is.EqualTo(2));
+            var result = engine.PlayCard(card.InstanceId, "enemy");
 
-            Assert.That(engine.ConfirmExecution().Success, Is.True);
-            Assert.That(engine.State.Enemies[0].IsDead, Is.True);
-            Assert.That(engine.State.Phase, Is.EqualTo(CombatPhase.Victory));
+            Assert.That(result.Success, Is.True);
+            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(40));
+            Assert.That(engine.State.Enemies[0].CurrentToughness, Is.EqualTo(5));
+            Assert.That(engine.State.Phase, Is.EqualTo(CombatPhase.PlayerInput));
             Assert.That(engine.State.TurnNumber, Is.EqualTo(1));
             Assert.That(engine.State.Player.CurrentActionPoints, Is.EqualTo(2));
+            Assert.That(result.Events.Any(e =>
+                e.Type == CombatEventType.ExecutionResolved && e.Amount == 60), Is.True);
         }
-
         [Test]
         public void NewPlayerTurn_DiscardsOldHandAndRestoresActionPoints()
         {
@@ -301,6 +301,26 @@ namespace KiKs.Combat.Tests
         }
 
         [Test]
+        public void PlayerBleed_TicksAtPlayerTurnStart_AndCanCauseDefeat()
+        {
+            var engine = CreateEngine(CreateDamageCard("attack", 1, 1), 8);
+            engine.StartBattle();
+            engine.EndPlayerTurn();
+            engine.State.Player.AddBleedStacks(30);
+
+            var result = engine.CompleteEnemyTurn();
+
+            Assert.That(result.Success, Is.True);
+            Assert.That(engine.State.Player.IsDead, Is.True);
+            Assert.That(engine.State.Player.BleedStacks, Is.EqualTo(29));
+            Assert.That(engine.State.Outcome, Is.EqualTo(BattleOutcome.Defeat));
+            Assert.That(engine.State.Phase, Is.EqualTo(CombatPhase.Defeat));
+            Assert.That(result.Events.Any(e =>
+                e.Type == CombatEventType.StatusTicked &&
+                e.TargetId == "player" &&
+                e.Amount == 30), Is.True);
+        }
+        [Test]
         public void BlockAndReflect_ModifyTheNextEnemyAttack()
         {
             var block = CreateCard("block", 0, CardResourceType.ActionPoint,
@@ -337,13 +357,12 @@ namespace KiKs.Combat.Tests
 
             Assert.That(upgrade.Success, Is.True);
             Assert.That(card.IsUpgraded, Is.True);
-            Assert.That(engine.State.Mana.Current, Is.EqualTo(4));
+            Assert.That(engine.State.Mana.Current, Is.EqualTo(2));
             Assert.That(engine.State.Player.CurrentActionPoints, Is.EqualTo(3));
             Assert.That(engine.PlayCard(card.InstanceId, "enemy").Success, Is.True);
             Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(91));
             Assert.That(card.IsUpgraded, Is.False);
         }
-
         [Test]
         public void ManaSpendLimit_IsSharedByUpgradeAndMagicCard()
         {
@@ -359,38 +378,38 @@ namespace KiKs.Combat.Tests
             var magicResult = engine.PlayCard(magicCard.InstanceId, "enemy");
 
             Assert.That(magicResult.Success, Is.False);
-            Assert.That(engine.State.Mana.Current, Is.EqualTo(4));
+            Assert.That(engine.State.Mana.Current, Is.EqualTo(2));
             Assert.That(engine.State.Player.CurrentActionPoints, Is.EqualTo(3));
         }
-
         [Test]
-        public void ThirdCumulativeManaSpend_TriggersUltimateWithoutRefundingMana()
+        public void ThirdCumulativeManaSpend_TriggersThirtyDamageUltimate_AndRefillsMana()
         {
             var engine = CreateEngine(CreateDamageCard("basic", 0, 0, 1), 12);
             engine.StartBattle();
 
+            CombatResult thirdUpgrade = null;
             for (var turn = 1; turn <= 3; turn++)
             {
                 var card = engine.State.Deck.Hand.First(candidate => candidate.Spec.CanUpgrade);
-                var result = engine.UpgradeCard(card.InstanceId, "enemy");
-                Assert.That(result.Success, Is.True);
+                thirdUpgrade = engine.UpgradeCard(card.InstanceId, "enemy");
+                Assert.That(thirdUpgrade.Success, Is.True);
 
                 if (turn < 3)
                 {
                     engine.EndPlayerTurn();
                     engine.CompleteEnemyTurn();
                 }
-                else
-                {
-                    Assert.That(result.Events.Any(e => e.Type == CombatEventType.UltimateTriggered), Is.True);
-                }
             }
 
-            Assert.That(engine.State.Mana.Current, Is.EqualTo(2));
+            Assert.That(thirdUpgrade.Events.Any(e =>
+                e.Type == CombatEventType.UltimateTriggered && e.Amount == 30), Is.True);
+            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(70));
+            Assert.That(engine.State.Mana.Current, Is.EqualTo(3));
             Assert.That(engine.State.Mana.SpentTowardUltimate, Is.EqualTo(0));
-            Assert.That(engine.State.Enemies[0].StunTurns, Is.EqualTo(1));
+            Assert.That(engine.State.Enemies[0].StunTurns, Is.EqualTo(0));
+            Assert.That(thirdUpgrade.Events.Any(e =>
+                e.Type == CombatEventType.ManaChanged && e.Amount == 3), Is.True);
         }
-
         [Test]
         public void ToughnessBreak_RestoresManaToMaximum()
         {
@@ -401,65 +420,244 @@ namespace KiKs.Combat.Tests
 
             var cardToUpgrade = engine.State.Deck.Hand.First(card => card.Spec.Id == "upgradeable");
             Assert.That(engine.UpgradeCard(cardToUpgrade.InstanceId).Success, Is.True);
-            Assert.That(engine.State.Mana.Current, Is.EqualTo(4));
+            Assert.That(engine.State.Mana.Current, Is.EqualTo(2));
 
             var breakCard = engine.State.Deck.Hand.First(card => card.Spec.Id == "breaker");
             var result = engine.PlayCard(breakCard.InstanceId, "enemy");
 
             Assert.That(result.Success, Is.True);
-            Assert.That(engine.State.Mana.Current, Is.EqualTo(5));
+            Assert.That(engine.State.Mana.Current, Is.EqualTo(3));
             Assert.That(result.Events.Any(combatEvent =>
-                combatEvent.Type == CombatEventType.ManaChanged && combatEvent.Amount == 5), Is.True);
+                combatEvent.Type == CombatEventType.ManaChanged && combatEvent.Amount == 3), Is.True);
         }
-
-        [Test]
-        public void ExecutionOnElite_DealsFortyDamageAndStunsOneTurn()
+        [TestCase(EnemyRank.Elite)]
+        [TestCase(EnemyRank.Boss)]
+        public void Execution_DealsSixtyDamageWithoutStun_ForEveryEnemyRank(EnemyRank enemyRank)
         {
-            var engine = CreateEngine(CreateToughnessCard("break", 1, 5), 4, EnemyRank.Elite);
+            var engine = CreateEngine(CreateToughnessCard("break", 1, 5), 4, enemyRank);
             engine.StartBattle();
             var card = engine.State.Deck.Hand[0];
 
-            Assert.That(engine.PlayCard(card.InstanceId, "enemy").Success, Is.True);
-            Assert.That(engine.State.Phase, Is.EqualTo(CombatPhase.AwaitingExecutionConfirmation));
+            var result = engine.PlayCard(card.InstanceId, "enemy");
 
-            Assert.That(engine.ConfirmExecution().Success, Is.True);
-            Assert.That(engine.State.Enemies[0].IsDead, Is.False);
-            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(60)); // 100 - 40
-            Assert.That(engine.State.Enemies[0].StunTurns, Is.EqualTo(1));
-            Assert.That(engine.State.Phase, Is.EqualTo(CombatPhase.PlayerInput));
-
-            // Next turn: enemy should be stunned (cannot attack)
-            engine.EndPlayerTurn();
-            var attackResult = engine.ResolveEnemyAttack("enemy", 20);
-            Assert.That(attackResult.Success, Is.True);
-            Assert.That(attackResult.Events.Any(e => e.Type == CombatEventType.EnemyActionSkipped), Is.True);
+            Assert.That(result.Success, Is.True);
+            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(40));
+            Assert.That(engine.State.Enemies[0].CurrentToughness, Is.EqualTo(5));
             Assert.That(engine.State.Enemies[0].StunTurns, Is.EqualTo(0));
-            Assert.That(engine.State.Player.CurrentHealth, Is.EqualTo(30)); // No damage taken
+            Assert.That(engine.State.Phase, Is.EqualTo(CombatPhase.PlayerInput));
         }
 
         [Test]
-        public void ExecutionOnBoss_DealsFortyDamageAndStunsOneTurn()
+        public void PlayerAndEnemyCards_ShareDamageMitigationFlow()
         {
-            var engine = CreateEngine(CreateToughnessCard("break", 1, 5), 4, EnemyRank.Boss);
+            var playerAttack = CreateDamageCard("player_attack", 0, 10);
+            var enemyAttack = CreateDamageCard("enemy_attack", 0, 10);
+            var engine = CreateEngine(playerAttack, 8);
+            RegisterEnemyDeck(engine, enemyAttack);
+
+            engine.State.Enemies[0].AddBlockPoints(4);
+            Assert.That(engine.StartBattle().Success, Is.True);
+
+            var playerCard = engine.State.Deck.Hand.First();
+            var playerResult = engine.PlayCard(playerCard.InstanceId, "enemy");
+
+            Assert.That(playerResult.Success, Is.True);
+            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(94));
+            Assert.That(engine.State.Enemies[0].BlockPoints, Is.EqualTo(0));
+
+            engine.State.Player.AddBlockPoints(4);
+            Assert.That(engine.EndPlayerTurn().Success, Is.True);
+            engine.DrawEnemyCards("enemy", 1, 10);
+            var enemyCard = engine.State.GetDeck("enemy").Hand.Single();
+            var enemyResult = engine.PlayEnemyCard("enemy", enemyCard.InstanceId);
+
+            Assert.That(enemyResult.Success, Is.True);
+            Assert.That(engine.State.Player.CurrentHealth, Is.EqualTo(24));
+            Assert.That(engine.State.Player.BlockPoints, Is.EqualTo(0));
+            Assert.That(playerResult.Events.Any(e =>
+                e.Type == CombatEventType.DamageApplied &&
+                e.SourceId == "player" &&
+                e.Amount == 6), Is.True);
+            Assert.That(enemyResult.Events.Any(e =>
+                e.Type == CombatEventType.DamageApplied &&
+                e.SourceId == "enemy" &&
+                e.Amount == 6), Is.True);
+        }
+
+        [Test]
+        public void PlayerAndEnemyCards_ApplyBleedThroughSameFlow()
+        {
+            var playerBleed = CreateCard(
+                "player_bleed",
+                0,
+                CardResourceType.ActionPoint,
+                CreateEffect(CardEffectType.Bleed, amount: 2));
+            var enemyBleed = CreateCard(
+                "enemy_bleed",
+                0,
+                CardResourceType.ActionPoint,
+                CreateEffect(CardEffectType.Bleed, amount: 3));
+            var engine = CreateEngine(playerBleed, 8);
+            RegisterEnemyDeck(engine, enemyBleed);
+
             engine.StartBattle();
-            var card = engine.State.Deck.Hand[0];
+            var playerCard = engine.State.Deck.Hand.First();
+            Assert.That(engine.PlayCard(playerCard.InstanceId, "enemy").Success, Is.True);
+            Assert.That(engine.State.Enemies[0].BleedStacks, Is.EqualTo(2));
 
-            Assert.That(engine.PlayCard(card.InstanceId, "enemy").Success, Is.True);
-            Assert.That(engine.State.Phase, Is.EqualTo(CombatPhase.AwaitingExecutionConfirmation));
-
-            Assert.That(engine.ConfirmExecution().Success, Is.True);
-            Assert.That(engine.State.Enemies[0].IsDead, Is.False);
-            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(60)); // 100 - 40
-            Assert.That(engine.State.Enemies[0].StunTurns, Is.EqualTo(1));
-            Assert.That(engine.State.Phase, Is.EqualTo(CombatPhase.PlayerInput));
-
-            // Next turn: boss should be stunned (cannot attack)
             engine.EndPlayerTurn();
-            var attackResult = engine.ResolveEnemyAttack("enemy", 20);
-            Assert.That(attackResult.Success, Is.True);
-            Assert.That(attackResult.Events.Any(e => e.Type == CombatEventType.EnemyActionSkipped), Is.True);
-            Assert.That(engine.State.Enemies[0].StunTurns, Is.EqualTo(0));
-            Assert.That(engine.State.Player.CurrentHealth, Is.EqualTo(30)); // No damage taken
+            engine.DrawEnemyCards("enemy", 1, 10);
+            var enemyCard = engine.State.GetDeck("enemy").Hand.Single();
+            Assert.That(engine.PlayEnemyCard("enemy", enemyCard.InstanceId).Success, Is.True);
+            Assert.That(engine.State.Player.BleedStacks, Is.EqualTo(3));
+
+            var nextTurn = engine.CompleteEnemyTurn();
+
+            Assert.That(nextTurn.Success, Is.True);
+            Assert.That(engine.State.Player.CurrentHealth, Is.EqualTo(27));
+            Assert.That(engine.State.Player.BleedStacks, Is.EqualTo(2));
+            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(98));
+            Assert.That(engine.State.Enemies[0].BleedStacks, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void EnemySelfEffect_UsesEnemyAsTheDestination()
+        {
+            var playerAttack = CreateDamageCard("player_attack", 0, 10);
+            var enemyReduction = CreateCard(
+                "enemy_reduction",
+                0,
+                CardResourceType.ActionPoint,
+                CreateEffect(CardEffectType.DamageReduction, amount: 50));
+            var engine = CreateEngine(playerAttack, 8);
+            RegisterEnemyDeck(engine, enemyReduction);
+
+            engine.StartBattle();
+            engine.EndPlayerTurn();
+            engine.DrawEnemyCards("enemy", 1, 10);
+            var enemyCard = engine.State.GetDeck("enemy").Hand.Single();
+            Assert.That(engine.PlayEnemyCard("enemy", enemyCard.InstanceId).Success, Is.True);
+            Assert.That(engine.State.Enemies[0].DamageReductionPercent, Is.EqualTo(50));
+
+            engine.CompleteEnemyTurn();
+            var playerCard = engine.State.Deck.Hand.First();
+            Assert.That(engine.PlayCard(playerCard.InstanceId, "enemy").Success, Is.True);
+            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(95));
+        }
+
+        [Test]
+        public void NullifyAndReflect_WorkForActionsFromEitherSide()
+        {
+            var playerAttack = CreateDamageCard("player_attack", 0, 10);
+            var enemyAttack = CreateDamageCard("enemy_attack", 0, 10);
+            var engine = CreateEngine(playerAttack, 8);
+            RegisterEnemyDeck(engine, enemyAttack);
+
+            engine.State.Enemies[0].AddNullifyAttackCharges(1);
+            engine.StartBattle();
+            var playerCard = engine.State.Deck.Hand.First();
+            var nullifiedPlayerCard = engine.PlayCard(playerCard.InstanceId, "enemy");
+
+            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(100));
+            Assert.That(nullifiedPlayerCard.Events.Any(e =>
+                e.Type == CombatEventType.ActionNullified &&
+                e.SourceId == "player"), Is.True);
+
+            engine.State.Player.AddNullifyAttackCharges(1);
+            engine.EndPlayerTurn();
+            engine.DrawEnemyCards("enemy", 1, 10);
+            var enemyCard = engine.State.GetDeck("enemy").Hand.Single();
+            var nullifiedEnemyCard = engine.PlayEnemyCard("enemy", enemyCard.InstanceId);
+
+            Assert.That(engine.State.Player.CurrentHealth, Is.EqualTo(30));
+            Assert.That(nullifiedEnemyCard.Events.Any(e =>
+                e.Type == CombatEventType.ActionNullified &&
+                e.SourceId == "enemy"), Is.True);
+
+            engine.CompleteEnemyTurn();
+            engine.State.Enemies[0].AddReflectDamage(5);
+            playerCard = engine.State.Deck.Hand.First();
+            engine.PlayCard(playerCard.InstanceId, "enemy");
+
+            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(90));
+            Assert.That(engine.State.Player.CurrentHealth, Is.EqualTo(25));
+        }
+
+        [Test]
+        public void EnemyStun_CannotBeBypassedByCallingPlayEnemyCardDirectly()
+        {
+            var enemyAttack = CreateDamageCard("enemy_attack", 0, 10);
+            var engine = CreateEngine(CreateDamageCard("player_attack", 0, 1), 8);
+            RegisterEnemyDeck(engine, enemyAttack);
+            engine.State.Enemies[0].AddStun(1);
+
+            engine.StartBattle();
+            engine.EndPlayerTurn();
+            engine.DrawEnemyCards("enemy", 1, 10);
+            var enemyCard = engine.State.GetDeck("enemy").Hand.Single();
+
+            var firstAttempt = engine.PlayEnemyCard("enemy", enemyCard.InstanceId);
+            var secondAttempt = engine.PlayEnemyCard("enemy", enemyCard.InstanceId);
+
+            Assert.That(firstAttempt.Success, Is.False);
+            Assert.That(secondAttempt.Success, Is.False);
+            Assert.That(engine.State.Player.CurrentHealth, Is.EqualTo(30));
+            Assert.That(engine.State.GetDeck("enemy").FindInHand(enemyCard.InstanceId), Is.Not.Null);
+            Assert.That(firstAttempt.Events.Any(e =>
+                e.Type == CombatEventType.CombatantTurnSkipped &&
+                e.SourceId == "enemy"), Is.True);
+        }
+
+        [Test]
+        public void EnemyStunCard_SkipsThePlayersNextTurnThroughTheSameGate()
+        {
+            var enemyStun = new CardSpec(
+                "enemy_stun",
+                "enemy_stun",
+                "enemy_stun",
+                "enemy_test",
+                CardResourceType.ActionPoint,
+                0,
+                false,
+                CardTargetType.SingleEnemy,
+                new[] { CreateEffect(CardEffectType.Stun, amount: 1) });
+            var engine = CreateEngine(CreateDamageCard("player_attack", 0, 1), 8);
+            RegisterEnemyDeck(engine, enemyStun);
+
+            engine.StartBattle();
+            engine.EndPlayerTurn();
+            engine.DrawEnemyCards("enemy", 1, 10);
+            var enemyCard = engine.State.GetDeck("enemy").Hand.Single();
+            Assert.That(engine.PlayEnemyCard("enemy", enemyCard.InstanceId).Success, Is.True);
+            Assert.That(engine.State.Player.StunTurns, Is.EqualTo(1));
+
+            var nextTurn = engine.CompleteEnemyTurn();
+
+            Assert.That(nextTurn.Success, Is.True);
+            Assert.That(engine.State.Player.StunTurns, Is.EqualTo(0));
+            Assert.That(engine.State.TurnNumber, Is.EqualTo(2));
+            Assert.That(engine.State.Phase, Is.EqualTo(CombatPhase.EnemyTurn));
+            Assert.That(engine.State.Deck.Hand.Count, Is.EqualTo(0));
+            Assert.That(nextTurn.Events.Any(e =>
+                e.Type == CombatEventType.CombatantTurnSkipped &&
+                e.TargetId == "player"), Is.True);
+        }
+
+        [Test]
+        public void UnifiedIntent_RejectsAnOriginThatControlsTheWrongSide()
+        {
+            var engine = CreateEngine(CreateDamageCard("attack", 0, 1));
+            engine.StartBattle();
+            var card = engine.State.Deck.Hand.First();
+
+            var result = engine.SubmitCardAction(new CombatActionIntent(
+                "player",
+                card.InstanceId,
+                "enemy",
+                CombatActionOrigin.EnemyAI));
+
+            Assert.That(result.Success, Is.False);
+            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(100));
         }
 
         [Test]
@@ -489,6 +687,15 @@ namespace KiKs.Combat.Tests
                 player,
                 new[] { enemy },
                 new DeckState(cards, 123, false)));
+        }
+
+        private static void RegisterEnemyDeck(CombatEngine engine, params CardSpec[] specs)
+        {
+            var cards = specs.Select((spec, index) =>
+                new CardInstance("enemy:" + spec.Id + "#" + index, spec)).ToList();
+            engine.State.RegisterCombatantDeck(
+                "enemy",
+                new DeckState(cards, 456, false));
         }
 
         private static CardSpec CreateDamageCard(
@@ -526,9 +733,12 @@ namespace KiKs.Combat.Tests
                 id, id, id, "test", resource, cost, false,
                 effect.Type == CardEffectType.Damage ||
                 effect.Type == CardEffectType.ToughnessDamage ||
+                effect.Type == CardEffectType.Stun ||
+                effect.Type == CardEffectType.Vulnerability ||
                 effect.Type == CardEffectType.Bleed ||
                 effect.Type == CardEffectType.BleedScaledDamage ||
                 effect.Type == CardEffectType.LifeSteal ||
+                effect.Type == CardEffectType.LifeStealMaxHealth ||
                 effect.Type == CardEffectType.Poison
                     ? CardTargetType.SingleEnemy
                     : CardTargetType.Self,

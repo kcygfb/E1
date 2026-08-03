@@ -27,27 +27,44 @@ namespace KiKs.Combat
             var state = controller.State;
             var enemy = state.FindEnemy(enemyId);
             if (enemy == null || enemy.IsDead) yield break;
+            if (!engine.CanEnemyTakeCardTurn(enemyId))
+                yield break;
+
+            var turnRules = state.Rules.GetEnemyTurnRules(enemy.EnemyRank);
 
             var deck = state.GetEnemyDeck(enemyId);
+
+            if (turnRules.BerserkTurn > 0 &&
+                state.TurnNumber == turnRules.BerserkTurn &&
+                state.GetEnemySpecialCard(enemyId) != null)
+            {
+                yield return new WaitForSeconds(drawDelay);
+                var specialResult = engine.PlayEnemySpecialCard(enemyId);
+                if (specialResult.Success)
+                {
+                    yield return new WaitForSeconds(playDelay);
+                    engine.DiscardEnemyHand(enemyId);
+                    yield break;
+                }
+            }
 
             // 没有牌库 → 直接 fallback 固定伤害
             if (deck == null)
             {
-                yield return new WaitForSeconds(drawDelay);
+                yield return new WaitForSeconds(fallbackDelay);
                 controller.ResolveEnemyAttack(enemyId, fallbackDamage, fallbackToughnessDamage);
                 yield break;
             }
 
             // 1. 抽牌
-            engine.DrawEnemyCards(enemyId, GetCardsPerTurn(controller, enemyId), GetHandLimit(controller, enemyId));
+            engine.DrawEnemyCards(enemyId, turnRules.CardsDrawnPerTurn, turnRules.HandLimit);
             yield return new WaitForSeconds(drawDelay);
 
             // 2. 按伤害降序出牌（AP 限制）
-            int actionsRemaining = GetActionsPerTurn(controller, enemyId);
-            bool playedAnyCard = false;
+            int actionsRemaining = turnRules.CardsPlayedPerTurn;
 
             // 取手牌快照，按伤害排序
-            var handSnapshot = deck.Hand.ToList();
+            var handSnapshot = deck.Hand.Where(card => !card.Spec.IsSpecial).ToList();
             var sorted = handSnapshot
                 .OrderByDescending(c => GetCardDamage(c))
                 .ThenBy(c => c.Spec.CostAmount)
@@ -59,13 +76,12 @@ namespace KiKs.Combat
                 if (enemy.IsDead) break;
 
                 // 检查 AP 是否足够（AP 卡才检查）
-                if (card.Spec.CostResource == CardResourceType.ActionPoint &&
-                    enemy.CurrentActionPoints < card.Spec.CostAmount)
+                if (!engine.CanPlayEnemyCard(enemyId, card, out _))
                     continue;
 
                 // 出牌
-                engine.PlayEnemyCard(enemyId, card.InstanceId);
-                playedAnyCard = true;
+                var playResult = engine.PlayEnemyCard(enemyId, card.InstanceId);
+                if (!playResult.Success) continue;
                 actionsRemaining--;
                 yield return new WaitForSeconds(playDelay);
 
@@ -74,11 +90,6 @@ namespace KiKs.Combat
             }
 
             // 3. 没出牌 → fallback 固定伤害
-            if (!playedAnyCard && !state.Player.IsDead)
-            {
-                controller.ResolveEnemyAttack(enemyId, fallbackDamage, fallbackToughnessDamage);
-                yield return new WaitForSeconds(fallbackDelay);
-            }
 
             // 4. 弃手牌
             engine.DiscardEnemyHand(enemyId);

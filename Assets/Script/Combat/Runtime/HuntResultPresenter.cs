@@ -166,14 +166,21 @@ namespace KiKs.Combat
                 {
                     if (!seen.Add(cardId)) continue;
                     if (repository.TryGetCard(cardId, out CardSpec card))
-                        candidates.Add(card);
+                    {
+                        if (!card.IsEnemyCard) candidates.Add(card);
+                    }
                     else
+                    {
                         Debug.LogWarning($"[HuntResult] Unknown reward card id: {cardId}", this);
+                    }
                 }
             }
             else
             {
-                candidates.AddRange(repository.Cards);
+                foreach (var card in repository.Cards)
+                {
+                    if (!card.IsEnemyCard) candidates.Add(card);
+                }
             }
 
             if (candidates.Count == 0) return;

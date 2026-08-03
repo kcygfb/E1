@@ -23,6 +23,8 @@ namespace KiKs.Combat
         public IReadOnlyList<CardEffectSpec> Effects { get; }
         public string ImagePath { get; }
         public bool CanUpgrade => Effects.Any(effect => effect.HasUpgrade);
+        public bool IsEnemyCard =>
+            Category.StartsWith("enemy_", StringComparison.Ordinal);
 
         public CardSpec(
             string id,

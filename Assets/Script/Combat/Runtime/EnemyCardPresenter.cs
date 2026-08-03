@@ -223,6 +223,9 @@ namespace KiKs.Combat
             if (battleController?.State == null) return null;
             foreach (var enemy in battleController.State.Enemies)
             {
+                var specialCard = battleController.State.GetEnemySpecialCard(enemy.Id);
+                if (specialCard != null && specialCard.InstanceId == instanceId)
+                    return specialCard.Spec;
                 var deck = battleController.State.GetEnemyDeck(enemy.Id);
                 if (deck == null) continue;
                 var card = deck.FindInHand(instanceId);

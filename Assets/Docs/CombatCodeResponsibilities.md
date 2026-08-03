@@ -1,96 +1,169 @@
 # Combat 代码职责说明
 
-## 总体结构
+更新时间：2026-08-04
 
-当前战斗代码分为四层：
+## 1. 架构边界
 
-1. JSON 数据层：读取并验证 43 张静态卡牌；
-2. 纯规则层：保存战斗状态并执行回合、出牌、强化和伤害规则；
-3. Unity 接入层：加载 StreamingAssets、跨场景传递牌组 ID、连接场景；
-4. 测试层：验证牌堆、JSON、强化、魔法点和大招。
+战斗模块分为：
 
-## 文件职责
+1. 输入/AI：只决定要执行的行动；
+2. `CombatEngine`：验证权限、阶段、费用、牌组和回合；
+3. `CombatFlowController`：统一处理效果、防御、状态、伤害、死亡和事件；
+4. `BattleState`：保存战斗状态；
+5. Runtime/Presenter：消费事件并播放 UI、VFX、音效和日志；
+6. 测试：验证规则方向与边界。
 
-### Core
+完整设计见《统一战斗流架构》。
 
-- `CombatTypes.cs`：阶段、阵营、效果、资源、事件等枚举。
-- `CardEffectSpec.cs`：一条 JSON 效果及其基础/强化数值。
-- `CardSpec.cs`：从 JSON 得到的不可变卡牌定义。
-- `CardInstance.cs`：本场战斗中的实体牌，保存唯一实例 ID 与 `IsUpgraded`。
-- `DeckState.cs`：抽牌堆、手牌、弃牌堆、抽牌和洗牌。
-- `ManaState.cs`：当前魔法点、每回合消耗、累计大招进度和魔法牌次数。
-- `CombatantState.cs`：角色生命、韧性、行动点、眩晕和当前防御状态。
-- `BattleState.cs`：整场战斗状态的聚合，包括玩家、敌人、牌堆和魔法点。
-- `CombatRules.cs`：从 Inspector 复制出来的不可变规则快照。
-- `CombatEvent.cs`：规则层输出给 UI/动画的事实事件。
-- `CombatEngine.cs`：唯一允许推进规则的入口，负责出牌、强化、回合、处决、敌人攻击和大招。
+## 2. Core
 
-### Data
+目录：`Assets/Script/Combat/Core`
 
-- `SimpleJsonParser.cs`：项目内置的小型 JSON 解析器，不依赖 Newtonsoft.Json。
-- `CardJsonRepository.cs`：解析 manifest 和分类文件，验证版本、数量、分类、重复 ID 与效果字段，并提供按 ID 查询。
-- `CombatRulesConfig.cs`：可以通过 Create 菜单创建的全局战斗规则资源。
-- `CombatantDefinition.cs`：可以通过 Create 菜单创建的玩家/敌人基础属性资源。
+### CombatFlowController.cs
 
-旧的 `CardDefinition.cs` 已移除，所以 Create 菜单中不再提供 `Card Definition`。卡牌本身只维护 JSON。
+包含三个关键类型：
 
-### Runtime
+- `CombatActionIntent`：玩家输入与 AI 共用的出牌请求；
+- `CombatFlowResult`：一次流式结算结果；
+- `CombatFlowController`：唯一的效果与数值流中枢。
 
-- `CardDatabaseService.cs`：从 `StreamingAssets/CardData` 异步加载牌库；单例可跨场景保留。
-- `BattleSession.cs`：在选牌场景与战斗场景之间传递卡牌 ID 列表；不保存强化状态。
-- `BattleController.cs`：从选中的 ID 自动创建卡牌实例，创建 `BattleState` 和 `CombatEngine`，向 UI 暴露操作接口。
+中枢负责：
 
-### Tests
+- 卡牌效果；
+- 普通/多段伤害；
+- 韧性伤害；
+- 流血、中毒和状态 tick；
+- 眩晕、无效、减伤、格挡和反伤；
+- 吸血、治疗、抽牌和资源效果；
+- 固定攻击、枪械伤害、大招和处决；
+- 死亡事件。
 
-- `CardJsonRepositoryTests.cs`：用项目真实 JSON 验证 43 张牌、强化值和固定数值字段。
-- `DeckStateTests.cs`：验证抽牌、手牌上限和中途洗牌。
-- `CombatEngineTests.cs`：验证回合、行动点、处决、战斗内强化、每回合耗蓝限制和自动大招。
+运行时代码不应在该文件之外直接修改上述战斗数值。
 
-## 哪些脚本需要挂载
+### CombatEngine.cs
 
-需要挂载：
+唯一推进阶段和胜负的入口，负责：
 
-- `CardDatabaseService`：挂在一个 `GameServices` 对象上；
-- `BattleController`：挂在战斗场景的 `BattleRoot` 对象上；
-- 你后续编写的 UI、动画和敌人 AI 脚本。
+- `SubmitCardAction(CombatActionIntent)`；
+- 行动来源权限；
+- 玩家/敌人回合授权闸门；
+- 行动点、玩家魔法值和大招进度；
+- 玩家牌组与敌人牌组编排；
+- 敌人出牌数量和昂贵卡牌窗口；
+- 特殊牌回合与使用次数；
+- 阶段切换、胜负和事件派发。
 
-不需要挂载：
+兼容方法：
 
-- 所有 `Core` 类；
-- `CardJsonRepository`、`SimpleJsonParser`；
-- `BattleSession`；
-- 测试类。
+- `PlayCard`
+- `PlayEnemyCard`
+- `PlayEnemySpecialCard`
 
-需要创建资源但不挂载：
+都只构造 Intent 并调用统一入口。
 
-- `Combat Rules`；
-- 玩家与敌人的 `Combatant Definition`。
+### BattleState.cs
 
-## 对外常用接口
+保存：
 
-- 读取全部牌：`cardDatabase.Repository.Cards`
-- 按 ID 取牌：`cardDatabase.Repository.GetRequiredCard(cardId)`
-- 保存赛前牌组：`BattleSession.SetSelectedDeck(cardIds)`
-- 打出牌：`battleController.PlayCard(instanceId, targetId)`
-- 强化手牌：`battleController.UpgradeCard(instanceId, targetId)`
-- 确认处决：`battleController.ConfirmExecution()`
-- 结束玩家回合：`battleController.EndPlayerTurn()`
-- 结算敌人攻击：`battleController.ResolveEnemyAttack(enemyId, damage)`
-- 完成敌方回合：`battleController.CompleteEnemyTurn()`
-- 刷新界面：读取 `battleController.State` 并监听 `CombatEventRaised`
+- 玩家与敌人；
+- 玩家牌组与按战斗单位 ID 注册的敌人牌组；
+- 敌人特殊牌；
+- 玩家魔法值；
+- 阶段、结果和回合数。
 
-UI 不应直接调用状态对象内部方法改变数值。
+通用查询：
 
+- `FindCombatant`
+- `FindFirstLivingOpponent`
+- `GetDeck`
+- `RegisterCombatantDeck`
 
-## CombatTemp 现行职责
+### CombatantState.cs
 
-`CombatTemp` 现在不再保存临时战斗规则，而是当前场景表现层适配器：
+保存单个战斗单位的：
 
-- `CardData.cs`：把场景卡牌对象绑定到手牌中的 `CardInstance`；不保存攻击力、削韧或费用。
-- `DragAttackCard.cs`：识别拖拽落点上的敌人，然后调用 `BattleController.PlayCard`。
-- `ClickAttackCard.cs`：点击卡牌时通过同一个规则入口出牌。
-- `EnemyStats.cs`：名字暂时保留以维持场景 GUID；实际职责是把 `BattleState` 中的敌人只读数据转成 UnityEvent。
-- `StatBarUI.cs`：监听敌人只读视图，显示生命或韧性。
-- `EnemyHitFeedback.cs`：生命下降后播放 DOTween 受击表现。
+- 生命、韧性和行动点；
+- 眩晕、无效、减伤、跳过；
+- 流血、中毒、格挡和反伤。
 
-这些脚本都不能直接修改生命、韧性、行动点、魔法点或牌堆。
+这些修改方法是中枢的底层原语，不是 UI 或 AI 的业务入口。
+
+### 其他 Core
+
+- `CombatTypes.cs`：阶段、结果、效果和事件枚举；
+- `CombatRules.cs`：15 张牌组、60 点处决、30 点大招和敌人分级规则；
+- `CardSpec.cs` / `CardEffectSpec.cs`：不可变卡牌规则；
+- `CardInstance.cs`：单张实例与强化；
+- `DeckState.cs`：抽牌、手牌、弃牌和洗牌；
+- `ManaState.cs`：玩家魔法值和大招进度；
+- `CombatEvent.cs`：表现层事件。
+
+## 3. Data
+
+目录：`Assets/Script/Combat/Data`
+
+- `CardJsonRepository.cs`：Manifest/分类文件加载、验证和目标推断；
+- `SimpleJsonParser.cs`：无外部依赖 JSON 解析器；
+- `CombatRulesConfig.cs`：Inspector 规则转核心规则；
+- `CombatantDefinition.cs`：单位定义、敌人类型和牌组配置。
+
+目标推断已覆盖普通伤害、削韧、眩晕、易伤、流血、中毒、两种吸血等敌对效果。
+
+## 4. AI
+
+目录：`Assets/Script/Combat/AI`
+
+- `EnemyAIStrategy.cs`：AI 策略基类；
+- `SimpleCardAI.cs`：抽牌、选牌、特殊牌和兜底攻击决策。
+
+AI 只能选择动作，不计算实际伤害，也不能直接修改目标状态。即使 AI 忘记调用前置检查，`SubmitCardAction` 仍会执行统一授权闸门。
+
+## 5. Runtime
+
+目录：`Assets/Script/Combat/Runtime`
+
+- `BattleController.cs`：Unity 场景适配器，并暴露 `SubmitCardAction`；
+- `CardDatabaseService.cs`：从 StreamingAssets 加载 JSON；
+- `CardEnemyAI.cs` / `SimpleEnemyAI.cs`：驱动 AI 回合；
+- Presenter/View/VFX：只消费 `CombatEvent`。
+
+玩家 UI 和敌方 AI 最终都进入同一个 Runtime/Core 提交入口。
+
+## 6. JSON 数据
+
+目录：`Assets/StreamingAssets/CardDataV2`
+
+Manifest 当前为 ASCII 安全 JSON，中文来源字段使用 `\uXXXX`：
+
+- 7 个分类；
+- 54 个定义；
+- 76 份 copies；
+- 42 个玩家定义/64 份；
+- 12 个敌人定义/12 份。
+
+项目自己的 Repository 已完整加载并验证这些数据。
+
+## 7. Tests
+
+目录：`Assets/Tests/EditMode/Combat`
+
+测试覆盖：
+
+- 牌组与回合；
+- 玩家与敌人出牌；
+- 双向伤害、格挡、减伤、流血、无效和反伤；
+- 玩家/敌人眩晕与跳过闸门；
+- 强化、魔法、大招和处决；
+- Manifest、玩家牌和敌人牌。
+
+当前纯战斗用例实际执行结果：28 通过、0 失败。
+
+## 8. 扩展规则
+
+新增效果时：
+
+1. 增加 `CardEffectType` 和 JSON 映射；
+2. 更新敌对/自身目标推断；
+3. 只在 `CombatFlowController.ResolveEffect` 实现一次；
+4. 增加玩家方向和敌人方向测试；
+5. 禁止在 AI、UI、Presenter 或 `BattleController` 中复制结算代码。

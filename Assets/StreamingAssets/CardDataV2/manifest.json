@@ -1,14 +1,17 @@
 {
   "schemaVersion": 2,
-  "sourceWorkbook": "Killkiss全套卡牌.xlsx",
-  "sourceSheet": "卡牌全套小数值",
-  "cardCount": 42,
-  "deckCardCount": 64,
+  "sourceWorkbook": "Killkiss\u5168\u5957\u5361\u724c.xlsx",
+  "sourceSheet": "\u5361\u724c\u5168\u5957\u5c0f\u6570\u503c",
+  "cardCount": 54,
+  "deckCardCount": 76,
   "schema": "card-data.schema.json",
   "files": [
     { "category": "melee", "file": "melee.json", "cardCount": 25 },
     { "category": "ranged", "file": "ranged.json", "cardCount": 8 },
     { "category": "magic", "file": "magic.json", "cardCount": 4 },
-    { "category": "defense", "file": "defense.json", "cardCount": 5 }
+    { "category": "defense", "file": "defense.json", "cardCount": 5 },
+    { "category": "enemy_dog", "file": "enemy_dog.json", "cardCount": 3 },
+    { "category": "enemy_little_girl", "file": "enemy_little_girl.json", "cardCount": 4 },
+    { "category": "enemy_big_eye", "file": "enemy_big_eye.json", "cardCount": 5 }
   ]
 }

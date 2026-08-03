@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 2,
+  "category": "enemy_little_girl",
+  "categoryName": "小女孩",
+  "cards": [
+    {
+      "id": "enemy_little_girl_tentacle_attack",
+      "name": { "zhCN": "触手攻击", "en": "tentacle attack" },
+      "category": "enemy_little_girl",
+      "copies": 1,
+      "image": "Art/Cards/placeholder.png",
+      "cost": { "resource": "action_point", "amount": 1 },
+      "special": false,
+      "effects": [
+        { "type": "damage", "amount": { "base": 3 }, "hits": 3 },
+        { "type": "toughness_damage", "amount": { "base": 2 }, "unit": "points" }
+      ],
+      "source": { "workbook": "Killkiss全套卡牌.xlsx", "sheet": "怪", "row": 24 },
+      "notes": []
+    },
+    {
+      "id": "enemy_little_girl_screaming",
+      "name": { "zhCN": "尖叫", "en": "screaming" },
+      "category": "enemy_little_girl",
+      "copies": 1,
+      "image": "Art/Cards/placeholder.png",
+      "cost": { "resource": "action_point", "amount": 1 },
+      "special": false,
+      "effects": [
+        { "type": "damage", "amount": { "base": 1 }, "hits": 1 },
+        { "type": "bleed", "amount": { "base": 3 } },
+        { "type": "damage_reduction", "amount": { "base": 3 } }
+      ],
+      "source": { "workbook": "Killkiss全套卡牌.xlsx", "sheet": "怪", "row": 25 },
+      "notes": []
+    },
+    {
+      "id": "enemy_little_girl_drag_to_abyss",
+      "name": { "zhCN": "拖入深渊", "en": "drag to abyss" },
+      "category": "enemy_little_girl",
+      "copies": 1,
+      "image": "Art/Cards/placeholder.png",
+      "cost": { "resource": "action_point", "amount": 2 },
+      "special": false,
+      "effects": [
+        { "type": "damage", "amount": { "base": 20 }, "hits": 1 }
+      ],
+      "source": { "workbook": "Killkiss全套卡牌.xlsx", "sheet": "怪", "row": 26 },
+      "notes": []
+    },
+    {
+      "id": "enemy_little_girl_feel_my_pain",
+      "name": { "zhCN": "感受我的痛苦", "en": "feel my pain" },
+      "category": "enemy_little_girl",
+      "copies": 1,
+      "image": "Art/Cards/placeholder.png",
+      "cost": { "resource": "action_point", "amount": 2 },
+      "special": false,
+      "effects": [
+        { "type": "damage", "amount": { "base": 5 }, "hits": 1 },
+        { "type": "toughness_damage", "amount": { "base": 30 }, "unit": "points" }
+      ],
+      "source": { "workbook": "Killkiss全套卡牌.xlsx", "sheet": "怪", "row": 27 },
+      "notes": []
+    }
+  ]
+}

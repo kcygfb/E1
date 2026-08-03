@@ -149,22 +149,36 @@ namespace KiKs.Combat
             }
         }
 
-        public CombatResult PlayCard(string cardInstanceId, string targetId)
+        public CombatResult SubmitCardAction(CombatActionIntent intent)
         {
+            if (intent == null) throw new ArgumentNullException(nameof(intent));
+
             var engine = GetEngineOrThrow();
-            var card = engine.State.Deck.FindInHand(cardInstanceId);
-            var cardName = card != null ? card.Spec.DisplayName : cardInstanceId;
-            var playerId = engine.State.Player.Id;
-            var result = engine.PlayCard(cardInstanceId, targetId);
+            var source = engine.State.FindCombatant(intent.ActorId);
+            var card = intent.CardSource == CombatCardSource.Special
+                ? engine.State.GetEnemySpecialCard(intent.ActorId)
+                : engine.State.GetDeck(intent.ActorId)?.FindInHand(intent.CardInstanceId);
+            var cardName = card != null ? card.Spec.DisplayName : intent.CardInstanceId;
+            var result = engine.SubmitCardAction(intent);
 
             if (result.Success)
             {
-                var actualDamage = SumDamage(result, playerId);
-                Debug.Log("[Combat] Player played card \"" + cardName +
-                          "\" and dealt " + actualDamage + " damage.", this);
+                var sourceName = source != null ? source.DisplayName : intent.ActorId;
+                var actualDamage = SumDamage(result, intent.ActorId);
+                Debug.Log("[Combat] " + sourceName + " played card \"" + cardName +
+                          "\" through the shared flow and dealt " + actualDamage + " damage.", this);
             }
 
             return result;
+        }
+
+        public CombatResult PlayCard(string cardInstanceId, string targetId)
+        {
+            return SubmitCardAction(new CombatActionIntent(
+                State.Player.Id,
+                cardInstanceId,
+                targetId,
+                CombatActionOrigin.PlayerInput));
         }
 
         public CombatResult UpgradeCard(string cardInstanceId, string preferredUltimateTargetId = null)
@@ -192,7 +206,6 @@ namespace KiKs.Combat
             return GetEngineOrThrow().CancelShooting(cardInstanceId);
         }
 
-        public CombatResult ConfirmExecution() { return GetEngineOrThrow().ConfirmExecution(); }
         public CombatResult EndPlayerTurn() { return GetEngineOrThrow().EndPlayerTurn(); }
 
         public CombatResult ResolveEnemyAttack(string enemyId, int damage, int toughnessDamage = 0)
@@ -208,7 +221,9 @@ namespace KiKs.Combat
                 CombatEvent skippedEvent = null;
                 foreach (var combatEvent in result.Events)
                 {
-                    if (combatEvent.Type != CombatEventType.EnemyActionSkipped) continue;
+                    if (combatEvent.Type != CombatEventType.EnemyActionSkipped &&
+                        combatEvent.Type != CombatEventType.CombatantTurnSkipped &&
+                        combatEvent.Type != CombatEventType.ActionNullified) continue;
                     skippedEvent = combatEvent;
                     break;
                 }
@@ -243,23 +258,26 @@ namespace KiKs.Combat
 
         public CombatResult PlayEnemyCard(string enemyId, string cardInstanceId)
         {
-            var engine = GetEngineOrThrow();
-            var deck = engine.State.GetEnemyDeck(enemyId);
-            var card = deck?.FindInHand(cardInstanceId);
-            var cardName = card != null ? card.Spec.DisplayName : cardInstanceId;
-            var result = engine.PlayEnemyCard(enemyId, cardInstanceId);
-
-            if (result.Success)
-            {
-                var enemy = engine.State.FindEnemy(enemyId);
-                var enemyName = enemy != null ? enemy.DisplayName : enemyId;
-                var actualDamage = SumDamage(result, enemyId);
-                Debug.Log("[Combat] " + enemyName + " played card \"" + cardName +
-                          "\" and dealt " + actualDamage + " damage.", this);
-            }
-
-            return result;
+            return SubmitCardAction(new CombatActionIntent(
+                enemyId,
+                cardInstanceId,
+                State.Player.Id,
+                CombatActionOrigin.EnemyAI));
         }
+
+        public CombatResult PlayEnemySpecialCard(string enemyId)
+        {
+            var card = State.GetEnemySpecialCard(enemyId);
+            if (card == null) return GetEngineOrThrow().PlayEnemySpecialCard(enemyId);
+
+            return SubmitCardAction(new CombatActionIntent(
+                enemyId,
+                card.InstanceId,
+                State.Player.Id,
+                CombatActionOrigin.EnemyAI,
+                CombatCardSource.Special));
+        }
+
 
         public void DiscardEnemyHand(string enemyId)
         {
@@ -323,14 +341,71 @@ namespace KiKs.Combat
             for (var i = 0; i < enemyDefinitions.Count; i++)
             {
                 var definition = enemyDefinitions[i];
-                if (definition == null || !definition.HasEnemyDeck) continue;
+                if (definition == null) continue;
 
                 var enemy = state.Enemies[i];
-                var enemyCards = CreateCardInstances(definition.EnemyCardIds, enemy.Id + "_");
+                var turnRules = state.Rules.GetEnemyTurnRules(enemy.EnemyRank);
+                List<CardInstance> enemyCards;
+                CardSpec specialCard = null;
+
+                if (definition.EnemyArchetype != EnemyArchetype.None)
+                {
+                    enemyCards = new List<CardInstance>();
+                    foreach (var spec in cardDatabase.Repository.Cards)
+                    {
+                        if (!string.Equals(
+                                spec.Category,
+                                definition.EnemyCardCategory,
+                                StringComparison.Ordinal))
+                            continue;
+
+                        if (spec.IsSpecial)
+                        {
+                            if (specialCard != null)
+                                throw new InvalidOperationException(
+                                    definition.name + " has more than one special enemy card.");
+                            specialCard = spec;
+                            continue;
+                        }
+
+                        enemyCards.Add(new CardInstance(
+                            enemy.Id + "_" + spec.Id + "#" + (enemyCards.Count + 1).ToString("D2"),
+                            spec));
+                    }
+                }
+                else if (definition.HasEnemyDeck)
+                {
+                    enemyCards = CreateCardInstances(definition.EnemyCardIds, enemy.Id + "_");
+                }
+                else
+                {
+                    continue;
+                }
+
+                if (enemyCards.Count == 0)
+                    throw new InvalidOperationException(
+                        definition.name + " resolved to an empty enemy card deck.");
+
+                if (enemyCards.Count != turnRules.DeckSize)
+                {
+                    Debug.LogWarning(
+                        definition.name + " has " + enemyCards.Count +
+                        " normal enemy cards; " + enemy.EnemyRank +
+                        " rules expect " + turnRules.DeckSize + ".", this);
+                }
+
                 var enemySeed = randomSeed + i + 1;
-                var enemyDeck = new DeckState(enemyCards, enemySeed, shuffleAtBattleStart);
-                state.RegisterEnemyDeck(enemy.Id, enemyDeck);
-                state.RegisterEnemyBaseActionPoints(enemy.Id, definition.BaseActionPoints);
+                state.RegisterEnemyDeck(
+                    enemy.Id,
+                    new DeckState(enemyCards, enemySeed, shuffleAtBattleStart));
+                state.RegisterEnemyBaseActionPoints(enemy.Id, turnRules.BaseActionPoints);
+
+                if (specialCard != null)
+                {
+                    state.RegisterEnemySpecialCard(
+                        enemy.Id,
+                        new CardInstance(enemy.Id + "_special_" + specialCard.Id, specialCard));
+                }
             }
         }
 

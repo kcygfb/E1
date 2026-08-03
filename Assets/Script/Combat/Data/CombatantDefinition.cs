@@ -20,25 +20,48 @@ namespace KiKs.Combat
         [Min(0)] [SerializeField] private int maxToughness = 100;
 
         [Header("Enemy Deck")]
+        [Tooltip("Selects the dedicated enemy JSON deck. Turn rules come from Enemy Rank in CombatRules.")]
+        [SerializeField] private EnemyArchetype enemyArchetype = EnemyArchetype.None;
+
+        [Header("Legacy/Custom Enemy Deck")]
         [Tooltip("卡牌ID列表，和玩家共用同一套 CardDataV2 JSON。如 melee_long_axe, defense_block 等")]
         [SerializeField] private List<string> enemyCardIds = new();
         [Tooltip("每回合抽几张牌")]
+        [HideInInspector]
         [Min(1)] [SerializeField] private int cardsPerTurn = 2;
         [Tooltip("手牌上限")]
+        [HideInInspector]
         [Min(1)] [SerializeField] private int enemyHandLimit = 5;
         [Tooltip("每回合行动次数（出几张牌）")]
+        [HideInInspector]
         [Min(1)] [SerializeField] private int enemyActionsPerTurn = 1;
         [Tooltip("没牌或没行动时的固定伤害")]
         [Min(0)] [SerializeField] private int fallbackDamage = 20;
         [Tooltip("没牌时的固定破甲伤害")]
         [Min(0)] [SerializeField] private int fallbackToughnessDamage = 10;
         [Tooltip("怪物每回合的行动点")]
+        [HideInInspector]
         [Min(0)] [SerializeField] private int baseActionPoints = 2;
 
         public string CombatantId => combatantId;
         public string DisplayName => displayName;
         public CombatantSide Side => side;
         public EnemyRank EnemyRank => enemyRank;
+        public EnemyArchetype EnemyArchetype => enemyArchetype;
+        public string EnemyCardCategory
+        {
+            get
+            {
+                switch (enemyArchetype)
+                {
+                    case EnemyArchetype.Dog: return "enemy_dog";
+                    case EnemyArchetype.LittleGirl: return "enemy_little_girl";
+                    case EnemyArchetype.BigEye: return "enemy_big_eye";
+                    default: return string.Empty;
+                }
+            }
+        }
+
         public IReadOnlyList<string> EnemyCardIds => enemyCardIds;
         public int CardsPerTurn => cardsPerTurn;
         public int EnemyHandLimit => enemyHandLimit;

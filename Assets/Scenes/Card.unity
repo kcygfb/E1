@@ -1792,10 +1792,20 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 38af5df9514dad94d8d74b87d9eb5912, type: 2}
   debugStartingCardIds:
   - melee_fire_axe
+  - melee_fire_axe
+  - melee_tachi
   - melee_tachi
   - ranged_sniper_rifle
   - magic_blizzard
+  - magic_blizzard
   - defense_block
+  - defense_block
+  - ranged_pistol
+  - ranged_pistol
+  - melee_dagger
+  - defense_evade
+  - magic_lifesteal
+  - magic_lifesteal
   randomSeed: 1
   shuffleAtBattleStart: 1
   autoStartBattle: 0
@@ -3117,11 +3127,20 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 37365789fb2ea24468c94f37191a010e, type: 2}
   debugStartingCardIds:
   - melee_fire_axe
+  - melee_fire_axe
+  - melee_tachi
   - melee_tachi
   - ranged_sniper_rifle
   - magic_blizzard
+  - magic_blizzard
+  - defense_block
   - defense_block
   - ranged_pistol
+  - ranged_pistol
+  - melee_dagger
+  - defense_evade
+  - magic_lifesteal
+  - magic_lifesteal
   randomSeed: 1
   shuffleAtBattleStart: 1
   autoStartBattle: 1

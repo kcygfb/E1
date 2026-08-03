@@ -5,7 +5,7 @@
   "apiKey": "sk-6ebe92a50344455fa05683d90df83c05",
   "temperature": 0,
   "primaryModel": {
-    "id": "deepseek-v4-pro"
+    "id": "deepseek-v4-flash"
   },
   "fasterModel": {
     "id": "deepseek-v4-flash"

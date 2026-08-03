@@ -15,17 +15,30 @@ MonoBehaviour:
   baseActionPoints: 3
   cardsDrawnPerTurn: 4
   handLimit: 10
-  expectedInitialDeckSize: 5
-  startingMana: 5
-  maximumMana: 5
+  expectedInitialDeckSize: 15
+  startingMana: 3
+  maximumMana: 3
   maximumManaSpendPerTurn: 1
   cardUpgradeManaCost: 1
   magicCardsPerTurn: 1
+  minionDeckSize: 3
+  minionActionPoints: 3
+  minionCardsDrawnPerTurn: 1
+  minionCardsPlayedPerTurn: 1
+  eliteDeckSize: 4
+  eliteActionPoints: 4
+  eliteCardsDrawnPerTurn: 2
+  eliteCardsPlayedPerTurn: 2
+  bossDeckSize: 4
+  bossActionPoints: 5
+  bossCardsDrawnPerTurn: 2
+  bossCardsPlayedPerTurn: 2
+  bossBerserkTurn: 12
+  enemyHandLimit: 5
+  expensiveCardWindowSize: 5
+  maxTwoCostCardsInWindow: 2
   ultimateManaThreshold: 3
-  ultimateDamage: 0
-  ultimateStunTurns: 1
-  eliteExecutionDamage: 0
-  eliteStunTurns: 0
-  bossExecutionDamage: 0
+  ultimateDamage: 30
+  executionDamage: 60
   toughnessRestoreMode: 0
   fixedToughnessRestoreAmount: 0

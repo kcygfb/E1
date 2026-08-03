@@ -153,11 +153,16 @@ namespace KiKs.Combat
             DamageReductionTurns = Math.Max(DamageReductionTurns, turns);
         }
 
-        public void AdvancePlayerTurnStatuses()
+        public void AdvanceTurnStatuses()
         {
             if (DamageReductionTurns <= 0) return;
             DamageReductionTurns--;
             if (DamageReductionTurns == 0) DamageReductionPercent = 0;
+        }
+
+        public void AdvancePlayerTurnStatuses()
+        {
+            AdvanceTurnStatuses();
         }
 
         public void AddSkipEnemyTurns(int turns)

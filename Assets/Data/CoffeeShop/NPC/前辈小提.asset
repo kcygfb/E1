@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::NPCData
   npcId: 2
   npcName: "\u524D\u8F88\u5C0F\u63D0"
-  portrait: {fileID: 21300000, guid: 15c4d001d98a8e44b9418b782db15742, type: 3}
+  portrait: {fileID: -4748894624273762065, guid: 633afb7b9f283734e8a04fe0d0fc8afa, type: 3}
   portraitSize: {x: 637.5, y: 695.5}
   willOrder: 1
   arrivalDialogueId: timi_arrival

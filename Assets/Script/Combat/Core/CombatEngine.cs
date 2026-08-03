@@ -8,7 +8,13 @@ namespace KiKs.Combat
     /// <summary>Validates commands, mutates BattleState, and emits ordered presentation events.</summary>
     public sealed class CombatEngine
     {
+        private readonly Dictionary<string, int> _enemyCardsPlayedThisTurn = new();
+        private readonly Dictionary<string, Queue<int>> _enemyRecentCardCosts = new();
+        private readonly HashSet<string> _usedEnemySpecialCards = new();
+        private readonly HashSet<string> _enemyActorsAuthorizedThisTurn = new();
+        private readonly HashSet<string> _enemyActorsBlockedThisTurn = new();
         private readonly Dictionary<string, int> _gunCardShotsRemaining = new();
+        private readonly CombatFlowController _flow;
 
         public BattleState State { get; }
         public event Action<CombatEvent> EventRaised;
@@ -16,6 +22,7 @@ namespace KiKs.Combat
         public CombatEngine(BattleState state)
         {
             State = state ?? throw new ArgumentNullException(nameof(state));
+            _flow = new CombatFlowController(State);
         }
 
         public CombatResult StartBattle()
@@ -61,23 +68,91 @@ namespace KiKs.Combat
 
         public CombatResult PlayCard(string cardInstanceId, string targetId)
         {
-            if (State.Phase != CombatPhase.PlayerInput)
-                return Reject("Cards cannot be played during phase " + State.Phase + ".");
+            return SubmitCardAction(new CombatActionIntent(
+                State.Player.Id,
+                cardInstanceId,
+                targetId,
+                CombatActionOrigin.PlayerInput));
+        }
 
-            var card = State.Deck.FindInHand(cardInstanceId);
-            if (card == null) return Reject("The selected card is not in hand.");
+        /// <summary>
+        /// Unified card entry point. Player input and enemy AI submit the same intent;
+        /// only the actor, target direction and resource policy differ.
+        /// </summary>
+        public CombatResult SubmitCardAction(CombatActionIntent intent)
+        {
+            if (intent == null) return Reject("Combat action intent is required.");
 
-            var target = ResolveTarget(card.Spec.TargetType, targetId);
+            var source = State.FindCombatant(intent.ActorId);
+            if (source == null || source.IsDead)
+                return Reject("The acting combatant is invalid or dead.");
+
+            if (source.Side == CombatantSide.Player)
+            {
+                if (intent.Origin == CombatActionOrigin.EnemyAI)
+                    return Reject("Enemy AI cannot control the player.");
+                if (State.Phase != CombatPhase.PlayerInput)
+                    return Reject("Player cards cannot be played during phase " + State.Phase + ".");
+                if (intent.CardSource == CombatCardSource.Special)
+                    return Reject("Player special-card source is not configured.");
+            }
+            else
+            {
+                if (intent.Origin == CombatActionOrigin.PlayerInput)
+                    return Reject("Player input cannot control an enemy.");
+                if (State.Phase != CombatPhase.EnemyTurn)
+                    return Reject("Enemy cards can only be played during the enemy turn.");
+                if (!TryAuthorizeEnemyTurn(source, out var skippedEvent))
+                {
+                    var skippedEvents = new List<CombatEvent>();
+                    if (skippedEvent != null) skippedEvents.Add(skippedEvent);
+                    return Complete(false, skippedEvent?.Message ?? "Enemy cannot act.", skippedEvents);
+                }
+            }
+
+            var sourceDeck = State.GetDeck(source.Id);
+            CardInstance card;
+            if (intent.CardSource == CombatCardSource.Special)
+            {
+                card = State.GetEnemySpecialCard(source.Id);
+                if (card == null || card.InstanceId != intent.CardInstanceId)
+                    return Reject("The selected special card is unavailable.");
+                if (_usedEnemySpecialCards.Contains(card.InstanceId))
+                    return Reject("The special card was already used.");
+
+                var specialRules = State.Rules.GetEnemyTurnRules(source.EnemyRank);
+                if (specialRules.BerserkTurn <= 0 || State.TurnNumber != specialRules.BerserkTurn)
+                    return Reject("The special card is not available on this turn.");
+            }
+            else
+            {
+                if (sourceDeck == null)
+                    return Reject(source.DisplayName + " has no deck.");
+                card = sourceDeck.FindInHand(intent.CardInstanceId);
+                if (card == null)
+                    return Reject("The selected card is not in " + source.DisplayName + "'s hand.");
+            }
+
+            if (source.Side == CombatantSide.Enemy &&
+                intent.CardSource == CombatCardSource.Hand &&
+                !CanPlayEnemyCard(source.Id, card, out var enemyRejection))
+            {
+                return Reject(enemyRejection);
+            }
+
+            var target = ResolveTarget(source, card.Spec.TargetType, intent.TargetId);
             if (target == null) return Reject("The selected target is invalid.");
             if (target.IsDead) return Reject("The selected target is already dead.");
 
             if (card.Spec.CostResource == CardResourceType.ActionPoint)
             {
-                if (State.Player.CurrentActionPoints < card.Spec.CostAmount)
-                    return Reject("Not enough action points.");
+                if (source.CurrentActionPoints < card.Spec.CostAmount)
+                    return Reject(source.DisplayName + " does not have enough action points.");
             }
             else
             {
+                if (source.Side != CombatantSide.Player)
+                    return Reject("Enemy mana resources are not configured.");
                 if (State.Mana.MagicCardsPlayedThisTurn >= State.Rules.MagicCardsPerTurn)
                     return Reject("The magic-card limit for this turn has been reached.");
                 if (!CanSpendMana(card.Spec.CostAmount))
@@ -89,12 +164,12 @@ namespace KiKs.Combat
 
             if (card.Spec.CostResource == CardResourceType.ActionPoint)
             {
-                State.Player.TrySpendActionPoints(card.Spec.CostAmount);
+                source.TrySpendActionPoints(card.Spec.CostAmount);
                 events.Add(new CombatEvent(
                     CombatEventType.ActionPointsChanged,
-                    State.Player.Id,
-                    amount: State.Player.CurrentActionPoints,
-                    message: "Action points spent."));
+                    source.Id,
+                    amount: source.CurrentActionPoints,
+                    message: source.DisplayName + " spent " + card.Spec.CostAmount + " action points."));
             }
             else
             {
@@ -104,85 +179,58 @@ namespace KiKs.Combat
 
             events.Add(new CombatEvent(
                 CombatEventType.CardPlayed,
-                State.Player.Id,
+                source.Id,
                 target.Id,
                 card.InstanceId,
                 card.Spec.CostAmount,
-                "Played " + card.Spec.DisplayName + (card.IsUpgraded ? " (upgraded)." : ".")));
+                source.DisplayName + " played " + card.Spec.DisplayName +
+                (card.IsUpgraded ? " (upgraded)." : ".")));
 
-            var toughnessBroken = ResolveEffects(card, target, events);
-            card.ConsumeUpgrade();
-            State.Deck.DiscardFromHand(card.InstanceId, out _);
-            events.Add(new CombatEvent(
-                CombatEventType.CardDiscarded,
-                State.Player.Id,
-                cardInstanceId: card.InstanceId,
-                message: "Used card moved to discard pile."));
+            var handLimit = source.Side == CombatantSide.Player
+                ? State.Rules.HandLimit
+                : State.Rules.GetEnemyTurnRules(source.EnemyRank).HandLimit;
+            _flow.ResolveCard(
+                source,
+                target,
+                card,
+                sourceDeck,
+                handLimit,
+                source.Side == CombatantSide.Player && target.Side == CombatantSide.Enemy,
+                events);
 
-            if (card.Spec.CostResource == CardResourceType.Mana)
-                TryTriggerUltimate(targetId, events);
+            if (source.Side == CombatantSide.Enemy && intent.CardSource == CombatCardSource.Hand)
+                RecordEnemyCardPlayed(source.Id, card);
 
-            if (EvaluateOutcome(events)) return Complete(true, string.Empty, events);
-
-            if (toughnessBroken && !target.IsDead)
+            if (intent.CardSource == CombatCardSource.Hand)
             {
-                State.PendingExecution = new PendingExecutionState(target.Id, card.InstanceId);
-                SetPhase(CombatPhase.AwaitingExecutionConfirmation, events);
+                card.ConsumeUpgrade();
+                sourceDeck.DiscardFromHand(card.InstanceId, out _);
                 events.Add(new CombatEvent(
-                    CombatEventType.ExecutionConfirmationRequired,
-                    State.Player.Id,
-                    target.Id,
-                    card.InstanceId,
-                    message: "Execution confirmation is required."));
+                    CombatEventType.CardDiscarded,
+                    source.Id,
+                    cardInstanceId: card.InstanceId,
+                    message: "Used card moved to " + source.DisplayName + "'s discard pile."));
             }
             else
             {
-                SetPhase(CombatPhase.PlayerInput, events);
+                _usedEnemySpecialCards.Add(card.InstanceId);
             }
 
-            return Complete(true, string.Empty, events);
-        }
-
-        public CombatResult ConfirmExecution()
-        {
-            if (State.Phase != CombatPhase.AwaitingExecutionConfirmation || State.PendingExecution == null)
-                return Reject("There is no execution waiting for confirmation.");
-
-            var pending = State.PendingExecution;
-            var target = State.FindEnemy(pending.TargetId);
-            if (target == null || target.IsDead)
+            if (source.Side == CombatantSide.Player &&
+                card.Spec.CostResource == CardResourceType.Mana)
             {
-                State.PendingExecution = null;
-                return Reject("The pending execution target is no longer valid.");
+                TryTriggerUltimate(target.Id, events);
             }
 
-            var events = new List<CombatEvent>();
-            var executionDamage = ResolveExecution(target, events);
-            events.Add(new CombatEvent(
-                CombatEventType.ExecutionResolved,
-                State.Player.Id,
-                target.Id,
-                pending.SourceCardInstanceId,
-                executionDamage,
-                "Execution damage resolved."));
-
-            State.PendingExecution = null;
-            if (target.IsDead)
+            if (!EvaluateOutcome(events))
             {
-                events.Add(CreateDeathEvent(target));
-            }
-            else
-            {
-                var restored = target.RestoreToughness(State.Rules.GetToughnessRestoreAmount(target));
-                events.Add(new CombatEvent(
-                    CombatEventType.ToughnessChanged,
-                    State.Player.Id,
-                    target.Id,
-                    amount: target.CurrentToughness,
-                    message: "Restored " + restored + " toughness after execution."));
+                SetPhase(
+                    source.Side == CombatantSide.Player
+                        ? CombatPhase.PlayerInput
+                        : CombatPhase.EnemyTurn,
+                    events);
             }
 
-            if (!EvaluateOutcome(events)) SetPhase(CombatPhase.PlayerInput, events);
             return Complete(true, string.Empty, events);
         }
 
@@ -202,35 +250,51 @@ namespace KiKs.Combat
                     message: "Unplayed card discarded at turn end."));
             }
 
-            State.IsCurrentEnemyTurnSkipped = State.Player.TryConsumeSkipEnemyTurn();
-            SetPhase(CombatPhase.EnemyTurn, events);
-            events.Add(new CombatEvent(CombatEventType.EnemyTurnStarted, message: "Enemy turn started."));
+            BeginEnemyTurn(events);
+            return Complete(true, string.Empty, events);
+        }
 
-            // Restore enemy action points
+        private void BeginEnemyTurn(List<CombatEvent> events)
+        {
+            State.IsCurrentEnemyTurnSkipped = State.Player.TryConsumeSkipEnemyTurn();
+            _enemyActorsAuthorizedThisTurn.Clear();
+            _enemyActorsBlockedThisTurn.Clear();
+
+            SetPhase(CombatPhase.EnemyTurn, events);
+            events.Add(new CombatEvent(
+                CombatEventType.EnemyTurnStarted,
+                message: "Enemy turn started."));
+
             foreach (var enemy in State.Enemies)
             {
                 if (enemy.IsDead) continue;
-                var baseAP = State.GetEnemyBaseActionPoints(enemy.Id);
-                if (baseAP > 0)
-                {
-                    enemy.RestoreActionPoints(baseAP);
-                    events.Add(new CombatEvent(
-                        CombatEventType.ActionPointsChanged,
-                        enemy.Id,
-                        amount: enemy.CurrentActionPoints,
-                        message: enemy.DisplayName + " restored " + baseAP + " action points."));
-                }
+
+                enemy.AdvanceTurnStatuses();
+                _enemyCardsPlayedThisTurn[enemy.Id] = 0;
+                var baseActionPoints = State.GetEnemyBaseActionPoints(enemy.Id);
+                if (baseActionPoints <= 0) continue;
+
+                enemy.RestoreActionPoints(baseActionPoints);
+                events.Add(new CombatEvent(
+                    CombatEventType.ActionPointsChanged,
+                    enemy.Id,
+                    amount: enemy.CurrentActionPoints,
+                    message: enemy.DisplayName + " restored " + baseActionPoints +
+                             " action points."));
             }
 
             if (State.IsCurrentEnemyTurnSkipped)
             {
+                foreach (var enemy in State.Enemies)
+                {
+                    if (!enemy.IsDead) _enemyActorsBlockedThisTurn.Add(enemy.Id);
+                }
+
                 events.Add(new CombatEvent(
-                    CombatEventType.EnemyActionSkipped,
+                    CombatEventType.CombatantTurnSkipped,
                     State.Player.Id,
                     message: "The current enemy turn is skipped."));
             }
-
-            return Complete(true, string.Empty, events);
         }
 
         public CombatResult ResolveEnemyAttack(string enemyId, int damage, int toughnessDamage = 0)
@@ -241,91 +305,137 @@ namespace KiKs.Combat
             if (toughnessDamage < 0) return Reject("Enemy toughness damage cannot be negative.");
 
             var enemy = State.FindEnemy(enemyId);
-            if (enemy == null || enemy.IsDead) return Reject("The attacking enemy is invalid.");
+            if (enemy == null || enemy.IsDead)
+                return Reject("The attacking enemy is invalid.");
 
             var events = new List<CombatEvent>();
-            if (State.IsCurrentEnemyTurnSkipped)
+            if (!TryAuthorizeEnemyTurn(enemy, out var skippedEvent))
             {
-                events.Add(new CombatEvent(
-                    CombatEventType.EnemyActionSkipped,
-                    enemy.Id,
-                    State.Player.Id,
-                    message: "Enemy turn was already marked as skipped."));
+                if (skippedEvent != null) events.Add(skippedEvent);
                 return Complete(true, string.Empty, events);
             }
 
-            if (enemy.ConsumeOneStunTurn())
-            {
-                events.Add(new CombatEvent(
-                    CombatEventType.EnemyActionSkipped,
-                    enemy.Id,
-                    State.Player.Id,
-                    message: "Enemy attack skipped because of stun."));
-                return Complete(true, string.Empty, events);
-            }
-
-            if (State.Player.TryConsumeNullifyAttack())
-            {
-                events.Add(new CombatEvent(
-                    CombatEventType.EnemyActionSkipped,
-                    enemy.Id,
-                    State.Player.Id,
-                    message: "Enemy attack was nullified."));
-                return Complete(true, string.Empty, events);
-            }
-
-            var reducedDamage = (int)Math.Ceiling(damage * (100 - State.Player.DamageReductionPercent) / 100d);
-            var blockedDamage = State.Player.ConsumeBlockPoints(Math.Max(0, reducedDamage));
-            var actualDamage = State.Player.ApplyDamage(Math.Max(0, reducedDamage - blockedDamage));
-            events.Add(new CombatEvent(
-                CombatEventType.DamageApplied,
-                enemy.Id,
-                State.Player.Id,
-                amount: actualDamage,
-                message: "Enemy attack resolved."));
-
-            if (blockedDamage > 0)
-            {
-                events.Add(new CombatEvent(
-                    CombatEventType.StatusApplied,
-                    State.Player.Id,
-                    State.Player.Id,
-                    amount: State.Player.BlockPoints,
-                    message: "Block absorbed " + blockedDamage + " damage."));
-            }
-
-            if (toughnessDamage > 0)
-            {
-                var actualToughnessDamage = State.Player.ReduceToughness(toughnessDamage);
-                events.Add(new CombatEvent(
-                    CombatEventType.ToughnessChanged,
-                    enemy.Id,
-                    State.Player.Id,
-                    amount: State.Player.CurrentToughness,
-                    message: "Enemy attack reduced player toughness by " +
-                             actualToughnessDamage + "."));
-            }
-
-            if (State.Player.IsDead) events.Add(CreateDeathEvent(State.Player));
-
-            var reflectedDamage = State.Player.ConsumeReflectDamage();
-            if (reflectedDamage > 0 && !enemy.IsDead)
-            {
-                var actualReflectedDamage = enemy.ApplyDamage(reflectedDamage);
-                events.Add(new CombatEvent(
-                    CombatEventType.DamageApplied,
-                    State.Player.Id,
-                    enemy.Id,
-                    amount: actualReflectedDamage,
-                    message: "Player reflected damage to the attacker."));
-                if (enemy.IsDead) events.Add(CreateDeathEvent(enemy));
-            }
+            _flow.ResolveDirectAttack(
+                enemy,
+                State.Player,
+                damage,
+                toughnessDamage,
+                "fixed-attack:" + enemy.Id,
+                events);
 
             EvaluateOutcome(events);
             return Complete(true, string.Empty, events);
         }
 
-        /// <summary>Enemy draws cards from its own deck. Returns draw result, or null if enemy has no deck.</summary>
+        private bool TryAuthorizeEnemyTurn(
+            CombatantState enemy,
+            out CombatEvent skippedEvent)
+        {
+            skippedEvent = null;
+            if (enemy == null || enemy.IsDead) return false;
+            if (_enemyActorsAuthorizedThisTurn.Contains(enemy.Id)) return true;
+
+            if (_enemyActorsBlockedThisTurn.Contains(enemy.Id))
+            {
+                skippedEvent = new CombatEvent(
+                    CombatEventType.CombatantTurnSkipped,
+                    enemy.Id,
+                    State.Player.Id,
+                    message: enemy.DisplayName + " cannot act again during this turn.");
+                return false;
+            }
+
+            if (State.IsCurrentEnemyTurnSkipped)
+            {
+                _enemyActorsBlockedThisTurn.Add(enemy.Id);
+                skippedEvent = new CombatEvent(
+                    CombatEventType.CombatantTurnSkipped,
+                    enemy.Id,
+                    State.Player.Id,
+                    message: enemy.DisplayName + "'s turn was skipped.");
+                return false;
+            }
+
+            if (enemy.ConsumeOneStunTurn())
+            {
+                _enemyActorsBlockedThisTurn.Add(enemy.Id);
+                skippedEvent = new CombatEvent(
+                    CombatEventType.CombatantTurnSkipped,
+                    enemy.Id,
+                    State.Player.Id,
+                    message: enemy.DisplayName + "'s turn was skipped because of stun.");
+                return false;
+            }
+
+            _enemyActorsAuthorizedThisTurn.Add(enemy.Id);
+            return true;
+        }
+
+        public bool CanEnemyTakeCardTurn(string enemyId)
+        {
+            if (State.Phase != CombatPhase.EnemyTurn) return false;
+            var enemy = State.FindEnemy(enemyId);
+            if (enemy == null || enemy.IsDead) return false;
+            if (TryAuthorizeEnemyTurn(enemy, out var skippedEvent)) return true;
+
+            if (skippedEvent != null)
+                ForwardEvents(new List<CombatEvent> { skippedEvent });
+            return false;
+        }
+
+        public bool CanPlayEnemyCard(string enemyId, CardInstance card, out string reason)
+        {
+            var enemy = State.FindEnemy(enemyId);
+            if (enemy == null || enemy.IsDead)
+            {
+                reason = "The acting enemy is invalid or dead.";
+                return false;
+            }
+
+            if (card == null)
+            {
+                reason = "The selected enemy card is missing.";
+                return false;
+            }
+
+            if (card.Spec.CostResource == CardResourceType.ActionPoint &&
+                enemy.CurrentActionPoints < card.Spec.CostAmount)
+            {
+                reason = "Enemy does not have enough action points.";
+                return false;
+            }
+
+            var rules = State.Rules.GetEnemyTurnRules(enemy.EnemyRank);
+            _enemyCardsPlayedThisTurn.TryGetValue(enemyId, out var cardsPlayed);
+            if (cardsPlayed >= rules.CardsPlayedPerTurn)
+            {
+                reason = "Enemy reached its card-play limit for this turn.";
+                return false;
+            }
+
+            if (rules.UsesExpensiveCardWindow &&
+                card.Spec.CostResource == CardResourceType.ActionPoint &&
+                card.Spec.CostAmount == 2 &&
+                _enemyRecentCardCosts.TryGetValue(enemyId, out var recentCosts))
+            {
+                var twoCostCards = 0;
+                foreach (var cost in recentCosts)
+                {
+                    if (cost == 2) twoCostCards++;
+                }
+
+                if (twoCostCards >= rules.MaxTwoCostCardsInWindow)
+                {
+                    reason = "Enemy already used the maximum number of 2-AP cards in its recent-card window.";
+                    return false;
+                }
+            }
+
+            reason = string.Empty;
+            return true;
+        }
+
+        /// <summary>Draw cards for an enemy through the same deck-event flow used by the player.</summary>
         public DeckDrawResult DrawEnemyCards(string enemyId, int count, int handLimit)
         {
             if (State.Phase != CombatPhase.EnemyTurn)
@@ -334,95 +444,38 @@ namespace KiKs.Combat
                 return null;
             }
 
-            var deck = State.GetEnemyDeck(enemyId);
-            if (deck == null) return null;
+            var enemy = State.FindEnemy(enemyId);
+            var deck = State.GetDeck(enemyId);
+            if (enemy == null || deck == null) return null;
 
-            var result = deck.Draw(count, handLimit);
             var events = new List<CombatEvent>();
-
-            for (var i = 0; i < result.ReshuffleCount; i++)
-                events.Add(new CombatEvent(CombatEventType.DeckReshuffled,
-                    sourceId: enemyId, message: "Enemy discard pile reshuffled."));
-
-            foreach (var drawn in result.DrawnCards)
-                events.Add(new CombatEvent(CombatEventType.CardDrawn,
-                    sourceId: enemyId, cardInstanceId: drawn.InstanceId,
-                    message: enemyId + " drew " + drawn.Spec.DisplayName + "."));
-
-            foreach (var overflow in result.OverflowDiscardedCards)
-                events.Add(new CombatEvent(CombatEventType.CardDiscarded,
-                    sourceId: enemyId, cardInstanceId: overflow.InstanceId,
-                    message: "Enemy card exceeded hand limit and was discarded."));
-
+            var result = _flow.DrawCards(enemy, deck, count, handLimit, events);
             ForwardEvents(events);
             return result;
         }
 
-        /// <summary>Enemy plays a card from its hand against the player.</summary>
         public CombatResult PlayEnemyCard(string enemyId, string cardInstanceId)
         {
-            if (State.Phase != CombatPhase.EnemyTurn)
-                return Reject("Enemy cards can only be played during the enemy turn.");
-
-            var enemy = State.FindEnemy(enemyId);
-            if (enemy == null || enemy.IsDead)
-                return Reject("The attacking enemy is invalid or dead.");
-
-            var deck = State.GetEnemyDeck(enemyId);
-            if (deck == null)
-                return Reject("Enemy " + enemyId + " has no deck.");
-
-            var card = deck.FindInHand(cardInstanceId);
-            if (card == null)
-                return Reject("The selected card is not in enemy hand.");
-
-            var target = State.Player;
-            if (target.IsDead) return Reject("The player is already dead.");
-
-            var events = new List<CombatEvent>();
-
-            // Check action points for action-point cards
-            if (card.Spec.CostResource == CardResourceType.ActionPoint)
-            {
-                if (enemy.CurrentActionPoints < card.Spec.CostAmount)
-                    return Reject("Enemy does not have enough action points.");
-                enemy.TrySpendActionPoints(card.Spec.CostAmount);
-                events.Add(new CombatEvent(
-                    CombatEventType.ActionPointsChanged,
-                    enemy.Id,
-                    amount: enemy.CurrentActionPoints,
-                    message: "Enemy spent " + card.Spec.CostAmount + " action points."));
-            }
-
-            SetPhase(CombatPhase.ResolvingCard, events);
-
-            events.Add(new CombatEvent(
-                CombatEventType.CardPlayed,
-                enemy.Id,
-                target.Id,
-                card.InstanceId,
-                card.Spec.CostAmount,
-                enemy.DisplayName + " played " + card.Spec.DisplayName + "."));
-
-            ResolveEnemyCardEffects(card, enemy, target, events);
-
-            card.ConsumeUpgrade();
-            deck.DiscardFromHand(card.InstanceId, out _);
-            events.Add(new CombatEvent(
-                CombatEventType.CardDiscarded,
-                enemy.Id,
-                cardInstanceId: card.InstanceId,
-                message: "Enemy card moved to discard pile."));
-
-            if (EvaluateOutcome(events))
-            {
-                SetPhase(CombatPhase.EnemyTurn, events);
-                return Complete(true, string.Empty, events);
-            }
-
-            SetPhase(CombatPhase.EnemyTurn, events);
-            return Complete(true, string.Empty, events);
+            return SubmitCardAction(new CombatActionIntent(
+                enemyId,
+                cardInstanceId,
+                State.Player.Id,
+                CombatActionOrigin.EnemyAI));
         }
+
+        public CombatResult PlayEnemySpecialCard(string enemyId)
+        {
+            var card = State.GetEnemySpecialCard(enemyId);
+            if (card == null) return Reject("Enemy has no configured special card.");
+
+            return SubmitCardAction(new CombatActionIntent(
+                enemyId,
+                card.InstanceId,
+                State.Player.Id,
+                CombatActionOrigin.EnemyAI,
+                CombatCardSource.Special));
+        }
+
 
         /// <summary>Enemy discards its entire hand (called at end of enemy turn).</summary>
         public void DiscardEnemyHand(string enemyId)
@@ -442,180 +495,29 @@ namespace KiKs.Combat
             ForwardEvents(events);
         }
 
-        private void ResolveEnemyCardEffects(
-            CardInstance card, CombatantState source, CombatantState target, List<CombatEvent> events)
+        private void RecordEnemyCardPlayed(string enemyId, CardInstance card)
         {
-            foreach (var effect in card.Spec.Effects)
+            _enemyCardsPlayedThisTurn.TryGetValue(enemyId, out var played);
+            _enemyCardsPlayedThisTurn[enemyId] = played + 1;
+
+            var rules = State.Rules.GetEnemyTurnRules(
+                State.FindEnemy(enemyId)?.EnemyRank ?? EnemyRank.Minion);
+            if (!rules.UsesExpensiveCardWindow) return;
+
+            if (!_enemyRecentCardCosts.TryGetValue(enemyId, out var recentCosts))
             {
-                switch (effect.Type)
-                {
-                    case CardEffectType.Damage:
-                        ResolveEnemyDamage(card, source, target, effect, events);
-                        break;
-
-                    case CardEffectType.ToughnessDamage:
-                        ResolveEnemyToughnessDamage(card, source, target, effect, events);
-                        break;
-
-                    case CardEffectType.Stun:
-                        target.AddStun(1);
-                        events.Add(new CombatEvent(
-                            CombatEventType.StunApplied, source.Id, target.Id,
-                            card.InstanceId, 1, "Enemy stunned the player."));
-                        break;
-
-                    case CardEffectType.Bleed:
-                        var bleedStacks = effect.Amount.Resolve(card.IsUpgraded);
-                        target.AddBleedStacks(bleedStacks);
-                        events.Add(new CombatEvent(
-                            CombatEventType.StatusApplied, source.Id, target.Id,
-                            card.InstanceId, target.BleedStacks, "Enemy applied bleed stacks."));
-                        break;
-
-                    case CardEffectType.Poison:
-                        var poisonStacks = effect.Amount.Resolve(card.IsUpgraded);
-                        target.AddPoisonStacks(poisonStacks);
-                        events.Add(new CombatEvent(
-                            CombatEventType.StatusApplied, source.Id, target.Id,
-                            card.InstanceId, target.PoisonStacks, "Enemy applied poison stacks."));
-                        break;
-
-                    case CardEffectType.BlockDamage:
-                        var blockPoints = effect.Amount.Resolve(card.IsUpgraded);
-                        source.AddBlockPoints(blockPoints);
-                        events.Add(new CombatEvent(
-                            CombatEventType.StatusApplied, source.Id, source.Id,
-                            card.InstanceId, source.BlockPoints, "Enemy gained block points."));
-                        break;
-
-                    case CardEffectType.DamageReduction:
-                        var reduction = effect.Amount.Resolve(card.IsUpgraded);
-                        source.AddDamageReduction(reduction, 1);
-                        events.Add(new CombatEvent(
-                            CombatEventType.StatusApplied, source.Id, source.Id,
-                            card.InstanceId, reduction, "Enemy gained damage reduction."));
-                        break;
-
-                    case CardEffectType.DrawCards:
-                        var drawCount = effect.Amount.Resolve(card.IsUpgraded);
-                        var deck = State.GetEnemyDeck(source.Id);
-                        if (deck != null)
-                        {
-                            var drawResult = deck.Draw(drawCount, 10);
-                            foreach (var drawn in drawResult.DrawnCards)
-                                events.Add(new CombatEvent(
-                                    CombatEventType.CardDrawn, source.Id,
-                                    cardInstanceId: drawn.InstanceId,
-                                    message: "Enemy drew " + drawn.Spec.DisplayName + "."));
-                        }
-                        break;
-
-                    case CardEffectType.LifeSteal:
-                        ResolveEnemyLifeSteal(card, source, target, effect, events);
-                        break;
-
-                    case CardEffectType.LifeStealMaxHealth:
-                        ResolveEnemyLifeStealMaxHealth(card, source, target, effect, events);
-                        break;
-
-                    case CardEffectType.GainResource:
-                        // Enemies don't use action points, skip
-                        break;
-
-                    default:
-                        events.Add(new CombatEvent(
-                            CombatEventType.EffectNotImplemented,
-                            source.Id, target.Id,
-                            card.InstanceId,
-                            message: effect.Type + " is not implemented for enemy cards yet."));
-                        break;
-                }
-
-                if (target.IsDead) break;
+                recentCosts = new Queue<int>();
+                _enemyRecentCardCosts[enemyId] = recentCosts;
             }
+
+            var cost = card.Spec.CostResource == CardResourceType.ActionPoint
+                ? card.Spec.CostAmount
+                : -1;
+            recentCosts.Enqueue(cost);
+            while (recentCosts.Count > rules.RecentCardWindowSize)
+                recentCosts.Dequeue();
         }
 
-        private void ResolveEnemyDamage(
-            CardInstance card, CombatantState source, CombatantState target,
-            CardEffectSpec effect, List<CombatEvent> events)
-        {
-            var amount = effect.Amount.Resolve(card.IsUpgraded);
-            var hits = effect.Hits.Resolve(card.IsUpgraded);
-
-            for (var hit = 0; hit < hits && !target.IsDead; hit++)
-            {
-                var blockedDamage = target.ConsumeBlockPoints(Math.Max(0, amount));
-                var actualDamage = target.ApplyDamage(Math.Max(0, amount - blockedDamage));
-                events.Add(new CombatEvent(
-                    CombatEventType.DamageApplied, source.Id, target.Id,
-                    card.InstanceId, actualDamage,
-                    "Enemy card damage hit " + (hit + 1) + " resolved.",
-                    isUpgraded: card.IsUpgraded));
-
-                if (blockedDamage > 0)
-                    events.Add(new CombatEvent(
-                        CombatEventType.StatusApplied, target.Id, target.Id,
-                        amount: target.BlockPoints,
-                        message: "Block absorbed " + blockedDamage + " damage."));
-
-                if (target.IsDead) events.Add(CreateDeathEvent(target));
-            }
-        }
-
-        private void ResolveEnemyToughnessDamage(
-            CardInstance card, CombatantState source, CombatantState target,
-            CardEffectSpec effect, List<CombatEvent> events)
-        {
-            var rawAmount = effect.Amount.Resolve(card.IsUpgraded);
-            var amount = effect.Unit == ValueUnit.Percent
-                ? (int)Math.Ceiling(target.MaxToughness * rawAmount / 100d)
-                : rawAmount;
-            var hits = effect.Hits.Resolve(card.IsUpgraded);
-
-            for (var hit = 0; hit < hits; hit++)
-            {
-                var changed = target.ReduceToughness(amount);
-                events.Add(new CombatEvent(
-                    CombatEventType.ToughnessChanged, source.Id, target.Id,
-                    card.InstanceId, target.CurrentToughness,
-                    "Enemy card toughness hit " + (hit + 1) + " reduced " + changed + "."));
-            }
-        }
-
-        private void ResolveEnemyLifeSteal(
-            CardInstance card, CombatantState source, CombatantState target,
-            CardEffectSpec effect, List<CombatEvent> events)
-        {
-            var requestedDamage = effect.Amount.Resolve(card.IsUpgraded);
-            var actualDamage = target.ApplyDamage(requestedDamage);
-            var healing = source.Heal(actualDamage);
-            events.Add(new CombatEvent(
-                CombatEventType.DamageApplied, source.Id, target.Id,
-                card.InstanceId, actualDamage, "Enemy life steal dealt damage.",
-                isUpgraded: card.IsUpgraded));
-            events.Add(new CombatEvent(
-                CombatEventType.HealingApplied, source.Id, source.Id,
-                card.InstanceId, healing, "Enemy life steal healed."));
-            if (target.IsDead) events.Add(CreateDeathEvent(target));
-        }
-
-        private void ResolveEnemyLifeStealMaxHealth(
-            CardInstance card, CombatantState source, CombatantState target,
-            CardEffectSpec effect, List<CombatEvent> events)
-        {
-            var percent = effect.Amount.Resolve(card.IsUpgraded);
-            var requested = (int)Math.Ceiling(target.MaxHealth * percent / 100d);
-            var damage = target.ApplyDamage(requested);
-            var healing = source.Heal(damage);
-            events.Add(new CombatEvent(
-                CombatEventType.DamageApplied, source.Id, target.Id,
-                card.InstanceId, damage, "Enemy life steal (max health) dealt damage.",
-                isUpgraded: card.IsUpgraded));
-            events.Add(new CombatEvent(
-                CombatEventType.HealingApplied, source.Id, source.Id,
-                card.InstanceId, healing, "Enemy life steal (max health) healed."));
-            if (target.IsDead) events.Add(CreateDeathEvent(target));
-        }
 
         private void ForwardEvents(List<CombatEvent> events)
         {
@@ -636,237 +538,14 @@ namespace KiKs.Combat
             return Complete(true, string.Empty, events);
         }
 
-        private bool ResolveEffects(CardInstance card, CombatantState target, List<CombatEvent> events)
-        {
-            foreach (var effect in card.Spec.Effects)
-            {
-                switch (effect.Type)
-                {
-                    case CardEffectType.Damage:
-                        ResolveDamage(card, target, effect, events);
-                        break;
-                    case CardEffectType.ToughnessDamage:
-                        if (ResolveToughnessDamage(card, target, effect, events)) return true;
-                        break;
-                    case CardEffectType.Stun:
-                        target.AddStun(1);
-                        events.Add(new CombatEvent(
-                            CombatEventType.StunApplied, State.Player.Id, target.Id,
-                            card.InstanceId, 1, "Stun applied."));
-                        break;
-                    case CardEffectType.NullifyAttacks:
-                        var nullifyCharges = effect.Amount.Resolve(card.IsUpgraded);
-                        State.Player.AddNullifyAttackCharges(nullifyCharges);
-                        AddStatusEvent(card, State.Player, nullifyCharges, "Attack-nullify charges added.", events);
-                        break;
-                    case CardEffectType.DamageReduction:
-                        var reduction = effect.Amount.Resolve(card.IsUpgraded);
-                        State.Player.AddDamageReduction(reduction, 1);
-                        AddStatusEvent(card, State.Player, reduction, "Damage reduction applied.", events);
-                        break;
-                    case CardEffectType.SkipEnemyTurns:
-                        State.Player.AddSkipEnemyTurns(1);
-                        AddStatusEvent(card, State.Player, 1, "Enemy-turn skip applied.", events);
-                        break;
-                    case CardEffectType.DrawCards:
-                        DrawCards(effect.Amount.Resolve(card.IsUpgraded), events);
-                        break;
-                    case CardEffectType.LifeStealMaxHealth:
-                        ResolveLifeSteal(card, target, effect, events);
-                        break;
-
-                    case CardEffectType.Bleed:
-                        var bleedStacks = effect.Amount.Resolve(card.IsUpgraded);
-                        target.AddBleedStacks(bleedStacks);
-                        AddStatusEvent(card, target, target.BleedStacks, "Bleed stacks applied.", events);
-                        break;
-                    case CardEffectType.BleedScaledDamage:
-                        ResolveBleedScaledDamage(card, target, effect, events);
-                        target.ClearBleedStacks();
-                        break;
-                    case CardEffectType.Poison:
-                        var poisonStacks = effect.Amount.Resolve(card.IsUpgraded);
-                        target.AddPoisonStacks(poisonStacks);
-                        AddStatusEvent(card, target, target.PoisonStacks, "Poison stacks applied.", events);
-                        break;
-                    case CardEffectType.LifeSteal:
-                        ResolveFixedLifeSteal(card, target, effect, events);
-                        break;
-                    case CardEffectType.ReflectDamage:
-                        var reflectDamage = effect.Amount.Resolve(card.IsUpgraded);
-                        State.Player.AddReflectDamage(reflectDamage);
-                        AddStatusEvent(card, State.Player, State.Player.PendingReflectDamage,
-                            "Reflect damage prepared.", events);
-                        break;
-                    case CardEffectType.BlockDamage:
-                        var blockPoints = effect.Amount.Resolve(card.IsUpgraded);
-                        State.Player.AddBlockPoints(blockPoints);
-                        AddStatusEvent(card, State.Player, State.Player.BlockPoints,
-                            "Block points gained.", events);
-                        break;
-                    case CardEffectType.GainResource:
-                        ResolveGainResource(card, effect, events);
-                        break;
-
-                    case CardEffectType.Vulnerability:
-                    case CardEffectType.Immunity:
-                    case CardEffectType.SummonCompanion:
-                    case CardEffectType.PlayCardsFromDiscard:
-                        events.Add(new CombatEvent(
-                            CombatEventType.EffectNotImplemented,
-                            State.Player.Id,
-                            target.Id,
-                            card.InstanceId,
-                            message: effect.Type + " is parsed but awaits its dedicated rule."));
-                        break;
-                }
-
-                if (target.IsDead) break;
-            }
-
-            return false;
-        }
-
-        private void ResolveDamage(CardInstance card, CombatantState target, CardEffectSpec effect, List<CombatEvent> events)
-        {
-            var amount = effect.Amount.Resolve(card.IsUpgraded);
-            var hits = effect.Hits.Resolve(card.IsUpgraded);
-            for (var hit = 0; hit < hits && !target.IsDead; hit++)
-            {
-                var actualDamage = target.ApplyDamage(amount);
-                events.Add(new CombatEvent(
-                    CombatEventType.DamageApplied, State.Player.Id, target.Id,
-                    card.InstanceId, actualDamage, "Damage hit " + (hit + 1) + " resolved.",
-                    isUpgraded: card.IsUpgraded));
-                if (target.IsDead) events.Add(CreateDeathEvent(target));
-            }
-        }
-
-        private bool ResolveToughnessDamage(
-            CardInstance card, CombatantState target, CardEffectSpec effect, List<CombatEvent> events)
-        {
-            var rawAmount = effect.Amount.Resolve(card.IsUpgraded);
-            var amount = effect.Unit == ValueUnit.Percent
-                ? (int)Math.Ceiling(target.MaxToughness * rawAmount / 100d)
-                : rawAmount;
-            var hits = effect.Hits.Resolve(card.IsUpgraded);
-
-            for (var hit = 0; hit < hits; hit++)
-            {
-                var hadToughness = target.CurrentToughness > 0;
-                var changed = target.ReduceToughness(amount);
-                events.Add(new CombatEvent(
-                    CombatEventType.ToughnessChanged, State.Player.Id, target.Id,
-                    card.InstanceId, target.CurrentToughness,
-                    "Toughness hit " + (hit + 1) + " reduced " + changed + "."));
-
-                if (target.Side == CombatantSide.Enemy && hadToughness && target.CurrentToughness == 0)
-                {
-                    events.Add(new CombatEvent(
-                        CombatEventType.ToughnessBroken, State.Player.Id, target.Id,
-                        card.InstanceId, message: "Target toughness was broken."));
-                    var restoredMana = State.Mana.RestoreToMaximum();
-                    if (restoredMana > 0)
-                    {
-                        events.Add(new CombatEvent(
-                            CombatEventType.ManaChanged, State.Player.Id, target.Id,
-                            card.InstanceId, State.Mana.Current,
-                            "Enemy toughness broken; restored " + restoredMana + " mana."));
-                    }
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        private void ResolveLifeSteal(
-            CardInstance card, CombatantState target, CardEffectSpec effect, List<CombatEvent> events)
-        {
-            var percent = effect.Amount.Resolve(card.IsUpgraded);
-            var requested = (int)Math.Ceiling(target.MaxHealth * percent / 100d);
-            var damage = target.ApplyDamage(requested);
-            var healing = State.Player.Heal(damage);
-            events.Add(new CombatEvent(
-                CombatEventType.DamageApplied, State.Player.Id, target.Id,
-                card.InstanceId, damage, "Life steal dealt damage.",
-                isUpgraded: card.IsUpgraded));
-            events.Add(new CombatEvent(
-                CombatEventType.HealingApplied, State.Player.Id, State.Player.Id,
-                card.InstanceId, healing, "Life steal healed the player."));
-            if (target.IsDead) events.Add(CreateDeathEvent(target));
-        }
-
-        private void ResolveBleedScaledDamage(
-            CardInstance card, CombatantState target, CardEffectSpec effect, List<CombatEvent> events)
-        {
-            var requestedDamage = (int)Math.Ceiling(target.BleedStacks * effect.Multiplier);
-            var actualDamage = target.ApplyDamage(requestedDamage);
-            events.Add(new CombatEvent(
-                CombatEventType.DamageApplied, State.Player.Id, target.Id,
-                card.InstanceId, actualDamage,
-                "Bleed-scaled damage resolved from " + target.BleedStacks + " stacks.",
-                isUpgraded: card.IsUpgraded));
-            if (target.IsDead) events.Add(CreateDeathEvent(target));
-        }
-
-        private void ResolveFixedLifeSteal(
-            CardInstance card, CombatantState target, CardEffectSpec effect, List<CombatEvent> events)
-        {
-            var requestedDamage = effect.Amount.Resolve(card.IsUpgraded);
-            var actualDamage = target.ApplyDamage(requestedDamage);
-            var actualHealing = State.Player.Heal(actualDamage);
-            events.Add(new CombatEvent(
-                CombatEventType.DamageApplied, State.Player.Id, target.Id,
-                card.InstanceId, actualDamage, "Life steal dealt fixed damage.",
-                isUpgraded: card.IsUpgraded));
-            events.Add(new CombatEvent(
-                CombatEventType.HealingApplied, State.Player.Id, State.Player.Id,
-                card.InstanceId, actualHealing, "Life steal healed fixed health."));
-            if (target.IsDead) events.Add(CreateDeathEvent(target));
-        }
-
-        private void ResolveGainResource(CardInstance card, CardEffectSpec effect, List<CombatEvent> events)
-        {
-            var amount = effect.Amount.Resolve(card.IsUpgraded);
-            State.Player.AddActionPoints(amount);
-            events.Add(new CombatEvent(
-                CombatEventType.ActionPointsChanged, State.Player.Id,
-                cardInstanceId: card.InstanceId, amount: State.Player.CurrentActionPoints,
-                message: "Action points gained."));
-        }
-
         private void DrawCards(int count, List<CombatEvent> events)
         {
-            var result = State.Deck.Draw(count, State.Rules.HandLimit);
-            for (var i = 0; i < result.ReshuffleCount; i++)
-                events.Add(new CombatEvent(CombatEventType.DeckReshuffled, message: "Discard pile reshuffled."));
-
-            foreach (var drawn in result.DrawnCards)
-            {
-                events.Add(new CombatEvent(
-                    CombatEventType.CardDrawn, State.Player.Id,
-                    cardInstanceId: drawn.InstanceId, message: "Drew " + drawn.Spec.DisplayName + "."));
-            }
-
-            foreach (var overflow in result.OverflowDiscardedCards)
-            {
-                events.Add(new CombatEvent(
-                    CombatEventType.CardDiscarded, State.Player.Id,
-                    cardInstanceId: overflow.InstanceId,
-                    message: "Card exceeded the hand limit and was discarded."));
-            }
-        }
-
-        private static void AddStatusEvent(
-            CardInstance card, CombatantState target, int amount, string message, List<CombatEvent> events)
-        {
-            events.Add(new CombatEvent(
-                CombatEventType.StatusApplied,
-                cardInstanceId: card.InstanceId,
-                targetId: target.Id,
-                amount: amount,
-                message: message));
+            _flow.DrawCards(
+                State.Player,
+                State.Deck,
+                count,
+                State.Rules.HandLimit,
+                events);
         }
 
         private bool CanSpendMana(int amount)
@@ -890,28 +569,30 @@ namespace KiKs.Combat
             if (target == null || target.IsDead) target = State.FindFirstLivingEnemy();
 
             events.Add(new CombatEvent(
-                CombatEventType.UltimateTriggered, State.Player.Id, target?.Id,
+                CombatEventType.UltimateTriggered,
+                State.Player.Id,
+                target?.Id,
                 amount: State.Rules.UltimateDamage,
                 message: "Mana threshold reached; ultimate triggered automatically."));
 
             if (target != null)
             {
-                var damage = target.ApplyDamage(State.Rules.UltimateDamage);
-                events.Add(new CombatEvent(
-                    CombatEventType.DamageApplied, State.Player.Id, target.Id,
-                    amount: damage, message: "Ultimate damage resolved."));
-
-                if (!target.IsDead && State.Rules.UltimateStunTurns > 0)
-                {
-                    target.AddStun(State.Rules.UltimateStunTurns);
-                    events.Add(new CombatEvent(
-                        CombatEventType.StunApplied, State.Player.Id, target.Id,
-                        amount: State.Rules.UltimateStunTurns, message: "Ultimate stun applied."));
-                }
-
-                if (target.IsDead) events.Add(CreateDeathEvent(target));
+                _flow.ResolveDirectDamage(
+                    State.Player,
+                    target,
+                    State.Rules.UltimateDamage,
+                    "ultimate",
+                    "Ultimate damage resolved.",
+                    true,
+                    events);
             }
 
+            var restoredMana = State.Mana.RestoreToMaximum();
+            events.Add(new CombatEvent(
+                CombatEventType.ManaChanged,
+                State.Player.Id,
+                amount: State.Mana.Current,
+                message: "Ultimate restored " + restoredMana + " mana."));
         }
 
         private void BeginPlayerTurn(List<CombatEvent> events)
@@ -919,7 +600,7 @@ namespace KiKs.Combat
             State.TurnNumber++;
             State.IsCurrentEnemyTurnSkipped = false;
             State.Mana.BeginTurn();
-            State.Player.AdvancePlayerTurnStatuses();
+            State.Player.AdvanceTurnStatuses();
 
             SetPhase(CombatPhase.PlayerTurnStart, events);
             events.Add(new CombatEvent(
@@ -927,28 +608,40 @@ namespace KiKs.Combat
                 amount: State.TurnNumber, message: "Player turn " + State.TurnNumber + " started."));
             if (EvaluateOutcome(events)) return;
 
-            // Process status-effect ticks (bleed, poison, etc.) for all living enemies.
+            // Status effects on the player and enemies tick at the start of the player turn.
+            _flow.ProcessStatusTicks(State.Player, State.FindFirstLivingEnemy()?.Id, events);
+            if (EvaluateOutcome(events)) return;
+
             foreach (var enemy in State.Enemies)
             {
-                if (enemy.IsDead) continue;
-                foreach (var tick in enemy.ProcessStatusTicks())
+                _flow.ProcessStatusTicks(enemy, State.Player.Id, events);
+                if (EvaluateOutcome(events)) return;
+            }
+
+            CombatantState skipSource = null;
+            var playerStunned = State.Player.ConsumeOneStunTurn();
+            if (!playerStunned)
+            {
+                foreach (var enemy in State.Enemies)
                 {
-                    if (tick.DamageDealt <= 0) continue;
-                    var actualDamage = enemy.ApplyDamage(tick.DamageDealt);
-                    events.Add(new CombatEvent(
-                        CombatEventType.StatusTicked, State.Player.Id, enemy.Id,
-                        amount: actualDamage,
-                        message: tick.Type + " dealt " + actualDamage + " damage (" +
-                                 tick.RemainingStacks + " stacks remaining)."));
-                    if (enemy.IsDead)
-                    {
-                        events.Add(CreateDeathEvent(enemy));
-                        break;
-                    }
+                    if (enemy.IsDead || !enemy.TryConsumeSkipEnemyTurn()) continue;
+                    skipSource = enemy;
+                    break;
                 }
             }
 
-            if (EvaluateOutcome(events)) return;
+            if (playerStunned || skipSource != null)
+            {
+                events.Add(new CombatEvent(
+                    CombatEventType.CombatantTurnSkipped,
+                    skipSource?.Id,
+                    State.Player.Id,
+                    message: playerStunned
+                        ? "Player turn was skipped because of stun."
+                        : "Player turn was skipped by " + skipSource.DisplayName + "."));
+                BeginEnemyTurn(events);
+                return;
+            }
 
             State.Player.RestoreActionPoints(State.Rules.BaseActionPoints);
             events.Add(new CombatEvent(
@@ -962,53 +655,18 @@ namespace KiKs.Combat
             SetPhase(CombatPhase.PlayerInput, events);
         }
 
-        private CombatantState ResolveTarget(CardTargetType targetType, string targetId)
+        private CombatantState ResolveTarget(
+            CombatantState source,
+            CardTargetType targetType,
+            string targetId)
         {
-            return targetType == CardTargetType.Self ? State.Player :
-                   targetType == CardTargetType.SingleEnemy ? State.FindEnemy(targetId) : null;
-        }
+            if (source == null) return null;
+            if (targetType == CardTargetType.Self) return source;
+            if (targetType != CardTargetType.SingleEnemy) return null;
 
-        private int ResolveExecution(CombatantState target, List<CombatEvent> events)
-        {
-            int actualDamage;
-            switch (target.EnemyRank)
-            {
-                case EnemyRank.Minion:
-                    actualDamage = target.Kill();
-                    break;
-                case EnemyRank.Elite:
-                    actualDamage = target.ApplyDamage(State.Rules.EliteExecutionDamage);
-                    if (!target.IsDead && State.Rules.EliteStunTurns > 0)
-                    {
-                        target.AddStun(State.Rules.EliteStunTurns);
-                        events.Add(new CombatEvent(
-                            CombatEventType.StunApplied, State.Player.Id, target.Id,
-                            amount: State.Rules.EliteStunTurns, message: "Elite was stunned by execution."));
-                    }
-                    break;
-                case EnemyRank.Boss:
-                    actualDamage = target.ApplyDamage(State.Rules.BossExecutionDamage);
-                    if (!target.IsDead && State.Rules.BossStunTurns > 0)
-                    {
-                        target.AddStun(State.Rules.BossStunTurns);
-                        events.Add(new CombatEvent(
-                            CombatEventType.StunApplied, State.Player.Id, target.Id,
-                            amount: State.Rules.BossStunTurns, message: "Boss was stunned by execution."));
-                    }
-                    break;
-                default:
-                    actualDamage = 0;
-                    break;
-            }
-
-            if (actualDamage > 0)
-            {
-                events.Add(new CombatEvent(
-                    CombatEventType.DamageApplied, State.Player.Id, target.Id,
-                    amount: actualDamage, message: "Execution dealt an additional damage instance."));
-            }
-
-            return actualDamage;
+            var target = State.FindCombatant(targetId) ?? State.FindFirstLivingOpponent(source);
+            if (target == null || target.Side == source.Side) return null;
+            return target;
         }
 
         private bool EvaluateOutcome(List<CombatEvent> events)
@@ -1078,7 +736,7 @@ namespace KiKs.Combat
             var card = State.Deck.FindInHand(cardInstanceId);
             if (card == null) return Reject("The selected card is not in hand.");
 
-            var target = ResolveTarget(card.Spec.TargetType, targetId);
+            var target = ResolveTarget(State.Player, card.Spec.TargetType, targetId);
             if (target == null) return Reject("The selected target is invalid.");
             if (target.IsDead) return Reject("The selected target is already dead.");
 
@@ -1120,18 +778,14 @@ namespace KiKs.Combat
 
             // 造成1发伤害
             var damagePerHit = GetGunCardDamagePerHit(card);
-            var actualDamage = target.ApplyDamage(damagePerHit);
-            events.Add(new CombatEvent(
-                CombatEventType.DamageApplied,
-                State.Player.Id,
-                target.Id,
+            _flow.ResolveDirectDamage(
+                State.Player,
+                target,
+                damagePerHit,
                 card.InstanceId,
-                actualDamage,
                 "Gun shot resolved.",
-                isUpgraded: card.IsUpgraded));
-
-            if (target.IsDead)
-                events.Add(CreateDeathEvent(target));
+                true,
+                events);
 
             _gunCardShotsRemaining[cardInstanceId]--;
 
@@ -1187,7 +841,7 @@ namespace KiKs.Combat
             var card = State.Deck.FindInHand(cardInstanceId);
             if (card == null) return Reject("Card not in hand.");
 
-            var target = ResolveTarget(card.Spec.TargetType, targetId);
+            var target = ResolveTarget(State.Player, card.Spec.TargetType, targetId);
             if (target == null || target.IsDead) return Reject("Invalid target.");
 
             var events = new List<CombatEvent>();
@@ -1195,19 +849,16 @@ namespace KiKs.Combat
 
             for (int i = 0; i < remaining && !target.IsDead; i++)
             {
-                var actualDamage = target.ApplyDamage(damagePerHit);
-                events.Add(new CombatEvent(
-                    CombatEventType.DamageApplied,
-                    State.Player.Id,
-                    target.Id,
+                _flow.ResolveDirectDamage(
+                    State.Player,
+                    target,
+                    damagePerHit,
                     card.InstanceId,
-                    actualDamage,
                     "Gun shot (burst) resolved.",
-                    isUpgraded: card.IsUpgraded));
+                    true,
+                    events);
             }
 
-            if (target.IsDead)
-                events.Add(CreateDeathEvent(target));
 
             _gunCardShotsRemaining.Remove(cardInstanceId);
             card.ConsumeUpgrade();

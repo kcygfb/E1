@@ -152,9 +152,12 @@ namespace KiKs.Combat
             return effects.Any(effect =>
                 effect.Type == CardEffectType.Damage ||
                 effect.Type == CardEffectType.ToughnessDamage ||
+                effect.Type == CardEffectType.Stun ||
+                effect.Type == CardEffectType.Vulnerability ||
                 effect.Type == CardEffectType.Bleed ||
                 effect.Type == CardEffectType.BleedScaledDamage ||
                 effect.Type == CardEffectType.LifeSteal ||
+                effect.Type == CardEffectType.LifeStealMaxHealth ||
                 effect.Type == CardEffectType.Poison)
                 ? CardTargetType.SingleEnemy
                 : CardTargetType.Self;
