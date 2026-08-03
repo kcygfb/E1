@@ -25,6 +25,9 @@ namespace KiKs.UI
         [SerializeField] private Image pauseIcon;              // 暂停图标
         [SerializeField] private Text trackNameText;           // 歌曲名（可选）
 
+        [Header("Volume")]
+        [SerializeField] private float defaultVolume = 0.5f;
+
         [Header("Animation")]
         [SerializeField] private float expandDuration = 0.25f;
         [SerializeField] private Ease expandEase = Ease.OutBack;
@@ -60,6 +63,9 @@ namespace KiKs.UI
 
             // 歌曲名
             UpdateTrackName();
+
+            // 默认音量
+            audioSource.volume = defaultVolume;
         }
 
         private void Start()
@@ -158,6 +164,14 @@ namespace KiKs.UI
         {
             if (trackNameText != null && _currentTrack < bgmClips.Count && bgmClips[_currentTrack] != null)
                 trackNameText.text = bgmClips[_currentTrack].name;
+        }
+
+        /// <summary>
+        /// 设置 BGM 音量 (0~1)，可外部调用（如通过设置界面/调试接口）。
+        /// </summary>
+        public void SetVolume(float volume)
+        {
+            audioSource.volume = Mathf.Clamp01(volume);
         }
     }
 }

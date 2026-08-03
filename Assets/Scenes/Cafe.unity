@@ -457,7 +457,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 0, y: 0.5}
-  m_AnchoredPosition: {x: 237.63, y: 84.1}
+  m_AnchoredPosition: {x: 212, y: 76}
   m_SizeDelta: {x: 180, y: 60}
   m_Pivot: {x: 0, y: 0.5}
 --- !u!114 &57127208
@@ -4679,9 +4679,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 29f5fc4cba6bf7f4d8dcb5ba6fd0aa4d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KiKs.UI::KiKs.UI.ButtonFeedback
-  hoverScale: 1.1
+  hoverScale: 1.05
   hoverDuration: 0.15
-  pressScale: 0.9
+  pressScale: 0.95
   pressDuration: 0.08
   ease: 9
   selectionFrame: {fileID: 0}
@@ -6357,10 +6357,10 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 12
+    m_FontSize: 14
     m_FontStyle: 0
     m_BestFit: 0
-    m_MinSize: 10
+    m_MinSize: 7
     m_MaxSize: 40
     m_Alignment: 4
     m_AlignByGeometry: 0
@@ -11751,7 +11751,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 355.32996, y: -9.799988}
+  m_AnchoredPosition: {x: 355.32983, y: -9.800049}
   m_SizeDelta: {x: 274.8359, y: 241.9715}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1894080202
@@ -11803,6 +11803,7 @@ MonoBehaviour:
   playIcon: {fileID: 1232388905}
   pauseIcon: {fileID: 1789838918}
   trackNameText: {fileID: 959662409}
+  defaultVolume: 0.5
   expandDuration: 0.25
   expandEase: 27
 --- !u!114 &1894080204
