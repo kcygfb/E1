@@ -140,6 +140,10 @@ namespace KiKs.Combat
 
                 _engine = new CombatEngine(state);
                 _engine.EventRaised += ForwardEvent;
+
+                // Sync HP to global stats so other scenes can read it
+                PlayerGlobalStats.SetHealth(state.Player.CurrentHealth, state.Player.MaxHealth);
+
                 var result = _engine.StartBattle();
                 if (!result.Success)
                 {
@@ -562,6 +566,16 @@ namespace KiKs.Combat
 
         private void ForwardEvent(CombatEvent combatEvent)
         {
+            // Sync HP to global stats on damage/heal events
+            if (_engine != null && _engine.State?.Player != null &&
+                (combatEvent.Type == CombatEventType.DamageApplied || combatEvent.Type == CombatEventType.HealingApplied) &&
+                combatEvent.TargetId == _engine.State.Player.Id)
+            {
+                PlayerGlobalStats.SetHealth(
+                    _engine.State.Player.CurrentHealth,
+                    _engine.State.Player.MaxHealth);
+            }
+
             CombatEventRaised?.Invoke(combatEvent);
         }
 
@@ -569,7 +583,14 @@ namespace KiKs.Combat
 
         private void DisposeEngine()
         {
-            if (_engine != null) _engine.EventRaised -= ForwardEvent;
+            if (_engine != null)
+            {
+                // Sync final HP to global stats before disposing
+                var player = _engine.State?.Player;
+                if (player != null)
+                    PlayerGlobalStats.SetHealth(player.CurrentHealth, player.MaxHealth);
+                _engine.EventRaised -= ForwardEvent;
+            }
             _engine = null;
         }
     }

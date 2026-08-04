@@ -13,13 +13,13 @@ MonoBehaviour:
   m_Name: linshuil
   m_EditorClassIdentifier: Assembly-CSharp::NPCData
   npcId: 3
-  npcName: linshuil
+  npcName: "\u62B9\u8336"
   portrait: {fileID: 6069710931494159596, guid: 761e8259328ec88498254a12bd8e2ae9, type: 3}
   portraitSize: {x: 637.5, y: 695.5125}
   willOrder: 1
   arrivalDialogueId: generic_arrival
   departureDialogueId: generic_departure
-  desiredCoffeeId: PourOver
+  desiredCoffeeId: Espresso
   lockedDialogueId: 
   lockedDepartureDialogueId: 
   returnFoundDialogueId: 

@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -10,9 +11,15 @@ public class DialoguePlayer : MonoBehaviour
     public Text lineText;
     public Button nextButton;
 
+    [Header("打字机效果")]
+    [SerializeField] private float charsPerSecond = 30f;
+
     private DialogueDataJson currentDialogue;
     private int currentIndex;
     private bool isRunning;
+    private bool isTyping;
+    private Coroutine typingRoutine;
+    private string currentFullText;
     private Dictionary<string, string> tokens = new();
     private string speakerOverride;
     private string currentContext;
@@ -103,13 +110,39 @@ public class DialoguePlayer : MonoBehaviour
             if (speakerText != null)
                 speakerText.text = speaker;
 
-            lineText.text = text;
+            if (typingRoutine != null) StopCoroutine(typingRoutine);
+            currentFullText = text;
+            typingRoutine = StartCoroutine(TypeText(text));
         }
+    }
+
+    private IEnumerator TypeText(string fullText)
+    {
+        isTyping = true;
+        lineText.text = "";
+        float delay = 1f / charsPerSecond;
+        for (int i = 0; i < fullText.Length; i++)
+        {
+            lineText.text = fullText.Substring(0, i + 1);
+            yield return new WaitForSeconds(delay);
+        }
+        lineText.text = fullText;
+        isTyping = false;
     }
 
     public void OnNextClicked()
     {
         if (!isRunning || currentDialogue == null) return;
+
+        if (isTyping)
+        {
+            // 停止打字动画，显示整句，不跳转下一句
+            if (typingRoutine != null) StopCoroutine(typingRoutine);
+            lineText.text = currentFullText;
+            isTyping = false;
+            return;
+        }
+
         int next = currentIndex + 1;
         if (next >= currentDialogue.lines.Count) EndDialogue();
         else ShowLine(next);
@@ -117,6 +150,8 @@ public class DialoguePlayer : MonoBehaviour
 
     private void EndDialogue()
     {
+        if (typingRoutine != null) StopCoroutine(typingRoutine);
+        isTyping = false;
         isRunning = false;
         currentDialogue = null;
         currentIndex = 0;
