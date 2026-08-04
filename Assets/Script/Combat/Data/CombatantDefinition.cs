@@ -19,6 +19,13 @@ namespace KiKs.Combat
         [Min(1)] [SerializeField] private int maxHealth = 100;
         [Min(0)] [SerializeField] private int maxToughness = 100;
 
+        [Header("Enemy Presentation")]
+        [SerializeField] private Sprite portrait;
+        [SerializeField] private Vector2 portraitSize = new Vector2(100f, 100f);
+        [SerializeField] private Vector2 portraitOffset = Vector2.zero;
+        [Min(0.01f)]
+        [SerializeField] private float portraitScale = 1f;
+
         [Header("Enemy Deck")]
         [Tooltip("Selects the dedicated enemy JSON deck. Turn rules come from Enemy Rank in CombatRules.")]
         [SerializeField] private EnemyArchetype enemyArchetype = EnemyArchetype.None;
@@ -48,6 +55,10 @@ namespace KiKs.Combat
         public CombatantSide Side => side;
         public EnemyRank EnemyRank => enemyRank;
         public EnemyArchetype EnemyArchetype => enemyArchetype;
+        public Sprite Portrait => portrait;
+        public Vector2 PortraitSize => portraitSize;
+        public Vector2 PortraitOffset => portraitOffset;
+        public float PortraitScale => portraitScale;
         public string EnemyCardCategory
         {
             get

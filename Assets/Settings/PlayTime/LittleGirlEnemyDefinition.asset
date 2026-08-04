@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4754d7bc2fd800f4287cf59ee457d044, type: 3}
+  m_Name: LittleGirlEnemyDefinition
+  m_EditorClassIdentifier: KiKs.Combat::KiKs.Combat.CombatantDefinition
+  combatantId: demo_little_girl
+  displayName: "\u5C0F\u5973\u5B69"
+  side: 1
+  enemyRank: 2
+  maxHealth: 100
+  maxToughness: 100
+  portrait: {fileID: -4826310739445990366, guid: 42a85882ff07c2f45bdebcf1ee87e3f0, type: 3}
+  portraitSize: {x: 100, y: 100}
+  portraitOffset: {x: 0, y: -5}
+  portraitScale: 0.95
+  enemyArchetype: 2
+  enemyCardIds: []
+  cardsPerTurn: 2
+  enemyHandLimit: 5
+  enemyActionsPerTurn: 2
+  fallbackDamage: 18
+  fallbackToughnessDamage: 10
+  baseActionPoints: 4

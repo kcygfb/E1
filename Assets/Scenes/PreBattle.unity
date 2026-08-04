@@ -1292,7 +1292,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 0.08, g: 0.08, b: 0.1, a: 0}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -5355,6 +5355,15 @@ MonoBehaviour:
   beginButton: {fileID: 1862050044}
   undoButton: {fileID: 600537510}
   rulesConfig: {fileID: 11400000, guid: a3bb6ee28ee6f144aaf43b96d914eb96, type: 2}
+  demoMapPoints:
+  - {fileID: 944471938}
+  - {fileID: 575675249}
+  - {fileID: 765540610}
+  decorativeOverlay: {fileID: 425786355}
+  demoCompletePanel: {fileID: 1021546883}
+  demoCompleteLabel: {fileID: 1436081117}
+  demoCompleteText: "\u8BD5\u73A9\u7ED3\u675F / Demo Complete"
+  openCardSelectionAfterMapClick: 1
   cardPopup: {fileID: 1454766522}
   cardGridContent: {fileID: 806669835}
   cardItemPrefab: {fileID: 0}
@@ -6527,7 +6536,7 @@ MonoBehaviour:
   m_Elasticity: 0.1
   m_Inertia: 1
   m_DecelerationRate: 0.135
-  m_ScrollSensitivity: 1
+  m_ScrollSensitivity: 35
   m_Viewport: {fileID: 1557624851}
   m_HorizontalScrollbar: {fileID: 0}
   m_VerticalScrollbar: {fileID: 0}

@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4754d7bc2fd800f4287cf59ee457d044, type: 3}
+  m_Name: DogEnemyDefinition
+  m_EditorClassIdentifier: KiKs.Combat::KiKs.Combat.CombatantDefinition
+  combatantId: demo_dog
+  displayName: "\u72D7"
+  side: 1
+  enemyRank: 1
+  maxHealth: 25
+  maxToughness: 25
+  portrait: {fileID: 1480917699468073914, guid: 79047062320309c4fb7c4a58b8c788a0, type: 3}
+  portraitSize: {x: 100, y: 100}
+  portraitOffset: {x: 0, y: -5}
+  portraitScale: 1
+  enemyArchetype: 1
+  enemyCardIds: []
+  cardsPerTurn: 1
+  enemyHandLimit: 5
+  enemyActionsPerTurn: 1
+  fallbackDamage: 15
+  fallbackToughnessDamage: 8
+  baseActionPoints: 3

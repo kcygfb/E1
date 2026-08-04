@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace KiKs.Combat
 {
@@ -18,6 +19,15 @@ namespace KiKs.Combat
         [SerializeField] private CombatRulesConfig rulesConfig = null;
         [SerializeField] private CombatantDefinition playerDefinition = null;
         [SerializeField] private List<CombatantDefinition> enemyDefinitions = new List<CombatantDefinition>();
+
+        [Header("Linear Demo Encounters")]
+        [Tooltip("Order must be: Dog (Minion), Little Girl (Elite), Big Eye (Boss).")]
+        [SerializeField] private List<CombatantDefinition> demoEnemyDefinitions = new List<CombatantDefinition>();
+
+        [Header("Enemy Presentation")]
+        [SerializeField] private Image enemyPortraitImage;
+        [Tooltip("Optional Big Eye-only overlay. It is hidden automatically for the Dog and Little Girl.")]
+        [SerializeField] private GameObject bigEyePortraitOverlay;
 
         [Header("Deck source")]
         [Tooltip("Used only when no selection screen has filled BattleSession.")]
@@ -88,8 +98,13 @@ namespace KiKs.Combat
                 if (playerDefinition == null) throw new InvalidOperationException("Player definition is not assigned.");
                 if (playerDefinition.Side != CombatantSide.Player)
                     throw new InvalidOperationException("Player definition must use the Player side.");
+
+                ApplySelectedDemoEncounter();
+
                 if (enemyDefinitions == null || enemyDefinitions.Count == 0)
                     throw new InvalidOperationException("At least one enemy definition is required.");
+
+                ApplyPrimaryEnemyPresentation();
 
                 var usesSelectedDeck = BattleSession.HasSelectedDeck;
                 var selectedIds = usesSelectedDeck
@@ -334,6 +349,75 @@ namespace KiKs.Combat
             }
 
             return enemies;
+        }
+
+        private void ApplySelectedDemoEncounter()
+        {
+            if (!BattleSession.HasSelectedDemoStage)
+                return;
+
+            var stage = BattleSession.SelectedDemoStage;
+            if (!DemoFlowState.IsStageAvailable(stage))
+                throw new InvalidOperationException(
+                    $"Selected demo stage {stage} does not match current stage {DemoFlowState.CurrentStage}.");
+
+            var index = (int)stage;
+            if (demoEnemyDefinitions == null || index < 0 || index >= demoEnemyDefinitions.Count)
+                throw new InvalidOperationException(
+                    $"Demo enemy slot {index + 1} ({stage}) is not configured on BattleController.");
+
+            var definition = demoEnemyDefinitions[index];
+            if (definition == null)
+                throw new InvalidOperationException($"Demo enemy slot {index + 1} ({stage}) is null.");
+
+            enemyDefinitions = new List<CombatantDefinition> { definition };
+            Debug.Log(
+                $"[DemoFlow] BattleController selected {definition.DisplayName} / " +
+                $"{definition.EnemyArchetype} / {definition.EnemyRank} for {stage}.",
+                this);
+        }
+
+        private void ApplyPrimaryEnemyPresentation()
+        {
+            var definition = enemyDefinitions[0];
+            if (definition == null)
+                throw new InvalidOperationException("Primary enemy definition is null.");
+
+            if (enemyPortraitImage == null)
+            {
+                var portraitObject = GameObject.Find("EnemyPortrait");
+                if (portraitObject != null)
+                    enemyPortraitImage = portraitObject.GetComponent<Image>();
+            }
+
+            if (enemyPortraitImage == null)
+            {
+                Debug.LogWarning("EnemyPortrait Image is not configured; enemy art cannot be updated.", this);
+                return;
+            }
+
+            if (definition.Portrait == null)
+            {
+                Debug.LogWarning(definition.name + " has no enemy portrait configured.", definition);
+                return;
+            }
+
+            enemyPortraitImage.sprite = definition.Portrait;
+            enemyPortraitImage.preserveAspect = true;
+
+            var portraitRect = enemyPortraitImage.rectTransform;
+            portraitRect.sizeDelta = definition.PortraitSize;
+            portraitRect.anchoredPosition = definition.PortraitOffset;
+            portraitRect.localScale = Vector3.one * definition.PortraitScale;
+
+            if (bigEyePortraitOverlay != null)
+                bigEyePortraitOverlay.SetActive(definition.EnemyArchetype == EnemyArchetype.BigEye);
+
+            var hitFeedback = enemyPortraitImage.GetComponent<EnemyHitFeedbackNew>();
+            if (hitFeedback != null)
+                hitFeedback.RefreshOrigin();
+
+            Debug.Log($"[Combat] Applied portrait for {definition.DisplayName} at scale {definition.PortraitScale:0.###}.", this);
         }
 
         private void CreateEnemyDecks(BattleState state)

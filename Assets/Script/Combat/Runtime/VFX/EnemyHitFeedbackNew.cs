@@ -44,12 +44,20 @@ namespace KiKs.Combat
 
         private void Awake()
         {
+            RefreshOrigin();
+        }
+
+        /// <summary>立绘或布局切换后，重新记录受击动画应返回的位置、缩放和颜色。</summary>
+        public void RefreshOrigin()
+        {
+            _seq?.Kill();
             _rect = GetComponent<RectTransform>();
             _image = GetComponent<Image>();
             _originPos = _rect.anchoredPosition;
             _originScale = _rect.localScale;
             if (_image != null)
                 _originColor = _image.color;
+            _seq = null;
         }
 
         private void OnDestroy()

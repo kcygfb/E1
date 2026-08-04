@@ -6,6 +6,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using KiKs.UI;
 
 namespace KiKs.Combat
 {
@@ -310,10 +311,10 @@ namespace KiKs.Combat
             if (isTransitioning) return;
             isTransitioning = true;
             confirmButton.interactable = false;
-            StartCoroutine(TransitionToCafeRoutine());
+            StartCoroutine(TransitionAfterVictoryRoutine());
         }
 
-        private IEnumerator TransitionToCafeRoutine()
+        private IEnumerator TransitionAfterVictoryRoutine()
         {
             const float duration = 0.4f;
             float elapsed = 0f;
@@ -332,7 +333,50 @@ namespace KiKs.Combat
                 yield return null;
             }
 
-            EndNightAndReturnToCafe();
+            if (!BattleSession.HasSelectedDemoStage)
+            {
+                Debug.LogWarning(
+                    "[DemoFlow] Victory came from a direct/debug battle. Keeping the existing Cafe return flow.",
+                    this);
+                EndNightAndReturnToCafe();
+                yield break;
+            }
+
+            var completedStage = BattleSession.SelectedDemoStage;
+            var advanced = DemoFlowState.CompleteCurrentBattle(completedStage);
+            BattleSession.ClearSelectedDemoStage();
+            SyncCafeDayCounter(DemoFlowState.CurrentDay);
+
+            if (!advanced)
+                Debug.LogError(
+                    "[DemoFlow] Battle result did not advance progress; returning to PreBattle safely.", this);
+
+            ReturnToPreBattle();
+        }
+
+        private static void ReturnToPreBattle()
+        {
+            const string sceneName = "PreBattle";
+            if (!Application.CanStreamedLevelBeLoaded(sceneName))
+            {
+                Debug.LogError($"[DemoFlow] Scene '{sceneName}' is not included in the active build profile.");
+                return;
+            }
+
+            if (TransitionEffect.Instance != null)
+                TransitionEffect.Instance.TransitionTo(sceneName);
+            else
+                SceneManager.LoadScene(sceneName);
+        }
+
+        private static void SyncCafeDayCounter(int day)
+        {
+            Type timeSystemType = Type.GetType("TimeSystem, Assembly-CSharp");
+            MethodInfo setDayMethod = timeSystemType?.GetMethod(
+                "SetSavedDayCountForDemo",
+                BindingFlags.Public | BindingFlags.Static);
+            if (setDayMethod != null)
+                setDayMethod.Invoke(null, new object[] { day });
         }
 
         private void BuildPlaceholderUI()

@@ -70,6 +70,12 @@ public class TimeSystem : MonoBehaviour
         SceneManager.LoadScene("Cafe");
     }
 
+    public static void SetSavedDayCountForDemo(int day)
+    {
+        savedDayCount = Mathf.Max(1, day);
+        Debug.Log($"[TimeSystem] Demo flow synced -> Day {savedDayCount}");
+    }
+
     private void EnterMorningCheck()
     {
         CurrentPhase = DayPhase.MorningCheck;

@@ -12,9 +12,12 @@ namespace KiKs.Combat
     {
         private static IReadOnlyList<string> _selectedCardIds =
             new ReadOnlyCollection<string>(new List<string>());
+        private static DemoStage? _selectedDemoStage;
 
         public static IReadOnlyList<string> SelectedCardIds => _selectedCardIds;
         public static bool HasSelectedDeck => _selectedCardIds.Count > 0;
+        public static bool HasSelectedDemoStage => _selectedDemoStage.HasValue;
+        public static DemoStage SelectedDemoStage => _selectedDemoStage ?? DemoStage.Completed;
 
         public static void SetSelectedDeck(IEnumerable<string> cardIds)
         {
@@ -34,6 +37,20 @@ namespace KiKs.Combat
         public static void ClearSelectedDeck()
         {
             _selectedCardIds = new ReadOnlyCollection<string>(new List<string>());
+        }
+
+        public static void SetSelectedDemoStage(DemoStage stage)
+        {
+            if (!DemoFlowState.IsStageAvailable(stage))
+                throw new InvalidOperationException(
+                    $"Demo stage {stage} is not available. Current stage is {DemoFlowState.CurrentStage}.");
+
+            _selectedDemoStage = stage;
+        }
+
+        public static void ClearSelectedDemoStage()
+        {
+            _selectedDemoStage = null;
         }
     }
 }

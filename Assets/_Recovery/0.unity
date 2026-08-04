@@ -1632,7 +1632,7 @@ GameObject:
   - component: {fileID: 438658509}
   - component: {fileID: 438658508}
   m_Layer: 5
-  m_Name: BigEyePortraitOverlay
+  m_Name: GameObject
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1790,12 +1790,7 @@ MonoBehaviour:
   playerDefinition: {fileID: 11400000, guid: 192373106e9cd45478816be416f17b41, type: 2}
   enemyDefinitions:
   - {fileID: 11400000, guid: 38af5df9514dad94d8d74b87d9eb5912, type: 2}
-  demoEnemyDefinitions:
-  - {fileID: 11400000, guid: d318f1d79cda4e4f9d82a1087c2b4071, type: 2}
-  - {fileID: 11400000, guid: 83e0d896a3114ab8af4e2bdfc5c292f1, type: 2}
-  - {fileID: 11400000, guid: 924b6a0ddef5498bb73b7618c4e31d0a, type: 2}
-  enemyPortraitImage: {fileID: 970831849}
-  bigEyePortraitOverlay: {fileID: 438658506}
+  demoEnemyDefinitions: []
   debugStartingCardIds:
   - melee_fire_axe
   - melee_fire_axe
@@ -3130,15 +3125,8 @@ MonoBehaviour:
   rulesConfig: {fileID: 11400000, guid: a3bb6ee28ee6f144aaf43b96d914eb96, type: 2}
   playerDefinition: {fileID: 11400000, guid: 192373106e9cd45478816be416f17b41, type: 2}
   enemyDefinitions:
-  - {fileID: 11400000, guid: d318f1d79cda4e4f9d82a1087c2b4071, type: 2}
-  - {fileID: 11400000, guid: 83e0d896a3114ab8af4e2bdfc5c292f1, type: 2}
-  - {fileID: 11400000, guid: 924b6a0ddef5498bb73b7618c4e31d0a, type: 2}
-  demoEnemyDefinitions:
-  - {fileID: 11400000, guid: d318f1d79cda4e4f9d82a1087c2b4071, type: 2}
-  - {fileID: 11400000, guid: 83e0d896a3114ab8af4e2bdfc5c292f1, type: 2}
-  - {fileID: 11400000, guid: 924b6a0ddef5498bb73b7618c4e31d0a, type: 2}
-  enemyPortraitImage: {fileID: 970831849}
-  bigEyePortraitOverlay: {fileID: 438658506}
+  - {fileID: 11400000, guid: 37365789fb2ea24468c94f37191a010e, type: 2}
+  demoEnemyDefinitions: []
   debugStartingCardIds:
   - melee_fire_axe
   - melee_fire_axe

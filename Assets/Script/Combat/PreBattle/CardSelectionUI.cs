@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using UnityEngine.Events;
 using KiKs.UI;
 
 namespace KiKs.Combat
@@ -20,6 +21,16 @@ namespace KiKs.Combat
         [Header("Rules")]
         [SerializeField] private CombatRulesConfig rulesConfig;
 
+        [Header("Linear Demo Flow")]
+        [Tooltip("Order must be: 1 Dog, 2 Little Girl, 3 Big Eye.")]
+        [SerializeField] private List<GameObject> demoMapPoints = new();
+        [Tooltip("Decorative UI drawn above the map. Its non-button Graphics must not intercept clicks.")]
+        [SerializeField] private Transform decorativeOverlay;
+        [SerializeField] private GameObject demoCompletePanel;
+        [SerializeField] private Text demoCompleteLabel;
+        [SerializeField] private string demoCompleteText = "试玩结束 / Demo Complete";
+        [SerializeField] private bool openCardSelectionAfterMapClick = true;
+
         [Header("Popups")]
         [SerializeField] private GameObject cardPopup;
 
@@ -36,6 +47,7 @@ namespace KiKs.Combat
 
         private readonly List<string> selectedCardIds = new();
         private readonly List<CardSpec> allCards = new();
+        private readonly Dictionary<Button, UnityAction> demoMapPointListeners = new();
         private bool _isStartingBattle;
 
         private int RequiredDeckSize =>
@@ -43,10 +55,14 @@ namespace KiKs.Combat
 
         private IEnumerator Start()
         {
+            DisableDecorativeOverlayRaycasts();
+            BindDemoMapPoints();
+            RefreshMapPoints();
+            SyncCafeDayCounter(DemoFlowState.CurrentDay);
+
             yield return TransitionEffect.WaitEntrance();
 
             ResolveUndoButton();
-
             if (cardButton != null)
                 cardButton.onClick.AddListener(OnCardButtonClicked);
             if (beginButton != null)
@@ -68,6 +84,10 @@ namespace KiKs.Combat
                 beginButton.onClick.RemoveListener(OnBeginClicked);
             if (undoButton != null)
                 undoButton.onClick.RemoveListener(OnUndoClicked);
+
+            foreach (var pair in demoMapPointListeners)
+                if (pair.Key != null) pair.Key.onClick.RemoveListener(pair.Value);
+            demoMapPointListeners.Clear();
         }
 
         private IEnumerator LoadCardsAndPopulate()
@@ -225,9 +245,168 @@ namespace KiKs.Combat
                 undoButton.interactable = !_isStartingBattle && selectedCardIds.Count > 0;
             if (beginButton != null)
                 beginButton.interactable =
-                    !_isStartingBattle && selectedCardIds.Count == RequiredDeckSize;
+                    !_isStartingBattle &&
+                    BattleSession.HasSelectedDemoStage &&
+                    BattleSession.SelectedDemoStage == DemoFlowState.CurrentStage &&
+                    selectedCardIds.Count == RequiredDeckSize;
             if (cardButton != null)
-                cardButton.interactable = !_isStartingBattle;
+                cardButton.interactable = !_isStartingBattle && !DemoFlowState.IsCompleted;
+        }
+
+        private void DisableDecorativeOverlayRaycasts()
+        {
+            if (decorativeOverlay == null)
+                decorativeOverlay = transform.Find("Frame");
+
+            if (decorativeOverlay == null)
+            {
+                Debug.LogWarning(
+                    "[DemoFlow] Decorative overlay is not assigned; a transparent Graphic may block map clicks.",
+                    this);
+                return;
+            }
+
+            var disabledCount = 0;
+            foreach (var graphic in decorativeOverlay.GetComponentsInChildren<Graphic>(true))
+            {
+                if (!graphic.raycastTarget || graphic.GetComponent<Selectable>() != null)
+                    continue;
+
+                graphic.raycastTarget = false;
+                disabledCount++;
+            }
+
+            Debug.Log(
+                $"[DemoFlow] Disabled raycast interception on {disabledCount} decorative Graphics.",
+                decorativeOverlay);
+        }
+
+        private void BindDemoMapPoints()
+        {
+            ResolveDemoMapPointsByName();
+
+            if (demoMapPoints.Count < DemoFlowState.BattleCount)
+            {
+                Debug.LogError(
+                    $"[DemoFlow] CardSelectionUI needs {DemoFlowState.BattleCount} map points in Dog/Girl/Eye order; " +
+                    $"only {demoMapPoints.Count} are configured.", this);
+            }
+
+            var count = Mathf.Min(demoMapPoints.Count, DemoFlowState.BattleCount);
+            for (var i = 0; i < count; i++)
+            {
+                var mapPoint = demoMapPoints[i];
+                if (mapPoint == null)
+                {
+                    Debug.LogError($"[DemoFlow] Map point slot {i + 1} is not assigned.", this);
+                    continue;
+                }
+
+                var button = mapPoint.GetComponent<Button>();
+                if (button == null)
+                {
+                    Debug.LogError($"[DemoFlow] {mapPoint.name} has no Button component.", mapPoint);
+                    continue;
+                }
+
+                var stage = (DemoStage)i;
+                UnityAction listener = () => OnDemoMapPointClicked(stage);
+                button.onClick.AddListener(listener);
+                demoMapPointListeners[button] = listener;
+            }
+        }
+
+        private void ResolveDemoMapPointsByName()
+        {
+            if (demoMapPoints.Count >= DemoFlowState.BattleCount)
+                return;
+
+            demoMapPoints.Clear();
+            for (var i = 1; i <= DemoFlowState.BattleCount; i++)
+            {
+                var mapPoint = GameObject.Find($"MapPoint_{i}");
+                if (mapPoint != null) demoMapPoints.Add(mapPoint);
+            }
+        }
+
+        private void OnDemoMapPointClicked(DemoStage stage)
+        {
+            if (!DemoFlowState.IsStageAvailable(stage))
+            {
+                Debug.LogWarning(
+                    $"[DemoFlow] Ignored unavailable map point {stage}; current stage is {DemoFlowState.CurrentStage}.",
+                    this);
+                RefreshMapPoints();
+                return;
+            }
+
+            BattleSession.SetSelectedDemoStage(stage);
+            Debug.Log(
+                $"[DemoFlow] Selected day {DemoFlowState.CurrentDay}, map point {(int)stage + 1}: {stage}.",
+                this);
+
+            if (openCardSelectionAfterMapClick && cardPopup != null)
+                cardPopup.SetActive(true);
+
+            RefreshSelectionUI();
+        }
+
+        public void RefreshMapPoints()
+        {
+            var count = Mathf.Min(demoMapPoints.Count, DemoFlowState.BattleCount);
+            for (var i = 0; i < count; i++)
+            {
+                var mapPoint = demoMapPoints[i];
+                if (mapPoint != null)
+                    mapPoint.SetActive(!DemoFlowState.IsCompleted && i == DemoFlowState.CurrentBattleIndex);
+            }
+
+            if (demoCompletePanel != null)
+            {
+                demoCompletePanel.SetActive(DemoFlowState.IsCompleted);
+                if (DemoFlowState.IsCompleted)
+                {
+                    if (demoCompleteLabel != null)
+                        demoCompleteLabel.text = demoCompleteText;
+
+                    var closeButton = demoCompletePanel.transform.Find("CloseBtn");
+                    if (closeButton != null) closeButton.gameObject.SetActive(false);
+                }
+            }
+            else if (DemoFlowState.IsCompleted)
+            {
+                Debug.Log("[DemoFlow] Demo Complete. No completion panel is configured.", this);
+            }
+
+            RefreshSelectionUI();
+        }
+
+        [ContextMenu("Reset Demo Progress")]
+        public void ResetDemoProgress()
+        {
+            DemoFlowState.ResetDemoProgress();
+            BattleSession.ClearSelectedDemoStage();
+            BattleSession.ClearSelectedDeck();
+            selectedCardIds.Clear();
+            SyncCafeDayCounter(1);
+
+            if (demoCompletePanel != null)
+            {
+                var closeButton = demoCompletePanel.transform.Find("CloseBtn");
+                if (closeButton != null) closeButton.gameObject.SetActive(true);
+            }
+
+            RefreshMapPoints();
+        }
+
+        private static void SyncCafeDayCounter(int day)
+        {
+            var timeSystemType = System.Type.GetType("TimeSystem, Assembly-CSharp");
+            var setDayMethod = timeSystemType?.GetMethod(
+                "SetSavedDayCountForDemo",
+                System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+            if (setDayMethod != null)
+                setDayMethod.Invoke(null, new object[] { day });
         }
 
         private void UpdateDeckSlots()
@@ -325,6 +504,14 @@ namespace KiKs.Combat
             if (_isStartingBattle)
                 return;
 
+            if (!BattleSession.HasSelectedDemoStage ||
+                BattleSession.SelectedDemoStage != DemoFlowState.CurrentStage)
+            {
+                Debug.LogWarning(
+                    "[DemoFlow] Click the currently available map point before starting battle.", this);
+                return;
+            }
+
             var requiredDeckSize = RequiredDeckSize;
             if (selectedCardIds.Count != requiredDeckSize)
             {
@@ -343,7 +530,9 @@ namespace KiKs.Combat
             _isStartingBattle = true;
             RefreshSelectionUI();
             BattleSession.SetSelectedDeck(selectedCardIds);
-            Debug.Log($"[CardSelectionUI] Starting battle with {selectedCardIds.Count} cards.");
+            Debug.Log(
+                $"[CardSelectionUI] Starting {BattleSession.SelectedDemoStage} with " +
+                $"{selectedCardIds.Count} cards.");
 
             if (TransitionEffect.Instance != null)
             {
