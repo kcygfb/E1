@@ -898,5 +898,57 @@ namespace KiKs.Combat
         {
             return _gunCardShotsRemaining.ContainsKey(cardInstanceId);
         }
+
+        /// <summary>使用咖啡道具：免费消耗品，不走卡牌系统。</summary>
+        public CombatResult UseCoffee(string coffeeId, string targetId)
+        {
+            if (State.Phase != CombatPhase.PlayerInput)
+                return Reject("Coffee can only be used during player input.");
+
+            if (!CoffeeEffectRegistry.TryGet(coffeeId, out var effect))
+                return Reject("Unknown coffee: " + coffeeId);
+
+            var target = State.FindEnemy(targetId) ?? (targetId == State.Player.Id ? State.Player : null);
+            if (target == null || target.IsDead)
+                return Reject("Invalid coffee target.");
+
+            var events = new List<CombatEvent>();
+            SetPhase(CombatPhase.ResolvingCard, events);
+
+            switch (effect.Type)
+            {
+                case CoffeeEffectType.Heal:
+                    var healed = target.Heal(effect.Amount);
+                    events.Add(new CombatEvent(
+                        CombatEventType.HealingApplied, State.Player.Id, target.Id,
+                        amount: healed, message: "Coffee healed " + healed + "."));
+                    break;
+
+                case CoffeeEffectType.Bleed:
+                    target.AddBleedStacks(effect.Amount);
+                    events.Add(new CombatEvent(
+                        CombatEventType.StatusApplied, State.Player.Id, target.Id,
+                        amount: target.BleedStacks, message: "Coffee applied " + effect.Amount + " bleed stacks."));
+                    break;
+
+                case CoffeeEffectType.Block:
+                    target.AddBlockPoints(effect.Amount);
+                    events.Add(new CombatEvent(
+                        CombatEventType.StatusApplied, State.Player.Id, target.Id,
+                        amount: target.BlockPoints, message: "Coffee granted " + effect.Amount + " block."));
+                    break;
+
+                case CoffeeEffectType.Damage:
+                    var dmg = target.ApplyDamage(effect.Amount);
+                    events.Add(new CombatEvent(
+                        CombatEventType.DamageApplied, State.Player.Id, target.Id,
+                        amount: dmg, message: "Coffee dealt " + dmg + " damage."));
+                    if (target.IsDead) events.Add(CreateDeathEvent(target));
+                    break;
+            }
+
+            if (!EvaluateOutcome(events)) SetPhase(CombatPhase.PlayerInput, events);
+            return Complete(true, string.Empty, events);
+        }
     }
 }

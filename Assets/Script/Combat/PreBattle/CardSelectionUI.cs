@@ -534,6 +534,12 @@ namespace KiKs.Combat
                 $"[CardSelectionUI] Starting {BattleSession.SelectedDemoStage} with " +
                 $"{selectedCardIds.Count} cards.");
 
+            var coffeeUI = FindFirstObjectByType<CoffeeSelectionUI>();
+            if (coffeeUI != null)
+                coffeeUI.ConfirmSelection();
+
+            Debug.Log($"[CardSelectionUI] Starting battle with {selectedCardIds.Count} cards.");
+
             if (TransitionEffect.Instance != null)
             {
                 TransitionEffect.Instance.TransitionTo(BATTLE_SCENE_NAME);

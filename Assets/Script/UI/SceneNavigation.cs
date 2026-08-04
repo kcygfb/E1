@@ -15,5 +15,13 @@ namespace KiKs.UI
             else
                 SceneManager.LoadScene("Cafe");
         }
+
+        public void LoadPreBattleScene()
+        {
+            if (TransitionEffect.Instance != null)
+                TransitionEffect.Instance.TransitionTo("PreBattle");
+            else
+                SceneManager.LoadScene("PreBattle");
+        }
     }
 }
