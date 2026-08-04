@@ -132,7 +132,8 @@ namespace KiKs.Combat
                 actionPointText.text = "ACT POINT : " + player.CurrentActionPoints;
 
             if (manaText != null && battleController != null && battleController.IsInitialized)
-                manaText.text = "MAGIC POINT : " + battleController.State.Mana.Current;
+                manaText.text = "MAGIC POINT : " + battleController.State.Mana.Current +
+                                " / " + battleController.State.Mana.PerTurn;
         }
 
         private static void ConfigureFillImage(Image image)

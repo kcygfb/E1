@@ -7,14 +7,15 @@ namespace KiKs.Combat.Tests
     public sealed class CombatEngineTests
     {
         [Test]
-        public void StartBattle_RestoresThreeActionPointsAndDrawsFourCards()
+        public void StartBattle_RestoresThreeActionPoints_DrawsFourCards_AndGrantsOneMana()
         {
             var engine = CreateEngine(CreateDamageCard("attack", 1, 1));
             var result = engine.StartBattle();
 
             Assert.That(result.Success, Is.True);
             Assert.That(engine.State.Player.CurrentActionPoints, Is.EqualTo(3));
-            Assert.That(engine.State.Mana.Current, Is.EqualTo(3));
+            Assert.That(engine.State.Mana.Current, Is.EqualTo(1));
+            Assert.That(engine.State.Mana.PerTurn, Is.EqualTo(1));
             Assert.That(engine.State.Deck.Hand.Count, Is.EqualTo(4));
             Assert.That(engine.State.Phase, Is.EqualTo(CombatPhase.PlayerInput));
         }
@@ -32,6 +33,24 @@ namespace KiKs.Combat.Tests
             Assert.That(engine.State.Player.CurrentActionPoints, Is.EqualTo(2));
             Assert.That(engine.State.Deck.FindInHand(card.InstanceId), Is.Null);
             Assert.That(engine.State.Deck.DiscardPile, Does.Contain(card));
+        }
+
+        [Test]
+        public void PlaySingleShot_KillingBeforeFinalShot_ImmediatelyTriggersVictory()
+        {
+            var engine = CreateEngine(CreateGunCard("gun", 1, 100, 3));
+            engine.StartBattle();
+            var card = engine.State.Deck.Hand[0];
+
+            var result = engine.PlaySingleShot(card.InstanceId, "enemy");
+
+            Assert.That(result.Success, Is.True);
+            Assert.That(engine.State.Enemies[0].IsDead, Is.True);
+            Assert.That(engine.State.Outcome, Is.EqualTo(BattleOutcome.Victory));
+            Assert.That(engine.State.Phase, Is.EqualTo(CombatPhase.Victory));
+            Assert.That(engine.IsShooting(card.InstanceId), Is.False);
+            Assert.That(engine.State.Deck.DiscardPile, Does.Contain(card));
+            Assert.That(result.Events.Any(e => e.Type == CombatEventType.Victory), Is.True);
         }
 
         [Test]
@@ -353,18 +372,18 @@ namespace KiKs.Combat.Tests
             engine.StartBattle();
             var card = engine.State.Deck.Hand[0];
 
-            var upgrade = engine.UpgradeCard(card.InstanceId, "enemy");
+            var upgrade = engine.UpgradeCard(card.InstanceId);
 
             Assert.That(upgrade.Success, Is.True);
             Assert.That(card.IsUpgraded, Is.True);
-            Assert.That(engine.State.Mana.Current, Is.EqualTo(2));
+            Assert.That(engine.State.Mana.Current, Is.EqualTo(0));
             Assert.That(engine.State.Player.CurrentActionPoints, Is.EqualTo(3));
             Assert.That(engine.PlayCard(card.InstanceId, "enemy").Success, Is.True);
             Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(91));
             Assert.That(card.IsUpgraded, Is.False);
         }
         [Test]
-        public void ManaSpendLimit_IsSharedByUpgradeAndMagicCard()
+        public void ManaPerTurn_IsSharedByUpgradeAndMagicCard()
         {
             var basic = CreateDamageCard("basic", 1, 1, 2);
             var magic = CreateDamageCard("magic", 1, 1, null, CardResourceType.Mana);
@@ -378,40 +397,34 @@ namespace KiKs.Combat.Tests
             var magicResult = engine.PlayCard(magicCard.InstanceId, "enemy");
 
             Assert.That(magicResult.Success, Is.False);
-            Assert.That(engine.State.Mana.Current, Is.EqualTo(2));
+            Assert.That(engine.State.Mana.Current, Is.EqualTo(0));
             Assert.That(engine.State.Player.CurrentActionPoints, Is.EqualTo(3));
         }
         [Test]
-        public void ThirdCumulativeManaSpend_TriggersThirtyDamageUltimate_AndRefillsMana()
+        public void ThreeManaSpends_DoNotTriggerAutomaticUltimate()
         {
             var engine = CreateEngine(CreateDamageCard("basic", 0, 0, 1), 12);
             engine.StartBattle();
 
-            CombatResult thirdUpgrade = null;
             for (var turn = 1; turn <= 3; turn++)
             {
                 var card = engine.State.Deck.Hand.First(candidate => candidate.Spec.CanUpgrade);
-                thirdUpgrade = engine.UpgradeCard(card.InstanceId, "enemy");
-                Assert.That(thirdUpgrade.Success, Is.True);
+                var upgrade = engine.UpgradeCard(card.InstanceId);
+                Assert.That(upgrade.Success, Is.True);
+                Assert.That(engine.State.Mana.Current, Is.EqualTo(0));
 
                 if (turn < 3)
                 {
                     engine.EndPlayerTurn();
                     engine.CompleteEnemyTurn();
+                    Assert.That(engine.State.Mana.Current, Is.EqualTo(engine.State.Mana.PerTurn));
                 }
             }
 
-            Assert.That(thirdUpgrade.Events.Any(e =>
-                e.Type == CombatEventType.UltimateTriggered && e.Amount == 30), Is.True);
-            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(70));
-            Assert.That(engine.State.Mana.Current, Is.EqualTo(3));
-            Assert.That(engine.State.Mana.SpentTowardUltimate, Is.EqualTo(0));
-            Assert.That(engine.State.Enemies[0].StunTurns, Is.EqualTo(0));
-            Assert.That(thirdUpgrade.Events.Any(e =>
-                e.Type == CombatEventType.ManaChanged && e.Amount == 3), Is.True);
+            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(100));
         }
         [Test]
-        public void ToughnessBreak_RestoresManaToMaximum()
+        public void ToughnessBreak_DoesNotRestoreMana()
         {
             var upgradeable = CreateDamageCard("upgradeable", 0, 0, 1);
             var breaker = CreateToughnessCard("breaker", 0, 5);
@@ -420,15 +433,15 @@ namespace KiKs.Combat.Tests
 
             var cardToUpgrade = engine.State.Deck.Hand.First(card => card.Spec.Id == "upgradeable");
             Assert.That(engine.UpgradeCard(cardToUpgrade.InstanceId).Success, Is.True);
-            Assert.That(engine.State.Mana.Current, Is.EqualTo(2));
+            Assert.That(engine.State.Mana.Current, Is.EqualTo(0));
 
             var breakCard = engine.State.Deck.Hand.First(card => card.Spec.Id == "breaker");
             var result = engine.PlayCard(breakCard.InstanceId, "enemy");
 
             Assert.That(result.Success, Is.True);
-            Assert.That(engine.State.Mana.Current, Is.EqualTo(3));
+            Assert.That(engine.State.Mana.Current, Is.EqualTo(0));
             Assert.That(result.Events.Any(combatEvent =>
-                combatEvent.Type == CombatEventType.ManaChanged && combatEvent.Amount == 3), Is.True);
+                combatEvent.Type == CombatEventType.ManaChanged), Is.False);
         }
         [TestCase(EnemyRank.Elite)]
         [TestCase(EnemyRank.Boss)]
@@ -711,6 +724,28 @@ namespace KiKs.Combat.Tests
                 UpgradeableNumber.One,
                 ValueUnit.Points,
                 1));
+        }
+
+        private static CardSpec CreateGunCard(string id, int cost, int damagePerHit, int hits)
+        {
+            return new CardSpec(
+                id,
+                id,
+                id,
+                "guns",
+                CardResourceType.ActionPoint,
+                cost,
+                false,
+                CardTargetType.SingleEnemy,
+                new[]
+                {
+                    new CardEffectSpec(
+                        CardEffectType.Damage,
+                        new UpgradeableNumber(damagePerHit, null),
+                        new UpgradeableNumber(hits, null),
+                        ValueUnit.Points,
+                        1)
+                });
         }
 
         private static CardSpec CreateToughnessCard(string id, int cost, int amount)

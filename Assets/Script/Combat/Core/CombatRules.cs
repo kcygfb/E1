@@ -56,13 +56,8 @@ namespace KiKs.Combat
         public ToughnessRestoreMode RestoreMode { get; }
         public int FixedToughnessRestoreAmount { get; }
 
-        public int StartingMana { get; }
-        public int MaximumMana { get; }
-        public int MaximumManaSpendPerTurn { get; }
+        public int ManaPerTurn { get; }
         public int CardUpgradeManaCost { get; }
-        public int MagicCardsPerTurn { get; }
-        public int UltimateManaThreshold { get; }
-        public int UltimateDamage { get; }
 
         public EnemyTurnRules MinionTurnRules { get; }
         public EnemyTurnRules EliteTurnRules { get; }
@@ -76,13 +71,8 @@ namespace KiKs.Combat
             int executionDamage,
             ToughnessRestoreMode toughnessRestoreMode,
             int fixedToughnessRestoreAmount,
-            int startingMana,
-            int maximumMana,
-            int maximumManaSpendPerTurn,
+            int manaPerTurn,
             int cardUpgradeManaCost,
-            int magicCardsPerTurn,
-            int ultimateManaThreshold,
-            int ultimateDamage,
             EnemyTurnRules minionTurnRules,
             EnemyTurnRules eliteTurnRules,
             EnemyTurnRules bossTurnRules)
@@ -93,13 +83,8 @@ namespace KiKs.Combat
             if (expectedInitialDeckSize <= 0) throw new ArgumentOutOfRangeException(nameof(expectedInitialDeckSize));
             if (executionDamage < 0) throw new ArgumentOutOfRangeException(nameof(executionDamage));
             if (fixedToughnessRestoreAmount < 0) throw new ArgumentOutOfRangeException(nameof(fixedToughnessRestoreAmount));
-            if (maximumMana < 0) throw new ArgumentOutOfRangeException(nameof(maximumMana));
-            if (startingMana < 0 || startingMana > maximumMana) throw new ArgumentOutOfRangeException(nameof(startingMana));
-            if (maximumManaSpendPerTurn < 0) throw new ArgumentOutOfRangeException(nameof(maximumManaSpendPerTurn));
+            if (manaPerTurn <= 0) throw new ArgumentOutOfRangeException(nameof(manaPerTurn));
             if (cardUpgradeManaCost < 0) throw new ArgumentOutOfRangeException(nameof(cardUpgradeManaCost));
-            if (magicCardsPerTurn < 0) throw new ArgumentOutOfRangeException(nameof(magicCardsPerTurn));
-            if (ultimateManaThreshold <= 0) throw new ArgumentOutOfRangeException(nameof(ultimateManaThreshold));
-            if (ultimateDamage < 0) throw new ArgumentOutOfRangeException(nameof(ultimateDamage));
 
             BaseActionPoints = baseActionPoints;
             CardsDrawnPerTurn = cardsDrawnPerTurn;
@@ -108,13 +93,8 @@ namespace KiKs.Combat
             ExecutionDamage = executionDamage;
             RestoreMode = toughnessRestoreMode;
             FixedToughnessRestoreAmount = fixedToughnessRestoreAmount;
-            StartingMana = startingMana;
-            MaximumMana = maximumMana;
-            MaximumManaSpendPerTurn = maximumManaSpendPerTurn;
+            ManaPerTurn = manaPerTurn;
             CardUpgradeManaCost = cardUpgradeManaCost;
-            MagicCardsPerTurn = magicCardsPerTurn;
-            UltimateManaThreshold = ultimateManaThreshold;
-            UltimateDamage = ultimateDamage;
             MinionTurnRules = minionTurnRules ?? throw new ArgumentNullException(nameof(minionTurnRules));
             EliteTurnRules = eliteTurnRules ?? throw new ArgumentNullException(nameof(eliteTurnRules));
             BossTurnRules = bossTurnRules ?? throw new ArgumentNullException(nameof(bossTurnRules));
@@ -144,8 +124,7 @@ namespace KiKs.Combat
                 3, 4, 10, 15,
                 60,
                 ToughnessRestoreMode.Full, 0,
-                3, 3, 1, 1, 1,
-                3, 30,
+                1, 1,
                 new EnemyTurnRules(3, 3, 1, 1, 5),
                 new EnemyTurnRules(4, 4, 2, 2, 5, 5, 2),
                 new EnemyTurnRules(4, 5, 2, 2, 5, 5, 2, 12));

@@ -12,7 +12,7 @@ namespace KiKs.Combat
         [SerializeField] private TMP_Text actionPointText;
         [SerializeField] private TMP_Text manaText;
         [SerializeField] private string actionPointFormat = "ACT Point : {0}";
-        [SerializeField] private string manaFormat = "MAGIC Point : {0}";
+        [SerializeField] private string manaFormat = "MAGIC Point : {0} / {1}";
 
         private void OnEnable()
         {
@@ -61,7 +61,12 @@ namespace KiKs.Combat
             if (actionPointText != null)
                 actionPointText.text = string.Format(actionPointFormat, state.Player.CurrentActionPoints);
             if (manaText != null)
-                manaText.text = string.Format(manaFormat, state.Mana.Current);
+            {
+                var manaDisplay = string.Format(manaFormat, state.Mana.Current, state.Mana.PerTurn);
+                manaText.text = manaFormat.Contains("{1}")
+                    ? manaDisplay
+                    : manaDisplay + " / " + state.Mana.PerTurn;
+            }
         }
     }
 }

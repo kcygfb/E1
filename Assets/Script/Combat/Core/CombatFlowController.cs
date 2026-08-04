@@ -164,7 +164,6 @@ namespace KiKs.Combat
                     1,
                     ValueUnit.Points,
                     sourceActionId,
-                    false,
                     events);
             }
 
@@ -289,7 +288,6 @@ namespace KiKs.Combat
                         effect.Hits.Resolve(card.IsUpgraded),
                         effect.Unit,
                         card.InstanceId,
-                        true,
                         events);
                     break;
 
@@ -470,7 +468,6 @@ namespace KiKs.Combat
             int hits,
             ValueUnit unit,
             string sourceActionId,
-            bool restorePlayerMana,
             List<CombatEvent> events)
         {
             var amount = unit == ValueUnit.Percent
@@ -499,24 +496,6 @@ namespace KiKs.Combat
                     target.Id,
                     sourceActionId,
                     message: target.DisplayName + "'s toughness was broken."));
-
-                if (restorePlayerMana &&
-                    source != null &&
-                    source.Side == CombatantSide.Player &&
-                    target.Side == CombatantSide.Enemy)
-                {
-                    var restoredMana = _state.Mana.RestoreToMaximum();
-                    if (restoredMana > 0)
-                    {
-                        events.Add(new CombatEvent(
-                            CombatEventType.ManaChanged,
-                            source.Id,
-                            target.Id,
-                            sourceActionId,
-                            _state.Mana.Current,
-                            "Enemy toughness broken; restored " + restoredMana + " mana."));
-                    }
-                }
             }
 
             return broken;

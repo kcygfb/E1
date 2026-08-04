@@ -73,7 +73,6 @@ namespace KiKs.Combat
         ActionNullified,
         CombatantTurnSkipped,
         EnemyActionSkipped,
-        UltimateTriggered,
         StatusTicked,
         EffectNotImplemented,
         CombatantDied,

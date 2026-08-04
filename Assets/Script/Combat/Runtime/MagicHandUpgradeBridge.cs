@@ -43,8 +43,7 @@ namespace KiKs.Combat
                 !cardView.Spec.CanUpgrade || cardView.IsUpgraded)
                 return;
 
-            var targetId = _battleController.State.FindFirstLivingEnemy()?.Id;
-            var result = _battleController.UpgradeCard(cardView.InstanceId, targetId);
+            var result = _battleController.UpgradeCard(cardView.InstanceId);
             if (!result.Success)
             {
                 Debug.LogWarning("[MagicHandUpgradeBridge] Card upgrade failed: " + result.Message, this);

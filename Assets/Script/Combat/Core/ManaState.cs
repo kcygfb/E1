@@ -2,60 +2,34 @@ using System;
 
 namespace KiKs.Combat
 {
-    /// <summary>Battle-scoped mana and automatic-ultimate progress.</summary>
+    /// <summary>Battle-scoped mana that refills to its per-turn amount each player turn.</summary>
     public sealed class ManaState
     {
         public int Current { get; private set; }
-        public int Maximum { get; }
-        public int SpentThisTurn { get; private set; }
-        public int SpentTowardUltimate { get; private set; }
-        public int MagicCardsPlayedThisTurn { get; private set; }
+        public int PerTurn { get; }
 
-        public ManaState(int startingMana, int maximumMana)
+        public ManaState(int manaPerTurn)
         {
-            if (maximumMana < 0) throw new ArgumentOutOfRangeException(nameof(maximumMana));
-            if (startingMana < 0 || startingMana > maximumMana)
-                throw new ArgumentOutOfRangeException(nameof(startingMana));
+            if (manaPerTurn <= 0) throw new ArgumentOutOfRangeException(nameof(manaPerTurn));
 
-            Current = startingMana;
-            Maximum = maximumMana;
+            PerTurn = manaPerTurn;
         }
 
-        public bool CanSpend(int amount, int maximumSpendPerTurn)
+        public bool CanSpend(int amount)
         {
-            return amount >= 0 && Current >= amount &&
-                   SpentThisTurn + amount <= maximumSpendPerTurn;
+            return amount >= 0 && Current >= amount;
         }
 
-        internal bool TrySpend(int amount, int maximumSpendPerTurn)
+        internal bool TrySpend(int amount)
         {
-            if (!CanSpend(amount, maximumSpendPerTurn)) return false;
+            if (!CanSpend(amount)) return false;
             Current -= amount;
-            SpentThisTurn += amount;
-            SpentTowardUltimate += amount;
             return true;
         }
-
-        internal void RegisterMagicCardPlayed() { MagicCardsPlayedThisTurn++; }
 
         internal void BeginTurn()
         {
-            SpentThisTurn = 0;
-            MagicCardsPlayedThisTurn = 0;
-        }
-
-        internal int RestoreToMaximum()
-        {
-            var previous = Current;
-            Current = Maximum;
-            return Current - previous;
-        }
-
-        internal bool ConsumeUltimateThreshold(int threshold)
-        {
-            if (threshold <= 0 || SpentTowardUltimate < threshold) return false;
-            SpentTowardUltimate -= threshold;
-            return true;
+            Current = PerTurn;
         }
     }
 }

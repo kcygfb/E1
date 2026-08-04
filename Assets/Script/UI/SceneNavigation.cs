@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 namespace KiKs.UI
 {
@@ -8,20 +9,37 @@ namespace KiKs.UI
     /// </summary>
     public class SceneNavigation : MonoBehaviour
     {
+        [SerializeField] private Button navigationButton;
+        private bool _isLoading;
+
+        private void Awake()
+        {
+            if (navigationButton == null)
+                navigationButton = GetComponent<Button>();
+        }
+
         public void LoadCafeScene()
         {
-            if (TransitionEffect.Instance != null)
-                TransitionEffect.Instance.TransitionTo("Cafe");
-            else
-                SceneManager.LoadScene("Cafe");
+            LoadScene("Cafe");
         }
 
         public void LoadPreBattleScene()
         {
+            LoadScene("PreBattle");
+        }
+
+        private void LoadScene(string sceneName)
+        {
+            if (_isLoading) return;
+            _isLoading = true;
+
+            if (navigationButton != null)
+                navigationButton.interactable = false;
+
             if (TransitionEffect.Instance != null)
-                TransitionEffect.Instance.TransitionTo("PreBattle");
+                TransitionEffect.Instance.TransitionTo(sceneName);
             else
-                SceneManager.LoadScene("PreBattle");
+                SceneManager.LoadScene(sceneName);
         }
     }
 }

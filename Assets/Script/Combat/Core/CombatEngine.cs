@@ -37,7 +37,7 @@ namespace KiKs.Combat
         }
 
         /// <summary>Spend mana to upgrade a card in hand without playing or discarding it.</summary>
-        public CombatResult UpgradeCard(string cardInstanceId, string preferredUltimateTargetId = null)
+        public CombatResult UpgradeCard(string cardInstanceId)
         {
             if (State.Phase != CombatPhase.PlayerInput)
                 return Reject("Cards can only be upgraded during player input.");
@@ -49,7 +49,7 @@ namespace KiKs.Combat
             if (!card.Spec.CanUpgrade) return Reject("This card has no upgraded values in JSON.");
             if (card.IsUpgraded) return Reject("This card instance is already upgraded.");
             if (!CanSpendMana(State.Rules.CardUpgradeManaCost))
-                return Reject("Not enough mana or this turn's mana-spend limit has been reached.");
+                return Reject("Not enough mana for this turn.");
 
             var events = new List<CombatEvent>();
             SpendMana(State.Rules.CardUpgradeManaCost, events, "Mana spent to upgrade a card.");
@@ -61,7 +61,6 @@ namespace KiKs.Combat
                 amount: State.Rules.CardUpgradeManaCost,
                 message: "Card upgraded for this battle instance."));
 
-            TryTriggerUltimate(preferredUltimateTargetId, events);
             EvaluateOutcome(events);
             return Complete(true, string.Empty, events);
         }
@@ -153,10 +152,8 @@ namespace KiKs.Combat
             {
                 if (source.Side != CombatantSide.Player)
                     return Reject("Enemy mana resources are not configured.");
-                if (State.Mana.MagicCardsPlayedThisTurn >= State.Rules.MagicCardsPerTurn)
-                    return Reject("The magic-card limit for this turn has been reached.");
                 if (!CanSpendMana(card.Spec.CostAmount))
-                    return Reject("Not enough mana or this turn's mana-spend limit has been reached.");
+                    return Reject("Not enough mana for this turn.");
             }
 
             var events = new List<CombatEvent>();
@@ -174,7 +171,6 @@ namespace KiKs.Combat
             else
             {
                 SpendMana(card.Spec.CostAmount, events, "Mana spent to play a magic card.");
-                State.Mana.RegisterMagicCardPlayed();
             }
 
             events.Add(new CombatEvent(
@@ -214,12 +210,6 @@ namespace KiKs.Combat
             else
             {
                 _usedEnemySpecialCards.Add(card.InstanceId);
-            }
-
-            if (source.Side == CombatantSide.Player &&
-                card.Spec.CostResource == CardResourceType.Mana)
-            {
-                TryTriggerUltimate(target.Id, events);
             }
 
             if (!EvaluateOutcome(events))
@@ -322,7 +312,6 @@ namespace KiKs.Combat
                 toughnessDamage,
                 "fixed-attack:" + enemy.Id,
                 events);
-
             EvaluateOutcome(events);
             return Complete(true, string.Empty, events);
         }
@@ -550,49 +539,15 @@ namespace KiKs.Combat
 
         private bool CanSpendMana(int amount)
         {
-            return State.Mana.CanSpend(amount, State.Rules.MaximumManaSpendPerTurn);
+            return State.Mana.CanSpend(amount);
         }
 
         private void SpendMana(int amount, List<CombatEvent> events, string message)
         {
-            State.Mana.TrySpend(amount, State.Rules.MaximumManaSpendPerTurn);
+            State.Mana.TrySpend(amount);
             events.Add(new CombatEvent(
                 CombatEventType.ManaChanged, State.Player.Id,
                 amount: State.Mana.Current, message: message));
-        }
-
-        private void TryTriggerUltimate(string preferredTargetId, List<CombatEvent> events)
-        {
-            if (!State.Mana.ConsumeUltimateThreshold(State.Rules.UltimateManaThreshold)) return;
-
-            var target = State.FindEnemy(preferredTargetId);
-            if (target == null || target.IsDead) target = State.FindFirstLivingEnemy();
-
-            events.Add(new CombatEvent(
-                CombatEventType.UltimateTriggered,
-                State.Player.Id,
-                target?.Id,
-                amount: State.Rules.UltimateDamage,
-                message: "Mana threshold reached; ultimate triggered automatically."));
-
-            if (target != null)
-            {
-                _flow.ResolveDirectDamage(
-                    State.Player,
-                    target,
-                    State.Rules.UltimateDamage,
-                    "ultimate",
-                    "Ultimate damage resolved.",
-                    true,
-                    events);
-            }
-
-            var restoredMana = State.Mana.RestoreToMaximum();
-            events.Add(new CombatEvent(
-                CombatEventType.ManaChanged,
-                State.Player.Id,
-                amount: State.Mana.Current,
-                message: "Ultimate restored " + restoredMana + " mana."));
         }
 
         private void BeginPlayerTurn(List<CombatEvent> events)
@@ -649,7 +604,7 @@ namespace KiKs.Combat
                 amount: State.Player.CurrentActionPoints, message: "Action points restored for the turn."));
             events.Add(new CombatEvent(
                 CombatEventType.ManaChanged, State.Player.Id,
-                amount: State.Mana.Current, message: "Mana spend allowance reset for the turn."));
+                amount: State.Mana.Current, message: "Mana restored for the turn."));
 
             DrawCards(State.Rules.CardsDrawnPerTurn, events);
             SetPhase(CombatPhase.PlayerInput, events);
@@ -790,7 +745,9 @@ namespace KiKs.Combat
             _gunCardShotsRemaining[cardInstanceId]--;
 
             // 最后一发：弃牌 + 回到 PlayerInput
-            if (_gunCardShotsRemaining[cardInstanceId] <= 0)
+            if (_gunCardShotsRemaining[cardInstanceId] <= 0 ||
+                State.Player.IsDead ||
+                State.Enemies.All(enemy => enemy.IsDead))
             {
                 _gunCardShotsRemaining.Remove(cardInstanceId);
                 card.ConsumeUpgrade();

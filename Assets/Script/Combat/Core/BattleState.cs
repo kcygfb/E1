@@ -53,7 +53,7 @@ namespace KiKs.Combat
             }
 
             Enemies = new ReadOnlyCollection<CombatantState>(_enemies);
-            Mana = new ManaState(rules.StartingMana, rules.MaximumMana);
+            Mana = new ManaState(rules.ManaPerTurn);
             Phase = CombatPhase.NotStarted;
             Outcome = BattleOutcome.None;
         }

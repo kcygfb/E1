@@ -12,11 +12,9 @@ namespace KiKs.Combat
         [Min(1)] [SerializeField] private int expectedInitialDeckSize = 15;
 
         [Header("Mana and in-battle upgrades")]
-        [Min(0)] [SerializeField] private int startingMana = 3;
-        [Min(0)] [SerializeField] private int maximumMana = 3;
-        [Min(0)] [SerializeField] private int maximumManaSpendPerTurn = 1;
+        [Tooltip("玩家回合开始时获得的魔法点。后续机制可提高这个数量。")]
+        [Min(1)] [SerializeField] private int manaPerTurn = 1;
         [Min(0)] [SerializeField] private int cardUpgradeManaCost = 1;
-        [Min(0)] [SerializeField] private int magicCardsPerTurn = 1;
         [Header("Enemy cards - Minion")]
         [Min(1)] [SerializeField] private int minionDeckSize = 3;
         [Min(0)] [SerializeField] private int minionActionPoints = 3;
@@ -43,11 +41,6 @@ namespace KiKs.Combat
         [Tooltip("Elite/Boss: maximum number of 2-AP cards within the recent-card window.")]
         [Min(0)] [SerializeField] private int maxTwoCostCardsInWindow = 2;
 
-
-        [Header("Automatic ultimate")]
-        [Min(1)] [SerializeField] private int ultimateManaThreshold = 3;
-        [Min(0)] [SerializeField] private int ultimateDamage = 30;
-
         [Header("Automatic execution")]
         [Min(0)] [SerializeField] private int executionDamage = 60;
 
@@ -59,6 +52,7 @@ namespace KiKs.Combat
         public int CardsDrawnPerTurn => cardsDrawnPerTurn;
         public int HandLimit => handLimit;
         public int ExpectedInitialDeckSize => expectedInitialDeckSize;
+        public int ManaPerTurn => manaPerTurn;
 
         public CombatRules CreateRuntimeRules()
         {
@@ -70,13 +64,8 @@ namespace KiKs.Combat
                 executionDamage,
                 toughnessRestoreMode,
                 fixedToughnessRestoreAmount,
-                startingMana,
-                maximumMana,
-                maximumManaSpendPerTurn,
+                manaPerTurn,
                 cardUpgradeManaCost,
-                magicCardsPerTurn,
-                ultimateManaThreshold,
-                ultimateDamage,
                 new EnemyTurnRules(
                     minionDeckSize,
                     minionActionPoints,
@@ -100,11 +89,6 @@ namespace KiKs.Combat
                     expensiveCardWindowSize,
                     maxTwoCostCardsInWindow,
                     bossBerserkTurn));
-        }
-
-        private void OnValidate()
-        {
-            if (startingMana > maximumMana) startingMana = maximumMana;
         }
     }
 }

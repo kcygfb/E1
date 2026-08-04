@@ -52,6 +52,7 @@ namespace KiKs.Combat
 
         private int RequiredDeckSize =>
             rulesConfig != null ? rulesConfig.ExpectedInitialDeckSize : DEFAULT_DECK_SIZE;
+        private bool IsDeckComplete => selectedCardIds.Count == RequiredDeckSize;
 
         private IEnumerator Start()
         {
@@ -71,6 +72,7 @@ namespace KiKs.Combat
                 undoButton.onClick.AddListener(OnUndoClicked);
 
             BindCloseButton(cardPopup);
+            RestoreSelectedDeckFromSession();
             RefreshSelectionUI();
 
             StartCoroutine(LoadCardsAndPopulate());
@@ -233,6 +235,7 @@ namespace KiKs.Combat
                 return;
 
             selectedCardIds.RemoveAt(selectedCardIds.Count - 1);
+            BattleSession.ClearSelectedDemoStage();
             RefreshSelectionUI();
         }
 
@@ -248,7 +251,7 @@ namespace KiKs.Combat
                     !_isStartingBattle &&
                     BattleSession.HasSelectedDemoStage &&
                     BattleSession.SelectedDemoStage == DemoFlowState.CurrentStage &&
-                    selectedCardIds.Count == RequiredDeckSize;
+                    IsDeckComplete;
             if (cardButton != null)
                 cardButton.interactable = !_isStartingBattle && !DemoFlowState.IsCompleted;
         }
@@ -340,13 +343,22 @@ namespace KiKs.Combat
                 return;
             }
 
+            if (!IsDeckComplete)
+            {
+                if (openCardSelectionAfterMapClick && cardPopup != null)
+                    cardPopup.SetActive(true);
+
+                RefreshSelectionUI();
+                return;
+            }
+
             BattleSession.SetSelectedDemoStage(stage);
             Debug.Log(
                 $"[DemoFlow] Selected day {DemoFlowState.CurrentDay}, map point {(int)stage + 1}: {stage}.",
                 this);
 
-            if (openCardSelectionAfterMapClick && cardPopup != null)
-                cardPopup.SetActive(true);
+            if (cardPopup != null)
+                cardPopup.SetActive(false);
 
             RefreshSelectionUI();
         }
@@ -513,7 +525,7 @@ namespace KiKs.Combat
             }
 
             var requiredDeckSize = RequiredDeckSize;
-            if (selectedCardIds.Count != requiredDeckSize)
+            if (!IsDeckComplete)
             {
                 Debug.LogWarning(
                     $"[CardSelectionUI] Select exactly {requiredDeckSize} cards before starting.");
@@ -534,7 +546,7 @@ namespace KiKs.Combat
                 $"[CardSelectionUI] Starting {BattleSession.SelectedDemoStage} with " +
                 $"{selectedCardIds.Count} cards.");
 
-            var coffeeUI = FindFirstObjectByType<CoffeeSelectionUI>();
+            var coffeeUI = UnityEngine.Object.FindFirstObjectByType<CoffeeSelectionUI>();
             if (coffeeUI != null)
                 coffeeUI.ConfirmSelection();
 
@@ -563,6 +575,15 @@ namespace KiKs.Combat
 
             while (!operation.isDone)
                 yield return null;
+        }
+
+        private void RestoreSelectedDeckFromSession()
+        {
+            if (!BattleSession.HasSelectedDeck)
+                return;
+
+            selectedCardIds.Clear();
+            selectedCardIds.AddRange(BattleSession.SelectedCardIds);
         }
 
         private void BindCloseButton(GameObject popup)

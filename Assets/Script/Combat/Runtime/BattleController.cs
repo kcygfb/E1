@@ -153,9 +153,6 @@ namespace KiKs.Combat
                     huntResultPresenter = gameObject.AddComponent<HuntResultPresenter>();
                 huntResultPresenter.Configure(this);
 
-                if (usesSelectedDeck)
-                    BattleSession.ClearSelectedDeck();
-
                 // Coffee slots
                 if (BattleSession.HasSelectedCoffees)
                 {
@@ -206,9 +203,9 @@ namespace KiKs.Combat
                 CombatActionOrigin.PlayerInput));
         }
 
-        public CombatResult UpgradeCard(string cardInstanceId, string preferredUltimateTargetId = null)
+        public CombatResult UpgradeCard(string cardInstanceId)
         {
-            return GetEngineOrThrow().UpgradeCard(cardInstanceId, preferredUltimateTargetId);
+            return GetEngineOrThrow().UpgradeCard(cardInstanceId);
         }
 
         public CombatResult PlaySingleShot(string cardInstanceId, string targetId)
