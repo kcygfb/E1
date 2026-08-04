@@ -603,6 +603,7 @@ namespace KiKs.Combat
 
             var flashObj = new GameObject("ImpactFlash");
             flashObj.transform.SetParent(_canvasRect, false);
+            flashObj.transform.SetAsFirstSibling();
 
             var impactPos = meleeDashTarget != null ? meleeDashTarget.position : Vector3.zero;
             var localPos = _canvasRect.InverseTransformPoint(impactPos);

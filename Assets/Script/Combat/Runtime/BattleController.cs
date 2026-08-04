@@ -40,6 +40,7 @@ namespace KiKs.Combat
         [Min(0f)] [SerializeField] private float huntResultDelay = 0.75f;
 
         private CombatEngine _engine;
+        private string[] _coffeeSlots = new string[2];
 
         public BattleState State => _engine?.State;
         public bool IsInitialized => _engine != null;
@@ -139,6 +140,15 @@ namespace KiKs.Combat
 
                 if (usesSelectedDeck)
                     BattleSession.ClearSelectedDeck();
+
+                // Coffee slots
+                if (BattleSession.HasSelectedCoffees)
+                {
+                    var coffees = BattleSession.SelectedCoffeeIds;
+                    for (int i = 0; i < _coffeeSlots.Length && i < coffees.Count; i++)
+                        _coffeeSlots[i] = coffees[i];
+                    BattleSession.ClearSelectedCoffees();
+                }
                 return true;
             }
             catch (Exception exception)
@@ -207,6 +217,33 @@ namespace KiKs.Combat
         }
 
         public CombatResult EndPlayerTurn() { return GetEngineOrThrow().EndPlayerTurn(); }
+
+        // ─── Coffee ───
+
+        public string GetCoffeeSlot(int slotIndex)
+        {
+            if (slotIndex < 0 || slotIndex >= _coffeeSlots.Length) return null;
+            return _coffeeSlots[slotIndex];
+        }
+
+        public CombatResult UseCoffee(int slotIndex, string targetId)
+        {
+            if (slotIndex < 0 || slotIndex >= _coffeeSlots.Length)
+                return new CombatResult(false, "Invalid coffee slot.", new List<CombatEvent>());
+
+            var coffeeId = _coffeeSlots[slotIndex];
+            if (string.IsNullOrEmpty(coffeeId))
+                return new CombatResult(false, "Coffee slot is empty.", new List<CombatEvent>());
+
+            var engine = GetEngineOrThrow();
+            var result = engine.UseCoffee(coffeeId, targetId);
+            if (result.Success)
+            {
+                _coffeeSlots[slotIndex] = null;
+                Debug.Log("[Combat] Used coffee: " + coffeeId + " on " + targetId, this);
+            }
+            return result;
+        }
 
         public CombatResult ResolveEnemyAttack(string enemyId, int damage, int toughnessDamage = 0)
         {

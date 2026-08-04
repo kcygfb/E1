@@ -35,5 +35,30 @@ namespace KiKs.Combat
         {
             _selectedCardIds = new ReadOnlyCollection<string>(new List<string>());
         }
+
+        // ─── Coffee slots ───
+
+        private static IReadOnlyList<string> _selectedCoffeeIds =
+            new ReadOnlyCollection<string>(new List<string>());
+
+        public static IReadOnlyList<string> SelectedCoffeeIds => _selectedCoffeeIds;
+        public static bool HasSelectedCoffees => _selectedCoffeeIds.Count > 0;
+
+        public static void SetSelectedCoffees(IEnumerable<string> coffeeIds)
+        {
+            if (coffeeIds == null) throw new ArgumentNullException(nameof(coffeeIds));
+            var copy = new List<string>();
+            foreach (var id in coffeeIds)
+            {
+                if (string.IsNullOrWhiteSpace(id)) continue;
+                copy.Add(id);
+            }
+            _selectedCoffeeIds = new ReadOnlyCollection<string>(copy);
+        }
+
+        public static void ClearSelectedCoffees()
+        {
+            _selectedCoffeeIds = new ReadOnlyCollection<string>(new List<string>());
+        }
     }
 }

@@ -343,6 +343,11 @@ namespace KiKs.Combat
             _isStartingBattle = true;
             RefreshSelectionUI();
             BattleSession.SetSelectedDeck(selectedCardIds);
+
+            var coffeeUI = FindFirstObjectByType<CoffeeSelectionUI>();
+            if (coffeeUI != null)
+                coffeeUI.ConfirmSelection();
+
             Debug.Log($"[CardSelectionUI] Starting battle with {selectedCardIds.Count} cards.");
 
             if (TransitionEffect.Instance != null)

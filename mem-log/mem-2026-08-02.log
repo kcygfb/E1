@@ -992,3 +992,11 @@
 [2026-08-02T19:01:01.997Z] InitialReadForge.onBeforeSend: SKIP (fr=true syn=false hasRead=true)
 [2026-08-02T19:02:22.903Z] LiveUpdateForge: EndTurn fallback flush
 [2026-08-02T19:02:22.903Z] onEndTurn: naturalStop=false toolCalls=12 nudgeMsg=no
+[2026-08-02T19:02:28.288Z] LiveUpdateForge: AfterToolExec flush
+[2026-08-02T19:02:28.330Z] InitialReadForge.onBeforeSend: SKIP (fr=true syn=false hasRead=true)
+[2026-08-02T19:02:37.006Z] LiveUpdateForge: EndTurn fallback flush
+[2026-08-02T19:02:37.007Z] onEndTurn: naturalStop=false toolCalls=13 nudgeMsg=no
+[2026-08-02T19:03:36.100Z] LiveUpdateForge: AfterToolExec flush
+[2026-08-02T19:03:36.144Z] InitialReadForge.onBeforeSend: SKIP (fr=true syn=false hasRead=true)
+[2026-08-02T19:05:27.981Z] LiveUpdateForge: EndTurn fallback flush
+[2026-08-02T19:05:27.981Z] onEndTurn: naturalStop=true toolCalls=14 nudgeMsg=no
