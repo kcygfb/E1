@@ -458,9 +458,9 @@ MonoBehaviour:
   transitionMaterial: {fileID: 2100000, guid: 0ce41c1493948c84dbfe2e917889c540, type: 2}
   centerImage: {fileID: 141487724}
   centerImageScale: 2
-  alphaDuration: 0.5
+  alphaDuration: 0.3
   centerFadeInDuration: 0.3
-  sliderDuration: 2
+  sliderDuration: 1.2
   sliderTarget: 2
   endHoldDuration: 0.2
   sliderEase: 17

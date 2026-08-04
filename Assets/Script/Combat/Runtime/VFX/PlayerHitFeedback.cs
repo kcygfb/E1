@@ -77,21 +77,22 @@ namespace KiKs.Combat
             _seq?.Kill();
             var currentScale = _rect.localScale;
 
-            _seq = DOTween.Sequence();
+            _seq = DOTween.Sequence().SetUpdate(UpdateType.Late);
 
             // 瞬间闪红
             if (_image != null)
                 _image.color = flashColor;
 
-            // 瞬间缩小（被打击感）
-            _rect.localScale = currentScale * hitScalePunch;
+            // 缩放弹回（用 DOTween.To 显式设值，避免 Animator 的 scale 曲线覆盖 DOScale 的 start value）
+            var punchScale = currentScale * hitScalePunch;
+            _seq.Join(DOTween.To(
+                () => 0f,
+                t => _rect.localScale = Vector3.LerpUnclamped(punchScale, currentScale, t),
+                1f, hitScaleDuration).SetEase(Ease.OutBack));
 
             // 震动
             _seq.Join(_rect.DOShakePosition(shakeDuration, shakeStrength, shakeVibrato, 90f, false)
                 .SetEase(Ease.InOutQuad));
-
-            // 缩放弹回
-            _seq.Join(_rect.DOScale(currentScale, hitScaleDuration).SetEase(Ease.OutBack));
 
             // 闪红→恢复
             if (_image != null)
