@@ -14,8 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::NPCData
   npcId: 2
   npcName: "\u524D\u8F88\u5C0F\u63D0"
+  speakerColor: {r: 0.75294125, g: 0.41960788, b: 0.41960788, a: 1}
   portrait: {fileID: -4748894624273762065, guid: 633afb7b9f283734e8a04fe0d0fc8afa, type: 3}
-  portraitSize: {x: 637.5, y: 695.5}
+  portraitSize: {x: 736.3125, y: 803.3025}
   willOrder: 1
   arrivalDialogueId: timi_arrival
   departureDialogueId: timi_departure

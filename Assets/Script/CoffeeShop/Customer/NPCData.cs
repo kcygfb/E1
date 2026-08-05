@@ -14,6 +14,8 @@ public class NPCData : ScriptableObject
 
     public string npcName;
 
+    public Color speakerColor = Color.white;
+
     public Sprite portrait;
 
     public Vector2 portraitSize = new Vector2(150, 200);

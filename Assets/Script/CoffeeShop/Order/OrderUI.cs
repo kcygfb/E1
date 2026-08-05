@@ -1,3 +1,4 @@
+using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -14,6 +15,8 @@ public class OrderUI : MonoBehaviour
     [SerializeField] private GameObject orderTicketImage;
     [SerializeField] private Image ticketImage;
     [SerializeField] private TMP_Text ticketCoffeeLabel;
+    [SerializeField] private TMP_Text ticketStepsText;
+    [SerializeField] private TMP_Text ticketMaterialsText;
 
     private void OnEnable()
     {
@@ -42,6 +45,7 @@ public class OrderUI : MonoBehaviour
         ShowPanel();
         ShowTicket(order.TicketSprite);
         SetTicketLabel(order.CoffeeName);
+        SetTicketDetails(order.CoffeeId);
 
         if (npcText != null) npcText.text = $"Customer: {order.NpcName}";
         if (coffeeText != null) coffeeText.text = $"Order: {order.CoffeeName}";
@@ -75,6 +79,58 @@ public class OrderUI : MonoBehaviour
     private void SetTicketLabel(string coffeeName)
     {
         if (ticketCoffeeLabel != null) ticketCoffeeLabel.text = coffeeName;
+    }
+
+    private void SetTicketDetails(string coffeeId)
+    {
+        if (CoffeeDataLoader.Instance == null) return;
+        var coffee = CoffeeDataLoader.Instance.GetCoffee(coffeeId);
+        if (coffee == null) return;
+
+        // 制作流程
+        if (ticketStepsText != null)
+        {
+            var sb = new StringBuilder();
+            if (coffee.steps != null)
+            {
+                for (int i = 0; i < coffee.steps.Count; i++)
+                {
+                    var step = coffee.steps[i];
+                    var name = !string.IsNullOrEmpty(step.displayName) ? step.displayName : step.id;
+                    if (i > 0) sb.AppendLine();
+                    sb.Append($"{i + 1}. {name}");
+                }
+            }
+            ticketStepsText.text = sb.ToString();
+        }
+
+        // 消耗材料
+        if (ticketMaterialsText != null)
+        {
+            var sb = new StringBuilder();
+            if (coffee.recipe != null)
+            {
+                for (int i = 0; i < coffee.recipe.Count; i++)
+                {
+                    var entry = coffee.recipe[i];
+                    var displayName = entry.resourceId;
+                    if (ResourceDataLoader.Instance != null)
+                    {
+                        var res = ResourceDataLoader.Instance.GetAllResources();
+                        if (res != null)
+                        {
+                            foreach (var r in res)
+                            {
+                                if (r.id == entry.resourceId) { displayName = r.displayName; break; }
+                            }
+                        }
+                    }
+                    if (i > 0) sb.AppendLine();
+                    sb.Append($"{displayName} ×{entry.amount}");
+                }
+            }
+            ticketMaterialsText.text = sb.ToString();
+        }
     }
 
     private void HideTicket()

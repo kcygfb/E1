@@ -24,6 +24,41 @@
       "id": "gold",
       "displayName": "Gold",
       "startingAmount": 0
+    },
+    {
+      "id": "claw",
+      "displayName": "爪子",
+      "startingAmount": 5
+    },
+    {
+      "id": "wolfHair",
+      "displayName": "狼毫",
+      "startingAmount": 5
+    },
+    {
+      "id": "eyeball",
+      "displayName": "眼珠",
+      "startingAmount": 5
+    },
+    {
+      "id": "purpleFlame",
+      "displayName": "紫色火焰",
+      "startingAmount": 5
+    },
+    {
+      "id": "snakeDried",
+      "displayName": "蛇干",
+      "startingAmount": 5
+    },
+    {
+      "id": "tentacle",
+      "displayName": "触手",
+      "startingAmount": 5
+    },
+    {
+      "id": "Water",
+      "displayName": "水",
+      "startingAmount": 10
     }
   ]
 }

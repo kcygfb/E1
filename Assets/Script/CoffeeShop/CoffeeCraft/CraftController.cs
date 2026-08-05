@@ -2,10 +2,19 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+public class StepDef
+{
+    public string id;
+    public string displayName;
+    public string resourceId;
+    public int amount;
+    public string qteType;
+    public bool useMaterialSelector;
+}
+
 public class CraftController : MonoBehaviour
 {
     [Header("UI Groups")]
-    [SerializeField] private GameObject coffeeListGroup;
     [SerializeField] private GameObject coffeeMakeGroup;
 
     [Header("Step Buttons")]
@@ -20,27 +29,29 @@ public class CraftController : MonoBehaviour
     [Header("Deliver")]
     [SerializeField] private Button deliverBtn;
 
-    [Header("Back")]
-    [SerializeField] private Button backButton;
+    [Header("Reset")]
+    [SerializeField] private Button resetBtn;
 
     [Header("System")]
     [SerializeField] private OrderSystem orderSystem;
-    [SerializeField] private CoffeeMachine coffeeMachine;
 
-    [Header("QTE Controllers (拖到 Canvas 下的 QTE GameObject)")]
+    [Header("QTE Controllers")]
     [SerializeField] private RhythmTapQTE rhythmTapQTE;
     [SerializeField] private HoldReleaseQTE holdReleaseQTE;
     [SerializeField] private RapidTapQTE rapidTapQTE;
     [SerializeField] private RotationStopQTE rotationStopQTE;
     [SerializeField] private DropStopQTE dropStopQTE;
 
-    private CoffeeData selectedCoffee;
-    private CraftStep[] currentSteps;
-    private int currentStepIndex;
+    private readonly List<string> _performedSteps = new();
+    private readonly List<string> _usedMaterials = new();
     private QTEScoreResult _qteScore;
     private bool _waitingForQTE;
+    private bool _isCrafting;
+    private string _currentStepId;
+    private string _currentMaterialId;
 
     private readonly Dictionary<string, Button> _stepButtons = new();
+    private readonly Dictionary<string, StepDef> _stepDefs = new();
 
     private void Awake()
     {
@@ -52,22 +63,21 @@ public class CraftController : MonoBehaviour
         _stepButtons["AddMilk"] = addMilkBtn;
         _stepButtons["AddSugar"] = addSugarBtn;
 
-        foreach (var kvp in _stepButtons)
-        {
-            if (kvp.Value != null)
-            {
-                var stepId = kvp.Key;
-                kvp.Value.onClick.AddListener(() => OnStepClicked(stepId));
-            }
-        }
+        _stepDefs["Grind"] = new StepDef { id = "Grind", displayName = "研磨", resourceId = "", amount = 0, qteType = "RotationStop" };
+        _stepDefs["PourOver"] = new StepDef { id = "PourOver", displayName = "手冲注水", resourceId = "", amount = 0, qteType = "HoldRelease" };
+        _stepDefs["Extract"] = new StepDef { id = "Extract", displayName = "萃取浓缩", resourceId = "", amount = 0, qteType = "DropStop" };
+        _stepDefs["SteamMilk"] = new StepDef { id = "SteamMilk", displayName = "打发奶泡", resourceId = "", amount = 0, qteType = "RhythmTap" };
+        _stepDefs["AddWater"] = new StepDef { id = "AddWater", displayName = "加水稀释", resourceId = "", amount = 0, qteType = "" };
+        _stepDefs["AddMilk"] = new StepDef { id = "AddMilk", displayName = "加入牛奶", resourceId = "", amount = 0, qteType = "" };
+        _stepDefs["AddSugar"] = new StepDef { id = "AddSugar", displayName = "加入糖浆", resourceId = "", amount = 0, qteType = "" };
 
+        // Deliver and Reset still use onClick
         if (deliverBtn != null)
             deliverBtn.onClick.AddListener(OnDeliverClicked);
 
-        if (backButton != null)
-            backButton.onClick.AddListener(OnBackClicked);
+        if (resetBtn != null)
+            resetBtn.onClick.AddListener(ResetCraft);
 
-        // 注册 QTE 完成回调
         if (rhythmTapQTE != null)
             rhythmTapQTE.OnQTEDone.AddListener(r => OnQTEComplete(r));
         if (holdReleaseQTE != null)
@@ -80,62 +90,80 @@ public class CraftController : MonoBehaviour
             dropStopQTE.OnQTEDone.AddListener(r => OnQTEComplete(r));
     }
 
-    public void OnCoffeeSelected(CoffeeData coffee)
+    private void OnEnable()
     {
-        if (!IsCraftingAllowed())
-        {
-            Debug.Log("[CraftController] Cannot enter crafting: shop not open or no active order");
-            return;
-        }
+        GameEvent.On("OrderCreated", OnOrderCreated);
+    }
 
-        selectedCoffee = coffee;
-        currentStepIndex = 0;
-        currentSteps = coffee.Steps;
+    private void OnDisable()
+    {
+        GameEvent.Off("OrderCreated", OnOrderCreated);
+    }
+
+    private void OnOrderCreated(object payload)
+    {
+        StartFreeCraft();
+    }
+
+    private void StartFreeCraft()
+    {
+        _performedSteps.Clear();
+        _usedMaterials.Clear();
         _qteScore = new QTEScoreResult();
         _waitingForQTE = false;
+        _isCrafting = true;
 
-        if (coffeeListGroup != null) coffeeListGroup.SetActive(false);
+        var coffeeList = GameObject.Find("CoffeeList");
+        if (coffeeList != null) coffeeList.SetActive(false);
+
         if (coffeeMakeGroup != null) coffeeMakeGroup.SetActive(true);
-
+        if (TrayGridUI.Instance != null) TrayGridUI.Instance.ShowDrag();
         GameEvent.Emit("CraftViewChanged", "CoffeeMake");
         UpdateButtonStates();
 
-        Debug.Log($"[CraftController] Start crafting: {coffee.coffeeName}, {currentSteps.Length} steps");
+        Debug.Log("[CraftController] Free craft started");
     }
 
-    private void OnStepClicked(string stepId)
+    /// <summary>拖拽材料到步骤按钮时调用。</summary>
+    public void OnMaterialDroppedOnStep(string stepId, string materialId)
     {
-        if (selectedCoffee == null || currentSteps == null) return;
-        if (currentStepIndex >= currentSteps.Length) return;
-        if (_waitingForQTE) return;
+        if (!_isCrafting || _waitingForQTE) return;
+        if (!_stepDefs.TryGetValue(stepId, out var def)) return;
+        if (string.IsNullOrEmpty(materialId)) return;
 
-        var step = currentSteps[currentStepIndex];
-        if (step.id != stepId) return;
-
-        if (!string.IsNullOrEmpty(step.resourceId) && step.amount > 0)
+        // Spend 1 from inventory
+        var inv = InventorySystem.Instance;
+        if (inv == null || !inv.Spend(materialId, 1))
         {
-            var inv = InventorySystem.Instance;
-            if (inv == null || !inv.Spend(step.resourceId, step.amount))
-            {
-                Debug.Log($"[CraftController] Not enough {step.resourceId} for step {step.id}.");
-                return;
-            }
+            Debug.Log($"[CraftController] Not enough {materialId} for step {stepId}.");
+            return;
         }
 
-        // 启动 QTE（如果有配置）
-        if (!string.IsNullOrEmpty(step.qteType))
+        // Refresh tray UI counts
+        if (TrayGridUI.Instance != null) TrayGridUI.Instance.RefreshCounts();
+
+        _currentStepId = stepId;
+        _currentMaterialId = materialId;
+
+        Debug.Log($"[CraftController] Material '{materialId}' dropped on step '{stepId}'");
+
+        StartStepQTE(def);
+    }
+
+    private void StartStepQTE(StepDef def)
+    {
+        if (!string.IsNullOrEmpty(def.qteType))
         {
             _waitingForQTE = true;
-            LaunchQTE(step.qteType, step.id);
+            LaunchQTE(def.qteType, def.id, def.displayName);
         }
         else
         {
-            // 无 QTE 的步骤直接推进
-            AdvanceStep();
+            CompleteStep(def.id);
         }
     }
 
-    private void LaunchQTE(string qteType, string stepId)
+    private void LaunchQTE(string qteType, string stepId, string displayName)
     {
         QTEBase qte = qteType switch
         {
@@ -150,115 +178,137 @@ public class CraftController : MonoBehaviour
         if (qte == null)
         {
             Debug.LogWarning($"[CraftController] QTE type '{qteType}' not assigned, skipping.");
-            AdvanceStep();
+            CompleteStep(stepId);
             return;
         }
 
-        string displayName = currentSteps[currentStepIndex].displayName;
         Debug.Log($"[CraftController] Launch QTE: {qteType} for step {stepId} ({displayName})");
         qte.Show(stepId, displayName);
     }
 
     private void OnQTEComplete(QTERating rating)
     {
-        if (!_waitingForQTE || selectedCoffee == null || currentSteps == null) return;
+        if (!_waitingForQTE) return;
 
-        var step = currentSteps[currentStepIndex];
-        _qteScore.Record(step.id, rating);
-        Debug.Log($"[CraftController] QTE result for {step.id}: {rating}");
+        if (_qteScore != null && !string.IsNullOrEmpty(_currentStepId))
+            _qteScore.Record(_currentStepId, rating);
+        Debug.Log($"[CraftController] QTE result for {_currentStepId}: {rating}");
 
         _waitingForQTE = false;
-        AdvanceStep();
+        CompleteStep(_currentStepId);
     }
 
-    private void AdvanceStep()
+    private void CompleteStep(string stepId)
     {
-        currentStepIndex++;
-        Debug.Log($"[CraftController] Step {currentStepIndex}/{currentSteps.Length} done");
+        _performedSteps.Add(stepId);
+        _usedMaterials.Add(_currentMaterialId ?? "");
+        Debug.Log($"[CraftController] Step done: {stepId} (total: {_performedSteps.Count})");
+        _currentMaterialId = null;
         UpdateButtonStates();
     }
 
-    /// <summary>只亮当前步骤对应的按钮，其他全灰</summary>
+    /// <summary>检测已执行步骤的尾部是否匹配某个咖啡配方（允许前面有多余步骤）</summary>
+    private CoffeeDataJson MatchCoffeeBySteps()
+    {
+        if (CoffeeDataLoader.Instance == null || !CoffeeDataLoader.Instance.IsLoaded) return null;
+
+        foreach (var coffee in CoffeeDataLoader.Instance.GetAllCoffees())
+        {
+            if (coffee.steps == null || coffee.steps.Count == 0) continue;
+            if (coffee.steps.Count > _performedSteps.Count) continue;
+
+            int offset = _performedSteps.Count - coffee.steps.Count;
+            bool match = true;
+            for (int i = 0; i < coffee.steps.Count; i++)
+            {
+                if (coffee.steps[i].id != _performedSteps[offset + i])
+                {
+                    match = false;
+                    break;
+                }
+            }
+
+            if (match) return coffee;
+        }
+
+        return null;
+    }
+
     private void UpdateButtonStates()
     {
-        // 先全灰
         foreach (var kvp in _stepButtons)
         {
             if (kvp.Value != null)
-                kvp.Value.interactable = false;
+                kvp.Value.interactable = _isCrafting && !_waitingForQTE;
         }
 
-        // QTE 进行中不亮任何按钮
-        if (_waitingForQTE) return;
-
-        // 交付按钮：全步骤完成才亮
         if (deliverBtn != null)
-            deliverBtn.interactable = (currentStepIndex >= currentSteps.Length);
+            deliverBtn.interactable = _isCrafting && _performedSteps.Count > 0 && !_waitingForQTE;
 
-        // 没完成时亮当前步骤对应的按钮
-        if (currentStepIndex < currentSteps.Length)
-        {
-            var currentStepId = currentSteps[currentStepIndex].id;
-            if (_stepButtons.TryGetValue(currentStepId, out var btn) && btn != null)
-                btn.interactable = true;
-        }
+        if (resetBtn != null)
+            resetBtn.interactable = _isCrafting && _performedSteps.Count > 0 && !_waitingForQTE;
     }
 
     private void OnDeliverClicked()
     {
-        if (selectedCoffee == null || currentSteps == null) return;
-        if (currentStepIndex < currentSteps.Length) return;
+        var matched = MatchCoffeeBySteps();
+        if (matched == null)
+        {
+            Debug.Log("[CraftController] No coffee recipe matches the performed steps.");
+            return;
+        }
 
-        Debug.Log($"[CraftController] Deliver success: {selectedCoffee.coffeeName}");
+        Debug.Log($"[CraftController] Crafted: {matched.coffeeName}");
 
         if (orderSystem == null)
             orderSystem = FindFirstObjectByType<OrderSystem>();
 
         if (orderSystem != null && orderSystem.HasActiveOrder)
         {
-            // 将 QTE 评分附加到订单
             var order = orderSystem.ActiveOrder;
             if (order != null && _qteScore != null)
                 order.QTEScore = _qteScore;
+
+            if (order != null && order.CoffeeId == matched.coffeeId)
+            {
+                var coffeeData = ScriptableObject.CreateInstance<CoffeeData>();
+                coffeeData.ApplyJson(matched);
+                orderSystem.TryServeCoffee(coffeeData);
+                Debug.Log($"[CraftController] Correct coffee! Served {matched.coffeeName}");
+                EndCraft();
+            }
+            else
+            {
+                Debug.Log($"[CraftController] Wrong coffee! Made {matched.coffeeName} but order wants {(order != null ? order.CoffeeName : "?")}");
+                ResetCraft();
+            }
         }
-
-        if (orderSystem != null)
-            orderSystem.TryServeCoffee(selectedCoffee);
-        else
-            GameEvent.Emit("CoffeeServed", selectedCoffee);
-
-        BackToList();
     }
 
-    private void BackToList()
+    private void ResetCraft()
     {
-        if (coffeeMakeGroup != null) coffeeMakeGroup.SetActive(false);
-        if (coffeeListGroup != null) coffeeListGroup.SetActive(true);
-        selectedCoffee = null;
-        currentSteps = null;
-        currentStepIndex = 0;
+        _performedSteps.Clear();
+        _usedMaterials.Clear();
+        _qteScore = new QTEScoreResult();
+        _waitingForQTE = false;
+        _currentStepId = null;
+        _currentMaterialId = null;
+        UpdateButtonStates();
+        Debug.Log("[CraftController] Craft reset — try again");
+    }
+
+    private void EndCraft()
+    {
+        _isCrafting = false;
+        _performedSteps.Clear();
+        _usedMaterials.Clear();
         _qteScore = null;
         _waitingForQTE = false;
+        _currentStepId = null;
+        _currentMaterialId = null;
 
+        if (coffeeMakeGroup != null) coffeeMakeGroup.SetActive(false);
+        if (TrayGridUI.Instance != null) TrayGridUI.Instance.HideAll();
         GameEvent.Emit("CraftViewChanged", "Menu");
-    }
-
-    private void OnBackClicked()
-    {
-        BackToList();
-    }
-
-    private bool IsCraftingAllowed()
-    {
-        var timeSystem = FindFirstObjectByType<TimeSystem>();
-        if (timeSystem != null && timeSystem.CurrentPhase != DayPhase.Shop)
-            return false;
-
-        if (orderSystem == null)
-            orderSystem = FindFirstObjectByType<OrderSystem>();
-        if (orderSystem != null && !orderSystem.HasActiveOrder)
-            return false;
-
-        return true;
     }
 }

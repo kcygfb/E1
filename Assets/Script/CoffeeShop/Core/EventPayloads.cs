@@ -89,15 +89,18 @@ public class DialogueRequest
     public string DialogueId { get; }
     public Dictionary<string, string> Tokens { get; }
     public string SpeakerOverride { get; }
+    public Color SpeakerColor { get; }
     public string Context { get; }
 
     public DialogueRequest(string dialogueId, string context,
-        Dictionary<string, string> tokens = null, string speakerOverride = null)
+        Dictionary<string, string> tokens = null, string speakerOverride = null,
+        Color speakerColor = default)
     {
         DialogueId = dialogueId;
         Context = context;
         Tokens = tokens;
         SpeakerOverride = speakerOverride;
+        SpeakerColor = speakerColor == default ? Color.white : speakerColor;
     }
 }
 

@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class TimeSystem : MonoBehaviour
 {
@@ -9,6 +10,10 @@ public class TimeSystem : MonoBehaviour
 
     [Header("Scene Flow")]
     public string preBattleSceneName = "PreBattle";
+
+    [Header("Morning Check")]
+    [SerializeField] private GameObject morningCheckPanel;
+    [SerializeField] private Button startShopBtn;
 
     private static int savedDayCount = 1;
     private DailyRevenueSummary dailyRevenueSummary;
@@ -30,6 +35,28 @@ public class TimeSystem : MonoBehaviour
         dailyRevenueSummary = GetComponent<DailyRevenueSummary>();
         if (dailyRevenueSummary == null)
             dailyRevenueSummary = gameObject.AddComponent<DailyRevenueSummary>();
+
+        // Auto-find via Canvas hierarchy (works even if MorningCheckPanel is inactive)
+        if (morningCheckPanel == null)
+        {
+            var canvas = GameObject.Find("Canvas");
+            if (canvas != null)
+            {
+                var t = canvas.transform.Find("MorningCheckPanel");
+                if (t != null) morningCheckPanel = t.gameObject;
+            }
+        }
+        if (startShopBtn == null && morningCheckPanel != null)
+        {
+            var btnT = morningCheckPanel.transform.Find("Btn_StartShop");
+            if (btnT != null) startShopBtn = btnT.GetComponent<Button>();
+        }
+
+        if (startShopBtn != null)
+        {
+            startShopBtn.onClick.RemoveAllListeners();
+            startShopBtn.onClick.AddListener(OnStartShopClicked);
+        }
     }
 
     private IEnumerator Start()
@@ -81,14 +108,37 @@ public class TimeSystem : MonoBehaviour
         CurrentPhase = DayPhase.MorningCheck;
         Debug.Log($"[TimeSystem] EnterMorningCheck -> Day {dayCount}");
         EmitPhaseChanged();
+
+        if (morningCheckPanel != null)
+            morningCheckPanel.SetActive(true);
+
+        if (TrayGridUI.Instance != null)
+            TrayGridUI.Instance.ShowSelection();
     }
 
     public void StartShopPhase()
     {
+        if (CurrentPhase == DayPhase.Shop) return; // Guard against double-call
         CurrentPhase = DayPhase.Shop;
         Debug.Log($"[TimeSystem] StartShopPhase -> Day {dayCount}");
         EmitPhaseChanged();
         GameEvent.Emit("DayStarted", dayCount);
+
+        if (morningCheckPanel != null)
+            morningCheckPanel.SetActive(false);
+
+        if (TrayGridUI.Instance != null)
+            TrayGridUI.Instance.HideAll();
+    }
+
+    private void OnStartShopClicked()
+    {
+        if (!IngredientTray.IsFilled)
+        {
+            Debug.Log("[TimeSystem] Cannot start shop — tray not filled (9 slots required).");
+            return;
+        }
+        StartShopPhase();
     }
 
     private void EmitPhaseChanged()

@@ -113,7 +113,7 @@ public class CustomerController : MonoBehaviour
 
     private void EmitDialogue(string dialogueId, string context, Dictionary<string, string> tokens = null)
     {
-        GameEvent.Emit("DialogueRequested", new DialogueRequest(dialogueId, context, tokens, NPCData.npcName));
+        GameEvent.Emit("DialogueRequested", new DialogueRequest(dialogueId, context, tokens, NPCData.npcName, NPCData.speakerColor));
     }
 
     private void OnDialogueEnded(object payload)

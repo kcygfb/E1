@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using DG.Tweening;
 
 public class DialoguePlayer : MonoBehaviour
 {
@@ -14,12 +15,20 @@ public class DialoguePlayer : MonoBehaviour
     [Header("打字机效果")]
     [SerializeField] private float charsPerSecond = 30f;
 
+    [Header("对话时隐藏的 UI")]
+    [SerializeField] private GameObject[] hideDuringDialogue;
+
+    [Header("主角")]
+    [SerializeField] private string playerName = "艾薇儿";
+    [SerializeField] private Color playerColor = new Color(0.4f, 0.8f, 1f, 1f);
+
     private DialogueDataJson currentDialogue;
     private int currentIndex;
     private bool isRunning;
     private bool isTyping;
     private Coroutine typingRoutine;
     private string currentFullText;
+    private Color _speakerColor = Color.white;
     private Dictionary<string, string> tokens = new();
     private string speakerOverride;
     private string currentContext;
@@ -51,11 +60,12 @@ public class DialoguePlayer : MonoBehaviour
     private void OnDialogueRequested(object payload)
     {
         if (payload is not DialogueRequest req) return;
-        StartDialogue(req.DialogueId, req.Context, req.Tokens, req.SpeakerOverride);
+        StartDialogue(req.DialogueId, req.Context, req.Tokens, req.SpeakerOverride, req.SpeakerColor);
     }
 
     public void StartDialogue(string dialogueId, string context,
-        Dictionary<string, string> tokens = null, string speakerOverride = null)
+        Dictionary<string, string> tokens = null, string speakerOverride = null,
+        Color speakerColor = default)
     {
         if (string.IsNullOrEmpty(dialogueId))
         {
@@ -82,9 +92,11 @@ public class DialoguePlayer : MonoBehaviour
         isRunning = true;
         this.tokens = tokens ?? new();
         this.speakerOverride = speakerOverride;
+        _speakerColor = speakerColor == default ? Color.white : speakerColor;
         currentContext = context;
 
         if (dialoguePanel != null) dialoguePanel.SetActive(true);
+        HideUI(true);
         ShowLine(0);
     }
 
@@ -108,11 +120,15 @@ public class DialoguePlayer : MonoBehaviour
             string speaker = !string.IsNullOrEmpty(line.speaker) ? line.speaker : (speakerOverride ?? "");
 
             if (speakerText != null)
+            {
                 speakerText.text = speaker;
+                speakerText.color = speaker == playerName ? playerColor : _speakerColor;
+            }
 
             if (typingRoutine != null) StopCoroutine(typingRoutine);
             currentFullText = text;
             typingRoutine = StartCoroutine(TypeText(text));
+            AnimateSpeaker(speaker);
         }
     }
 
@@ -156,8 +172,52 @@ public class DialoguePlayer : MonoBehaviour
         currentDialogue = null;
         currentIndex = 0;
         if (dialoguePanel != null) dialoguePanel.SetActive(false);
+        HideUI(false);
         var ctx = currentContext;
         currentContext = null;
         GameEvent.Emit("DialogueEnded", ctx);
+    }
+
+    private void HideUI(bool hide)
+    {
+        if (hideDuringDialogue == null) return;
+        foreach (var go in hideDuringDialogue)
+        {
+            if (go != null) go.SetActive(!hide);
+        }
+    }
+
+    private void AnimateSpeaker(string speaker)
+    {
+        if (string.IsNullOrEmpty(speaker)) return;
+
+        RectTransform target = null;
+
+        if (speaker == playerName)
+        {
+            var player = GameObject.Find("Canvas/PlayerArea/PlayerP");
+            if (player != null) target = player.GetComponent<RectTransform>();
+        }
+        else
+        {
+            var npcs = FindObjectsByType<CustomerController>(FindObjectsSortMode.None);
+            foreach (var npc in npcs)
+            {
+                if (npc.NPCData != null &&
+                    (npc.NPCData.npcName == speaker ||
+                     npc.NPCData.npcName.Contains(speaker) ||
+                     speaker.Contains(npc.NPCData.npcName)))
+                {
+                    target = npc.GetComponent<RectTransform>();
+                    break;
+                }
+            }
+        }
+
+        if (target == null) return;
+
+        target.DOKill();
+        target.localScale = Vector3.one;
+        target.DOScale(1.08f, 0.12f).SetLoops(2, LoopType.Yoyo).SetEase(Ease.OutQuad);
     }
 }

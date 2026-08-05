@@ -151,7 +151,7 @@ public class CoffeeListPopulator : MonoBehaviour
 
         if (craftController != null)
         {
-            craftController.OnCoffeeSelected(coffeeData);
+            // Free craft mode — no need to select coffee manually
         }
         else
         {
