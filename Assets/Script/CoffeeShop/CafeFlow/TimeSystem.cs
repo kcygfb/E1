@@ -133,9 +133,9 @@ public class TimeSystem : MonoBehaviour
 
     private void OnStartShopClicked()
     {
-        if (!IngredientTray.IsFilled)
+        if (!IngredientTray.HasAny)
         {
-            Debug.Log("[TimeSystem] Cannot start shop — tray not filled (9 slots required).");
+            Debug.Log("[TimeSystem] Cannot start shop — no materials selected.");
             return;
         }
         StartShopPhase();

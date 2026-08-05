@@ -68,7 +68,7 @@ public class TrayGridUI : MonoBehaviour
     private void ShowSelectionInternal()
     {
         _isDragMode = false;
-        IngredientTray.Clear();
+        IngredientTray.SetDefaults();
 
         gameObject.SetActive(true);
         if (materialPalette != null)
@@ -77,8 +77,10 @@ public class TrayGridUI : MonoBehaviour
         for (int i = 0; i < 9; i++)
         {
             if (cells[i] == null) continue;
-            SetCellMaterial(i, null);
-            SetCellCount(i, "");
+            string matId = IngredientTray.GetSlot(i);
+            SetCellMaterial(i, matId);
+            SetCellCount(i, matId != null && InventorySystem.Instance != null
+                ? InventorySystem.Instance.GetAmount(matId).ToString() : "");
             var drop = cells[i].GetComponent<TrayCellDrop>();
             if (drop != null) drop.enabled = true;
             // Enable drag so cell can be dragged out to clear
@@ -86,7 +88,7 @@ public class TrayGridUI : MonoBehaviour
             if (drag == null)
                 drag = cells[i].gameObject.AddComponent<TraySlotDrag>();
             drag.SlotIndex = i;
-            drag.MaterialId = null; // set when material dropped
+            drag.MaterialId = matId;
             drag.enabled = true;
         }
 
@@ -128,7 +130,7 @@ public class TrayGridUI : MonoBehaviour
             string matId = IngredientTray.GetSlot(i);
             SetCellMaterial(i, matId);
 
-            int count = InventorySystem.Instance != null ? InventorySystem.Instance.GetAmount(matId) : 0;
+            int count = (!string.IsNullOrEmpty(matId) && InventorySystem.Instance != null) ? InventorySystem.Instance.GetAmount(matId) : 0;
             SetCellCount(i, count > 0 ? count.ToString() : "0");
 
             var drop = cells[i].GetComponent<TrayCellDrop>();
@@ -151,7 +153,7 @@ public class TrayGridUI : MonoBehaviour
         {
             if (cells[i] == null) continue;
             string matId = IngredientTray.GetSlot(i);
-            int count = InventorySystem.Instance != null ? InventorySystem.Instance.GetAmount(matId) : 0;
+            int count = (!string.IsNullOrEmpty(matId) && InventorySystem.Instance != null) ? InventorySystem.Instance.GetAmount(matId) : 0;
             SetCellCount(i, count > 0 ? count.ToString() : "0");
 
             if (count <= 0)
@@ -186,7 +188,7 @@ public class TrayGridUI : MonoBehaviour
         var drag = cells[cellIndex].GetComponent<TraySlotDrag>();
         if (drag != null) drag.MaterialId = materialId;
 
-        int count = InventorySystem.Instance != null ? InventorySystem.Instance.GetAmount(materialId) : 0;
+        int count = (!string.IsNullOrEmpty(materialId) && InventorySystem.Instance != null) ? InventorySystem.Instance.GetAmount(materialId) : 0;
         SetCellCount(cellIndex, count > 0 ? count.ToString() : "0");
 
         UpdateStartShopButton();
@@ -240,6 +242,6 @@ public class TrayGridUI : MonoBehaviour
     private void UpdateStartShopButton()
     {
         if (startShopBtn != null)
-            startShopBtn.interactable = IngredientTray.IsFilled;
+            startShopBtn.interactable = IngredientTray.HasAny;
     }
 }

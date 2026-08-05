@@ -42,6 +42,11 @@ public class CraftController : MonoBehaviour
     [SerializeField] private RotationStopQTE rotationStopQTE;
     [SerializeField] private DropStopQTE dropStopQTE;
 
+    [Header("Portafilter")]
+    [SerializeField] private Portafilter portafilter;
+    [SerializeField] private Transform cupSpawnParent;
+    [SerializeField] private GameObject cupPrefab; // Cup 预制体
+
     private readonly List<string> _performedSteps = new();
     private readonly List<string> _usedMaterials = new();
     private QTEScoreResult _qteScore;
@@ -49,6 +54,8 @@ public class CraftController : MonoBehaviour
     private bool _isCrafting;
     private string _currentStepId;
     private string _currentMaterialId;
+    private Portafilter _grindPortafilter;
+    private CupContainer _currentCup;
 
     private readonly Dictionary<string, Button> _stepButtons = new();
     private readonly Dictionary<string, StepDef> _stepDefs = new();
@@ -124,6 +131,109 @@ public class CraftController : MonoBehaviour
         Debug.Log("[CraftController] Free craft started");
     }
 
+    /// <summary>从杯子堆拖出一个杯子 → 在工作区生成 CupContainer。</summary>
+    public void OnCupDraggedOut(Vector2 screenPosition, Sprite cupSprite)
+    {
+        if (!_isCrafting) return;
+        if (cupSpawnParent == null) cupSpawnParent = transform;
+
+        // 从预制体实例化，没有预制体则代码生成 fallback
+        GameObject cupGO;
+        if (cupPrefab != null)
+            cupGO = Instantiate(cupPrefab, cupSpawnParent, false);
+        else
+            cupGO = new GameObject("Cup", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(CupContainer));
+
+        cupGO.transform.SetParent(cupSpawnParent, false);
+        cupGO.name = "Cup";
+
+        // 设置位置（用世界坐标避免 parent 偏移问题）
+        cupGO.transform.position = screenPosition;
+
+        // 设置 sprite
+        var img = cupGO.GetComponent<Image>();
+        if (img != null)
+        {
+            if (cupSprite != null) img.sprite = cupSprite;
+            img.preserveAspect = true;
+            img.color = Color.white;
+            img.raycastTarget = true;
+        }
+
+        // 确保有 CupContainer 组件
+        if (cupGO.GetComponent<CupContainer>() == null)
+            cupGO.AddComponent<CupContainer>();
+
+        Debug.Log("[CraftController] Cup spawned in workspace");
+    }
+
+    /// <summary>手柄拖到步骤按钮（Grind/Extract 等）。</summary>
+    public void OnPortafilterDroppedOnStep(string stepId, Portafilter pf)
+    {
+        if (!_isCrafting || _waitingForQTE) return;
+        if (!_stepDefs.TryGetValue(stepId, out var def)) return;
+
+        if (stepId == "Grind" && pf.CurrentState == Portafilter.State.HasMaterial)
+        {
+            _currentStepId = stepId;
+            _currentMaterialId = pf.MaterialId;
+            _grindPortafilter = pf;
+            StartStepQTE(def);
+        }
+        else if (stepId == "Extract" && pf.CurrentState == Portafilter.State.Ground)
+        {
+            _currentStepId = stepId;
+            _currentMaterialId = pf.MaterialId;
+            _grindPortafilter = pf;
+            StartStepQTE(def);
+        }
+        else
+        {
+            Debug.Log($"[CraftController] Portafilter state {pf.CurrentState} not valid for step {stepId}");
+        }
+    }
+
+    /// <summary>手柄停靠到 PortafilterDock（磨豆机/萃取机停留区）。</summary>
+    public void OnPortafilterDocked(string stepId, Portafilter pf)
+    {
+        if (!_isCrafting) return;
+        if (!_stepDefs.TryGetValue(stepId, out var def)) return;
+
+        // 检查手柄状态是否匹配该机器
+        bool valid = (stepId == "Grind" && pf.CurrentState == Portafilter.State.HasMaterial)
+                  || (stepId == "Extract" && pf.CurrentState == Portafilter.State.Ground);
+
+        if (valid)
+        {
+            Debug.Log($"[CraftController] Portafilter docked at {stepId}, state={pf.CurrentState} — ready to activate");
+            // TODO: 这里可以触发机器的"检测词条 on"视觉反馈
+            // 例如：高亮机器、显示"就绪"文字等
+        }
+        else
+        {
+            Debug.Log($"[CraftController] Portafilter docked at {stepId} but state={pf.CurrentState} not valid");
+        }
+    }
+
+    /// <summary>杯子拖到步骤按钮（Extract/PourOver 等）。</summary>
+    public void OnCupDroppedOnStep(string stepId, CupContainer cup)
+    {
+        if (!_isCrafting || _waitingForQTE) return;
+        if (!_stepDefs.TryGetValue(stepId, out var def)) return;
+
+        _currentStepId = stepId;
+        _currentMaterialId = cup.Contents.Count > 0 ? cup.Contents[0] : "";
+        _currentCup = cup;
+        StartStepQTE(def);
+    }
+
+    /// <summary>杯子拖到 Deliver 按钮 = 提交。</summary>
+    public void OnCupDelivered(CupContainer cup)
+    {
+        if (!_isCrafting) return;
+        OnDeliverClicked();
+    }
+
     /// <summary>拖拽材料到步骤按钮时调用。</summary>
     public void OnMaterialDroppedOnStep(string stepId, string materialId)
     {
@@ -195,6 +305,21 @@ public class CraftController : MonoBehaviour
         Debug.Log($"[CraftController] QTE result for {_currentStepId}: {rating}");
 
         _waitingForQTE = false;
+
+        // 研磨完成 → 手柄变 Ground
+        if (_currentStepId == "Grind" && _grindPortafilter != null)
+        {
+            _grindPortafilter.SetGround();
+            _grindPortafilter = null;
+        }
+
+        // 萃取完成 → 手柄清空
+        if (_currentStepId == "Extract" && _grindPortafilter != null)
+        {
+            _grindPortafilter.Clear();
+            _grindPortafilter = null;
+        }
+
         CompleteStep(_currentStepId);
     }
 
@@ -293,6 +418,8 @@ public class CraftController : MonoBehaviour
         _waitingForQTE = false;
         _currentStepId = null;
         _currentMaterialId = null;
+        _grindPortafilter = null;
+        _currentCup = null;
         UpdateButtonStates();
         Debug.Log("[CraftController] Craft reset — try again");
     }
@@ -306,6 +433,8 @@ public class CraftController : MonoBehaviour
         _waitingForQTE = false;
         _currentStepId = null;
         _currentMaterialId = null;
+        _grindPortafilter = null;
+        _currentCup = null;
 
         if (coffeeMakeGroup != null) coffeeMakeGroup.SetActive(false);
         if (TrayGridUI.Instance != null) TrayGridUI.Instance.HideAll();

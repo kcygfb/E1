@@ -7,8 +7,8 @@ public static class IngredientTray
     /// <summary>9 格选材，null/空 = 未选。</summary>
     public static readonly string[] Slots = new string[9];
 
-    /// <summary>全部 9 格是否已填满。</summary>
-    public static bool IsFilled => Slots.All(s => !string.IsNullOrEmpty(s));
+    /// <summary>是否有至少 1 格已选材（开始营业的最低条件）。</summary>
+    public static bool HasAny => Slots.Any(s => !string.IsNullOrEmpty(s));
 
     /// <summary>可选材料 ID 列表（10 种）。</summary>
     public static readonly string[] SelectableMaterials =
@@ -43,5 +43,15 @@ public static class IngredientTray
     public static void Clear()
     {
         Array.Fill(Slots, null);
+    }
+
+    /// <summary>默认预设格子（Milk/Sugar/Water 已放入前 3 格）。</summary>
+    public static void SetDefaults()
+    {
+        Clear();
+        Slots[0] = "Milk";
+        Slots[1] = "Sugar";
+        Slots[2] = "Water";
+        Slots[3] = "CoffeeBean";
     }
 }
