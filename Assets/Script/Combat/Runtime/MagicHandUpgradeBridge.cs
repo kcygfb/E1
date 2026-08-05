@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
+using KiKs.UI;
 
 namespace KiKs.Combat
 {
@@ -36,17 +37,35 @@ namespace KiKs.Combat
         public void OnEndDrag(PointerEventData eventData)
         {
             if (_battleController == null || !_battleController.IsInitialized || _animator == null)
+            {
+                WarningToast.Show("Battle is not ready.");
                 return;
+            }
 
             var cardView = FindCardAt(eventData.position, eventData.pressEventCamera);
-            if (cardView == null || cardView.Spec == null ||
-                !cardView.Spec.CanUpgrade || cardView.IsUpgraded)
+            if (cardView == null || cardView.Spec == null)
+            {
+                WarningToast.Show("Drag the magic hand onto an upgradeable card.");
                 return;
+            }
+
+            if (!cardView.Spec.CanUpgrade)
+            {
+                WarningToast.Show("This card cannot be upgraded.");
+                return;
+            }
+
+            if (cardView.IsUpgraded)
+            {
+                WarningToast.Show("This card is already upgraded.");
+                return;
+            }
 
             var result = _battleController.UpgradeCard(cardView.InstanceId);
             if (!result.Success)
             {
                 Debug.LogWarning("[MagicHandUpgradeBridge] Card upgrade failed: " + result.Message, this);
+                WarningToast.Show(CombatWarningText.FromResult(result));
                 return;
             }
 
@@ -55,7 +74,6 @@ namespace KiKs.Combat
             cardView.PlayUpgradeFlip();
             Debug.Log("[MagicHandUpgradeBridge] Upgraded " + cardView.Spec.DisplayName + ".", this);
         }
-
         private CardView FindCardAt(Vector2 screenPosition, Camera eventCamera)
         {
             var handCards = _animator.HandCards;

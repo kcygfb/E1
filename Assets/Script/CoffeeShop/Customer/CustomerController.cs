@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using KiKs.Combat;
 using UnityEngine.UI;
 
 public enum NPCState
@@ -79,7 +80,7 @@ public class CustomerController : MonoBehaviour
         ChangeState(NPCState.ArrivalDialogue);
         GameEvent.Emit("CustomerArrived", NPCData);
 
-        // 回访检查
+        // 回访检�?
         if (!string.IsNullOrEmpty(NPCData.desiredCoffeeId) && Spawner != null && Spawner.HasPendingReturnVisit(NPCData))
         {
             bool unlocked = CoffeeData != null && (UnlockManager.Instance == null || UnlockManager.Instance.IsUnlocked(CoffeeData));
@@ -96,7 +97,7 @@ public class CustomerController : MonoBehaviour
             return;
         }
 
-        // 首次到访：特殊NPC指定咖啡未解锁
+        // 首次到访：特殊NPC指定咖啡未解�?
         if (!string.IsNullOrEmpty(NPCData.desiredCoffeeId) && CoffeeData != null && UnlockManager.Instance != null && !UnlockManager.Instance.IsUnlocked(CoffeeData))
         {
             if (Spawner != null) Spawner.MarkReturnVisit(NPCData);
@@ -148,11 +149,8 @@ public class CustomerController : MonoBehaviour
     private void GiveReturnReward()
     {
         if (NPCData.returnReward <= 0) return;
-        if (InventorySystem.Instance != null)
-        {
-            InventorySystem.Instance.Add("gold", NPCData.returnReward);
-            Debug.Log($"[CustomerController] {NPCData.npcName} return reward: +{NPCData.returnReward} gold");
-        }
+        RuntimeGameRepository.AddGold(NPCData.returnReward);
+        Debug.Log($"[CustomerController] {NPCData.npcName} return reward: +{NPCData.returnReward} gold");
     }
 
     private void MakeOrder()

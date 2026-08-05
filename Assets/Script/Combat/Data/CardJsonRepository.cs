@@ -115,6 +115,7 @@ namespace KiKs.Combat
             var deckCopies = OptionalPositiveInt(card, "copies", 1);
             var special = OptionalBool(card, "special");
             var imagePath = OptionalString(card, "image");
+            var descriptionEn = OptionalDescriptionEn(card);
             var rawEffects = RequiredList(card, "effects");
             if (rawEffects.Count == 0) throw new FormatException(id + " has no effects.");
 
@@ -133,7 +134,17 @@ namespace KiKs.Combat
                 InferTargetType(effects),
                 effects,
                 deckCopies,
-                imagePath);
+                imagePath,
+                descriptionEn);
+        }
+
+        private static string OptionalDescriptionEn(Dictionary<string, object> card)
+        {
+            if (!card.TryGetValue("description", out var rawDescription) || rawDescription == null)
+                return string.Empty;
+
+            var description = AsObject(rawDescription, "description");
+            return OptionalString(description, "en");
         }
 
         private static CardEffectSpec ParseEffect(Dictionary<string, object> effect)

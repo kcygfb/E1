@@ -21,9 +21,12 @@ namespace KiKs.Combat
         [Header("Rules")]
         [SerializeField] private CombatRulesConfig rulesConfig;
 
-        [Header("Linear Demo Flow")]
-        [Tooltip("Order must be: 1 Dog, 2 Little Girl, 3 Big Eye.")]
+        [Header("Daily Area Map")]
+        [Tooltip("Five map points. Their positions are randomized between three battles, one event, and one treasure.")]
         [SerializeField] private List<GameObject> demoMapPoints = new();
+        [SerializeField] private Sprite battlePointSprite;
+        [SerializeField] private Sprite eventPointSprite;
+        [SerializeField] private Sprite treasurePointSprite;
         [Tooltip("Decorative UI drawn above the map. Its non-button Graphics must not intercept clicks.")]
         [SerializeField] private Transform decorativeOverlay;
         [SerializeField] private GameObject demoCompletePanel;
@@ -58,6 +61,7 @@ namespace KiKs.Combat
         {
             DisableDecorativeOverlayRaycasts();
             BindDemoMapPoints();
+            DailyAreaMapState.EnsureGenerated();
             RefreshMapPoints();
             SyncCafeDayCounter(DemoFlowState.CurrentDay);
 
@@ -112,8 +116,7 @@ namespace KiKs.Combat
             }
 
             allCards.Clear();
-            foreach (var card in db.Repository.Cards)
-                if (!card.IsEnemyCard) allCards.Add(card);
+            allCards.AddRange(StaticGameRepository.PlayerCards);
 
             PopulateCardGrid();
             RefreshSelectionUI();
@@ -216,26 +219,29 @@ namespace KiKs.Combat
             if (selectedCopies >= card.DeckCopies)
             {
                 Debug.Log("[CardSelectionUI] No more copies are available for " + card.DisplayName + ".");
+                WarningToast.Show("This card has reached its copy limit.");
                 return;
             }
 
             if (selectedCardIds.Count >= RequiredDeckSize)
             {
                 Debug.Log("[CardSelectionUI] Deck is full.");
+                WarningToast.Show(string.Format("Card limit reached: {0}.", RequiredDeckSize));
                 return;
             }
 
             selectedCardIds.Add(cardId);
             RefreshSelectionUI();
         }
-
         private void OnUndoClicked()
         {
             if (_isStartingBattle || selectedCardIds.Count == 0)
                 return;
 
             selectedCardIds.RemoveAt(selectedCardIds.Count - 1);
-            BattleSession.ClearSelectedDemoStage();
+            RuntimeGameRepository.ClearSelectedDemoStage();
+            DailyAreaMapState.CancelSelectedPoint();
+            RefreshMapPoints();
             RefreshSelectionUI();
         }
 
@@ -249,8 +255,9 @@ namespace KiKs.Combat
             if (beginButton != null)
                 beginButton.interactable =
                     !_isStartingBattle &&
-                    BattleSession.HasSelectedDemoStage &&
-                    BattleSession.SelectedDemoStage == DemoFlowState.CurrentStage &&
+                    DailyAreaMapState.HasSelectedPoint &&
+                    RuntimeGameRepository.HasSelectedDemoStage &&
+                    RuntimeGameRepository.SelectedDemoStage == DemoFlowState.CurrentStage &&
                     IsDeckComplete;
             if (cardButton != null)
                 cardButton.interactable = !_isStartingBattle && !DemoFlowState.IsCompleted;
@@ -287,15 +294,16 @@ namespace KiKs.Combat
         private void BindDemoMapPoints()
         {
             ResolveDemoMapPointsByName();
+            ResolveMapPointSprites();
 
-            if (demoMapPoints.Count < DemoFlowState.BattleCount)
+            if (demoMapPoints.Count < DailyAreaMapState.PointCount)
             {
                 Debug.LogError(
                     $"[DemoFlow] CardSelectionUI needs {DemoFlowState.BattleCount} map points in Dog/Girl/Eye order; " +
                     $"only {demoMapPoints.Count} are configured.", this);
             }
 
-            var count = Mathf.Min(demoMapPoints.Count, DemoFlowState.BattleCount);
+            var count = Mathf.Min(demoMapPoints.Count, DailyAreaMapState.PointCount);
             for (var i = 0; i < count; i++)
             {
                 var mapPoint = demoMapPoints[i];
@@ -312,8 +320,8 @@ namespace KiKs.Combat
                     continue;
                 }
 
-                var stage = (DemoStage)i;
-                UnityAction listener = () => OnDemoMapPointClicked(stage);
+                var pointIndex = i;
+                UnityAction listener = () => OnDemoMapPointClicked(pointIndex);
                 button.onClick.AddListener(listener);
                 demoMapPointListeners[button] = listener;
             }
@@ -321,25 +329,48 @@ namespace KiKs.Combat
 
         private void ResolveDemoMapPointsByName()
         {
-            if (demoMapPoints.Count >= DemoFlowState.BattleCount)
+            var resolvedPoints = new List<GameObject>();
+            for (var i = 1; i <= DailyAreaMapState.PointCount; i++)
+            {
+                var mapPoint = GameObject.Find($"MapPoint_{i}");
+                if (mapPoint != null) resolvedPoints.Add(mapPoint);
+            }
+
+            if (resolvedPoints.Count != DailyAreaMapState.PointCount)
                 return;
 
             demoMapPoints.Clear();
-            for (var i = 1; i <= DemoFlowState.BattleCount; i++)
+            demoMapPoints.AddRange(resolvedPoints);
+        }
+
+        private void ResolveMapPointSprites()
+        {
+            if (battlePointSprite == null && demoMapPoints.Count > 0)
+                battlePointSprite = demoMapPoints[0].GetComponent<Image>()?.sprite;
+            if (eventPointSprite == null && demoMapPoints.Count > 3)
+                eventPointSprite = demoMapPoints[3].GetComponent<Image>()?.sprite;
+            if (treasurePointSprite == null && demoMapPoints.Count > 4)
+                treasurePointSprite = demoMapPoints[4].GetComponent<Image>()?.sprite;
+
+            if (battlePointSprite == null || eventPointSprite == null || treasurePointSprite == null)
             {
-                var mapPoint = GameObject.Find($"MapPoint_{i}");
-                if (mapPoint != null) demoMapPoints.Add(mapPoint);
+                Debug.LogError("[AreaMap] Battle, event, and treasure sprites must be assigned.", this);
             }
         }
 
-        private void OnDemoMapPointClicked(DemoStage stage)
+        private void OnDemoMapPointClicked(int pointIndex)
         {
-            if (!DemoFlowState.IsStageAvailable(stage))
+            if (!DailyAreaMapState.TryGetPoint(pointIndex, out var point))
             {
-                Debug.LogWarning(
-                    $"[DemoFlow] Ignored unavailable map point {stage}; current stage is {DemoFlowState.CurrentStage}.",
-                    this);
-                RefreshMapPoints();
+                Debug.LogError($"[AreaMap] Map point index {pointIndex} is invalid.", this);
+                return;
+            }
+
+            if (point.Type != AreaPointType.Battle)
+            {
+                WarningToast.Show(point.Type == AreaPointType.Event
+                    ? "Event areas are not available yet."
+                    : "Treasure areas are not available yet.");
                 return;
             }
 
@@ -348,29 +379,51 @@ namespace KiKs.Combat
                 if (openCardSelectionAfterMapClick && cardPopup != null)
                     cardPopup.SetActive(true);
 
+                WarningToast.Show(string.Format("Select {0} cards first.", RequiredDeckSize));
                 RefreshSelectionUI();
                 return;
             }
 
-            BattleSession.SetSelectedDemoStage(stage);
+            if (!DailyAreaMapState.TrySelectPoint(pointIndex, out var failureReason))
+            {
+                WarningToast.Show(failureReason);
+                RefreshMapPoints();
+                return;
+            }
+
+            RuntimeGameRepository.SetSelectedDemoStage(DemoFlowState.CurrentStage);
             Debug.Log(
-                $"[DemoFlow] Selected day {DemoFlowState.CurrentDay}, map point {(int)stage + 1}: {stage}.",
+                $"[AreaMap] Selected map point {pointIndex + 1}: {point.Type}; " +
+                $"battle stage is {DemoFlowState.CurrentStage}.",
                 this);
 
             if (cardPopup != null)
                 cardPopup.SetActive(false);
 
+            RefreshMapPoints();
             RefreshSelectionUI();
         }
-
         public void RefreshMapPoints()
         {
-            var count = Mathf.Min(demoMapPoints.Count, DemoFlowState.BattleCount);
+            DailyAreaMapState.EnsureGenerated();
+
+            var count = Mathf.Min(demoMapPoints.Count, DailyAreaMapState.PointCount);
             for (var i = 0; i < count; i++)
             {
                 var mapPoint = demoMapPoints[i];
-                if (mapPoint != null)
-                    mapPoint.SetActive(!DemoFlowState.IsCompleted && i == DemoFlowState.CurrentBattleIndex);
+                if (mapPoint == null || !DailyAreaMapState.TryGetPoint(i, out var point))
+                    continue;
+
+                var image = mapPoint.GetComponent<Image>();
+                if (image != null)
+                    image.sprite = GetMapPointSprite(point.Type);
+
+                var isVisible = !DemoFlowState.IsCompleted && !point.IsCompleted;
+                mapPoint.SetActive(isVisible);
+
+                var button = mapPoint.GetComponent<Button>();
+                if (button != null)
+                    button.interactable = isVisible && !point.IsSelected;
             }
 
             if (demoCompletePanel != null)
@@ -393,12 +446,23 @@ namespace KiKs.Combat
             RefreshSelectionUI();
         }
 
+        private Sprite GetMapPointSprite(AreaPointType type)
+        {
+            return type switch
+            {
+                AreaPointType.Battle => battlePointSprite,
+                AreaPointType.Event => eventPointSprite,
+                AreaPointType.Treasure => treasurePointSprite,
+                _ => null
+            };
+        }
+
         [ContextMenu("Reset Demo Progress")]
         public void ResetDemoProgress()
         {
             DemoFlowState.ResetDemoProgress();
-            BattleSession.ClearSelectedDemoStage();
-            BattleSession.ClearSelectedDeck();
+            RuntimeGameRepository.ClearSelectedDemoStage();
+            RuntimeGameRepository.ClearSelectedDeck();
             selectedCardIds.Clear();
             SyncCafeDayCounter(1);
 
@@ -475,7 +539,7 @@ namespace KiKs.Combat
         private void UpdateDeckLabel()
         {
             if (deckLabel != null)
-                deckLabel.text = $"已选卡牌 ({selectedCardIds.Count}/{RequiredDeckSize})";
+                deckLabel.text = $"已选卡�?({selectedCardIds.Count}/{RequiredDeckSize})";
         }
 
         private void ResolveUndoButton()
@@ -516,11 +580,13 @@ namespace KiKs.Combat
             if (_isStartingBattle)
                 return;
 
-            if (!BattleSession.HasSelectedDemoStage ||
-                BattleSession.SelectedDemoStage != DemoFlowState.CurrentStage)
+            if (!RuntimeGameRepository.HasSelectedDemoStage ||
+                RuntimeGameRepository.SelectedDemoStage != DemoFlowState.CurrentStage ||
+                !DailyAreaMapState.HasSelectedPoint)
             {
                 Debug.LogWarning(
-                    "[DemoFlow] Click the currently available map point before starting battle.", this);
+                    "[AreaMap] Click an available battle point before starting battle.", this);
+                WarningToast.Show("Choose a battle area first.");
                 return;
             }
 
@@ -529,6 +595,7 @@ namespace KiKs.Combat
             {
                 Debug.LogWarning(
                     $"[CardSelectionUI] Select exactly {requiredDeckSize} cards before starting.");
+                WarningToast.Show(string.Format("Select {0} cards before starting.", requiredDeckSize));
                 return;
             }
 
@@ -536,14 +603,15 @@ namespace KiKs.Combat
             {
                 Debug.LogError(
                     $"[CardSelectionUI] Scene '{BATTLE_SCENE_NAME}' is not included in the active build profile.");
+                WarningToast.Show("The battle scene is unavailable.");
                 return;
             }
 
             _isStartingBattle = true;
             RefreshSelectionUI();
-            BattleSession.SetSelectedDeck(selectedCardIds);
+            RuntimeGameRepository.SetSelectedDeck(selectedCardIds);
             Debug.Log(
-                $"[CardSelectionUI] Starting {BattleSession.SelectedDemoStage} with " +
+                $"[CardSelectionUI] Starting {RuntimeGameRepository.SelectedDemoStage} with " +
                 $"{selectedCardIds.Count} cards.");
 
             var coffeeUI = UnityEngine.Object.FindFirstObjectByType<CoffeeSelectionUI>();
@@ -561,7 +629,6 @@ namespace KiKs.Combat
                 StartCoroutine(LoadBattleScene());
             }
         }
-
         private IEnumerator LoadBattleScene()
         {
             var operation = SceneManager.LoadSceneAsync(BATTLE_SCENE_NAME, LoadSceneMode.Single);
@@ -579,11 +646,11 @@ namespace KiKs.Combat
 
         private void RestoreSelectedDeckFromSession()
         {
-            if (!BattleSession.HasSelectedDeck)
+            if (!RuntimeGameRepository.HasSelectedDeck)
                 return;
 
             selectedCardIds.Clear();
-            selectedCardIds.AddRange(BattleSession.SelectedCardIds);
+            selectedCardIds.AddRange(RuntimeGameRepository.SelectedCardIds);
         }
 
         private void BindCloseButton(GameObject popup)

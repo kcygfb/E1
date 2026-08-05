@@ -32,10 +32,10 @@ namespace KiKs.Combat
                 return;
             }
 
-            var allCards = cardDatabase.Repository.Cards;
+            var allCards = StaticGameRepository.AllCards;
             if (allCards.Count == 0) return;
 
-            // 随机抽一张
+            // 随机抽一�?
             var spec = allCards[Random.Range(0, allCards.Count)];
             animator.DrawCard(spec);
         }

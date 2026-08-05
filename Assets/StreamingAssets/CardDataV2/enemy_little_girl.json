@@ -6,9 +6,10 @@
     {
       "id": "enemy_little_girl_tentacle_attack",
       "name": { "zhCN": "触手攻击", "en": "tentacle attack" },
+      "description": { "en": "Three lashes that damage and weaken guard." },
       "category": "enemy_little_girl",
       "copies": 1,
-      "image": "Art/Cards/placeholder.png",
+      "image": "Art/Cards/小女孩触手打击.png",
       "cost": { "resource": "action_point", "amount": 1 },
       "special": false,
       "effects": [
@@ -21,9 +22,10 @@
     {
       "id": "enemy_little_girl_screaming",
       "name": { "zhCN": "尖叫", "en": "screaming" },
+      "description": { "en": "A shriek that wounds, bleeds, and weakens attacks." },
       "category": "enemy_little_girl",
       "copies": 1,
-      "image": "Art/Cards/placeholder.png",
+      "image": "Art/Cards/小女孩尖叫.png",
       "cost": { "resource": "action_point", "amount": 1 },
       "special": false,
       "effects": [
@@ -37,9 +39,10 @@
     {
       "id": "enemy_little_girl_drag_to_abyss",
       "name": { "zhCN": "拖入深渊", "en": "drag to abyss" },
+      "description": { "en": "Drag the target into the abyss." },
       "category": "enemy_little_girl",
       "copies": 1,
-      "image": "Art/Cards/placeholder.png",
+      "image": "Art/Cards/小女孩拖入深渊.png",
       "cost": { "resource": "action_point", "amount": 2 },
       "special": false,
       "effects": [
@@ -51,9 +54,10 @@
     {
       "id": "enemy_little_girl_feel_my_pain",
       "name": { "zhCN": "感受我的痛苦", "en": "feel my pain" },
+      "description": { "en": "A cruel hit that devastates toughness." },
       "category": "enemy_little_girl",
       "copies": 1,
-      "image": "Art/Cards/placeholder.png",
+      "image": "Art/Cards/小女孩感受我的痛苦.png",
       "cost": { "resource": "action_point", "amount": 2 },
       "special": false,
       "effects": [

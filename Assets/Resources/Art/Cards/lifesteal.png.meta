@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 9186a761b9e6f8a48a32cc0ca54725c9
+guid: 7aeeaedcd6324ea4e8fdae880d597426
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 7123017666264362218
-    second: lifesteal_0
+      213: 4193294705550857686
+    second: lifesteal 1_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -100,7 +100,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: lifesteal_0
+      name: lifesteal 1_0
       rect:
         serializedVersion: 2
         x: 0
@@ -115,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: aece48ef3da0ad260800000000000000
-      internalID: 7123017666264362218
+      spriteID: 6d592e25153913a30800000000000000
+      internalID: 4193294705550857686
       vertices: []
       indices: 
       edges: []
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      lifesteal_0: 7123017666264362218
+      lifesteal 1_0: 4193294705550857686
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

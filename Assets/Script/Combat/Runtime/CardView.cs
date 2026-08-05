@@ -23,7 +23,16 @@ namespace KiKs.Combat
 
         [Header("Card UI")]
         [SerializeField] private TMP_Text cardNameText;
+        [SerializeField] private TMP_Text descriptionText;
+        [SerializeField] private TMP_Text damageText;
+        [SerializeField] private TMP_Text toughnessText;
         [SerializeField] private Image cardArtImage;
+
+        [Header("Card Text Auto Size")]
+        [SerializeField] private float descriptionFontSizeMin = 18f;
+        [SerializeField] private float descriptionFontSizeMax = 32f;
+        [SerializeField] private float statFontSizeMin = 28f;
+        [SerializeField] private float statFontSizeMax = 48f;
 
         private RectTransform _rect;
         private float _lastDragEndTime;
@@ -56,9 +65,9 @@ namespace KiKs.Combat
             _totalShots = GetTotalShots(spec);
             _remainingShots = _totalShots;
 
-            if (cardNameText == null)
-                cardNameText = GetComponentInChildren<TMP_Text>(true);
-            RefreshCardName();
+            ResolveCardTextReferences();
+            ConfigureCardTexts();
+            RefreshCardText();
 
             // 根据卡牌类型设置高光颜色
             SyncCardInteraction();
@@ -73,7 +82,7 @@ namespace KiKs.Combat
         public void SetUpgraded(bool isUpgraded)
         {
             IsUpgraded = isUpgraded;
-            RefreshCardName();
+            RefreshCardText();
             RefreshCardArt();
         }
 
@@ -81,7 +90,7 @@ namespace KiKs.Combat
         public void PlayUpgradeFlip(System.Action onComplete = null)
         {
             IsUpgraded = true;
-            RefreshCardName();
+            RefreshCardText();
 
             _isAnimating = true;
             _rect.DOKill();
@@ -115,15 +124,107 @@ namespace KiKs.Combat
             });
         }
 
+        private void RefreshCardText()
+        {
+            RefreshCardName();
+
+            if (Spec == null)
+                return;
+
+            SetText(descriptionText, Spec.DescriptionEn, false);
+            SetText(damageText, FormatEffectValue("Damage", CardEffectType.Damage), true);
+            SetText(toughnessText, FormatEffectValue("Toughness", CardEffectType.ToughnessDamage), true);
+        }
+
         private void RefreshCardName()
         {
-            if (cardNameText != null && Spec != null)
+            if (cardNameText == null || Spec == null)
+                return;
+
+            var name = Spec.DisplayName + (IsUpgraded ? " (UPGRADED)" : string.Empty);
+            if (_totalShots >= 1)
+                name += $" [{_remainingShots}/{_totalShots}]";
+            cardNameText.text = name;
+        }
+
+        private void ResolveCardTextReferences()
+        {
+            if (cardNameText == null)
+                cardNameText = FindText("CardNameText");
+            if (descriptionText == null)
+                descriptionText = FindText("DescriptionText");
+            if (damageText == null)
+                damageText = FindText("DamageText");
+            if (toughnessText == null)
+                toughnessText = FindText("ToughnessText");
+        }
+
+        private TMP_Text FindText(string objectName)
+        {
+            var directChild = transform.Find(objectName);
+            if (directChild != null)
+                return directChild.GetComponent<TMP_Text>();
+
+            foreach (var text in GetComponentsInChildren<TMP_Text>(true))
+                if (text.name == objectName)
+                    return text;
+
+            return null;
+        }
+
+        private void ConfigureCardTexts()
+        {
+            ConfigureCardText(descriptionText, descriptionFontSizeMin, descriptionFontSizeMax, true);
+            ConfigureCardText(damageText, statFontSizeMin, statFontSizeMax, false);
+            ConfigureCardText(toughnessText, statFontSizeMin, statFontSizeMax, false);
+        }
+
+        private static void ConfigureCardText(TMP_Text text, float minSize, float maxSize, bool allowWrapping)
+        {
+            if (text == null)
+                return;
+
+            text.enableAutoSizing = true;
+            text.fontSizeMin = minSize;
+            text.fontSizeMax = maxSize;
+            text.color = Color.black;
+            text.textWrappingMode = allowWrapping
+                ? TextWrappingModes.Normal
+                : TextWrappingModes.NoWrap;
+            text.overflowMode = TextOverflowModes.Ellipsis;
+            text.raycastTarget = false;
+        }
+
+        private string FormatEffectValue(string label, CardEffectType effectType)
+        {
+            var values = new System.Collections.Generic.List<string>();
+            foreach (var effect in Spec.Effects)
             {
-                var name = Spec.DisplayName + (IsUpgraded ? " (UPGRADED)" : string.Empty);
-                if (_totalShots >= 1)
-                    name += $" [{_remainingShots}/{_totalShots}]";
-                cardNameText.text = name;
+                if (effect.Type != effectType)
+                    continue;
+
+                var amount = effect.Amount.Resolve(IsUpgraded);
+                var hits = Mathf.Max(1, effect.Hits.Resolve(IsUpgraded));
+                if (effect.Unit == ValueUnit.Percent)
+                {
+                    values.Add(hits == 1 ? amount + "%" : amount + "%x" + hits);
+                }
+                else
+                {
+                    values.Add((amount * hits).ToString());
+                }
             }
+
+            return values.Count > 0 ? label + ": " + string.Join("+", values) : label + ": -";
+        }
+
+        private static void SetText(TMP_Text text, string value, bool showFallback)
+        {
+            if (text == null)
+                return;
+
+            text.text = string.IsNullOrWhiteSpace(value) && showFallback ? "-" : value;
+            text.gameObject.SetActive(!string.IsNullOrWhiteSpace(text.text));
         }
 
         /// <summary>消耗一发子弹，返回是否是最后一发</summary>
@@ -214,8 +315,11 @@ namespace KiKs.Combat
             {
                 TryPlayCard();
             }
+            else
+            {
+                WarningToast.Show("Drag cards into the battle area.");
+            }
         }
-
         private void TryPlayCard()
         {
             OnPlayRequested?.Invoke(this);

@@ -30,7 +30,7 @@ namespace KiKs.Combat
         [SerializeField] private GameObject bigEyePortraitOverlay;
 
         [Header("Deck source")]
-        [Tooltip("Used only when no selection screen has filled BattleSession.")]
+        [Tooltip("Used only when no selection screen has filled RuntimeGameRepository.")]
         [SerializeField] private List<string> debugStartingCardIds = new List<string>();
         [SerializeField] private int randomSeed = 1;
         [SerializeField] private bool shuffleAtBattleStart = true;
@@ -59,7 +59,6 @@ namespace KiKs.Combat
         public int HuntRewardCardCount => huntRewardCardCount;
         public IReadOnlyList<string> HuntRewardCardPool => huntRewardCardPool;
         public float HuntResultDelay => huntResultDelay;
-        internal CardJsonRepository CardRepository => cardDatabase != null ? cardDatabase.Repository : null;
         public event Action<CombatEvent> CombatEventRaised;
 
         private IEnumerator Start()
@@ -107,13 +106,13 @@ namespace KiKs.Combat
 
                 ApplyPrimaryEnemyPresentation();
 
-                var usesSelectedDeck = BattleSession.HasSelectedDeck;
+                var usesSelectedDeck = RuntimeGameRepository.HasSelectedDeck;
                 var selectedIds = usesSelectedDeck
-                    ? BattleSession.SelectedCardIds
+                    ? RuntimeGameRepository.SelectedCardIds
                     : debugStartingCardIds;
                 if (selectedIds == null || selectedIds.Count == 0)
                     throw new InvalidOperationException(
-                        "No selected deck exists. Fill BattleSession from the selection screen " +
+                        "No selected deck exists. Fill RuntimeGameRepository from the selection screen " +
                         "or add debug card ids on BattleController.");
 
                 var rules = rulesConfig.CreateRuntimeRules();
@@ -158,12 +157,12 @@ namespace KiKs.Combat
                 huntResultPresenter.Configure(this);
 
                 // Coffee slots
-                if (BattleSession.HasSelectedCoffees)
+                if (RuntimeGameRepository.HasSelectedCoffees)
                 {
-                    var coffees = BattleSession.SelectedCoffeeIds;
+                    var coffees = RuntimeGameRepository.SelectedCoffeeIds;
                     for (int i = 0; i < _coffeeSlots.Length && i < coffees.Count; i++)
                         _coffeeSlots[i] = coffees[i];
-                    BattleSession.ClearSelectedCoffees();
+                    RuntimeGameRepository.ClearSelectedCoffees();
                 }
                 return true;
             }
@@ -391,10 +390,10 @@ namespace KiKs.Combat
 
         private void ApplySelectedDemoEncounter()
         {
-            if (!BattleSession.HasSelectedDemoStage)
+            if (!RuntimeGameRepository.HasSelectedDemoStage)
                 return;
 
-            var stage = BattleSession.SelectedDemoStage;
+            var stage = RuntimeGameRepository.SelectedDemoStage;
             if (!DemoFlowState.IsStageAvailable(stage))
                 throw new InvalidOperationException(
                     $"Selected demo stage {stage} does not match current stage {DemoFlowState.CurrentStage}.");
@@ -473,7 +472,7 @@ namespace KiKs.Combat
                 if (definition.EnemyArchetype != EnemyArchetype.None)
                 {
                     enemyCards = new List<CardInstance>();
-                    foreach (var spec in cardDatabase.Repository.Cards)
+                    foreach (var spec in StaticGameRepository.GetCardsByCategory(definition.EnemyCardCategory))
                     {
                         if (!string.Equals(
                                 spec.Category,
@@ -536,7 +535,7 @@ namespace KiKs.Combat
             var cards = new List<CardInstance>(cardIds.Count);
             for (var i = 0; i < cardIds.Count; i++)
             {
-                var spec = cardDatabase.Repository.GetRequiredCard(cardIds[i]);
+                var spec = StaticGameRepository.GetRequiredCard(cardIds[i]);
                 cards.Add(new CardInstance(instanceIdPrefix + spec.Id + "#" + (i + 1).ToString("D2"), spec));
             }
 

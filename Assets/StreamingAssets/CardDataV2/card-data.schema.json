@@ -7,7 +7,7 @@
   "required": ["schemaVersion", "category", "categoryName", "cards"],
   "properties": {
     "schemaVersion": { "const": 2 },
-    "category": { "enum": ["melee", "ranged", "magic", "defense"] },
+    "category": { "enum": ["melee", "ranged", "magic", "defense", "enemy_dog", "enemy_little_girl", "enemy_big_eye"] },
     "categoryName": { "type": "string", "minLength": 1 },
     "cards": { "type": "array", "items": { "$ref": "#/$defs/card" } }
   },
@@ -30,7 +30,7 @@
     "card": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "name", "category", "copies", "cost", "special", "effects", "source", "notes"],
+      "required": ["id", "name", "description", "category", "copies", "cost", "special", "effects", "source", "notes"],
       "properties": {
         "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
         "name": {
@@ -42,7 +42,15 @@
             "en": { "type": ["string", "null"] }
           }
         },
-        "category": { "enum": ["melee", "ranged", "magic", "defense"] },
+        "description": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["en"],
+          "properties": {
+            "en": { "type": "string", "minLength": 1 }
+          }
+        },
+        "category": { "enum": ["melee", "ranged", "magic", "defense", "enemy_dog", "enemy_little_girl", "enemy_big_eye"] },
         "copies": { "type": "integer", "minimum": 1 },
         "cost": {
           "type": "object",

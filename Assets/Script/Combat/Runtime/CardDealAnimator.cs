@@ -23,7 +23,7 @@ namespace KiKs.Combat
 
         public IReadOnlyList<CardView> HandCards => _handCards;
         public System.Func<CardView, bool> OnCardPlayed;
-        public System.Action<CardView> OnCardShot;
+        public System.Func<CardView, bool> OnCardShot;
 
         public CardView DrawCard(CardSpec spec, string instanceId = null, bool isUpgraded = false)
         {
@@ -152,15 +152,22 @@ namespace KiKs.Combat
 
         private void HandleCardShot(CardView cardView)
         {
-            OnCardShot?.Invoke(cardView);
+            var success = OnCardShot?.Invoke(cardView) ?? true;
+            if (!success)
+            {
+                var index = _handCards.IndexOf(cardView);
+                if (index >= 0)
+                    cardView.ReturnToHand(GetCardAnchoredPosition(index));
+                return;
+            }
+
             var isLastShot = cardView.ConsumeShot();
             if (isLastShot)
             {
-                // 最后一发：PlaySingleShot 已在引擎层弃牌，这里只做视觉弃牌
+                // PlaySingleShot has already discarded the card in the combat engine.
                 DiscardCard(cardView);
             }
         }
-
         /// <summary>结束回合：所有手牌飞到弃牌堆</summary>
         public void DiscardAllCards()
         {
