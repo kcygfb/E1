@@ -6,6 +6,7 @@
     {
       "id": "magic_blizzard",
       "name": { "zhCN": "暴风雪", "en": "blizzard" },
+      "description": { "en": "Consume all bleed stacks for doubled damage." },
       "category": "magic",
       "copies": 2,
       "image": "Art/Cards/blizzard.png",
@@ -20,6 +21,7 @@
     {
       "id": "magic_tornado",
       "name": { "zhCN": "龙卷风", "en": "tornado" },
+      "description": { "en": "Hit repeatedly, chip toughness, and block attacks." },
       "category": "magic",
       "copies": 2,
       "image": "Art/Cards/placeholder.png",
@@ -36,6 +38,7 @@
     {
       "id": "magic_summon",
       "name": { "zhCN": "召唤", "en": "summon" },
+      "description": { "en": "Call a companion for three turns." },
       "category": "magic",
       "copies": 2,
       "image": "Art/Cards/placeholder.png",
@@ -50,6 +53,7 @@
     {
       "id": "magic_lifesteal",
       "name": { "zhCN": "吸血", "en": "lifesteal" },
+      "description": { "en": "Deal damage and heal for the damage dealt." },
       "category": "magic",
       "copies": 2,
       "image": "Art/Cards/lifesteal.png",

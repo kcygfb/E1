@@ -29,28 +29,6 @@ namespace KiKs.Combat
         }
     }
 
-    /// <summary>
-    /// Session-lifetime collection for cards earned from hunting. The project
-    /// has no save-file layer yet, so this mirrors the lifetime of other game state.
-    /// </summary>
-    public static class PlayerCardCollection
-    {
-        private static readonly Dictionary<string, int> Copies = new(StringComparer.Ordinal);
-
-        public static void Add(string cardId, int amount = 1)
-        {
-            if (string.IsNullOrWhiteSpace(cardId) || amount <= 0) return;
-            Copies.TryGetValue(cardId, out int current);
-            Copies[cardId] = current + amount;
-        }
-
-        public static int GetCopies(string cardId)
-        {
-            return !string.IsNullOrWhiteSpace(cardId) && Copies.TryGetValue(cardId, out int count)
-                ? count
-                : 0;
-        }
-    }
 
     /// <summary>
     /// Listens for the rules-layer Victory event, grants the configured rewards
@@ -132,9 +110,10 @@ namespace KiKs.Combat
         {
             if (rewardsGranted || battleController == null) return;
             rewardsGranted = true;
+            RuntimeGameRepository.BeginBattleRewards();
 
             if (battleController.HuntGoldReward > 0)
-                AddInventoryResource("gold", battleController.HuntGoldReward);
+                RuntimeGameRepository.AddGold(battleController.HuntGoldReward);
 
             IReadOnlyList<HuntLootReward> loot = battleController.HuntLootRewards;
             if (loot != null)
@@ -143,20 +122,19 @@ namespace KiKs.Combat
                 {
                     if (item == null || string.IsNullOrWhiteSpace(item.ResourceId) || item.Amount <= 0)
                         continue;
-                    AddInventoryResource(item.ResourceId, item.Amount);
+                    RuntimeGameRepository.AddResource(item.ResourceId, item.Amount);
                 }
             }
 
             SelectRewardCards();
             foreach (CardSpec card in rewardCards)
-                PlayerCardCollection.Add(card.Id);
+                RuntimeGameRepository.AddBattleRewardCard(card.Id);
         }
 
         private void SelectRewardCards()
         {
             rewardCards.Clear();
-            CardJsonRepository repository = battleController.CardRepository;
-            if (repository == null || battleController.HuntRewardCardCount <= 0) return;
+            if (!StaticGameRepository.HasCards || battleController.HuntRewardCardCount <= 0) return;
 
             var candidates = new List<CardSpec>();
             IReadOnlyList<string> configuredPool = battleController.HuntRewardCardPool;
@@ -166,7 +144,7 @@ namespace KiKs.Combat
                 foreach (string cardId in configuredPool)
                 {
                     if (!seen.Add(cardId)) continue;
-                    if (repository.TryGetCard(cardId, out CardSpec card))
+                    if (StaticGameRepository.TryGetCard(cardId, out CardSpec card))
                     {
                         if (!card.IsEnemyCard) candidates.Add(card);
                     }
@@ -178,9 +156,9 @@ namespace KiKs.Combat
             }
             else
             {
-                foreach (var card in repository.Cards)
+                foreach (var card in StaticGameRepository.PlayerCards)
                 {
-                    if (!card.IsEnemyCard) candidates.Add(card);
+                    candidates.Add(card);
                 }
             }
 
@@ -333,7 +311,7 @@ namespace KiKs.Combat
                 yield return null;
             }
 
-            if (!BattleSession.HasSelectedDemoStage)
+            if (!RuntimeGameRepository.HasSelectedDemoStage)
             {
                 Debug.LogWarning(
                     "[DemoFlow] Victory came from a direct/debug battle. Keeping the existing Cafe return flow.",
@@ -342,9 +320,15 @@ namespace KiKs.Combat
                 yield break;
             }
 
-            var completedStage = BattleSession.SelectedDemoStage;
+            var completedStage = RuntimeGameRepository.SelectedDemoStage;
             var advanced = DemoFlowState.CompleteCurrentBattle(completedStage);
-            BattleSession.ClearSelectedDemoStage();
+            RuntimeGameRepository.ClearSelectedDemoStage();
+
+            if (advanced)
+                DailyAreaMapState.CompleteSelectedPoint();
+            else
+                DailyAreaMapState.CancelSelectedPoint();
+
             SyncCafeDayCounter(DemoFlowState.CurrentDay);
 
             if (!advanced)
@@ -494,43 +478,6 @@ namespace KiKs.Combat
                     return candidate;
             }
             return FindFirstObjectByType<Canvas>();
-        }
-
-        private static bool AddInventoryResource(string resourceId, int amount)
-        {
-            if (string.IsNullOrWhiteSpace(resourceId) || amount <= 0) return false;
-            Type inventoryType = Type.GetType("InventorySystem, Assembly-CSharp") ??
-                                 Type.GetType("KiKs.Core.InventorySystem, Assembly-CSharp");
-            if (inventoryType == null)
-            {
-                Debug.LogWarning("[HuntResult] InventorySystem type was not found.");
-                return false;
-            }
-
-            PropertyInfo instanceProperty = inventoryType.GetProperty(
-                "Instance",
-                BindingFlags.Public | BindingFlags.Static);
-            object instance = instanceProperty?.GetValue(null);
-            if (instance == null && typeof(MonoBehaviour).IsAssignableFrom(inventoryType))
-            {
-                var inventoryObject = new GameObject("InventorySystem");
-                instance = inventoryObject.AddComponent(inventoryType);
-            }
-
-            MethodInfo addMethod = inventoryType.GetMethod(
-                "Add",
-                BindingFlags.Public | BindingFlags.Instance,
-                null,
-                new[] { typeof(string), typeof(int) },
-                null);
-            if (instance == null || addMethod == null)
-            {
-                Debug.LogWarning("[HuntResult] InventorySystem.Add was not available.");
-                return false;
-            }
-
-            addMethod.Invoke(instance, new object[] { resourceId, amount });
-            return true;
         }
 
         private static void EndNightAndReturnToCafe()

@@ -6,6 +6,7 @@
     {
       "id": "defense_evade",
       "name": { "zhCN": "闪避", "en": "evade" },
+      "description": { "en": "Negate incoming attacks." },
       "category": "defense",
       "copies": 1,
       "image": "Art/Cards/placeholder.png",
@@ -20,6 +21,7 @@
     {
       "id": "defense_block",
       "name": { "zhCN": "格挡", "en": "block" },
+      "description": { "en": "Gain temporary block against damage." },
       "category": "defense",
       "copies": 2,
       "image": "Art/Cards/block.png",
@@ -34,6 +36,7 @@
     {
       "id": "defense_invisibility",
       "name": { "zhCN": "隐身", "en": "invisibility" },
+      "description": { "en": "Skip the enemy's next turn." },
       "category": "defense",
       "copies": 2,
       "image": "Art/Cards/placeholder.png",
@@ -48,6 +51,7 @@
     {
       "id": "defense_immune",
       "name": { "zhCN": "免疫", "en": "immune" },
+      "description": { "en": "Gain a massive temporary block." },
       "category": "defense",
       "copies": 2,
       "image": "Art/Cards/placeholder.png",
@@ -62,6 +66,7 @@
     {
       "id": "defense_reflect",
       "name": { "zhCN": "反伤", "en": "reflect" },
+      "description": { "en": "Block damage and reflect it back." },
       "category": "defense",
       "copies": 2,
       "image": "Art/Cards/reflect.png",

@@ -19,6 +19,7 @@ namespace KiKs.Combat.Tests
             Assert.That(repository.Cards.Count, Is.EqualTo(54));
             Assert.That(repository.Cards.Sum(card => card.DeckCopies), Is.EqualTo(76));
             Assert.That(repository.Cards.Count(card => card.IsEnemyCard), Is.EqualTo(12));
+            Assert.That(repository.Cards.All(card => !string.IsNullOrWhiteSpace(card.DescriptionEn)), Is.True);
             Assert.That(
                 repository.Cards.Count(card =>
                     card.Category == "enemy_big_eye" && !card.IsSpecial),

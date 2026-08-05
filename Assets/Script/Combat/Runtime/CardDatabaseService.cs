@@ -95,6 +95,7 @@ namespace KiKs.Combat
             try
             {
                 Repository = CardJsonRepository.Load(manifestText, fileName => texts[fileName]);
+                StaticGameRepository.SetCardRepository(Repository);
             }
             catch (Exception exception)
             {
@@ -141,6 +142,7 @@ namespace KiKs.Combat
 
         private void Fail(string message)
         {
+            StaticGameRepository.ClearCardRepository(Repository);
             LastError = message;
             Repository = null;
             _isLoading = false;

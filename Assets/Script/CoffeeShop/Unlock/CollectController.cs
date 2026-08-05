@@ -1,4 +1,5 @@
 using UnityEngine;
+using KiKs.Combat;
 using UnityEngine.UI;
 
 public class CollectController : MonoBehaviour
@@ -11,7 +12,7 @@ public class CollectController : MonoBehaviour
     public Button returnButton;
 
     [Header("Collect Rewards")]
-    [Tooltip("采集获得的资源 resourceId")]
+    [Tooltip("采集获得的资�?resourceId")]
     public string rewardResourceId = "CocoaPowder";
     public int rewardAmount1 = 1;
     public int rewardAmount2 = 1;
@@ -32,13 +33,10 @@ public class CollectController : MonoBehaviour
     private void OnCollect(int index)
     {
         int amount = index == 1 ? rewardAmount1 : rewardAmount2;
-        if (InventorySystem.Instance != null)
-        {
-            InventorySystem.Instance.Add(rewardResourceId, amount);
-            if (index == 1) collected1++;
-            else collected2++;
-            Debug.Log($"[CollectScene] Collected {amount}x {rewardResourceId}");
-        }
+        RuntimeGameRepository.AddResource(rewardResourceId, amount);
+        if (index == 1) collected1++;
+        else collected2++;
+        Debug.Log($"[CollectScene] Collected {amount}x {rewardResourceId}");
     }
 
     private void OnReturn()

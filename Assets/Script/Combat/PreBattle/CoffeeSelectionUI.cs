@@ -1,12 +1,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using KiKs.UI;
 
 namespace KiKs.Combat
 {
     /// <summary>
-    /// PreBattle 咖啡选择 UI：弹窗横向列表 + 底部栏位，类似 CardSelectionUI 的选牌模式。
-    /// 点击咖啡弹窗里的项 → 加入底部栏位（最多 2 杯）。
+    /// PreBattle 咖啡选择 UI：弹窗横向列�?+ 底部栏位，类�?CardSelectionUI 的选牌模式�?
+    /// 点击咖啡弹窗里的�?�?加入底部栏位（最�?2 杯）�?
     /// </summary>
     public class CoffeeSelectionUI : MonoBehaviour
     {
@@ -126,7 +127,7 @@ namespace KiKs.Combat
             }
         }
 
-        /// <summary>预制体实例化后，按 coffeeId 设置图标/名字/描述。</summary>
+        /// <summary>预制体实例化后，�?coffeeId 设置图标/名字/描述�?/summary>
         private void ApplyCoffeeDataToItem(GameObject go, string coffeeId)
         {
             var icon = go.transform.Find("Icon");
@@ -155,7 +156,7 @@ namespace KiKs.Combat
 
         private GameObject CreateDefaultItem(string coffeeId)
         {
-            // 根容器
+            // 根容�?
             var go = new GameObject(coffeeId, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
             go.transform.SetParent(coffeeListContent, false);
             var rt = go.GetComponent<RectTransform>();
@@ -214,7 +215,7 @@ namespace KiKs.Combat
             return effect.Type switch
             {
                 CoffeeEffectType.Heal => $"回复 {effect.Amount} HP ({target})",
-                CoffeeEffectType.Bleed => $"流血 {effect.Amount} 层 ({target})",
+                CoffeeEffectType.Bleed => $"流血 {effect.Amount} �?({target})",
                 CoffeeEffectType.Block => $"护盾 {effect.Amount} ({target})",
                 CoffeeEffectType.Damage => $"伤害 {effect.Amount} ({target})",
                 _ => effect.Type.ToString(),
@@ -233,10 +234,12 @@ namespace KiKs.Combat
             {
                 selectedCoffeeIds.Add(coffeeId);
             }
+            else
+            {
+                WarningToast.Show(string.Format("Coffee limit reached: {0}.", MaxCoffees));
+            }
             RefreshUI();
         }
-
-        // ─── UI 刷新 ───
 
         private void RefreshUI()
         {
@@ -312,11 +315,11 @@ namespace KiKs.Combat
                 : new Color(0.18f, 0.16f, 0.14f, 1);
         }
 
-        /// <summary>由 CardSelectionUI.OnBeginClicked 调用。</summary>
+        /// <summary>�?CardSelectionUI.OnBeginClicked 调用�?/summary>
         public void ConfirmSelection()
         {
             if (selectedCoffeeIds.Count != MaxCoffees) return;
-            BattleSession.SetSelectedCoffees(selectedCoffeeIds);
+            RuntimeGameRepository.SetSelectedCoffees(selectedCoffeeIds);
         }
     }
 }

@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using KiKs.UI;
 
 namespace KiKs.Combat
 {
@@ -110,13 +111,15 @@ namespace KiKs.Combat
             if (cardView == null) return false;
 
             if (!_engineReady || battleController == null || !battleController.IsInitialized)
+            {
+                WarningToast.Show("Battle is not ready.");
                 return false;
+            }
 
             var targetId = string.IsNullOrEmpty(defaultTargetId)
                 ? battleController.State?.FindFirstLivingEnemy()?.Id
                 : defaultTargetId;
 
-            // 如果正在多段射击中拖拽，一次性打完剩余子弹
             CombatResult result;
             if (battleController.IsShooting(cardView.InstanceId))
             {
@@ -124,10 +127,10 @@ namespace KiKs.Combat
                 if (!result.Success)
                 {
                     Debug.LogWarning($"[BattleCardBridge] PlayRemainingShots failed: {result.Message}");
+                    WarningToast.Show(CombatWarningText.FromResult(result));
                     return false;
                 }
 
-                // 播一次特效
                 if (_playerAttackFeedback != null)
                     _playerAttackFeedback.PlayRangedSingleShot(cardView.IsUpgraded);
                 return true;
@@ -137,16 +140,20 @@ namespace KiKs.Combat
             if (!result.Success)
             {
                 Debug.LogWarning($"[BattleCardBridge] PlayCard failed: {result.Message}");
+                WarningToast.Show(CombatWarningText.FromResult(result));
                 return false;
             }
 
             return true;
         }
-
-        private void OnCardShot(CardView cardView)
+        private bool OnCardShot(CardView cardView)
         {
-            if (cardView == null) return;
-            if (!_engineReady || battleController == null || !battleController.IsInitialized) return;
+            if (cardView == null) return false;
+            if (!_engineReady || battleController == null || !battleController.IsInitialized)
+            {
+                WarningToast.Show("Battle is not ready.");
+                return false;
+            }
 
             var targetId = string.IsNullOrEmpty(defaultTargetId)
                 ? battleController.State?.FindFirstLivingEnemy()?.Id
@@ -156,41 +163,72 @@ namespace KiKs.Combat
             if (!result.Success)
             {
                 Debug.LogWarning($"[BattleCardBridge] PlaySingleShot failed: {result.Message}");
+                WarningToast.Show(CombatWarningText.FromResult(result));
+                return false;
+            }
+
+            if (_playerAttackFeedback != null)
+                _playerAttackFeedback.PlayRangedSingleShot(cardView.IsUpgraded);
+            return true;
+        }
+        public void EndTurn()
+        {
+            if (!_engineReady || battleController == null || !battleController.IsInitialized)
+            {
+                WarningToast.Show("Battle is not ready.");
                 return;
             }
 
-            // 播放单发射击特效
-            if (_playerAttackFeedback != null)
-                _playerAttackFeedback.PlayRangedSingleShot(cardView.IsUpgraded);
-        }
+            var state = battleController.State;
+            if (state == null)
+            {
+                WarningToast.Show("Battle state is not ready.");
+                return;
+            }
 
-        /// <summary>结束回合：回收手牌 + 引擎结束回合 + 抽新牌</summary>
-        public void EndTurn()
-        {
-            if (!_engineReady || battleController == null || !battleController.IsInitialized) return;
-
-            // 0. 如果正在多段射击，先取消（强制弃牌剩余子弹）
             var handCards = animator.HandCards;
+            var hasShootingCard = false;
             foreach (var card in handCards)
             {
                 if (card != null && battleController.IsShooting(card.InstanceId))
                 {
-                    var cancelResult = battleController.CancelShooting(card.InstanceId);
-                    Debug.Log("[BattleCardBridge] CancelShooting: " + (cancelResult.Success ? "success" : cancelResult.Message));
+                    hasShootingCard = true;
+                    break;
                 }
             }
 
-            // 1. 回收所有手牌到弃牌堆
-            animator.DiscardAllCards();
+            if (state.Phase != CombatPhase.PlayerInput && !hasShootingCard)
+            {
+                WarningToast.Show("You cannot end the turn now.");
+                return;
+            }
 
-            // 2. 引擎结束玩家回合
+            foreach (var card in handCards)
+            {
+                if (card == null || !battleController.IsShooting(card.InstanceId))
+                    continue;
+
+                var cancelResult = battleController.CancelShooting(card.InstanceId);
+                if (!cancelResult.Success)
+                {
+                    Debug.LogWarning("[BattleCardBridge] CancelShooting failed: " + cancelResult.Message);
+                    WarningToast.Show(CombatWarningText.FromResult(cancelResult));
+                    return;
+                }
+            }
+
             var result = battleController.EndPlayerTurn();
-            Debug.Log("[BattleCardBridge] EndPlayerTurn: " + (result.Success ? "success" : result.Message));
+            if (!result.Success)
+            {
+                Debug.LogWarning("[BattleCardBridge] EndPlayerTurn failed: " + result.Message);
+                WarningToast.Show(CombatWarningText.FromResult(result));
+                return;
+            }
 
-            // 3. 等新回合开始后抽新手牌
+            animator.DiscardAllCards();
+            Debug.Log("[BattleCardBridge] EndPlayerTurn: success");
             StartCoroutine(DrawNewHandNextTurn());
         }
-
         private IEnumerator DrawNewHandNextTurn()
         {
             // 等引擎回到 PlayerInput 阶段

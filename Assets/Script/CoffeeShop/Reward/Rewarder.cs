@@ -1,4 +1,5 @@
 using UnityEngine;
+using KiKs.Combat;
 
 public class Rewarder : MonoBehaviour
 {
@@ -24,7 +25,7 @@ public class Rewarder : MonoBehaviour
         int bonus = allPerfect ? perfectCraftBonus : 0;
         int total = coffeeRevenue + bonus;
 
-        InventorySystem.Instance.Add("gold", total);
+        RuntimeGameRepository.AddGold(total);
         GameEvent.Emit(
             "RevenueAwarded",
             new RevenueAwardedPayload(

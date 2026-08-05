@@ -6,9 +6,10 @@
     {
       "id": "enemy_big_eye_eye_beam",
       "name": { "zhCN": "眼棱", "en": "eye beam" },
+      "description": { "en": "Fire a focused beam of energy." },
       "category": "enemy_big_eye",
       "copies": 1,
-      "image": "Art/Cards/placeholder.png",
+      "image": "Art/Cards/大眼眼棱.png",
       "cost": { "resource": "action_point", "amount": 1 },
       "special": false,
       "effects": [
@@ -20,9 +21,10 @@
     {
       "id": "enemy_big_eye_scratch",
       "name": { "zhCN": "抓挠", "en": "scratch" },
+      "description": { "en": "Two claws that cut health and guard." },
       "category": "enemy_big_eye",
       "copies": 1,
-      "image": "Art/Cards/placeholder.png",
+      "image": "Art/Cards/大眼抓挠.png",
       "cost": { "resource": "action_point", "amount": 1 },
       "special": false,
       "effects": [
@@ -35,9 +37,10 @@
     {
       "id": "enemy_big_eye_mind_control",
       "name": { "zhCN": "精神控制", "en": "mind control" },
+      "description": { "en": "Reduce damage from incoming attacks." },
       "category": "enemy_big_eye",
       "copies": 1,
-      "image": "Art/Cards/placeholder.png",
+      "image": "Art/Cards/大眼精神控制.png",
       "cost": { "resource": "action_point", "amount": 2 },
       "special": false,
       "effects": [
@@ -49,9 +52,10 @@
     {
       "id": "enemy_big_eye_suffocate",
       "name": { "zhCN": "窒息", "en": "suffocate" },
+      "description": { "en": "Crush the target and break their resolve." },
       "category": "enemy_big_eye",
       "copies": 1,
-      "image": "Art/Cards/placeholder.png",
+      "image": "Art/Cards/大眼窒息.png",
       "cost": { "resource": "action_point", "amount": 2 },
       "special": false,
       "effects": [
@@ -64,6 +68,7 @@
     {
       "id": "enemy_big_eye_ten_thousand_hands",
       "name": { "zhCN": "万手缠身", "en": "ten thousand hands" },
+      "description": { "en": "Unleash ten strikes, break guard, and inflict bleed." },
       "category": "enemy_big_eye",
       "copies": 1,
       "image": "Art/Cards/placeholder.png",

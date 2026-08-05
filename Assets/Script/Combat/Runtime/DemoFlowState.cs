@@ -3,14 +3,6 @@ using UnityEngine;
 
 namespace KiKs.Combat
 {
-    public enum DemoStage
-    {
-        DogBattle = 0,
-        LittleGirlBattle = 1,
-        BigEyeBattle = 2,
-        Completed = 3
-    }
-
     /// <summary>
     /// Session-lifetime progress for the three-battle playtest demo.
     /// Static state survives scene changes and is reset when a new play session starts.
@@ -29,8 +21,8 @@ namespace KiKs.Combat
         private static void ResetOnPlaySessionStart()
         {
             _currentBattleIndex = 0;
-            BattleSession.ClearSelectedDemoStage();
-            BattleSession.ClearSelectedDeck();
+            RuntimeGameRepository.ResetRunState();
+            DailyAreaMapState.Reset();
         }
 
         public static bool IsStageAvailable(DemoStage stage)
@@ -60,8 +52,8 @@ namespace KiKs.Combat
         public static void ResetDemoProgress()
         {
             _currentBattleIndex = 0;
-            BattleSession.ClearSelectedDemoStage();
-            BattleSession.ClearSelectedDeck();
+            RuntimeGameRepository.ResetRunState();
+            DailyAreaMapState.Reset();
             Debug.Log("[DemoFlow] Progress reset to day 1 / DogBattle.");
         }
     }

@@ -6,6 +6,7 @@
     {
       "id": "ranged_pistol",
       "name": { "zhCN": "手枪", "en": "pistol" },
+      "description": { "en": "Fire a six-shot pistol burst." },
       "category": "ranged",
       "copies": 2,
       "image": "Art/Cards/pistol.png",
@@ -20,6 +21,7 @@
     {
       "id": "ranged_sniper_rifle",
       "name": { "zhCN": "狙击枪", "en": "sniper rifle" },
+      "description": { "en": "One precise shot with high damage." },
       "category": "ranged",
       "copies": 1,
       "image": "Art/Cards/sniperrifle.png",
@@ -34,9 +36,10 @@
     {
       "id": "ranged_shotgun",
       "name": { "zhCN": "霰弹枪", "en": "shotgun" },
+      "description": { "en": "Two close blasts that hurt and stagger." },
       "category": "ranged",
       "copies": 2,
-      "image": "Art/Cards/placeholder.png",
+      "image": "Art/Cards/shotgun.png",
       "cost": { "resource": "action_point", "amount": 2 },
       "special": false,
       "effects": [
@@ -49,9 +52,10 @@
     {
       "id": "ranged_rocket_launcher",
       "name": { "zhCN": "火箭筒", "en": "rocket launcher" },
+      "description": { "en": "Launch one devastating explosive round." },
       "category": "ranged",
       "copies": 1,
-      "image": "Art/Cards/placeholder.png",
+      "image": "Art/Cards/rocketlauncher.png",
       "cost": { "resource": "action_point", "amount": 3 },
       "special": false,
       "effects": [
@@ -63,6 +67,7 @@
     {
       "id": "ranged_revolver",
       "name": { "zhCN": "左轮手枪", "en": "revolver" },
+      "description": { "en": "Fire three rounds that also chip guard." },
       "category": "ranged",
       "copies": 1,
       "image": "Art/Cards/placeholder.png",
@@ -78,6 +83,7 @@
     {
       "id": "ranged_submachine_gun",
       "name": { "zhCN": "冲锋枪", "en": "submachine gun" },
+      "description": { "en": "Spray eight rapid bullets." },
       "category": "ranged",
       "copies": 1,
       "image": "Art/Cards/placeholder.png",
@@ -92,6 +98,7 @@
     {
       "id": "ranged_flamethrower",
       "name": { "zhCN": "火焰喷射器", "en": "flamethrower" },
+      "description": { "en": "Scorch the target repeatedly and inflict bleed." },
       "category": "ranged",
       "copies": 2,
       "image": "Art/Cards/placeholder.png",
@@ -107,6 +114,7 @@
     {
       "id": "ranged_grenade_launcher",
       "name": { "zhCN": "榴弹发射器", "en": "grenade launcher" },
+      "description": { "en": "Launch two explosive shells." },
       "category": "ranged",
       "copies": 2,
       "image": "Art/Cards/placeholder.png",

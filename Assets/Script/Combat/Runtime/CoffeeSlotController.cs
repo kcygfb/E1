@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using KiKs.UI;
 
 namespace KiKs.Combat
 {
@@ -47,34 +48,39 @@ namespace KiKs.Combat
 
         public void OnEndDrag(PointerEventData eventData)
         {
-            if (battleController == null || !battleController.IsInitialized) return;
+            if (battleController == null || !battleController.IsInitialized)
+            {
+                WarningToast.Show("Battle is not ready.");
+                return;
+            }
 
             var coffeeId = battleController.GetCoffeeSlot(slotIndex);
-            if (string.IsNullOrEmpty(coffeeId)) return;
+            if (string.IsNullOrEmpty(coffeeId))
+            {
+                WarningToast.Show("This coffee has already been used.");
+                return;
+            }
 
-            // 检测释放目标
             string targetId = null;
 
-            // 尝试命中 PlayerPortrait
             var playerPortrait = GameObject.Find("PlayerPortrait");
             if (playerPortrait != null)
             {
                 var playerRT = playerPortrait.GetComponent<RectTransform>();
-                if (RectTransformUtility.RectangleContainsScreenPoint(
+                if (playerRT != null && RectTransformUtility.RectangleContainsScreenPoint(
                         playerRT, eventData.position, eventData.pressEventCamera))
                 {
                     targetId = battleController.State.Player.Id;
                 }
             }
 
-            // 尝试命中 EnemyPortrait
             if (targetId == null)
             {
                 var enemyPortrait = GameObject.Find("EnemyPortrait");
                 if (enemyPortrait != null)
                 {
                     var enemyRT = enemyPortrait.GetComponent<RectTransform>();
-                    if (RectTransformUtility.RectangleContainsScreenPoint(
+                    if (enemyRT != null && RectTransformUtility.RectangleContainsScreenPoint(
                             enemyRT, eventData.position, eventData.pressEventCamera))
                     {
                         var enemy = battleController.State.FindFirstLivingEnemy();
@@ -83,7 +89,11 @@ namespace KiKs.Combat
                 }
             }
 
-            if (targetId == null) return;
+            if (targetId == null)
+            {
+                WarningToast.Show("Drag coffee onto a character portrait.");
+                return;
+            }
 
             var result = battleController.UseCoffee(slotIndex, targetId);
             if (result.Success)
@@ -94,9 +104,9 @@ namespace KiKs.Combat
             else
             {
                 Debug.LogWarning("[CoffeeSlot] Use failed: " + result.Message);
+                WarningToast.Show(CombatWarningText.FromResult(result));
             }
         }
-
         private Sprite GetIconForCoffee(string coffeeId)
         {
             return coffeeId switch

@@ -6,9 +6,10 @@
     {
       "id": "enemy_dog_tearing",
       "name": { "zhCN": "撕咬", "en": "tearing" },
+      "description": { "en": "A tearing bite that harms health and guard." },
       "category": "enemy_dog",
       "copies": 1,
-      "image": "Art/Cards/placeholder.png",
+      "image": "Art/Cards/狗撕咬.png",
       "cost": { "resource": "action_point", "amount": 1 },
       "special": false,
       "effects": [
@@ -21,9 +22,10 @@
     {
       "id": "enemy_dog_scratching",
       "name": { "zhCN": "抓挠", "en": "scratching" },
+      "description": { "en": "Three claws that leave a bleeding wound." },
       "category": "enemy_dog",
       "copies": 1,
-      "image": "Art/Cards/placeholder.png",
+      "image": "Art/Cards/狗抓挠.png",
       "cost": { "resource": "action_point", "amount": 1 },
       "special": false,
       "effects": [
@@ -36,9 +38,10 @@
     {
       "id": "enemy_dog_double_hit",
       "name": { "zhCN": "双重打击", "en": "double hit" },
+      "description": { "en": "Two heavy blows that chip toughness." },
       "category": "enemy_dog",
       "copies": 1,
-      "image": "Art/Cards/placeholder.png",
+      "image": "Art/Cards/狗双重打击.png",
       "cost": { "resource": "action_point", "amount": 2 },
       "special": false,
       "effects": [

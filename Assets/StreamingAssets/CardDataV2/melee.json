@@ -6,6 +6,7 @@
     {
       "id": "melee_long_axe",
       "name": { "zhCN": "长斧", "en": "long axe" },
+      "description": { "en": "A steady chop that wounds and breaks guard." },
       "category": "melee",
       "copies": 1,
       "image": "Art/Cards/placeholder.png",
@@ -21,6 +22,7 @@
     {
       "id": "melee_hatchet",
       "name": { "zhCN": "手斧", "en": "hatchet" },
+      "description": { "en": "A compact strike built to crack guard." },
       "category": "melee",
       "copies": 1,
       "image": "Art/Cards/placeholder.png",
@@ -36,6 +38,7 @@
     {
       "id": "melee_battle_axe",
       "name": { "zhCN": "战斧", "en": "battle axe" },
+      "description": { "en": "A brutal swing that devastates toughness." },
       "category": "melee",
       "copies": 2,
       "image": "Art/Cards/placeholder.png",
@@ -51,6 +54,7 @@
     {
       "id": "melee_francisca",
       "name": { "zhCN": "飞斧", "en": "francisca" },
+      "description": { "en": "Throw three quick axes to chip at guard." },
       "category": "melee",
       "copies": 1,
       "image": "Art/Cards/placeholder.png",
@@ -66,6 +70,7 @@
     {
       "id": "melee_camping_axe",
       "name": { "zhCN": "露营斧", "en": "camping axe" },
+      "description": { "en": "A heavy field swing that crushes toughness." },
       "category": "melee",
       "copies": 2,
       "image": "Art/Cards/placeholder.png",
@@ -81,6 +86,7 @@
     {
       "id": "melee_fire_axe",
       "name": { "zhCN": "消防斧", "en": "fire axe" },
+      "description": { "en": "A sharp rescue-axe blow that breaks guard." },
       "category": "melee",
       "copies": 2,
       "image": "Art/Cards/fireaxe.png",
@@ -96,6 +102,7 @@
     {
       "id": "melee_knight_sword",
       "name": { "zhCN": "骑士剑", "en": "knight sword" },
+      "description": { "en": "A disciplined slash with strong stopping power." },
       "category": "melee",
       "copies": 2,
       "image": "Art/Cards/placeholder.png",
@@ -111,6 +118,7 @@
     {
       "id": "melee_dagger",
       "name": { "zhCN": "匕首", "en": "dagger" },
+      "description": { "en": "A fast close-range stab." },
       "category": "melee",
       "copies": 1,
       "image": "Art/Cards/placeholder.png",
@@ -125,6 +133,7 @@
     {
       "id": "melee_tachi",
       "name": { "zhCN": "太刀", "en": "tachi" },
+      "description": { "en": "A clean cut that opens a deep bleed." },
       "category": "melee",
       "copies": 2,
       "image": "Art/Cards/tachi.png",
@@ -140,6 +149,7 @@
     {
       "id": "melee_scalpel",
       "name": { "zhCN": "手术刀", "en": "scalpel" },
+      "description": { "en": "A precise incision that causes bleeding." },
       "category": "melee",
       "copies": 1,
       "image": "Art/Cards/placeholder.png",
@@ -155,6 +165,7 @@
     {
       "id": "melee_throwing_knife",
       "name": { "zhCN": "飞刀", "en": "throwing knife" },
+      "description": { "en": "Twin throws that cut, pierce guard, and bleed." },
       "category": "melee",
       "copies": 1,
       "image": "Art/Cards/placeholder.png",
@@ -171,6 +182,7 @@
     {
       "id": "melee_greatsword",
       "name": { "zhCN": "巨剑", "en": "greatsword" },
+      "description": { "en": "A massive cleave with crushing impact." },
       "category": "melee",
       "copies": 2,
       "image": "Art/Cards/placeholder.png",
@@ -186,6 +198,7 @@
     {
       "id": "melee_zhanmadao",
       "name": { "zhCN": "斩马刀", "en": "zhanmadao" },
+      "description": { "en": "A sweeping execution cut that causes heavy bleed." },
       "category": "melee",
       "copies": 1,
       "image": "Art/Cards/placeholder.png",
@@ -201,6 +214,7 @@
     {
       "id": "melee_chain",
       "name": { "zhCN": "绊脚锁", "en": "chain" },
+      "description": { "en": "A snapping strike that shatters guard." },
       "category": "melee",
       "copies": 1,
       "image": "Art/Cards/placeholder.png",
@@ -216,6 +230,7 @@
     {
       "id": "melee_morning_star_flail",
       "name": { "zhCN": "流星锤", "en": "morning star flail" },
+      "description": { "en": "A crushing blow that wrecks toughness." },
       "category": "melee",
       "copies": 2,
       "image": "Art/Cards/placeholder.png",
@@ -231,6 +246,7 @@
     {
       "id": "melee_kusarigama",
       "name": { "zhCN": "锁镰", "en": "kusarigama" },
+      "description": { "en": "A poisoned slash that tears through guard." },
       "category": "melee",
       "copies": 2,
       "image": "Art/Cards/placeholder.png",
@@ -247,6 +263,7 @@
     {
       "id": "melee_rope_dart",
       "name": { "zhCN": "绳镖", "en": "rope dart" },
+      "description": { "en": "A dart combo that poisons with every strike." },
       "category": "melee",
       "copies": 2,
       "image": "Art/Cards/placeholder.png",
@@ -262,6 +279,7 @@
     {
       "id": "melee_urumi",
       "name": { "zhCN": "软剑", "en": "urumi" },
+      "description": { "en": "A flexible blade that inflicts bleed and poison." },
       "category": "melee",
       "copies": 2,
       "image": "Art/Cards/placeholder.png",
@@ -278,6 +296,7 @@
     {
       "id": "melee_chain_mace",
       "name": { "zhCN": "链锤", "en": "chain mace" },
+      "description": { "en": "A weighted strike that chips through guard." },
       "category": "melee",
       "copies": 1,
       "image": "Art/Cards/placeholder.png",
@@ -293,6 +312,7 @@
     {
       "id": "melee_crossbow",
       "name": { "zhCN": "弩", "en": "crossbow" },
+      "description": { "en": "A three-bolt volley that cuts and weakens guard." },
       "category": "melee",
       "copies": 1,
       "image": "Art/Cards/placeholder.png",
@@ -309,6 +329,7 @@
     {
       "id": "melee_kunai",
       "name": { "zhCN": "苦无", "en": "kunai" },
+      "description": { "en": "A rapid knife volley that bleeds and poisons." },
       "category": "melee",
       "copies": 1,
       "image": "Art/Cards/placeholder.png",
@@ -325,6 +346,7 @@
     {
       "id": "melee_smoke_bomb",
       "name": { "zhCN": "烟雾弹", "en": "smoke bomb" },
+      "description": { "en": "Vanish from one attack and draw cards." },
       "category": "melee",
       "copies": 1,
       "image": "Art/Cards/placeholder.png",
@@ -340,6 +362,7 @@
     {
       "id": "melee_poison_sting",
       "name": { "zhCN": "毒针", "en": "poison sting" },
+      "description": { "en": "Inflict bleed and poison without direct damage." },
       "category": "melee",
       "copies": 1,
       "image": "Art/Cards/placeholder.png",
@@ -355,6 +378,7 @@
     {
       "id": "melee_hidden_blade",
       "name": { "zhCN": "袖剑", "en": "hidden blade" },
+      "description": { "en": "A concealed cut that bleeds and chips guard." },
       "category": "melee",
       "copies": 1,
       "image": "Art/Cards/placeholder.png",
@@ -370,6 +394,7 @@
     {
       "id": "melee_poisonous_gas",
       "name": { "zhCN": "毒粉", "en": "poisonous gas" },
+      "description": { "en": "Poison the target and draw more options." },
       "category": "melee",
       "copies": 1,
       "image": "Art/Cards/placeholder.png",
