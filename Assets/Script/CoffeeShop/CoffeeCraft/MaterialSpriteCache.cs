@@ -1,12 +1,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary>材料图标缓存。在场景中挂此组件，Inspector 里分配 10 种材料的 Sprite，
-/// 运行时填充 MaterialDefinition 的静态缓存供 TrayGridUI / MaterialPalette 使用。
-/// sprites = 拖拽/列表用的单个图标；spritesAll = 格子里显示的整图。</summary>
+/// <summary>材料图标缓存。在场景中挂此组件，Inspector 里分配材料 Sprite，
+/// 运行时填充 MaterialDefinition 的静态缓存供 UI 使用。</summary>
 public class MaterialSpriteCache : MonoBehaviour
 {
-    [Header("Icons (拖拽/列表用)")]
+    [Header("Icons - 原始材料")]
     [SerializeField] private Sprite claw;
     [SerializeField] private Sprite wolfHair;
     [SerializeField] private Sprite eyeball;
@@ -18,7 +17,7 @@ public class MaterialSpriteCache : MonoBehaviour
     [SerializeField] private Sprite sugar;
     [SerializeField] private Sprite water;
 
-    [Header("Full Art (格子里显示用 *ALL)")]
+    [Header("Full Art - 格子里显示用")]
     [SerializeField] private Sprite clawAll;
     [SerializeField] private Sprite wolfHairAll;
     [SerializeField] private Sprite eyeballAll;
@@ -29,6 +28,13 @@ public class MaterialSpriteCache : MonoBehaviour
     [SerializeField] private Sprite milkAll;
     [SerializeField] private Sprite sugarAll;
     [SerializeField] private Sprite waterAll;
+
+    [Header("Icons - 机器产出材料")]
+    [SerializeField] private Sprite groundCoffee;
+    [SerializeField] private Sprite espresso;
+    [SerializeField] private Sprite steamedMilk;
+    [SerializeField] private Sprite pourOverCoffee;
+    [SerializeField] private Sprite unknown;
 
     private void Awake()
     {
@@ -44,8 +50,15 @@ public class MaterialSpriteCache : MonoBehaviour
             { "Milk", milk },
             { "Sugar", sugar },
             { "Water", water },
+            // 产出材料
+            { "GroundCoffee", groundCoffee },
+            { "Espresso", espresso },
+            { "SteamedMilk", steamedMilk },
+            { "PourOverCoffee", pourOverCoffee },
+            { "Unknown", unknown },
         };
 
+        // 产出材料没有 ALL 版本，复用 icon
         var allArt = new Dictionary<string, Sprite>
         {
             { "claw", clawAll },
@@ -58,6 +71,12 @@ public class MaterialSpriteCache : MonoBehaviour
             { "Milk", milkAll },
             { "Sugar", sugarAll },
             { "Water", waterAll },
+            // 产出材料复用 icon 作为 ALL
+            { "GroundCoffee", groundCoffee },
+            { "Espresso", espresso },
+            { "SteamedMilk", steamedMilk },
+            { "PourOverCoffee", pourOverCoffee },
+            { "Unknown", unknown },
         };
 
         MaterialDefinition.SetSpriteCache(icons);

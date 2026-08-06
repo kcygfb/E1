@@ -2,122 +2,37 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class StepDef
-{
-    public string id;
-    public string displayName;
-    public string resourceId;
-    public int amount;
-    public string qteType;
-    public bool useMaterialSelector;
-}
-
+/// <summary>制作总控。开始/重置/提交/内容物匹配。</summary>
 public class CraftController : MonoBehaviour
 {
-    [Header("UI Groups")]
+    [Header("UI")]
     [SerializeField] private GameObject coffeeMakeGroup;
-
-    [Header("Step Buttons")]
-    [SerializeField] private Button grindBtn;
-    [SerializeField] private Button pourOverBtn;
-    [SerializeField] private Button extractBtn;
-    [SerializeField] private Button steamMilkBtn;
-    [SerializeField] private Button addWaterBtn;
-    [SerializeField] private Button addMilkBtn;
-    [SerializeField] private Button addSugarBtn;
-
-    [Header("Deliver")]
     [SerializeField] private Button deliverBtn;
-
-    [Header("Reset")]
     [SerializeField] private Button resetBtn;
-
     [Header("System")]
     [SerializeField] private OrderSystem orderSystem;
-
-    [Header("QTE Controllers")]
-    [SerializeField] private RhythmTapQTE rhythmTapQTE;
-    [SerializeField] private HoldReleaseQTE holdReleaseQTE;
-    [SerializeField] private RapidTapQTE rapidTapQTE;
-    [SerializeField] private RotationStopQTE rotationStopQTE;
-    [SerializeField] private DropStopQTE dropStopQTE;
-
-    [Header("Portafilter")]
-    [SerializeField] private Portafilter portafilter;
     [SerializeField] private Transform cupSpawnParent;
-    [SerializeField] private GameObject cupPrefab; // Cup 预制体
 
-    private readonly List<string> _performedSteps = new();
-    private readonly List<string> _usedMaterials = new();
-    private QTEScoreResult _qteScore;
-    private bool _waitingForQTE;
+    public bool IsProcessing { get; set; }
+    public bool HasActiveCup { get; set; }
+
     private bool _isCrafting;
-    private string _currentStepId;
-    private string _currentMaterialId;
-    private Portafilter _grindPortafilter;
-    private CupContainer _currentCup;
-
-    private readonly Dictionary<string, Button> _stepButtons = new();
-    private readonly Dictionary<string, StepDef> _stepDefs = new();
 
     private void Awake()
     {
-        _stepButtons["Grind"] = grindBtn;
-        _stepButtons["PourOver"] = pourOverBtn;
-        _stepButtons["Extract"] = extractBtn;
-        _stepButtons["SteamMilk"] = steamMilkBtn;
-        _stepButtons["AddWater"] = addWaterBtn;
-        _stepButtons["AddMilk"] = addMilkBtn;
-        _stepButtons["AddSugar"] = addSugarBtn;
-
-        _stepDefs["Grind"] = new StepDef { id = "Grind", displayName = "研磨", resourceId = "", amount = 0, qteType = "RotationStop" };
-        _stepDefs["PourOver"] = new StepDef { id = "PourOver", displayName = "手冲注水", resourceId = "", amount = 0, qteType = "HoldRelease" };
-        _stepDefs["Extract"] = new StepDef { id = "Extract", displayName = "萃取浓缩", resourceId = "", amount = 0, qteType = "DropStop" };
-        _stepDefs["SteamMilk"] = new StepDef { id = "SteamMilk", displayName = "打发奶泡", resourceId = "", amount = 0, qteType = "RhythmTap" };
-        _stepDefs["AddWater"] = new StepDef { id = "AddWater", displayName = "加水稀释", resourceId = "", amount = 0, qteType = "" };
-        _stepDefs["AddMilk"] = new StepDef { id = "AddMilk", displayName = "加入牛奶", resourceId = "", amount = 0, qteType = "" };
-        _stepDefs["AddSugar"] = new StepDef { id = "AddSugar", displayName = "加入糖浆", resourceId = "", amount = 0, qteType = "" };
-
-        // Deliver and Reset still use onClick
-        if (deliverBtn != null)
-            deliverBtn.onClick.AddListener(OnDeliverClicked);
-
-        if (resetBtn != null)
-            resetBtn.onClick.AddListener(ResetCraft);
-
-        if (rhythmTapQTE != null)
-            rhythmTapQTE.OnQTEDone.AddListener(r => OnQTEComplete(r));
-        if (holdReleaseQTE != null)
-            holdReleaseQTE.OnQTEDone.AddListener(r => OnQTEComplete(r));
-        if (rapidTapQTE != null)
-            rapidTapQTE.OnQTEDone.AddListener(r => OnQTEComplete(r));
-        if (rotationStopQTE != null)
-            rotationStopQTE.OnQTEDone.AddListener(r => OnQTEComplete(r));
-        if (dropStopQTE != null)
-            dropStopQTE.OnQTEDone.AddListener(r => OnQTEComplete(r));
+        if (deliverBtn != null) deliverBtn.onClick.AddListener(() => OnDeliverBtnClicked());
+        if (resetBtn != null) resetBtn.onClick.AddListener(ResetCraft);
     }
 
-    private void OnEnable()
-    {
-        GameEvent.On("OrderCreated", OnOrderCreated);
-    }
+    private void OnEnable() => GameEvent.On("OrderCreated", OnOrderCreated);
+    private void OnDisable() => GameEvent.Off("OrderCreated", OnOrderCreated);
 
-    private void OnDisable()
-    {
-        GameEvent.Off("OrderCreated", OnOrderCreated);
-    }
+    private void OnOrderCreated(object payload) => StartCraft();
 
-    private void OnOrderCreated(object payload)
+    private void StartCraft()
     {
-        StartFreeCraft();
-    }
-
-    private void StartFreeCraft()
-    {
-        _performedSteps.Clear();
-        _usedMaterials.Clear();
-        _qteScore = new QTEScoreResult();
-        _waitingForQTE = false;
+        IsProcessing = false;
+        HasActiveCup = false;
         _isCrafting = true;
 
         var coffeeList = GameObject.Find("CoffeeList");
@@ -125,319 +40,198 @@ public class CraftController : MonoBehaviour
 
         if (coffeeMakeGroup != null) coffeeMakeGroup.SetActive(true);
         if (TrayGridUI.Instance != null) TrayGridUI.Instance.ShowDrag();
-        GameEvent.Emit("CraftViewChanged", "CoffeeMake");
         UpdateButtonStates();
-
-        Debug.Log("[CraftController] Free craft started");
     }
 
-    /// <summary>从杯子堆拖出一个杯子 → 在工作区生成 CupContainer。</summary>
-    public void OnCupDraggedOut(Vector2 screenPosition, Sprite cupSprite)
+    // === 机器回调 ===
+    public void OnMachineComplete(string machineId)
     {
-        if (!_isCrafting) return;
+        // 不再记录步骤序列，只用于互斥锁
+        UpdateButtonStates();
+    }
+
+    // === 杯子相关 ===
+    public void OnCupDraggedOut(Vector2 screenPosition, Sprite cupSprite, GameObject cupPrefab)
+    {
+        if (!_isCrafting || HasActiveCup) return;
         if (cupSpawnParent == null) cupSpawnParent = transform;
 
-        // 从预制体实例化，没有预制体则代码生成 fallback
         GameObject cupGO;
         if (cupPrefab != null)
+        {
             cupGO = Instantiate(cupPrefab, cupSpawnParent, false);
+            var rt = cupGO.GetComponent<RectTransform>();
+            if (rt != null) rt.sizeDelta = new Vector2(80 * 1.7f, 80 * 1.7f);
+        }
         else
+        {
             cupGO = new GameObject("Cup", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(CupContainer));
-
-        cupGO.transform.SetParent(cupSpawnParent, false);
+            cupGO.transform.SetParent(cupSpawnParent, false);
+            var img = cupGO.GetComponent<Image>();
+            if (cupSprite != null) { img.sprite = cupSprite; img.preserveAspect = true; img.color = Color.white; }
+            img.raycastTarget = true;
+            var rt = cupGO.GetComponent<RectTransform>();
+            rt.sizeDelta = new Vector2(80 * 1.7f, 80 * 1.7f);
+        }
         cupGO.name = "Cup";
-
-        // 设置位置（用世界坐标避免 parent 偏移问题）
         cupGO.transform.position = screenPosition;
 
-        // 设置 sprite
-        var img = cupGO.GetComponent<Image>();
-        if (img != null)
-        {
-            if (cupSprite != null) img.sprite = cupSprite;
-            img.preserveAspect = true;
-            img.color = Color.white;
-            img.raycastTarget = true;
-        }
-
-        // 确保有 CupContainer 组件
-        if (cupGO.GetComponent<CupContainer>() == null)
-            cupGO.AddComponent<CupContainer>();
-
-        Debug.Log("[CraftController] Cup spawned in workspace");
+        HasActiveCup = true;
     }
 
-    /// <summary>手柄拖到步骤按钮（Grind/Extract 等）。</summary>
-    public void OnPortafilterDroppedOnStep(string stepId, Portafilter pf)
-    {
-        if (!_isCrafting || _waitingForQTE) return;
-        if (!_stepDefs.TryGetValue(stepId, out var def)) return;
-
-        if (stepId == "Grind" && pf.CurrentState == Portafilter.State.HasMaterial)
-        {
-            _currentStepId = stepId;
-            _currentMaterialId = pf.MaterialId;
-            _grindPortafilter = pf;
-            StartStepQTE(def);
-        }
-        else if (stepId == "Extract" && pf.CurrentState == Portafilter.State.Ground)
-        {
-            _currentStepId = stepId;
-            _currentMaterialId = pf.MaterialId;
-            _grindPortafilter = pf;
-            StartStepQTE(def);
-        }
-        else
-        {
-            Debug.Log($"[CraftController] Portafilter state {pf.CurrentState} not valid for step {stepId}");
-        }
-    }
-
-    /// <summary>手柄停靠到 PortafilterDock（磨豆机/萃取机停留区）。</summary>
-    public void OnPortafilterDocked(string stepId, Portafilter pf)
-    {
-        if (!_isCrafting) return;
-        if (!_stepDefs.TryGetValue(stepId, out var def)) return;
-
-        // 检查手柄状态是否匹配该机器
-        bool valid = (stepId == "Grind" && pf.CurrentState == Portafilter.State.HasMaterial)
-                  || (stepId == "Extract" && pf.CurrentState == Portafilter.State.Ground);
-
-        if (valid)
-        {
-            Debug.Log($"[CraftController] Portafilter docked at {stepId}, state={pf.CurrentState} — ready to activate");
-            // TODO: 这里可以触发机器的"检测词条 on"视觉反馈
-            // 例如：高亮机器、显示"就绪"文字等
-        }
-        else
-        {
-            Debug.Log($"[CraftController] Portafilter docked at {stepId} but state={pf.CurrentState} not valid");
-        }
-    }
-
-    /// <summary>杯子拖到步骤按钮（Extract/PourOver 等）。</summary>
-    public void OnCupDroppedOnStep(string stepId, CupContainer cup)
-    {
-        if (!_isCrafting || _waitingForQTE) return;
-        if (!_stepDefs.TryGetValue(stepId, out var def)) return;
-
-        _currentStepId = stepId;
-        _currentMaterialId = cup.Contents.Count > 0 ? cup.Contents[0] : "";
-        _currentCup = cup;
-        StartStepQTE(def);
-    }
-
-    /// <summary>杯子拖到 Deliver 按钮 = 提交。</summary>
     public void OnCupDelivered(CupContainer cup)
     {
         if (!_isCrafting) return;
-        OnDeliverClicked();
+        Deliver(cup);
     }
 
-    /// <summary>拖拽材料到步骤按钮时调用。</summary>
-    public void OnMaterialDroppedOnStep(string stepId, string materialId)
+    public void OnCupReturned(CupContainer cup)
     {
-        if (!_isCrafting || _waitingForQTE) return;
-        if (!_stepDefs.TryGetValue(stepId, out var def)) return;
-        if (string.IsNullOrEmpty(materialId)) return;
-
-        // Spend 1 from inventory
-        var inv = InventorySystem.Instance;
-        if (inv == null || !inv.Spend(materialId, 1))
-        {
-            Debug.Log($"[CraftController] Not enough {materialId} for step {stepId}.");
-            return;
-        }
-
-        // Refresh tray UI counts
-        if (TrayGridUI.Instance != null) TrayGridUI.Instance.RefreshCounts();
-
-        _currentStepId = stepId;
-        _currentMaterialId = materialId;
-
-        Debug.Log($"[CraftController] Material '{materialId}' dropped on step '{stepId}'");
-
-        StartStepQTE(def);
+        if (cup == null) return;
+        cup.ClearContents();
+        Destroy(cup.gameObject);
+        HasActiveCup = false;
     }
 
-    private void StartStepQTE(StepDef def)
+    private void OnDeliverBtnClicked()
     {
-        if (!string.IsNullOrEmpty(def.qteType))
+        if (!_isCrafting || !HasActiveCup) return;
+        var cup = FindFirstObjectByType<CupContainer>();
+        if (cup != null) Deliver(cup);
+    }
+
+    // === 判定 ===
+    private void Deliver(CupContainer cup)
+    {
+        // 优先用合并后的咖啡ID，否则尝试匹配
+        string coffeeId = cup.MergedCoffeeId;
+        CoffeeDataJson matched = null;
+
+        if (!string.IsNullOrEmpty(coffeeId))
         {
-            _waitingForQTE = true;
-            LaunchQTE(def.qteType, def.id, def.displayName);
+            CoffeeDataLoader.Instance?.TryGetCoffee(coffeeId, out matched);
         }
         else
         {
-            CompleteStep(def.id);
-        }
-    }
-
-    private void LaunchQTE(string qteType, string stepId, string displayName)
-    {
-        QTEBase qte = qteType switch
-        {
-            "RhythmTap" => rhythmTapQTE,
-            "HoldRelease" => holdReleaseQTE,
-            "RapidTap" => rapidTapQTE,
-            "RotationStop" => rotationStopQTE,
-            "DropStop" => dropStopQTE,
-            _ => null
-        };
-
-        if (qte == null)
-        {
-            Debug.LogWarning($"[CraftController] QTE type '{qteType}' not assigned, skipping.");
-            CompleteStep(stepId);
-            return;
+            matched = MatchCoffeeByContents(cup.Contents);
         }
 
-        Debug.Log($"[CraftController] Launch QTE: {qteType} for step {stepId} ({displayName})");
-        qte.Show(stepId, displayName);
-    }
-
-    private void OnQTEComplete(QTERating rating)
-    {
-        if (!_waitingForQTE) return;
-
-        if (_qteScore != null && !string.IsNullOrEmpty(_currentStepId))
-            _qteScore.Record(_currentStepId, rating);
-        Debug.Log($"[CraftController] QTE result for {_currentStepId}: {rating}");
-
-        _waitingForQTE = false;
-
-        // 研磨完成 → 手柄变 Ground
-        if (_currentStepId == "Grind" && _grindPortafilter != null)
-        {
-            _grindPortafilter.SetGround();
-            _grindPortafilter = null;
-        }
-
-        // 萃取完成 → 手柄清空
-        if (_currentStepId == "Extract" && _grindPortafilter != null)
-        {
-            _grindPortafilter.Clear();
-            _grindPortafilter = null;
-        }
-
-        CompleteStep(_currentStepId);
-    }
-
-    private void CompleteStep(string stepId)
-    {
-        _performedSteps.Add(stepId);
-        _usedMaterials.Add(_currentMaterialId ?? "");
-        Debug.Log($"[CraftController] Step done: {stepId} (total: {_performedSteps.Count})");
-        _currentMaterialId = null;
-        UpdateButtonStates();
-    }
-
-    /// <summary>检测已执行步骤的尾部是否匹配某个咖啡配方（允许前面有多余步骤）</summary>
-    private CoffeeDataJson MatchCoffeeBySteps()
-    {
-        if (CoffeeDataLoader.Instance == null || !CoffeeDataLoader.Instance.IsLoaded) return null;
-
-        foreach (var coffee in CoffeeDataLoader.Instance.GetAllCoffees())
-        {
-            if (coffee.steps == null || coffee.steps.Count == 0) continue;
-            if (coffee.steps.Count > _performedSteps.Count) continue;
-
-            int offset = _performedSteps.Count - coffee.steps.Count;
-            bool match = true;
-            for (int i = 0; i < coffee.steps.Count; i++)
-            {
-                if (coffee.steps[i].id != _performedSteps[offset + i])
-                {
-                    match = false;
-                    break;
-                }
-            }
-
-            if (match) return coffee;
-        }
-
-        return null;
-    }
-
-    private void UpdateButtonStates()
-    {
-        foreach (var kvp in _stepButtons)
-        {
-            if (kvp.Value != null)
-                kvp.Value.interactable = _isCrafting && !_waitingForQTE;
-        }
-
-        if (deliverBtn != null)
-            deliverBtn.interactable = _isCrafting && _performedSteps.Count > 0 && !_waitingForQTE;
-
-        if (resetBtn != null)
-            resetBtn.interactable = _isCrafting && _performedSteps.Count > 0 && !_waitingForQTE;
-    }
-
-    private void OnDeliverClicked()
-    {
-        var matched = MatchCoffeeBySteps();
         if (matched == null)
         {
-            Debug.Log("[CraftController] No coffee recipe matches the performed steps.");
+            Debug.Log("[CraftController] 没有匹配的咖啡配方");
             return;
         }
 
-        Debug.Log($"[CraftController] Crafted: {matched.coffeeName}");
-
-        if (orderSystem == null)
-            orderSystem = FindFirstObjectByType<OrderSystem>();
-
+        if (orderSystem == null) orderSystem = FindFirstObjectByType<OrderSystem>();
         if (orderSystem != null && orderSystem.HasActiveOrder)
         {
             var order = orderSystem.ActiveOrder;
-            if (order != null && _qteScore != null)
-                order.QTEScore = _qteScore;
-
             if (order != null && order.CoffeeId == matched.coffeeId)
             {
                 var coffeeData = ScriptableObject.CreateInstance<CoffeeData>();
                 coffeeData.ApplyJson(matched);
                 orderSystem.TryServeCoffee(coffeeData);
-                Debug.Log($"[CraftController] Correct coffee! Served {matched.coffeeName}");
                 EndCraft();
             }
             else
             {
-                Debug.Log($"[CraftController] Wrong coffee! Made {matched.coffeeName} but order wants {(order != null ? order.CoffeeName : "?")}");
+                Debug.Log($"[CraftController] 做了 {matched.coffeeId}，订单要 {order?.CoffeeId}");
                 ResetCraft();
             }
         }
     }
 
-    private void ResetCraft()
+    private CoffeeDataJson MatchCoffeeByContents(List<string> contents)
     {
-        _performedSteps.Clear();
-        _usedMaterials.Clear();
-        _qteScore = new QTEScoreResult();
-        _waitingForQTE = false;
-        _currentStepId = null;
-        _currentMaterialId = null;
-        _grindPortafilter = null;
-        _currentCup = null;
+        if (CoffeeDataLoader.Instance == null || !CoffeeDataLoader.Instance.IsLoaded) return null;
+
+        var cupSet = new HashSet<string>(contents);
+        foreach (var coffee in CoffeeDataLoader.Instance.GetAllCoffees())
+        {
+            if (coffee.requiredMaterials == null || coffee.requiredMaterials.Count == 0) continue;
+            var recipeSet = new HashSet<string>(coffee.requiredMaterials);
+            if (cupSet.SetEquals(recipeSet)) return coffee;
+        }
+        return null;
+    }
+
+    // === 状态管理 ===
+    private UnityEngine.UI.Image _deliverImage;
+
+    private void Update()
+    {
+        if (deliverBtn == null) return;
+        // 有杯子时不透明可点，没杯子时半透明不可点
+        bool hasCup = _isCrafting && HasActiveCup;
+        deliverBtn.interactable = hasCup;
+        if (_deliverImage == null)
+            _deliverImage = deliverBtn.GetComponent<UnityEngine.UI.Image>();
+        if (_deliverImage != null)
+            _deliverImage.color = hasCup ? new Color(1, 1, 1, 1) : new Color(1, 1, 1, 0.4f);
+    }
+
+    private void UpdateButtonStates()
+    {
+        if (resetBtn != null)
+            resetBtn.interactable = _isCrafting;
+    }
+
+    public void ResetCraft()
+    {
+        IsProcessing = false;
+        HasActiveCup = false;
+
+        // 销毁杯子（含其子 MaterialIcon）
+        foreach (var cup in FindObjectsByType<CupContainer>(FindObjectsSortMode.None))
+        {
+            cup.ClearContents();
+            Destroy(cup.gameObject);
+        }
+
+        // 重置机器（清空 MaterialSlot 内的 icon）
+        foreach (var machine in FindObjectsByType<CraftMachine>(FindObjectsSortMode.None))
+            machine.ResetMachine();
+
+        // 清空水壶
+        foreach (var kettle in FindObjectsByType<Kettle>(FindObjectsSortMode.None))
+        {
+            kettle.Contents.Clear();
+            foreach (var icon in kettle.Icons)
+                if (icon != null) Destroy(icon.gameObject);
+            kettle.Icons.Clear();
+        }
+
+        // 清空 KettleSlot 引用
+        foreach (var slot in FindObjectsByType<KettleSlot>(FindObjectsSortMode.None))
+            slot.Clear();
+
+        // 销毁所有游离的 MaterialIcon（不在 Slot/Cup/Kettle/Canvas层级里的）
+        var canvas = GameObject.Find("Canvas");
+        foreach (var icon in FindObjectsByType<MaterialIcon>(FindObjectsSortMode.None))
+        {
+            if (icon == null) continue;
+            var parent = icon.transform.parent;
+            // 如果父级是 Canvas（拖出后游离）或 null，销毁
+            if (parent == null || (canvas != null && parent == canvas.transform))
+                Destroy(icon.gameObject);
+        }
+
         UpdateButtonStates();
-        Debug.Log("[CraftController] Craft reset — try again");
     }
 
     private void EndCraft()
     {
         _isCrafting = false;
-        _performedSteps.Clear();
-        _usedMaterials.Clear();
-        _qteScore = null;
-        _waitingForQTE = false;
-        _currentStepId = null;
-        _currentMaterialId = null;
-        _grindPortafilter = null;
-        _currentCup = null;
+        IsProcessing = false;
+        HasActiveCup = false;
+
+        foreach (var cup in FindObjectsByType<CupContainer>(FindObjectsSortMode.None))
+        {
+            cup.ClearContents();
+            Destroy(cup.gameObject);
+        }
 
         if (coffeeMakeGroup != null) coffeeMakeGroup.SetActive(false);
         if (TrayGridUI.Instance != null) TrayGridUI.Instance.HideAll();
-        GameEvent.Emit("CraftViewChanged", "Menu");
     }
 }

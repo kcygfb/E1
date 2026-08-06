@@ -46,6 +46,10 @@ public class CoffeeData : ScriptableObject
 
     public CraftStep[] Steps => steps;
 
+    [Header("Required Materials (v3: content set matching)")]
+    [SerializeField] private string[] requiredMaterials = Array.Empty<string>();
+    public string[] RequiredMaterials => requiredMaterials;
+
     /// <summary>运行时从 CoffeeDataLoader 加载 JSON 数据覆盖此 SO 实例</summary>
     public void ApplyJson(CoffeeDataJson json)
     {
@@ -84,6 +88,13 @@ public class CoffeeData : ScriptableObject
                     qteType = json.steps[i].qteType ?? ""
                 };
             }
+        }
+
+        if (json.requiredMaterials != null)
+        {
+            requiredMaterials = new string[json.requiredMaterials.Count];
+            for (int i = 0; i < json.requiredMaterials.Count; i++)
+                requiredMaterials[i] = json.requiredMaterials[i];
         }
     }
 }

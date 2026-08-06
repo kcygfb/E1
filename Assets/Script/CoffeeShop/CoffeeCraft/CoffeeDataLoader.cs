@@ -31,6 +31,7 @@ public class CoffeeDataJson
     public int unlockAmount;
     public List<RecipeEntryJson> recipe = new();
     public List<CraftStepJson> steps = new();
+    public List<string> requiredMaterials = new();
 }
 
 [DisallowMultipleComponent]
