@@ -28,12 +28,22 @@ namespace KiKs.Combat
         [SerializeField] private TMP_Text toughnessText;
         [SerializeField] private Image cardArtImage;
 
+        [Header("Upgrade VFX")]
+        [SerializeField] private GameObject upgradeFireEffect;
+        [SerializeField] private string upgradeFireObjectName = "Fire";
+        [SerializeField] private Vector2 upgradeFireSizeMultiplier = new(1.18f, 1.08f);
+        [SerializeField] private Vector2 upgradeFirePadding = new(26f, 4f);
+        [SerializeField] private Vector2 upgradeFireOffset = Vector2.zero;
+
         [Header("Card Text Auto Size")]
         [SerializeField] private float descriptionFontSizeMin = 18f;
         [SerializeField] private float descriptionFontSizeMax = 32f;
         [SerializeField] private float statFontSizeMin = 28f;
         [SerializeField] private float statFontSizeMax = 48f;
 
+        private RectTransform _upgradeFireRect;
+        private Image _upgradeFireImage;
+        private SpriteRenderer _upgradeFireSpriteRenderer;
         private RectTransform _rect;
         private float _lastDragEndTime;
         private bool _isAnimating;
@@ -43,6 +53,7 @@ namespace KiKs.Combat
 
         private int _totalShots;
         private int _remainingShots;
+        private const string DefaultUpgradeFireObjectName = "Fire";
 
         /// <summary>是否是多段射击的枪械卡</summary>
         public bool IsMultiShot => _totalShots > 1 && _remainingShots > 0;
@@ -50,6 +61,19 @@ namespace KiKs.Combat
         private void Awake()
         {
             _rect = GetComponent<RectTransform>();
+            ResolveUpgradeFireReference();
+            SyncUpgradeFire();
+        }
+
+        private void OnEnable()
+        {
+            SyncUpgradeFire();
+        }
+
+        private void LateUpdate()
+        {
+            RefreshUpgradeFireLayout();
+            SyncUpgradeFireFrame();
         }
 
         public void Setup(CardSpec spec, string instanceId = null)
@@ -77,6 +101,7 @@ namespace KiKs.Combat
 
             EnsureCardArt();
             RefreshCardArt();
+            SyncUpgradeFire();
         }
 
         public void SetUpgraded(bool isUpgraded)
@@ -84,6 +109,7 @@ namespace KiKs.Combat
             IsUpgraded = isUpgraded;
             RefreshCardText();
             RefreshCardArt();
+            SyncUpgradeFire();
         }
 
         /// <summary>强化翻转动画：Y轴翻转，中途切换为强化精灵图</summary>
@@ -91,6 +117,7 @@ namespace KiKs.Combat
         {
             IsUpgraded = true;
             RefreshCardText();
+            SyncUpgradeFire();
 
             _isAnimating = true;
             _rect.DOKill();
@@ -170,6 +197,122 @@ namespace KiKs.Combat
                     return text;
 
             return null;
+        }
+
+        private void ResolveUpgradeFireReference()
+        {
+            if (upgradeFireEffect == null)
+            {
+                var objectName = string.IsNullOrWhiteSpace(upgradeFireObjectName)
+                    ? DefaultUpgradeFireObjectName
+                    : upgradeFireObjectName;
+
+                var directChild = transform.Find(objectName);
+                if (directChild != null)
+                {
+                    upgradeFireEffect = directChild.gameObject;
+                }
+                else
+                {
+                    foreach (var child in GetComponentsInChildren<Transform>(true))
+                    {
+                        if (child == transform || child.name != objectName)
+                            continue;
+
+                        upgradeFireEffect = child.gameObject;
+                        break;
+                    }
+                }
+            }
+
+            EnsureUpgradeFireCanRenderInCanvas();
+        }
+
+        private void EnsureUpgradeFireCanRenderInCanvas()
+        {
+            if (upgradeFireEffect == null)
+                return;
+
+            var fireTransform = upgradeFireEffect.transform;
+            if (fireTransform.parent != transform)
+                fireTransform.SetParent(transform, false);
+            fireTransform.SetAsFirstSibling();
+
+            _upgradeFireRect = upgradeFireEffect.GetComponent<RectTransform>();
+            if (_upgradeFireRect != null)
+                ConfigureUpgradeFireRect(_upgradeFireRect);
+
+            if (_upgradeFireSpriteRenderer == null)
+                _upgradeFireSpriteRenderer = upgradeFireEffect.GetComponent<SpriteRenderer>();
+            if (_upgradeFireSpriteRenderer != null)
+                _upgradeFireSpriteRenderer.enabled = false;
+
+            if (_upgradeFireImage == null)
+                _upgradeFireImage = upgradeFireEffect.GetComponent<Image>();
+            if (_upgradeFireImage == null)
+                _upgradeFireImage = upgradeFireEffect.AddComponent<Image>();
+
+            _upgradeFireImage.raycastTarget = false;
+            _upgradeFireImage.preserveAspect = false;
+            _upgradeFireImage.maskable = false;
+            SyncUpgradeFireFrame();
+        }
+
+
+        private void RefreshUpgradeFireLayout()
+        {
+            if (_upgradeFireRect != null)
+                ConfigureUpgradeFireRect(_upgradeFireRect);
+        }
+
+        private void ConfigureUpgradeFireRect(RectTransform fireRect)
+        {
+            var cardSize = _rect != null ? _rect.rect.size : Vector2.zero;
+            if (cardSize.x <= 0f || cardSize.y <= 0f)
+            {
+                var sizeDelta = _rect != null ? _rect.sizeDelta : Vector2.zero;
+                cardSize = new Vector2(Mathf.Abs(sizeDelta.x), Mathf.Abs(sizeDelta.y));
+            }
+            if (cardSize.x <= 0f || cardSize.y <= 0f)
+                cardSize = new Vector2(160f, 30f);
+
+            fireRect.anchorMin = new Vector2(0.5f, 0.5f);
+            fireRect.anchorMax = new Vector2(0.5f, 0.5f);
+            fireRect.pivot = new Vector2(0.5f, 0.5f);
+            fireRect.anchoredPosition = upgradeFireOffset;
+            fireRect.sizeDelta = new Vector2(
+                Mathf.Max(1f, cardSize.x * Mathf.Max(0.01f, upgradeFireSizeMultiplier.x) + upgradeFirePadding.x),
+                Mathf.Max(1f, cardSize.y * Mathf.Max(0.01f, upgradeFireSizeMultiplier.y) + upgradeFirePadding.y));
+            fireRect.localScale = Vector3.one;
+            fireRect.localRotation = Quaternion.identity;
+        }
+        private void SyncUpgradeFireFrame()
+        {
+            if (_upgradeFireImage == null || _upgradeFireSpriteRenderer == null)
+                return;
+
+            var sprite = _upgradeFireSpriteRenderer.sprite;
+            if (_upgradeFireImage.sprite != sprite)
+                _upgradeFireImage.sprite = sprite;
+            if (_upgradeFireImage.color != _upgradeFireSpriteRenderer.color)
+                _upgradeFireImage.color = _upgradeFireSpriteRenderer.color;
+        }
+
+        private void SyncUpgradeFire()
+        {
+            ResolveUpgradeFireReference();
+            if (upgradeFireEffect == null)
+                return;
+
+            var shouldShow = IsUpgraded && Spec != null && Spec.CanUpgrade;
+            if (upgradeFireEffect.activeSelf != shouldShow)
+                upgradeFireEffect.SetActive(shouldShow);
+
+            if (shouldShow)
+            {
+                RefreshUpgradeFireLayout();
+                SyncUpgradeFireFrame();
+            }
         }
 
         private void ConfigureCardTexts()

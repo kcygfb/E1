@@ -379,7 +379,7 @@ namespace KiKs.Combat
                 if (openCardSelectionAfterMapClick && cardPopup != null)
                     cardPopup.SetActive(true);
 
-                WarningToast.Show(string.Format("Select {0} cards first.", RequiredDeckSize));
+                WarningToast.Show(string.Format("You still need to select all {0} cards.", RequiredDeckSize));
                 RefreshSelectionUI();
                 return;
             }
