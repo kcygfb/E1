@@ -29,6 +29,7 @@ public class CoffeeDataJson
     public bool locked;
     public string unlockItemId;
     public int unlockAmount;
+    public TutorialHintJson tutorial;
     public List<RecipeEntryJson> recipe = new();
     public List<CraftStepJson> steps = new();
 }

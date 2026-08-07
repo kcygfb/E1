@@ -1,0 +1,252 @@
+{
+  "schemaVersion": 2,
+  "category": "heavy",
+  "categoryName": "重型武器",
+  "cards": [
+    {
+      "id": "heavy_labrys",
+      "name": {
+        "zhCN": "战斧",
+        "en": "labrys"
+      },
+      "description": {
+        "en": "Strike with a heavy axe."
+      },
+      "category": "heavy",
+      "copies": 1,
+      "cost": {
+        "resource": "action_point",
+        "amount": 1
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "damage",
+          "amount": {
+            "base": 4,
+            "upgraded": 6
+          }
+        },
+        {
+          "type": "toughness_damage",
+          "amount": {
+            "base": 8,
+            "upgraded": 12
+          }
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "卡牌全套小数值",
+        "row": 13
+      },
+      "notes": [],
+      "image": "Art/Cards/labrys.png"
+    },
+    {
+      "id": "heavy_pickax",
+      "name": {
+        "zhCN": "矿镐",
+        "en": "pickax"
+      },
+      "description": {
+        "en": "Drive a pick into the target's toughness."
+      },
+      "category": "heavy",
+      "copies": 1,
+      "cost": {
+        "resource": "action_point",
+        "amount": 1
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "damage",
+          "amount": {
+            "base": 2,
+            "upgraded": 3
+          }
+        },
+        {
+          "type": "toughness_damage",
+          "amount": {
+            "base": 12,
+            "upgraded": 21
+          }
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "卡牌全套小数值",
+        "row": 14
+      },
+      "notes": [],
+      "image": "Art/Cards/pickax.png"
+    },
+    {
+      "id": "heavy_maul",
+      "name": {
+        "zhCN": "大锤",
+        "en": "maul"
+      },
+      "description": {
+        "en": "Crush health and toughness with a massive hammer."
+      },
+      "category": "heavy",
+      "copies": 1,
+      "cost": {
+        "resource": "action_point",
+        "amount": 2
+      },
+      "special": true,
+      "effects": [
+        {
+          "type": "damage",
+          "amount": {
+            "base": 8,
+            "upgraded": 10
+          }
+        },
+        {
+          "type": "toughness_damage",
+          "amount": {
+            "base": 25,
+            "upgraded": 50
+          }
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "卡牌全套小数值",
+        "row": 15
+      },
+      "notes": [],
+      "image": "Art/Cards/maul.png"
+    },
+    {
+      "id": "heavy_chain_flail",
+      "name": {
+        "zhCN": "多头伽",
+        "en": "chain flail"
+      },
+      "description": {
+        "en": "Strike three times with a chain flail."
+      },
+      "category": "heavy",
+      "copies": 1,
+      "cost": {
+        "resource": "action_point",
+        "amount": 1
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "damage",
+          "amount": {
+            "base": 1,
+            "upgraded": 1
+          },
+          "hits": {
+            "base": 3,
+            "upgraded": 3
+          }
+        },
+        {
+          "type": "toughness_damage",
+          "amount": {
+            "base": 3,
+            "upgraded": 6
+          }
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "卡牌全套小数值",
+        "row": 16
+      },
+      "notes": [],
+      "image": "Art/Cards/chainflail.png"
+    },
+    {
+      "id": "heavy_greatsword",
+      "name": {
+        "zhCN": "巨剑",
+        "en": "greatsword"
+      },
+      "description": {
+        "en": "Deliver a heavy greatsword blow."
+      },
+      "category": "heavy",
+      "copies": 1,
+      "cost": {
+        "resource": "action_point",
+        "amount": 2
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "damage",
+          "amount": {
+            "base": 5,
+            "upgraded": 5
+          }
+        },
+        {
+          "type": "toughness_damage",
+          "amount": {
+            "base": 22,
+            "upgraded": 45
+          }
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "卡牌全套小数值",
+        "row": 17
+      },
+      "notes": [],
+      "image": "Art/Cards/greatsword.png"
+    },
+    {
+      "id": "heavy_fire_axe",
+      "name": {
+        "zhCN": "消防斧",
+        "en": "fire axe"
+      },
+      "description": {
+        "en": "A sharp fire-axe strike."
+      },
+      "category": "heavy",
+      "copies": 1,
+      "cost": {
+        "resource": "action_point",
+        "amount": 1
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "damage",
+          "amount": {
+            "base": 3,
+            "upgraded": 6
+          }
+        },
+        {
+          "type": "toughness_damage",
+          "amount": {
+            "base": 10,
+            "upgraded": 15
+          }
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "卡牌全套小数值",
+        "row": 18,
+        "upgradeRow": 18
+      },
+      "notes": [],
+      "image": "Art/Cards/fireaxe.png"
+    }
+  ]
+}

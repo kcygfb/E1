@@ -1,19 +1,35 @@
 using UnityEngine;
 using UnityEngine.UI;
+using KiKs.UI;
 
 /// <summary>材料列表面板。MorningCheck 阶段显示 7 种可选材料，可拖拽到九宫格。
 /// 面板尺寸/位置由 Inspector 决定，物品用 GridLayoutGroup 自动排版成网格。</summary>
 [RequireComponent(typeof(RectTransform))]
 public class MaterialPalette : MonoBehaviour
 {
+    [Header("Tutorial")]
+    [SerializeField] private TutorialController tutorialController;
+
     [SerializeField] private Vector2 cellSize = new Vector2(90f, 90f);
     [SerializeField] private Vector2 spacing = new Vector2(10f, 10f);
     [SerializeField] private float labelHeight = 24f;
     [SerializeField] private int constraintCount = 5;
 
+    private void Awake()
+    {
+        if (tutorialController == null)
+            tutorialController = FindFirstObjectByType<TutorialController>();
+    }
+
     private void Start()
     {
         BuildItems();
+    }
+
+    private void OnDestroy()
+    {
+        if (tutorialController != null)
+            tutorialController.UnregisterJsonCallouts(this);
     }
 
     private void BuildItems()
@@ -95,6 +111,10 @@ public class MaterialPalette : MonoBehaviour
 
             var paletteItem = itemGO.AddComponent<MaterialPaletteItem>();
             paletteItem.Setup(mat.id);
+
+            var tutorial = ResourceDataLoader.Instance?.GetResource(mat.id)?.tutorial;
+            if (tutorialController != null)
+                tutorialController.RegisterJsonCallout(this, itemGO.GetComponent<RectTransform>(), tutorial);
         }
 
         LayoutRebuilder.ForceRebuildLayoutImmediate(transform as RectTransform);

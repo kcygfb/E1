@@ -41,6 +41,9 @@ namespace KiKs.Combat
         [SerializeField] private Transform cardGridContent;
         [SerializeField] private GameObject cardItemPrefab;
 
+        [Header("Tutorial")]
+        [SerializeField] private TutorialController tutorialController;
+
         [Header("Deck Slots")]
         [SerializeField] private Transform deckGridContent;
         [SerializeField] private Text deckLabel;
@@ -59,6 +62,9 @@ namespace KiKs.Combat
 
         private IEnumerator Start()
         {
+            if (tutorialController == null)
+                tutorialController = FindFirstObjectByType<TutorialController>();
+
             DisableDecorativeOverlayRaycasts();
             BindDemoMapPoints();
             DailyAreaMapState.EnsureGenerated();
@@ -94,6 +100,8 @@ namespace KiKs.Combat
             foreach (var pair in demoMapPointListeners)
                 if (pair.Key != null) pair.Key.onClick.RemoveListener(pair.Value);
             demoMapPointListeners.Clear();
+            if (tutorialController != null)
+                tutorialController.UnregisterJsonCallouts(this);
         }
 
         private IEnumerator LoadCardsAndPopulate()
@@ -126,6 +134,9 @@ namespace KiKs.Combat
         {
             if (cardGridContent == null) return;
 
+            if (tutorialController != null)
+                tutorialController.UnregisterJsonCallouts(this);
+
             for (int i = cardGridContent.childCount - 1; i >= 0; i--)
                 Destroy(cardGridContent.GetChild(i).gameObject);
 
@@ -156,6 +167,9 @@ namespace KiKs.Combat
 
             var cardId = card.Id;
             btn.onClick.AddListener(() => OnCardClicked(cardId));
+
+            if (tutorialController != null)
+                tutorialController.RegisterJsonCallout(this, item.GetComponent<RectTransform>(), card.Tutorial);
         }
 
         private void AddCardArtChild(GameObject parent, CardSpec card)
@@ -686,6 +700,10 @@ namespace KiKs.Combat
             return category switch
             {
                 "melee" => new Color(0.6f, 0.35f, 0.2f, 1),
+                "heavy" => new Color(0.65f, 0.3f, 0.18f, 1),
+                "bleed" => new Color(0.65f, 0.18f, 0.2f, 1),
+                "flexible" => new Color(0.3f, 0.55f, 0.25f, 1),
+                "hidden" => new Color(0.28f, 0.28f, 0.38f, 1),
                 "ranged" => new Color(0.2f, 0.4f, 0.6f, 1),
                 "defense" => new Color(0.2f, 0.5f, 0.5f, 1),
                 "magic" => new Color(0.5f, 0.2f, 0.5f, 1),

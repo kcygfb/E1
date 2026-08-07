@@ -3,8 +3,8 @@ guid: f0fee2b6046a2b5459ad94a0e617b026
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 2447449640077287245
-    second: fireaxe 1_0
+      213: -4564566167306137858
+    second: fireaxe_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -100,7 +100,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: fireaxe 1_0
+      name: fireaxe_0
       rect:
         serializedVersion: 2
         x: 0
@@ -115,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: d4fd6720b7617f120800000000000000
-      internalID: 2447449640077287245
+      spriteID: efe83f3414767a0c0800000000000000
+      internalID: -4564566167306137858
       vertices: []
       indices: 
       edges: []
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      fireaxe 1_0: 2447449640077287245
+      fireaxe_0: -4564566167306137858
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

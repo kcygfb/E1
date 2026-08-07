@@ -6,12 +6,15 @@ namespace KiKs.Combat
     public sealed class ManaState
     {
         public int Current { get; private set; }
-        public int PerTurn { get; }
+        public int BasePerTurn { get; }
+        public int BonusPerTurn { get; private set; }
+        public int PerTurn { get; private set; }
 
         public ManaState(int manaPerTurn)
         {
             if (manaPerTurn <= 0) throw new ArgumentOutOfRangeException(nameof(manaPerTurn));
 
+            BasePerTurn = manaPerTurn;
             PerTurn = manaPerTurn;
         }
 
@@ -27,8 +30,11 @@ namespace KiKs.Combat
             return true;
         }
 
-        internal void BeginTurn()
+        internal void BeginTurn(int bonusPerTurn = 0)
         {
+            if (bonusPerTurn < 0) throw new ArgumentOutOfRangeException(nameof(bonusPerTurn));
+            BonusPerTurn = bonusPerTurn;
+            PerTurn = BasePerTurn + bonusPerTurn;
             Current = PerTurn;
         }
     }

@@ -1,0 +1,182 @@
+{
+  "schemaVersion": 2,
+  "category": "enemy_butcher",
+  "categoryName": "屠夫",
+  "cards": [
+    {
+      "id": "enemy_butcher_road_sign_slam",
+      "name": {
+        "zhCN": "路牌重击",
+        "en": "road sign slam"
+      },
+      "description": {
+        "en": "Slam the target with a road sign."
+      },
+      "category": "enemy_butcher",
+      "copies": 1,
+      "cost": {
+        "resource": "action_point",
+        "amount": 2
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "damage",
+          "amount": 10,
+          "hits": 1
+        },
+        {
+          "type": "toughness_damage",
+          "amount": 15
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "怪",
+        "row": 49
+      },
+      "notes": []
+    },
+    {
+      "id": "enemy_butcher_chain_bind",
+      "name": {
+        "zhCN": "锁链缠绕",
+        "en": "chain bind"
+      },
+      "description": {
+        "en": "Bind the target and prepare attack-nullify charges."
+      },
+      "category": "enemy_butcher",
+      "copies": 1,
+      "cost": {
+        "resource": "action_point",
+        "amount": 1
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "damage",
+          "amount": 3
+        },
+        {
+          "type": "nullify_attacks",
+          "amount": 3
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "怪",
+        "row": 50
+      },
+      "notes": []
+    },
+    {
+      "id": "enemy_butcher_magic_burn",
+      "name": {
+        "zhCN": "魔法灼烧",
+        "en": "magic burn"
+      },
+      "description": {
+        "en": "Burn the target with three magical attacks."
+      },
+      "category": "enemy_butcher",
+      "copies": 1,
+      "cost": {
+        "resource": "action_point",
+        "amount": 2
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "damage",
+          "amount": 5,
+          "hits": 3
+        },
+        {
+          "type": "toughness_damage",
+          "amount": 8
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "怪",
+        "row": 51
+      },
+      "notes": []
+    },
+    {
+      "id": "enemy_butcher_slap",
+      "name": {
+        "zhCN": "拍击",
+        "en": "slap"
+      },
+      "description": {
+        "en": "Strike with a brutal slap."
+      },
+      "category": "enemy_butcher",
+      "copies": 1,
+      "cost": {
+        "resource": "action_point",
+        "amount": 1
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "damage",
+          "amount": 7,
+          "hits": 1
+        },
+        {
+          "type": "toughness_damage",
+          "amount": 5
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "怪",
+        "row": 52
+      },
+      "notes": []
+    },
+    {
+      "id": "enemy_butcher_road_sign_jungle",
+      "name": {
+        "zhCN": "路牌丛林",
+        "en": "road sign jungle"
+      },
+      "description": {
+        "en": "Ultimate road-sign assault."
+      },
+      "category": "enemy_butcher",
+      "copies": 1,
+      "cost": {
+        "resource": "action_point",
+        "amount": 3
+      },
+      "special": true,
+      "effects": [
+        {
+          "type": "damage",
+          "amount": 12,
+          "hits": 3
+        },
+        {
+          "type": "toughness_damage",
+          "amount": 6
+        },
+        {
+          "type": "nullify_attacks",
+          "amount": 5
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "怪",
+        "row": 53
+      },
+      "notes": [
+        "Ultimate: required on turn 12."
+      ]
+    }
+  ]
+}

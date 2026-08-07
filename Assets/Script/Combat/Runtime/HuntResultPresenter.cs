@@ -40,6 +40,7 @@ namespace KiKs.Combat
         private readonly List<CardSpec> rewardCards = new();
 
         private BattleController battleController;
+        [SerializeField] private TutorialController tutorialController;
         [SerializeField] private GameObject popupRoot;
         [SerializeField] private CanvasGroup rootCanvasGroup;
         [SerializeField] private CanvasGroup panelCanvasGroup;
@@ -64,6 +65,9 @@ namespace KiKs.Combat
 
         public void Configure(BattleController controller)
         {
+            if (tutorialController == null)
+                tutorialController = FindFirstObjectByType<TutorialController>();
+
             if (battleController != null)
                 battleController.CombatEventRaised -= OnCombatEvent;
 
@@ -78,6 +82,8 @@ namespace KiKs.Combat
         {
             if (battleController != null)
                 battleController.CombatEventRaised -= OnCombatEvent;
+            if (tutorialController != null)
+                tutorialController.UnregisterJsonCallouts(this);
         }
 
         private void OnCombatEvent(CombatEvent combatEvent)
@@ -202,6 +208,9 @@ namespace KiKs.Combat
 
         private void BuildCardRewards()
         {
+            if (tutorialController != null)
+                tutorialController.UnregisterJsonCallouts(this);
+
             for (int i = cardArea.childCount - 1; i >= 0; i--)
                 Destroy(cardArea.GetChild(i).gameObject);
 
@@ -252,6 +261,9 @@ namespace KiKs.Combat
                 TextAlignmentOptions.Center,
                 new Vector2(0.04f, 0.02f),
                 new Vector2(0.96f, 0.17f));
+
+            if (tutorialController != null)
+                tutorialController.RegisterJsonCallout(this, slot, card.Tutorial);
         }
 
         private IEnumerator ShowRoutine()

@@ -68,6 +68,13 @@ namespace KiKs.Combat
                     case EnemyArchetype.Dog: return "enemy_dog";
                     case EnemyArchetype.LittleGirl: return "enemy_little_girl";
                     case EnemyArchetype.BigEye: return "enemy_big_eye";
+                    case EnemyArchetype.Ghost: return "enemy_ghost";
+                    case EnemyArchetype.Cat: return "enemy_cat";
+                    case EnemyArchetype.Nightmare: return "enemy_nightmare";
+                    case EnemyArchetype.Fatty: return "enemy_fatty";
+                    case EnemyArchetype.Thief: return "enemy_thief";
+                    case EnemyArchetype.Merchant: return "enemy_merchant";
+                    case EnemyArchetype.Butcher: return "enemy_butcher";
                     default: return string.Empty;
                 }
             }

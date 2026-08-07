@@ -2,7 +2,8 @@
   "name": "KiKs.Combat.Tests",
   "rootNamespace": "KiKs.Combat.Tests",
   "references": [
-    "KiKs.Combat"
+    "KiKs.Combat",
+    "KiKs.UI"
   ],
   "includePlatforms": [
     "Editor"

@@ -12,6 +12,7 @@ namespace KiKs.Combat
         public string DisplayNameZhCn { get; }
         public string DisplayNameEn { get; }
         public string DescriptionEn { get; }
+        public TutorialHintJson Tutorial { get; }
         public string DisplayName =>
             !string.IsNullOrWhiteSpace(DisplayNameEn) ? DisplayNameEn :
             !string.IsNullOrWhiteSpace(DisplayNameZhCn) ? DisplayNameZhCn : Id;
@@ -39,7 +40,8 @@ namespace KiKs.Combat
             IEnumerable<CardEffectSpec> effects,
             int deckCopies = 1,
             string imagePath = "",
-            string descriptionEn = "")
+            string descriptionEn = "",
+            TutorialHintJson tutorial = null)
         {
             if (string.IsNullOrWhiteSpace(id)) throw new ArgumentException("Card id is required.", nameof(id));
             if (string.IsNullOrWhiteSpace(category)) throw new ArgumentException("Card category is required.", nameof(category));
@@ -55,6 +57,7 @@ namespace KiKs.Combat
             DisplayNameZhCn = displayNameZhCn ?? string.Empty;
             DisplayNameEn = displayNameEn ?? string.Empty;
             DescriptionEn = descriptionEn ?? string.Empty;
+            Tutorial = tutorial;
             Category = category;
             DeckCopies = deckCopies;
             CostResource = costResource;

@@ -1,0 +1,162 @@
+{
+  "schemaVersion": 2,
+  "category": "enemy_thief",
+  "categoryName": "窃贼",
+  "cards": [
+    {
+      "id": "enemy_thief_smoke_bomb",
+      "name": {
+        "zhCN": "烟雾弹",
+        "en": "smoke bomb"
+      },
+      "description": {
+        "en": "Poison, evade attacks, reduce damage, and gain block."
+      },
+      "category": "enemy_thief",
+      "copies": 1,
+      "cost": {
+        "resource": "action_point",
+        "amount": 1
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "poison",
+          "amount": 2
+        },
+        {
+          "type": "nullify_attacks",
+          "amount": 2
+        },
+        {
+          "type": "damage_reduction",
+          "amount": 2
+        },
+        {
+          "type": "block_damage",
+          "amount": 2
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "怪",
+        "row": 36
+      },
+      "notes": []
+    },
+    {
+      "id": "enemy_thief_laser_cutting",
+      "name": {
+        "zhCN": "激光切割",
+        "en": "laser cutting"
+      },
+      "description": {
+        "en": "Cut with a laser."
+      },
+      "category": "enemy_thief",
+      "copies": 1,
+      "cost": {
+        "resource": "action_point",
+        "amount": 1
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "damage",
+          "amount": 6,
+          "hits": 1
+        },
+        {
+          "type": "toughness_damage",
+          "amount": 6
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "怪",
+        "row": 37
+      },
+      "notes": []
+    },
+    {
+      "id": "enemy_thief_diversion",
+      "name": {
+        "zhCN": "声东击西",
+        "en": "diversion"
+      },
+      "description": {
+        "en": "Attack twice, gain block, and recover health."
+      },
+      "category": "enemy_thief",
+      "copies": 1,
+      "cost": {
+        "resource": "action_point",
+        "amount": 2
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "damage",
+          "amount": 8,
+          "hits": 2
+        },
+        {
+          "type": "toughness_damage",
+          "amount": 4
+        },
+        {
+          "type": "block_damage",
+          "amount": 10
+        },
+        {
+          "type": "heal",
+          "amount": 10
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "怪",
+        "row": 38
+      },
+      "notes": []
+    },
+    {
+      "id": "enemy_thief_reckless_smash",
+      "name": {
+        "zhCN": "破罐子破摔",
+        "en": "reckless smash"
+      },
+      "description": {
+        "en": "Smash recklessly and inflict bleed."
+      },
+      "category": "enemy_thief",
+      "copies": 1,
+      "cost": {
+        "resource": "action_point",
+        "amount": 2
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "damage",
+          "amount": 15,
+          "hits": 1
+        },
+        {
+          "type": "toughness_damage",
+          "amount": 10
+        },
+        {
+          "type": "bleed",
+          "amount": 2
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "怪",
+        "row": 39
+      },
+      "notes": []
+    }
+  ]
+}

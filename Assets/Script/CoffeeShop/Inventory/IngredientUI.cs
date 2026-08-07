@@ -1,10 +1,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using KiKs.UI;
 
 [DisallowMultipleComponent]
 public class IngredientUI : MonoBehaviour
 {
+    [Header("Tutorial")]
+    [SerializeField] private TutorialController tutorialController;
+
     [SerializeField] private string[] excludedResourceIds = { "gold" };
     [SerializeField] private float itemHeight = 32f;
     [SerializeField] private int fontSize = 18;
@@ -23,6 +27,9 @@ public class IngredientUI : MonoBehaviour
 
     private void Start()
     {
+        if (tutorialController == null)
+            tutorialController = FindFirstObjectByType<TutorialController>();
+
         SetupUI();
         RefreshData();
         Populate();
@@ -35,6 +42,9 @@ public class IngredientUI : MonoBehaviour
     {
         if (InventorySystem.Instance != null)
             InventorySystem.Instance.OnResourceChanged -= HandleResourceChanged;
+
+        if (tutorialController != null)
+            tutorialController.UnregisterJsonCallouts(this);
     }
 
     private void LateUpdate()
@@ -133,6 +143,11 @@ public class IngredientUI : MonoBehaviour
 
     private void Populate()
     {
+        if (_contentRT == null) return;
+
+        if (tutorialController != null)
+            tutorialController.UnregisterJsonCallouts(this);
+
         for (int i = _contentRT.childCount - 1; i >= 0; i--)
             Destroy(_contentRT.GetChild(i).gameObject);
         _itemTexts.Clear();
@@ -157,6 +172,12 @@ public class IngredientUI : MonoBehaviour
 
                 UpdateItemText(text, i);
                 _itemTexts.Add(text);
+
+                if (c == 1 && tutorialController != null)
+                {
+                    var tutorial = ResourceDataLoader.Instance?.GetResource(_resources[i].id)?.tutorial;
+                    tutorialController.RegisterJsonCallout(this, rt, tutorial);
+                }
             }
         }
 

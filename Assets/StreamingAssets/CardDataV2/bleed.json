@@ -1,0 +1,263 @@
+{
+  "schemaVersion": 2,
+  "category": "bleed",
+  "categoryName": "流血武器",
+  "cards": [
+    {
+      "id": "bleed_dagger",
+      "name": {
+        "zhCN": "匕首",
+        "en": "dagger"
+      },
+      "description": {
+        "en": "Stab and inflict bleed."
+      },
+      "category": "bleed",
+      "copies": 1,
+      "cost": {
+        "resource": "action_point",
+        "amount": 1
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "damage",
+          "amount": {
+            "base": 6,
+            "upgraded": 9
+          }
+        },
+        {
+          "type": "bleed",
+          "amount": {
+            "base": 1,
+            "upgraded": 2
+          }
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "卡牌全套小数值",
+        "row": 21
+      },
+      "notes": []
+    },
+    {
+      "id": "bleed_chainsaw",
+      "name": {
+        "zhCN": "电锯",
+        "en": "chainsaw"
+      },
+      "description": {
+        "en": "Saw twice and stack heavy bleed."
+      },
+      "category": "bleed",
+      "copies": 1,
+      "cost": {
+        "resource": "action_point",
+        "amount": 1
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "damage",
+          "amount": {
+            "base": 2,
+            "upgraded": 4
+          },
+          "hits": {
+            "base": 2,
+            "upgraded": 2
+          }
+        },
+        {
+          "type": "bleed",
+          "amount": {
+            "base": 5,
+            "upgraded": 8
+          }
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "卡牌全套小数值",
+        "row": 22
+      },
+      "notes": []
+    },
+    {
+      "id": "bleed_scalpel",
+      "name": {
+        "zhCN": "手术刀",
+        "en": "scalpel"
+      },
+      "description": {
+        "en": "Make a precise bleeding cut."
+      },
+      "category": "bleed",
+      "copies": 1,
+      "cost": {
+        "resource": "action_point",
+        "amount": 1
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "damage",
+          "amount": {
+            "base": 5,
+            "upgraded": 8
+          }
+        },
+        {
+          "type": "bleed",
+          "amount": {
+            "base": 2,
+            "upgraded": 4
+          }
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "卡牌全套小数值",
+        "row": 23
+      },
+      "notes": []
+    },
+    {
+      "id": "bleed_scourge",
+      "name": {
+        "zhCN": "链鞭",
+        "en": "scourge"
+      },
+      "description": {
+        "en": "Whip the target with chained strikes."
+      },
+      "category": "bleed",
+      "copies": 1,
+      "cost": {
+        "resource": "action_point",
+        "amount": 1
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "damage",
+          "amount": {
+            "base": 2,
+            "upgraded": 3
+          },
+          "hits": {
+            "base": 2,
+            "upgraded": 3
+          }
+        },
+        {
+          "type": "toughness_damage",
+          "amount": {
+            "base": 2,
+            "upgraded": 3
+          }
+        },
+        {
+          "type": "bleed",
+          "amount": {
+            "base": 2,
+            "upgraded": 3
+          }
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "卡牌全套小数值",
+        "row": 24
+      },
+      "notes": []
+    },
+    {
+      "id": "bleed_shuriken",
+      "name": {
+        "zhCN": "手里剑",
+        "en": "shuriken"
+      },
+      "description": {
+        "en": "Throw a special shuriken that tears through guard."
+      },
+      "category": "bleed",
+      "copies": 1,
+      "cost": {
+        "resource": "action_point",
+        "amount": 2
+      },
+      "special": true,
+      "effects": [
+        {
+          "type": "damage",
+          "amount": {
+            "base": 8,
+            "upgraded": 11
+          }
+        },
+        {
+          "type": "toughness_damage",
+          "amount": {
+            "base": 6,
+            "upgraded": 9
+          }
+        },
+        {
+          "type": "bleed",
+          "amount": {
+            "base": 8,
+            "upgraded": 11
+          }
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "卡牌全套小数值",
+        "row": 25
+      },
+      "notes": []
+    },
+    {
+      "id": "bleed_reaper",
+      "name": {
+        "zhCN": "镰刀",
+        "en": "reaper"
+      },
+      "description": {
+        "en": "Reap a large amount of health and bleed."
+      },
+      "category": "bleed",
+      "copies": 1,
+      "cost": {
+        "resource": "action_point",
+        "amount": 3
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "damage",
+          "amount": {
+            "base": 17,
+            "upgraded": 25
+          }
+        },
+        {
+          "type": "bleed",
+          "amount": {
+            "base": 5,
+            "upgraded": 8
+          }
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "卡牌全套小数值",
+        "row": 26
+      },
+      "notes": []
+    }
+  ]
+}

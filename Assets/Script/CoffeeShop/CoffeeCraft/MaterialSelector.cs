@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using UnityEngine.InputSystem;
 using TMPro;
 using DG.Tweening;
+using KiKs.UI;
 
 public class MaterialSelector : MonoBehaviour
 {
@@ -14,6 +15,9 @@ public class MaterialSelector : MonoBehaviour
     [SerializeField] private Transform content;
     [SerializeField] private Button confirmBtn;
     [SerializeField] private Button cancelBtn;
+
+    [Header("Tutorial")]
+    [SerializeField] private TutorialController tutorialController;
 
     [Header("Layout")]
     [SerializeField] private float itemWidth = 140f;
@@ -31,6 +35,9 @@ public class MaterialSelector : MonoBehaviour
 
     private void Awake()
     {
+        if (tutorialController == null)
+            tutorialController = FindFirstObjectByType<TutorialController>();
+
         if (confirmBtn != null) confirmBtn.onClick.AddListener(ConfirmSelection);
         if (cancelBtn != null) cancelBtn.onClick.AddListener(CancelSelection);
     }
@@ -38,6 +45,8 @@ public class MaterialSelector : MonoBehaviour
     private void OnDestroy()
     {
         if (scrollRect != null) scrollRect.onValueChanged.RemoveListener(OnScrollChanged);
+        if (tutorialController != null)
+            tutorialController.UnregisterJsonCallouts(this);
     }
 
     private void Update()
@@ -148,6 +157,9 @@ public class MaterialSelector : MonoBehaviour
             tmp.raycastTarget = false;
 
             _items.Add(go);
+
+            if (tutorialController != null)
+                tutorialController.RegisterJsonCallout(this, rt, mat.tutorial);
         }
 
         // Set content width to match total items width
@@ -160,6 +172,9 @@ public class MaterialSelector : MonoBehaviour
 
     private void ClearItems()
     {
+        if (tutorialController != null)
+            tutorialController.UnregisterJsonCallouts(this);
+
         foreach (var item in _items)
         {
             if (item != null) Destroy(item);

@@ -1,0 +1,133 @@
+{
+  "schemaVersion": 2,
+  "category": "enemy_fatty",
+  "categoryName": "胖子",
+  "cards": [
+    {
+      "id": "enemy_fatty_mountain_fall",
+      "name": {
+        "zhCN": "泰山压顶",
+        "en": "mountain fall"
+      },
+      "description": {
+        "en": "Crash down for damage."
+      },
+      "category": "enemy_fatty",
+      "copies": 1,
+      "cost": {
+        "resource": "action_point",
+        "amount": 1
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "damage",
+          "amount": 10,
+          "hits": 1
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "怪",
+        "row": 30
+      },
+      "notes": []
+    },
+    {
+      "id": "enemy_fatty_devour",
+      "name": {
+        "zhCN": "吞食",
+        "en": "devour"
+      },
+      "description": {
+        "en": "Recover 20 health."
+      },
+      "category": "enemy_fatty",
+      "copies": 1,
+      "cost": {
+        "resource": "action_point",
+        "amount": 1
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "heal",
+          "amount": 20
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "怪",
+        "row": 31
+      },
+      "notes": []
+    },
+    {
+      "id": "enemy_fatty_inhalation",
+      "name": {
+        "zhCN": "暴风吸入",
+        "en": "inhalation"
+      },
+      "description": {
+        "en": "Gain block and recover health."
+      },
+      "category": "enemy_fatty",
+      "copies": 1,
+      "cost": {
+        "resource": "action_point",
+        "amount": 2
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "block_damage",
+          "amount": 10
+        },
+        {
+          "type": "heal",
+          "amount": 35
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "怪",
+        "row": 32
+      },
+      "notes": []
+    },
+    {
+      "id": "enemy_fatty_stomach_attack",
+      "name": {
+        "zhCN": "胃击",
+        "en": "stomach attack"
+      },
+      "description": {
+        "en": "Attack while gaining block."
+      },
+      "category": "enemy_fatty",
+      "copies": 1,
+      "cost": {
+        "resource": "action_point",
+        "amount": 2
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "damage",
+          "amount": 20,
+          "hits": 1
+        },
+        {
+          "type": "block_damage",
+          "amount": 10
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "怪",
+        "row": 33
+      },
+      "notes": []
+    }
+  ]
+}

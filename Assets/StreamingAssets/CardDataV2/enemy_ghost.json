@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 2,
+  "category": "enemy_ghost",
+  "categoryName": "幽灵",
+  "cards": [
+    {
+      "id": "enemy_ghost_illusion",
+      "name": {
+        "zhCN": "幻像",
+        "en": "illusion"
+      },
+      "description": {
+        "en": "Prepare two attack-nullify charges."
+      },
+      "category": "enemy_ghost",
+      "copies": 1,
+      "cost": {
+        "resource": "action_point",
+        "amount": 1
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "nullify_attacks",
+          "amount": 2
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "怪",
+        "row": 8
+      },
+      "notes": []
+    },
+    {
+      "id": "enemy_ghost_flash",
+      "name": {
+        "zhCN": "瞬移",
+        "en": "flash"
+      },
+      "description": {
+        "en": "Blink in for a quick strike."
+      },
+      "category": "enemy_ghost",
+      "copies": 1,
+      "cost": {
+        "resource": "action_point",
+        "amount": 1
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "damage",
+          "amount": 8,
+          "hits": 1
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "怪",
+        "row": 9
+      },
+      "notes": []
+    },
+    {
+      "id": "enemy_ghost_snake_poison",
+      "name": {
+        "zhCN": "蛇毒",
+        "en": "snake poison"
+      },
+      "description": {
+        "en": "Apply poison while striking toughness."
+      },
+      "category": "enemy_ghost",
+      "copies": 1,
+      "cost": {
+        "resource": "action_point",
+        "amount": 2
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "toughness_damage",
+          "amount": 2
+        },
+        {
+          "type": "poison",
+          "amount": 3
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "怪",
+        "row": 10
+      },
+      "notes": []
+    }
+  ]
+}

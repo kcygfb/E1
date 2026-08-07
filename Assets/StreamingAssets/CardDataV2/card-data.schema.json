@@ -4,83 +4,263 @@
   "title": "Killkiss Sheet3 card data",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schemaVersion", "category", "categoryName", "cards"],
+  "required": [
+    "schemaVersion",
+    "category",
+    "categoryName",
+    "cards"
+  ],
   "properties": {
-    "schemaVersion": { "const": 2 },
-    "category": { "enum": ["melee", "ranged", "magic", "defense", "enemy_dog", "enemy_little_girl", "enemy_big_eye"] },
-    "categoryName": { "type": "string", "minLength": 1 },
-    "cards": { "type": "array", "items": { "$ref": "#/$defs/card" } }
+    "schemaVersion": {
+      "const": 2
+    },
+    "category": {
+      "enum": [
+        "ranged",
+        "heavy",
+        "bleed",
+        "flexible",
+        "hidden",
+        "defense",
+        "magic",
+        "enemy_dog",
+        "enemy_ghost",
+        "enemy_cat",
+        "enemy_nightmare",
+        "enemy_little_girl",
+        "enemy_fatty",
+        "enemy_thief",
+        "enemy_merchant",
+        "enemy_butcher",
+        "enemy_big_eye"
+      ]
+    },
+    "categoryName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "cards": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/card"
+      }
+    }
   },
   "$defs": {
     "valuePair": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["base", "upgraded"],
+      "required": [
+        "base",
+        "upgraded"
+      ],
       "properties": {
-        "base": { "type": "integer", "minimum": 0 },
-        "upgraded": { "type": ["integer", "null"], "minimum": 0 }
+        "base": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "upgraded": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        }
       }
     },
     "numberOrPair": {
       "oneOf": [
-        { "type": "integer", "minimum": 0 },
-        { "$ref": "#/$defs/valuePair" }
+        {
+          "type": "integer",
+          "minimum": 0
+        },
+        {
+          "$ref": "#/$defs/valuePair"
+        }
       ]
     },
     "card": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "name", "description", "category", "copies", "cost", "special", "effects", "source", "notes"],
+      "required": [
+        "id",
+        "name",
+        "description",
+        "category",
+        "copies",
+        "cost",
+        "special",
+        "effects",
+        "source",
+        "notes"
+      ],
       "properties": {
-        "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
+        },
         "name": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["zhCN", "en"],
+          "required": [
+            "zhCN",
+            "en"
+          ],
           "properties": {
-            "zhCN": { "type": "string", "minLength": 1 },
-            "en": { "type": ["string", "null"] }
+            "zhCN": {
+              "type": "string",
+              "minLength": 1
+            },
+            "en": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
           }
         },
         "description": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["en"],
+          "required": [
+            "en"
+          ],
           "properties": {
-            "en": { "type": "string", "minLength": 1 }
+            "en": {
+              "type": "string",
+              "minLength": 1
+            }
           }
         },
-        "category": { "enum": ["melee", "ranged", "magic", "defense", "enemy_dog", "enemy_little_girl", "enemy_big_eye"] },
-        "copies": { "type": "integer", "minimum": 1 },
+        "category": {
+          "enum": [
+            "ranged",
+            "heavy",
+            "bleed",
+            "flexible",
+            "hidden",
+            "defense",
+            "magic",
+            "enemy_dog",
+            "enemy_ghost",
+            "enemy_cat",
+            "enemy_nightmare",
+            "enemy_little_girl",
+            "enemy_fatty",
+            "enemy_thief",
+            "enemy_merchant",
+            "enemy_butcher",
+            "enemy_big_eye"
+          ]
+        },
+        "copies": {
+          "type": "integer",
+          "minimum": 1
+        },
         "cost": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["resource", "amount"],
+          "required": [
+            "resource",
+            "amount"
+          ],
           "properties": {
-            "resource": { "enum": ["action_point", "mana"] },
-            "amount": { "type": "integer", "minimum": 0 }
+            "resource": {
+              "enum": [
+                "action_point",
+                "mana"
+              ]
+            },
+            "amount": {
+              "type": "integer",
+              "minimum": 0
+            }
           }
         },
-        "special": { "type": "boolean" },
-        "effects": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/effect" } },
+        "special": {
+          "type": "boolean"
+        },
+        "tutorial": {
+          "$ref": "#/$defs/tutorialHint"
+        },
+        "effects": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/effect"
+          }
+        },
         "source": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["workbook", "sheet", "row"],
+          "required": [
+            "workbook",
+            "sheet",
+            "row"
+          ],
           "properties": {
-            "workbook": { "type": "string" },
-            "sheet": { "type": "string" },
-            "row": { "type": "integer", "minimum": 1 },
-            "upgradeRow": { "type": "integer", "minimum": 1 }
+            "workbook": {
+              "type": "string"
+            },
+            "sheet": {
+              "type": "string"
+            },
+            "row": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "upgradeRow": {
+              "type": "integer",
+              "minimum": 1
+            }
           }
         },
-        "notes": { "type": "array", "items": { "type": "string" } }
+        "notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "image": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "tutorialHint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "description"
+      ],
+      "properties": {
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "placement": {
+          "enum": [
+            "Above",
+            "Below",
+            "Left",
+            "Right",
+            "Center"
+          ]
+        },
+        "offsetX": {
+          "type": "number"
+        },
+        "offsetY": {
+          "type": "number"
+        }
       }
     },
     "effect": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["type"],
+      "required": [
+        "type"
+      ],
       "properties": {
         "type": {
           "enum": [
@@ -91,13 +271,17 @@
             "life_steal",
             "reflect_damage",
             "block_damage",
+            "block_scaled_damage",
             "stun",
             "poison",
+            "poison_scaled_next_attack",
+            "poison_damage_bonus",
             "vulnerability",
             "nullify_attacks",
             "damage_reduction",
             "skip_enemy_turns",
             "draw_cards",
+            "heal",
             "immunity",
             "summon_companion",
             "life_steal_max_health",
@@ -105,10 +289,22 @@
             "play_cards_from_discard"
           ]
         },
-        "amount": { "$ref": "#/$defs/numberOrPair" },
-        "hits": { "$ref": "#/$defs/numberOrPair" },
-        "unit": { "enum": ["points", "percent"] },
-        "multiplier": { "type": "number", "minimum": 0 }
+        "amount": {
+          "$ref": "#/$defs/numberOrPair"
+        },
+        "hits": {
+          "$ref": "#/$defs/numberOrPair"
+        },
+        "unit": {
+          "enum": [
+            "points",
+            "percent"
+          ]
+        },
+        "multiplier": {
+          "type": "number",
+          "minimum": 0
+        }
       }
     }
   }

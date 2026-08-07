@@ -28,12 +28,22 @@
     {
       "id": "claw",
       "displayName": "爪子",
-      "startingAmount": 5
+      "startingAmount": 5,
+      "tutorial": {
+        "description": "材料一",
+        "placement": "Above",
+        "offsetY": 20
+      }
     },
     {
       "id": "wolfHair",
       "displayName": "狼毫",
-      "startingAmount": 5
+      "startingAmount": 5,
+      "tutorial": {
+        "description": "材料二",
+        "placement": "Above",
+        "offsetY": 20
+      }
     },
     {
       "id": "eyeball",

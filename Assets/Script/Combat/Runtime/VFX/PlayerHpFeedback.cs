@@ -7,6 +7,7 @@ namespace KiKs.Combat
 {
     /// <summary>
     /// 玩家血量UI受击动效：图标抖动+闪红，文字变红后数字递减。
+    /// 数据来源唯一：BattleController.PlayerHealthChanged（单条血量数据链路）。
     /// 挂在 PlayerHpIconText 容器上，需要 HpIcon(Image) 和 HpText(TMP_Text) 子物体。
     /// </summary>
     public class PlayerHpFeedback : MonoBehaviour
@@ -22,6 +23,7 @@ namespace KiKs.Combat
 
         [Header("文字受击")]
         [SerializeField] private Color textHitColor = new(1f, 0.2f, 0.2f, 1f);
+        [SerializeField] private Color textHealColor = new(0.2f, 1f, 0.35f, 1f);
         [SerializeField] private float textColorDuration = 0.3f;
         [SerializeField] private float numberCountDuration = 0.5f;
 
@@ -68,32 +70,50 @@ namespace KiKs.Combat
             }
             if (battleController != null)
             {
-                battleController.CombatEventRaised += OnCombatEvent;
+                battleController.PlayerHealthChanged += OnHealthChanged;
                 _subscribed = true;
-                if (battleController.IsInitialized)
+                if (battleController.IsInitialized && battleController.State?.Player != null)
+                {
                     _displayedHp = battleController.State.Player.CurrentHealth;
+                    if (_hpText != null)
+                        _hpText.text = _displayedHp + " / " + battleController.State.Player.MaxHealth;
+                }
             }
         }
 
         private void OnDestroy()
         {
             if (battleController != null && _subscribed)
-                battleController.CombatEventRaised -= OnCombatEvent;
+                battleController.PlayerHealthChanged -= OnHealthChanged;
             _iconSeq?.Kill();
             _textSeq?.Kill();
         }
 
-        private void OnCombatEvent(CombatEvent evt)
+        private void OnHealthChanged(
+            int currentHealth,
+            int maxHealth,
+            BattleController.PlayerHealthChangeKind kind)
         {
-            if (evt.Type != CombatEventType.DamageApplied) return;
-            if (battleController == null || !battleController.IsInitialized) return;
-            if (evt.TargetId != battleController.State.Player.Id) return;
-            if (evt.Amount <= 0) return;
+            switch (kind)
+            {
+                case BattleController.PlayerHealthChangeKind.Initialize:
+                    _displayedHp = currentHealth;
+                    if (_hpText != null)
+                        _hpText.text = _displayedHp + " / " + maxHealth;
+                    break;
 
-            PlayHitFeedback(evt.Amount, battleController.State.Player.CurrentHealth);
+                case BattleController.PlayerHealthChangeKind.Damage:
+                case BattleController.PlayerHealthChangeKind.Tick:
+                    PlayHitFeedback(currentHealth, maxHealth);
+                    break;
+
+                case BattleController.PlayerHealthChangeKind.Heal:
+                    PlayHealFeedback(currentHealth, maxHealth);
+                    break;
+            }
         }
 
-        private void PlayHitFeedback(int damageAmount, int targetHp)
+        private void PlayHitFeedback(int targetHp, int maxHealth)
         {
             // --- 图标：抖动 + 闪红 + 缩放 ---
             if (_iconImage != null && _iconRect != null)
@@ -117,22 +137,56 @@ namespace KiKs.Combat
             {
                 _textSeq?.Kill();
 
+                // 防御分支：展示值不应低于真实血量（例如漏刷过一次治疗），直接对齐避免“扣血反而数字上涨”
+                if (_displayedHp <= targetHp)
+                {
+                    _displayedHp = targetHp;
+                    _hpText.text = targetHp + " / " + maxHealth;
+                    return;
+                }
+
                 _hpText.color = textHitColor;
 
                 _textSeq = DOTween.Sequence();
                 _textSeq.Join(DOTween.To(() => _displayedHp, v =>
                 {
                     _displayedHp = Mathf.RoundToInt(v);
-                    _hpText.text = _displayedHp + " / " + battleController.State.Player.MaxHealth;
+                    _hpText.text = _displayedHp + " / " + maxHealth;
                 }, targetHp, numberCountDuration).SetEase(Ease.OutQuart));
                 _textSeq.Join(DOTween.To(() => _hpText.color, c => _hpText.color = c, _textOriginColor, textColorDuration)
                     .SetEase(Ease.OutQuart).SetDelay(0.1f));
                 _textSeq.OnComplete(() =>
                 {
                     _displayedHp = targetHp;
-                    _hpText.text = targetHp + " / " + battleController.State.Player.MaxHealth;
+                    _hpText.text = targetHp + " / " + maxHealth;
                 });
             }
+        }
+
+        private void PlayHealFeedback(int targetHp, int maxHealth)
+        {
+            if (_hpText == null)
+            {
+                _displayedHp = targetHp;
+                return;
+            }
+
+            _textSeq?.Kill();
+            _hpText.color = textHealColor;
+
+            _textSeq = DOTween.Sequence();
+            _textSeq.Join(DOTween.To(() => _displayedHp, v =>
+            {
+                _displayedHp = Mathf.RoundToInt(v);
+                _hpText.text = _displayedHp + " / " + maxHealth;
+            }, targetHp, numberCountDuration).SetEase(Ease.OutQuart));
+            _textSeq.Join(DOTween.To(() => _hpText.color, c => _hpText.color = c, _textOriginColor, textColorDuration)
+                .SetEase(Ease.OutQuart).SetDelay(0.1f));
+            _textSeq.OnComplete(() =>
+            {
+                _displayedHp = targetHp;
+                _hpText.text = targetHp + " / " + maxHealth;
+            });
         }
     }
 }

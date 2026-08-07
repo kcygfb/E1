@@ -111,6 +111,30 @@ namespace KiKs.Combat
             return _hand.Find(card => card.InstanceId == instanceId);
         }
 
+        /// <summary>Removes cards from the top of the discard pile without moving them elsewhere.</summary>
+        public IReadOnlyList<CardInstance> TakeFromDiscard(int count)
+        {
+            if (count < 0) throw new ArgumentOutOfRangeException(nameof(count));
+
+            var cards = new List<CardInstance>();
+            for (var i = 0; i < count && _discardPile.Count > 0; i++)
+            {
+                var topIndex = _discardPile.Count - 1;
+                var card = _discardPile[topIndex];
+                _discardPile.RemoveAt(topIndex);
+                cards.Add(card);
+            }
+
+            return cards.AsReadOnly();
+        }
+
+        public void ReturnToDiscard(CardInstance card)
+        {
+            if (card == null) throw new ArgumentNullException(nameof(card));
+            card.ConsumeUpgrade();
+            _discardPile.Add(card);
+        }
+
         /// <summary>
         /// 从手牌中弃掉指定卡牌（按实例 ID 匹配），被弃的卡牌移入弃牌堆。
         /// 成功返回 true，卡牌不在手牌中返回 false。

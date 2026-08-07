@@ -260,16 +260,18 @@ namespace KiKs.Combat
                 if (enemy.IsDead) continue;
 
                 enemy.AdvanceTurnStatuses();
+                var companionBonus = _flow.ResolveCompanionResourceBonus(enemy, events);
                 _enemyCardsPlayedThisTurn[enemy.Id] = 0;
                 var baseActionPoints = State.GetEnemyBaseActionPoints(enemy.Id);
-                if (baseActionPoints <= 0) continue;
+                var restoredActionPoints = baseActionPoints + companionBonus;
+                if (restoredActionPoints <= 0) continue;
 
-                enemy.RestoreActionPoints(baseActionPoints);
+                enemy.RestoreActionPoints(restoredActionPoints);
                 events.Add(new CombatEvent(
                     CombatEventType.ActionPointsChanged,
                     enemy.Id,
                     amount: enemy.CurrentActionPoints,
-                    message: enemy.DisplayName + " restored " + baseActionPoints +
+                    message: enemy.DisplayName + " restored " + restoredActionPoints +
                              " action points."));
             }
 
@@ -554,13 +556,14 @@ namespace KiKs.Combat
         {
             State.TurnNumber++;
             State.IsCurrentEnemyTurnSkipped = false;
-            State.Mana.BeginTurn();
             State.Player.AdvanceTurnStatuses();
 
             SetPhase(CombatPhase.PlayerTurnStart, events);
             events.Add(new CombatEvent(
                 CombatEventType.TurnStarted, State.Player.Id,
                 amount: State.TurnNumber, message: "Player turn " + State.TurnNumber + " started."));
+            var companionBonus = _flow.ResolveCompanionResourceBonus(State.Player, events);
+            State.Mana.BeginTurn(companionBonus);
             if (EvaluateOutcome(events)) return;
 
             // Status effects on the player and enemies tick at the start of the player turn.

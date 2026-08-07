@@ -1,0 +1,133 @@
+{
+  "schemaVersion": 2,
+  "category": "enemy_merchant",
+  "categoryName": "黑心狼人",
+  "cards": [
+    {
+      "id": "enemy_merchant_fur_armor",
+      "name": {
+        "zhCN": "毛发护体",
+        "en": "fur armor"
+      },
+      "description": {
+        "en": "Gain thick fur block."
+      },
+      "category": "enemy_merchant",
+      "copies": 1,
+      "cost": {
+        "resource": "action_point",
+        "amount": 1
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "block_damage",
+          "amount": 20
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "怪",
+        "row": 42
+      },
+      "notes": []
+    },
+    {
+      "id": "enemy_merchant_claw",
+      "name": {
+        "zhCN": "爪击",
+        "en": "claw"
+      },
+      "description": {
+        "en": "Claw twice."
+      },
+      "category": "enemy_merchant",
+      "copies": 1,
+      "cost": {
+        "resource": "action_point",
+        "amount": 1
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "damage",
+          "amount": 4,
+          "hits": 2
+        },
+        {
+          "type": "toughness_damage",
+          "amount": 5
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "怪",
+        "row": 43
+      },
+      "notes": []
+    },
+    {
+      "id": "enemy_merchant_bribe",
+      "name": {
+        "zhCN": "贿赂",
+        "en": "bribe"
+      },
+      "description": {
+        "en": "Prepare five attack-nullify charges."
+      },
+      "category": "enemy_merchant",
+      "copies": 1,
+      "cost": {
+        "resource": "action_point",
+        "amount": 2
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "nullify_attacks",
+          "amount": 5
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "怪",
+        "row": 44
+      },
+      "notes": []
+    },
+    {
+      "id": "enemy_merchant_coinfall",
+      "name": {
+        "zhCN": "天降金币",
+        "en": "coinfall"
+      },
+      "description": {
+        "en": "Rain down coins in six attacks."
+      },
+      "category": "enemy_merchant",
+      "copies": 1,
+      "cost": {
+        "resource": "action_point",
+        "amount": 2
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "damage",
+          "amount": 2,
+          "hits": 6
+        },
+        {
+          "type": "toughness_damage",
+          "amount": 2
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "怪",
+        "row": 45
+      },
+      "notes": []
+    }
+  ]
+}

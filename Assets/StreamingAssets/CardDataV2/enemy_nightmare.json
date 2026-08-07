@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 2,
+  "category": "enemy_nightmare",
+  "categoryName": "游荡梦魇",
+  "cards": [
+    {
+      "id": "enemy_nightmare_nightmare",
+      "name": {
+        "zhCN": "噩梦",
+        "en": "nightmare"
+      },
+      "description": {
+        "en": "Deal severe toughness damage."
+      },
+      "category": "enemy_nightmare",
+      "copies": 1,
+      "cost": {
+        "resource": "action_point",
+        "amount": 1
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "toughness_damage",
+          "amount": 10
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "怪",
+        "row": 18
+      },
+      "notes": []
+    },
+    {
+      "id": "enemy_nightmare_chill",
+      "name": {
+        "zhCN": "冷气",
+        "en": "chill"
+      },
+      "description": {
+        "en": "Chill the target and reduce incoming damage."
+      },
+      "category": "enemy_nightmare",
+      "copies": 1,
+      "cost": {
+        "resource": "action_point",
+        "amount": 1
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "toughness_damage",
+          "amount": 4
+        },
+        {
+          "type": "nullify_attacks",
+          "amount": 2
+        },
+        {
+          "type": "damage_reduction",
+          "amount": 2
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "怪",
+        "row": 19
+      },
+      "notes": []
+    },
+    {
+      "id": "enemy_nightmare_xyster",
+      "name": {
+        "zhCN": "刮骨",
+        "en": "xyster"
+      },
+      "description": {
+        "en": "Scrape away toughness and inflict bleed."
+      },
+      "category": "enemy_nightmare",
+      "copies": 1,
+      "cost": {
+        "resource": "action_point",
+        "amount": 2
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "toughness_damage",
+          "amount": 8
+        },
+        {
+          "type": "bleed",
+          "amount": 5
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "怪",
+        "row": 20
+      },
+      "notes": []
+    }
+  ]
+}

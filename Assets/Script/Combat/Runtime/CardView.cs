@@ -21,6 +21,12 @@ namespace KiKs.Combat
         public System.Action<CardView> OnHoverEnter;
         public System.Action<CardView> OnHoverExit;
 
+        /// <summary>拖拽结束但未进入出牌区时触发（例如拖到屏幕下半区），由 CardDealAnimator 负责拉回手牌</summary>
+        public System.Action<CardView> OnDragCanceled;
+
+        [Header("Tutorial")]
+        [SerializeField] private TutorialController tutorialController;
+
         [Header("Card UI")]
         [SerializeField] private TMP_Text cardNameText;
         [SerializeField] private TMP_Text descriptionText;
@@ -61,6 +67,8 @@ namespace KiKs.Combat
         private void Awake()
         {
             _rect = GetComponent<RectTransform>();
+            if (tutorialController == null)
+                tutorialController = FindFirstObjectByType<TutorialController>();
             ResolveUpgradeFireReference();
             SyncUpgradeFire();
         }
@@ -70,6 +78,11 @@ namespace KiKs.Combat
             SyncUpgradeFire();
         }
 
+        private void OnDisable()
+        {
+            if (tutorialController != null)
+                tutorialController.UnregisterJsonCallouts(this);
+        }
         private void LateUpdate()
         {
             RefreshUpgradeFireLayout();
@@ -102,6 +115,16 @@ namespace KiKs.Combat
             EnsureCardArt();
             RefreshCardArt();
             SyncUpgradeFire();
+            RegisterTutorialCallout(spec);
+        }
+
+        private void RegisterTutorialCallout(CardSpec spec)
+        {
+            if (tutorialController == null)
+                tutorialController = FindFirstObjectByType<TutorialController>();
+
+            if (tutorialController != null)
+                tutorialController.RegisterJsonCallout(this, _rect, spec?.Tutorial);
         }
 
         public void SetUpgraded(bool isUpgraded)
@@ -454,14 +477,28 @@ namespace KiKs.Combat
             _wasDragged = false;
             _lastDragEndTime = Time.realtimeSinceStartup;
 
-            if (eventData.position.y > Screen.height * 0.5f)
+            if (IsOverBattleArea())
             {
                 TryPlayCard();
             }
             else
             {
                 WarningToast.Show("Drag cards into the battle area.");
+                OnDragCanceled?.Invoke(this);
             }
+        }
+
+        /// <summary>
+        /// 判定卡牌是否已拖入战斗区：以卡牌自身中心位置为准（而非鼠标指针），
+        /// 当卡牌中心越过屏幕中线上方时视为进入战斗区。
+        /// </summary>
+        private bool IsOverBattleArea()
+        {
+            if (_rect == null) return false;
+
+            // 卡牌中心的世界坐标 → 屏幕坐标，兼容 Overlay / ScreenSpaceCamera 两种 Canvas 模式。
+            Vector3 cardScreenPos = RectTransformUtility.WorldToScreenPoint(null, _rect.position);
+            return cardScreenPos.y > Screen.height * 0.5f;
         }
         private void TryPlayCard()
         {

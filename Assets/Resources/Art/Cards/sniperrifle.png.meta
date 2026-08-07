@@ -3,8 +3,8 @@ guid: 9d67aaec9e721f04b9c95e052c79b5fe
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 8003771578032677731
-    second: sniperrifle 1_0
+      213: 3866405808059555565
+    second: sniperrifle_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -100,7 +100,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: sniperrifle 1_0
+      name: sniperrifle_0
       rect:
         serializedVersion: 2
         x: 0
@@ -115,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 363610c28db131f60800000000000000
-      internalID: 8003771578032677731
+      spriteID: dee95eae89b38a530800000000000000
+      internalID: 3866405808059555565
       vertices: []
       indices: 
       edges: []
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      sniperrifle 1_0: 8003771578032677731
+      sniperrifle_0: 3866405808059555565
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

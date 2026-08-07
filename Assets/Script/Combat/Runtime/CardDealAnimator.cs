@@ -42,6 +42,7 @@ namespace KiKs.Combat
             cardView.SetUpgraded(isUpgraded);
             cardView.OnPlayRequested += HandleCardPlayed;
             cardView.OnShootRequested += HandleCardShot;
+            cardView.OnDragCanceled += HandleCardDragCanceled;
             _handCards.Add(cardView);
 
             // 计算 deck 在 handArea 空间下的 anchoredPosition
@@ -57,6 +58,7 @@ namespace KiKs.Combat
             if (cardView == null || !_handCards.Contains(cardView)) return;
             cardView.OnPlayRequested -= HandleCardPlayed;
             cardView.OnShootRequested -= HandleCardShot;
+            cardView.OnDragCanceled -= HandleCardDragCanceled;
             _handCards.Remove(cardView);
 
             Vector3 discardWorld = discardArea != null ? discardArea.position : Vector3.zero;
@@ -150,6 +152,14 @@ namespace KiKs.Combat
             }
         }
 
+        /// <summary>拖拽被取消（未进入出牌区）：把卡牌拉回它在手牌中的槽位。</summary>
+        private void HandleCardDragCanceled(CardView cardView)
+        {
+            var index = _handCards.IndexOf(cardView);
+            if (index >= 0)
+                cardView.ReturnToHand(GetCardAnchoredPosition(index));
+        }
+
         private void HandleCardShot(CardView cardView)
         {
             var success = OnCardShot?.Invoke(cardView) ?? true;
@@ -179,6 +189,8 @@ namespace KiKs.Combat
                 var card = _handCards[i];
                 if (card == null) continue;
                 card.OnPlayRequested -= HandleCardPlayed;
+                card.OnShootRequested -= HandleCardShot;
+                card.OnDragCanceled -= HandleCardDragCanceled;
                 _handCards.RemoveAt(i);
                 card.PlayDiscardAnimation(discardWorld, () => Destroy(card.gameObject));
             }

@@ -1,0 +1,259 @@
+{
+  "schemaVersion": 2,
+  "category": "flexible",
+  "categoryName": "软兵器",
+  "cards": [
+    {
+      "id": "flexible_chain",
+      "name": {
+        "zhCN": "绊脚锁",
+        "en": "chain"
+      },
+      "description": {
+        "en": "Trip the target and heavily damage toughness."
+      },
+      "category": "flexible",
+      "copies": 1,
+      "cost": {
+        "resource": "action_point",
+        "amount": 1
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "damage",
+          "amount": {
+            "base": 1,
+            "upgraded": 3
+          }
+        },
+        {
+          "type": "toughness_damage",
+          "amount": {
+            "base": 15,
+            "upgraded": 21
+          }
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "卡牌全套小数值",
+        "row": 30
+      },
+      "notes": []
+    },
+    {
+      "id": "flexible_morning_star",
+      "name": {
+        "zhCN": "流星锤",
+        "en": "morning star"
+      },
+      "description": {
+        "en": "Smash the target's toughness with a morning star."
+      },
+      "category": "flexible",
+      "copies": 1,
+      "cost": {
+        "resource": "action_point",
+        "amount": 2
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "damage",
+          "amount": {
+            "base": 3,
+            "upgraded": 5
+          }
+        },
+        {
+          "type": "toughness_damage",
+          "amount": {
+            "base": 27,
+            "upgraded": 45
+          }
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "卡牌全套小数值",
+        "row": 31
+      },
+      "notes": []
+    },
+    {
+      "id": "flexible_kusarigama",
+      "name": {
+        "zhCN": "锁镰",
+        "en": "kusarigama"
+      },
+      "description": {
+        "en": "Slash, break toughness, and poison."
+      },
+      "category": "flexible",
+      "copies": 1,
+      "cost": {
+        "resource": "action_point",
+        "amount": 2
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "damage",
+          "amount": {
+            "base": 9,
+            "upgraded": 15
+          }
+        },
+        {
+          "type": "toughness_damage",
+          "amount": {
+            "base": 6,
+            "upgraded": 12
+          }
+        },
+        {
+          "type": "poison",
+          "amount": {
+            "base": 2,
+            "upgraded": 3
+          }
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "卡牌全套小数值",
+        "row": 32
+      },
+      "notes": []
+    },
+    {
+      "id": "flexible_rope_dart",
+      "name": {
+        "zhCN": "绳镖",
+        "en": "rope dart"
+      },
+      "description": {
+        "en": "Strike repeatedly with a poisoned rope dart."
+      },
+      "category": "flexible",
+      "copies": 1,
+      "cost": {
+        "resource": "action_point",
+        "amount": 2
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "damage",
+          "amount": {
+            "base": 6,
+            "upgraded": 8
+          },
+          "hits": {
+            "base": 2,
+            "upgraded": 3
+          }
+        },
+        {
+          "type": "poison",
+          "amount": {
+            "base": 1,
+            "upgraded": 2
+          }
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "卡牌全套小数值",
+        "row": 33
+      },
+      "notes": []
+    },
+    {
+      "id": "flexible_urumi",
+      "name": {
+        "zhCN": "软剑",
+        "en": "urumi"
+      },
+      "description": {
+        "en": "A special flexible blade that inflicts bleed and poison."
+      },
+      "category": "flexible",
+      "copies": 1,
+      "cost": {
+        "resource": "action_point",
+        "amount": 2
+      },
+      "special": true,
+      "effects": [
+        {
+          "type": "damage",
+          "amount": {
+            "base": 8,
+            "upgraded": 12
+          }
+        },
+        {
+          "type": "bleed",
+          "amount": {
+            "base": 8,
+            "upgraded": 12
+          }
+        },
+        {
+          "type": "poison",
+          "amount": {
+            "base": 4,
+            "upgraded": 6
+          }
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "卡牌全套小数值",
+        "row": 34
+      },
+      "notes": []
+    },
+    {
+      "id": "flexible_chain_mace",
+      "name": {
+        "zhCN": "链锤",
+        "en": "chain mace"
+      },
+      "description": {
+        "en": "Hit with a chained mace."
+      },
+      "category": "flexible",
+      "copies": 1,
+      "cost": {
+        "resource": "action_point",
+        "amount": 1
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "damage",
+          "amount": {
+            "base": 5,
+            "upgraded": 10
+          }
+        },
+        {
+          "type": "toughness_damage",
+          "amount": {
+            "base": 3,
+            "upgraded": 6
+          }
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "卡牌全套小数值",
+        "row": 35
+      },
+      "notes": []
+    }
+  ]
+}

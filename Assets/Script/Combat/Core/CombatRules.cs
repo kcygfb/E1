@@ -58,6 +58,7 @@ namespace KiKs.Combat
 
         public int ManaPerTurn { get; }
         public int CardUpgradeManaCost { get; }
+        public int SummonedCompanionResourceBonus { get; }
 
         public EnemyTurnRules MinionTurnRules { get; }
         public EnemyTurnRules EliteTurnRules { get; }
@@ -75,7 +76,8 @@ namespace KiKs.Combat
             int cardUpgradeManaCost,
             EnemyTurnRules minionTurnRules,
             EnemyTurnRules eliteTurnRules,
-            EnemyTurnRules bossTurnRules)
+            EnemyTurnRules bossTurnRules,
+            int summonedCompanionResourceBonus = 1)
         {
             if (baseActionPoints < 0) throw new ArgumentOutOfRangeException(nameof(baseActionPoints));
             if (cardsDrawnPerTurn < 0) throw new ArgumentOutOfRangeException(nameof(cardsDrawnPerTurn));
@@ -85,6 +87,8 @@ namespace KiKs.Combat
             if (fixedToughnessRestoreAmount < 0) throw new ArgumentOutOfRangeException(nameof(fixedToughnessRestoreAmount));
             if (manaPerTurn <= 0) throw new ArgumentOutOfRangeException(nameof(manaPerTurn));
             if (cardUpgradeManaCost < 0) throw new ArgumentOutOfRangeException(nameof(cardUpgradeManaCost));
+            if (summonedCompanionResourceBonus < 0)
+                throw new ArgumentOutOfRangeException(nameof(summonedCompanionResourceBonus));
 
             BaseActionPoints = baseActionPoints;
             CardsDrawnPerTurn = cardsDrawnPerTurn;
@@ -95,6 +99,7 @@ namespace KiKs.Combat
             FixedToughnessRestoreAmount = fixedToughnessRestoreAmount;
             ManaPerTurn = manaPerTurn;
             CardUpgradeManaCost = cardUpgradeManaCost;
+            SummonedCompanionResourceBonus = summonedCompanionResourceBonus;
             MinionTurnRules = minionTurnRules ?? throw new ArgumentNullException(nameof(minionTurnRules));
             EliteTurnRules = eliteTurnRules ?? throw new ArgumentNullException(nameof(eliteTurnRules));
             BossTurnRules = bossTurnRules ?? throw new ArgumentNullException(nameof(bossTurnRules));

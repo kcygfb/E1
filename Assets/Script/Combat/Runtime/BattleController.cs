@@ -61,6 +61,25 @@ namespace KiKs.Combat
         public float HuntResultDelay => huntResultDelay;
         public event Action<CombatEvent> CombatEventRaised;
 
+        /// <summary>玩家血量变化的类型，供血量 UI 选择表现（单条血量数据链路）。</summary>
+        public enum PlayerHealthChangeKind
+        {
+            /// <summary>战斗开始 / 初始化。</summary>
+            Initialize,
+            /// <summary>受击扣血。</summary>
+            Damage,
+            /// <summary>治疗回血。</summary>
+            Heal,
+            /// <summary>流血 / 中毒等持续伤害。</summary>
+            Tick
+        }
+
+        /// <summary>
+        /// 单条血量数据链路：所有玩家血量变化统一从这里发布（current, max, kind）。
+        /// 战斗内的血量 UI 只允许消费此事件，禁止各自解读 CombatEvent，避免数值分叉。
+        /// </summary>
+        public event Action<int, int, PlayerHealthChangeKind> PlayerHealthChanged;
+
         private IEnumerator Start()
         {
             if (!autoStartBattle) yield break;
@@ -562,17 +581,44 @@ namespace KiKs.Combat
 
         private void ForwardEvent(CombatEvent combatEvent)
         {
-            // Sync HP to global stats on damage/heal events
-            if (_engine != null && _engine.State?.Player != null &&
-                (combatEvent.Type == CombatEventType.DamageApplied || combatEvent.Type == CombatEventType.HealingApplied) &&
-                combatEvent.TargetId == _engine.State.Player.Id)
+            var player = _engine?.State?.Player;
+            if (player != null)
             {
-                PlayerGlobalStats.SetHealth(
-                    _engine.State.Player.CurrentHealth,
-                    _engine.State.Player.MaxHealth);
+                // 单条血量数据链路：所有玩家血量变化统一在这里解析并发布。
+                // 战斗内各血量 UI 只消费 PlayerHealthChanged，不再各自解读事件，
+                // 从根源上避免“两个血条数值不一样”这类问题。
+                var kind = ResolvePlayerHealthChangeKind(combatEvent, player.Id);
+                if (kind.HasValue)
+                    PlayerHealthChanged?.Invoke(player.CurrentHealth, player.MaxHealth, kind.Value);
+
+                // 跨场景血量缓存也在这里同步，供 PreBattle 等界面读取。
+                PlayerGlobalStats.SetHealth(player.CurrentHealth, player.MaxHealth);
             }
 
             CombatEventRaised?.Invoke(combatEvent);
+        }
+
+        private static PlayerHealthChangeKind? ResolvePlayerHealthChangeKind(
+            CombatEvent combatEvent,
+            string playerId)
+        {
+            // 未造成实际血量变化的事件（如被格挡/免疫抵消、满血治疗）不发布，避免无效动画。
+            if (combatEvent.Amount <= 0 && combatEvent.Type != CombatEventType.BattleStarted)
+                return null;
+
+            switch (combatEvent.Type)
+            {
+                case CombatEventType.BattleStarted:
+                    return PlayerHealthChangeKind.Initialize;
+                case CombatEventType.DamageApplied:
+                    return combatEvent.TargetId == playerId ? PlayerHealthChangeKind.Damage : null;
+                case CombatEventType.StatusTicked:
+                    return combatEvent.TargetId == playerId ? PlayerHealthChangeKind.Tick : null;
+                case CombatEventType.HealingApplied:
+                    return combatEvent.TargetId == playerId ? PlayerHealthChangeKind.Heal : null;
+                default:
+                    return null;
+            }
         }
 
         private void OnDestroy() { DisposeEngine(); }

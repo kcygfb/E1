@@ -1,69 +1,225 @@
 {
   "schemaVersion": 2,
   "category": "magic",
-  "categoryName": "魔法牌",
+  "categoryName": "魔法",
   "cards": [
     {
       "id": "magic_blizzard",
-      "name": { "zhCN": "暴风雪", "en": "blizzard" },
-      "description": { "en": "Consume all bleed stacks for doubled damage." },
+      "name": {
+        "zhCN": "暴风雪",
+        "en": "blizzard"
+      },
+      "description": {
+        "en": "Consume all bleed stacks to deal double damage per stack."
+      },
       "category": "magic",
-      "copies": 2,
-      "image": "Art/Cards/blizzard.png",
-      "cost": { "resource": "mana", "amount": 1 },
+      "copies": 1,
+      "cost": {
+        "resource": "mana",
+        "amount": 1
+      },
       "special": false,
       "effects": [
-        { "type": "bleed_scaled_damage", "multiplier": 2 }
+        {
+          "type": "bleed_scaled_damage",
+          "multiplier": 2
+        }
       ],
-      "source": { "workbook": "Killkiss全套卡牌.xlsx", "sheet": "卡牌全套小数值", "row": 53, "upgradeRow": 53 },
-      "notes": ["每层流血造成 2 点伤害，结算后清除所有流血层数。"]
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "卡牌全套小数值",
+        "row": 54
+      },
+      "notes": [
+        "Each bleed stack deals 2 damage, then all bleed stacks are removed."
+      ],
+      "image": "Art/Cards/blizzard.png"
     },
     {
       "id": "magic_tornado",
-      "name": { "zhCN": "龙卷风", "en": "tornado" },
-      "description": { "en": "Hit repeatedly, chip toughness, and block attacks." },
+      "name": {
+        "zhCN": "龙卷风",
+        "en": "tornado"
+      },
+      "description": {
+        "en": "Hit eight times, damage toughness, and negate attacks."
+      },
       "category": "magic",
-      "copies": 2,
-      "image": "Art/Cards/placeholder.png",
-      "cost": { "resource": "mana", "amount": 1 },
+      "copies": 1,
+      "cost": {
+        "resource": "mana",
+        "amount": 1
+      },
       "special": false,
       "effects": [
-        { "type": "damage", "amount": 1, "hits": 8 },
-        { "type": "toughness_damage", "amount": 1, "unit": "points" },
-        { "type": "nullify_attacks", "amount": 3 }
+        {
+          "type": "damage",
+          "amount": 1,
+          "hits": 8
+        },
+        {
+          "type": "toughness_damage",
+          "amount": 1
+        },
+        {
+          "type": "nullify_attacks",
+          "amount": 3
+        }
       ],
-      "source": { "workbook": "Killkiss全套卡牌.xlsx", "sheet": "卡牌全套小数值", "row": 54, "upgradeRow": 54 },
-      "notes": []
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "卡牌全套小数值",
+        "row": 55
+      },
+      "notes": [],
+      "image": "Art/Cards/tornado.png"
     },
     {
       "id": "magic_summon",
-      "name": { "zhCN": "召唤", "en": "summon" },
-      "description": { "en": "Call a companion for three turns." },
+      "name": {
+        "zhCN": "召唤",
+        "en": "summon"
+      },
+      "description": {
+        "en": "Summon another magic hand for three turns."
+      },
       "category": "magic",
-      "copies": 2,
-      "image": "Art/Cards/placeholder.png",
-      "cost": { "resource": "mana", "amount": 1 },
+      "copies": 1,
+      "cost": {
+        "resource": "mana",
+        "amount": 1
+      },
       "special": false,
       "effects": [
-        { "type": "summon_companion", "amount": 3 }
+        {
+          "type": "summon_companion",
+          "amount": 3
+        }
       ],
-      "source": { "workbook": "Killkiss全套卡牌.xlsx", "sheet": "卡牌全套小数值", "row": 55, "upgradeRow": 55 },
-      "notes": ["召唤另一只魔手持续3回合。"]
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "卡牌全套小数值",
+        "row": 56
+      },
+      "notes": []
     },
     {
       "id": "magic_lifesteal",
-      "name": { "zhCN": "吸血", "en": "lifesteal" },
-      "description": { "en": "Deal damage and heal for the damage dealt." },
+      "name": {
+        "zhCN": "吸血",
+        "en": "lifesteal"
+      },
+      "description": {
+        "en": "Deal 9 damage and heal for the damage dealt. Damage is doubled against bleeding targets."
+      },
       "category": "magic",
-      "copies": 2,
-      "image": "Art/Cards/lifesteal.png",
-      "cost": { "resource": "mana", "amount": 1 },
+      "copies": 1,
+      "cost": {
+        "resource": "mana",
+        "amount": 1
+      },
       "special": false,
       "effects": [
-        { "type": "life_steal", "amount": 9 }
+        {
+          "type": "life_steal",
+          "amount": 9
+        }
       ],
-      "source": { "workbook": "Killkiss全套卡牌.xlsx", "sheet": "卡牌全套小数值", "row": 56, "upgradeRow": 56 },
-      "notes": ["造成 9 点伤害，并按实际伤害回复至多 9 点生命。"]
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "卡牌全套小数值",
+        "row": 57
+      },
+      "notes": [
+        "Damage doubles when the target has bleed stacks."
+      ],
+      "image": "Art/Cards/lifesteal.png"
+    },
+    {
+      "id": "magic_shield_bash",
+      "name": {
+        "zhCN": "盾击",
+        "en": "shield bash"
+      },
+      "description": {
+        "en": "Deal damage equal to the current temporary block."
+      },
+      "category": "magic",
+      "copies": 1,
+      "cost": {
+        "resource": "mana",
+        "amount": 1
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "block_scaled_damage"
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "卡牌全套小数值",
+        "row": 58
+      },
+      "notes": []
+    },
+    {
+      "id": "magic_biochemical_enchant",
+      "name": {
+        "zhCN": "生化附魔",
+        "en": "biochemical enchant"
+      },
+      "description": {
+        "en": "Your next attack adds poison equal to five times the current poison stacks."
+      },
+      "category": "magic",
+      "copies": 1,
+      "cost": {
+        "resource": "mana",
+        "amount": 1
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "poison_scaled_next_attack",
+          "multiplier": 5
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "卡牌全套小数值",
+        "row": 59
+      },
+      "notes": []
+    },
+    {
+      "id": "magic_poison_dragon",
+      "name": {
+        "zhCN": "毒龙",
+        "en": "poison dragon"
+      },
+      "description": {
+        "en": "Poison ticks deal 5 additional damage until the mark disappears."
+      },
+      "category": "magic",
+      "copies": 1,
+      "cost": {
+        "resource": "mana",
+        "amount": 1
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "poison_damage_bonus",
+          "amount": 5
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "卡牌全套小数值",
+        "row": 60
+      },
+      "notes": []
     }
   ]
 }

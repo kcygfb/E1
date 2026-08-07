@@ -21,6 +21,27 @@ namespace KiKs.Combat.Tests
         }
 
         [Test]
+        public void TakeFromDiscard_RemovesTopDiscardCards_AndReturnAddsThemBack()
+        {
+            var deck = new DeckState(CreateCards(3), 123, false);
+            var firstDraw = deck.Draw(2, 10);
+            var firstCard = firstDraw.DrawnCards[0];
+            var secondCard = firstDraw.DrawnCards[1];
+            deck.DiscardFromHand(firstCard.InstanceId, out _);
+            deck.DiscardFromHand(secondCard.InstanceId, out _);
+
+            var taken = deck.TakeFromDiscard(1);
+
+            Assert.That(taken.Count, Is.EqualTo(1));
+            Assert.That(taken[0], Is.SameAs(secondCard));
+            Assert.That(deck.DiscardPile.Count, Is.EqualTo(1));
+
+            deck.ReturnToDiscard(taken[0]);
+            Assert.That(deck.DiscardPile.Count, Is.EqualTo(2));
+            Assert.That(deck.DiscardPile[1], Is.SameAs(secondCard));
+        }
+
+        [Test]
         public void Draw_WhenHandIsFull_SendsOverflowCardsToDiscardPile()
         {
             var deck = new DeckState(CreateCards(5), 123, false);

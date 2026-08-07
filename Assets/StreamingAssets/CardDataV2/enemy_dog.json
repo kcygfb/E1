@@ -5,51 +5,108 @@
   "cards": [
     {
       "id": "enemy_dog_tearing",
-      "name": { "zhCN": "撕咬", "en": "tearing" },
-      "description": { "en": "A tearing bite that harms health and guard." },
+      "name": {
+        "zhCN": "撕咬",
+        "en": "tearing"
+      },
+      "description": {
+        "en": "Bite for damage and toughness damage."
+      },
       "category": "enemy_dog",
       "copies": 1,
-      "image": "Art/Cards/狗撕咬.png",
-      "cost": { "resource": "action_point", "amount": 1 },
+      "cost": {
+        "resource": "action_point",
+        "amount": 1
+      },
       "special": false,
       "effects": [
-        { "type": "damage", "amount": { "base": 6 }, "hits": 1 },
-        { "type": "toughness_damage", "amount": { "base": 2 }, "unit": "points" }
+        {
+          "type": "damage",
+          "amount": 6,
+          "hits": 1
+        },
+        {
+          "type": "toughness_damage",
+          "amount": 2
+        }
       ],
-      "source": { "workbook": "Killkiss全套卡牌.xlsx", "sheet": "怪", "row": 3 },
-      "notes": []
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "怪",
+        "row": 3
+      },
+      "notes": [],
+      "image": "Art/Cards/狗撕咬.png"
     },
     {
       "id": "enemy_dog_scratching",
-      "name": { "zhCN": "抓挠", "en": "scratching" },
-      "description": { "en": "Three claws that leave a bleeding wound." },
+      "name": {
+        "zhCN": "抓挠",
+        "en": "scratching"
+      },
+      "description": {
+        "en": "Scratch three times and inflict bleed."
+      },
       "category": "enemy_dog",
       "copies": 1,
-      "image": "Art/Cards/狗抓挠.png",
-      "cost": { "resource": "action_point", "amount": 1 },
+      "cost": {
+        "resource": "action_point",
+        "amount": 1
+      },
       "special": false,
       "effects": [
-        { "type": "damage", "amount": { "base": 2 }, "hits": 3 },
-        { "type": "bleed", "amount": { "base": 2 } }
+        {
+          "type": "damage",
+          "amount": 2,
+          "hits": 3
+        },
+        {
+          "type": "bleed",
+          "amount": 2
+        }
       ],
-      "source": { "workbook": "Killkiss全套卡牌.xlsx", "sheet": "怪", "row": 4 },
-      "notes": []
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "怪",
+        "row": 4
+      },
+      "notes": [],
+      "image": "Art/Cards/狗抓挠.png"
     },
     {
       "id": "enemy_dog_double_hit",
-      "name": { "zhCN": "双重打击", "en": "double hit" },
-      "description": { "en": "Two heavy blows that chip toughness." },
+      "name": {
+        "zhCN": "双重打击",
+        "en": "double hit"
+      },
+      "description": {
+        "en": "Strike twice with a heavy attack."
+      },
       "category": "enemy_dog",
       "copies": 1,
-      "image": "Art/Cards/狗双重打击.png",
-      "cost": { "resource": "action_point", "amount": 2 },
+      "cost": {
+        "resource": "action_point",
+        "amount": 2
+      },
       "special": false,
       "effects": [
-        { "type": "damage", "amount": { "base": 7 }, "hits": 2 },
-        { "type": "toughness_damage", "amount": { "base": 2 }, "unit": "points" }
+        {
+          "type": "damage",
+          "amount": 7,
+          "hits": 2
+        },
+        {
+          "type": "toughness_damage",
+          "amount": 2
+        }
       ],
-      "source": { "workbook": "Killkiss全套卡牌.xlsx", "sheet": "怪", "row": 5 },
-      "notes": []
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "怪",
+        "row": 5
+      },
+      "notes": [],
+      "image": "Art/Cards/狗双重打击.png"
     }
   ]
 }

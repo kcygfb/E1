@@ -66,6 +66,9 @@ namespace KiKs.Combat
     /// </summary>
     public sealed class CombatFlowController
     {
+        private const int DefaultTimedEffectTurns = 1;
+        private const int MaxDiscardReplayDepth = 3;
+
         private readonly BattleState _state;
 
         public CombatFlowController(BattleState state)
@@ -80,7 +83,8 @@ namespace KiKs.Combat
             DeckState sourceDeck,
             int handLimit,
             bool allowExecution,
-            List<CombatEvent> events)
+            List<CombatEvent> events,
+            int replayDepth = 0)
         {
             if (source == null) throw new ArgumentNullException(nameof(source));
             if (target == null) throw new ArgumentNullException(nameof(target));
@@ -104,7 +108,7 @@ namespace KiKs.Combat
 
             foreach (var effect in card.Spec.Effects)
             {
-                ResolveEffect(source, target, card, sourceDeck, handLimit, effect, result, events);
+                ResolveEffect(source, target, card, sourceDeck, handLimit, allowExecution, effect, result, events, replayDepth);
                 if (target.IsDead || source.IsDead) break;
             }
 
@@ -146,7 +150,7 @@ namespace KiKs.Combat
                 return result;
             }
 
-            result.TotalDamage += ApplyDamage(
+            result.TotalDamage += ResolveAttackDamage(
                 source,
                 target,
                 damage,
@@ -184,7 +188,7 @@ namespace KiKs.Combat
             bool applyMitigation,
             List<CombatEvent> events)
         {
-            return ApplyDamage(
+            return ResolveAttackDamage(
                 source,
                 target,
                 amount,
@@ -236,6 +240,24 @@ namespace KiKs.Combat
             return result;
         }
 
+        public int ResolveCompanionResourceBonus(
+            CombatantState source,
+            List<CombatEvent> events)
+        {
+            if (source == null) throw new ArgumentNullException(nameof(source));
+            if (events == null) throw new ArgumentNullException(nameof(events));
+            if (!source.TryConsumeCompanionTurn()) return 0;
+
+            var bonus = _state.Rules.SummonedCompanionResourceBonus;
+            events.Add(new CombatEvent(
+                CombatEventType.StatusApplied,
+                source.Id,
+                source.Id,
+                amount: bonus,
+                message: "Summoned companion provided a resource bonus."));
+            return bonus;
+        }
+
         public void ProcessStatusTicks(
             CombatantState target,
             string sourceId,
@@ -270,9 +292,11 @@ namespace KiKs.Combat
             CardInstance card,
             DeckState sourceDeck,
             int handLimit,
+            bool allowExecution,
             CardEffectSpec effect,
             CombatFlowResult result,
-            List<CombatEvent> events)
+            List<CombatEvent> events,
+            int replayDepth)
         {
             switch (effect.Type)
             {
@@ -348,7 +372,7 @@ namespace KiKs.Combat
 
                 case CardEffectType.BleedScaledDamage:
                     var requested = (int)Math.Ceiling(target.BleedStacks * effect.Multiplier);
-                    result.TotalDamage += ApplyDamage(
+                    result.TotalDamage += ResolveAttackDamage(
                         source,
                         target,
                         requested,
@@ -376,6 +400,17 @@ namespace KiKs.Combat
                         "Block points gained.", events);
                     break;
 
+                case CardEffectType.Heal:
+                    var healing = source.Heal(effect.Amount.Resolve(card.IsUpgraded));
+                    events.Add(new CombatEvent(
+                        CombatEventType.HealingApplied,
+                        source.Id,
+                        source.Id,
+                        card.InstanceId,
+                        healing,
+                        "Healing applied."));
+                    break;
+
                 case CardEffectType.GainResource:
                     source.AddActionPoints(effect.Amount.Resolve(card.IsUpgraded));
                     events.Add(new CombatEvent(
@@ -386,16 +421,73 @@ namespace KiKs.Combat
                         message: "Action points gained."));
                     break;
 
-                case CardEffectType.Vulnerability:
-                case CardEffectType.Immunity:
-                case CardEffectType.SummonCompanion:
-                case CardEffectType.PlayCardsFromDiscard:
-                    events.Add(new CombatEvent(
-                        CombatEventType.EffectNotImplemented,
-                        source.Id,
-                        target.Id,
+                case CardEffectType.BlockScaledDamage:
+                    var blockScaledDamage = source.BlockPoints;
+                    result.TotalDamage += ResolveAttackDamage(
+                        source,
+                        target,
+                        blockScaledDamage,
                         card.InstanceId,
-                        message: effect.Type + " is parsed but awaits its dedicated rule."));
+                        "Block-scaled damage resolved from " + blockScaledDamage + " block.",
+                        true,
+                        events,
+                        isUpgraded: card.IsUpgraded);
+                    break;
+
+                case CardEffectType.PoisonScaledNextAttack:
+                    var nextAttackPoisonMultiplier = effect.Multiplier > 0d
+                        ? effect.Multiplier
+                        : Math.Max(1, effect.Amount.Resolve(card.IsUpgraded));
+                    source.AddNextAttackPoisonMultiplier(nextAttackPoisonMultiplier);
+                    AddStatusEvent(
+                        source,
+                        source,
+                        card,
+                        (int)Math.Ceiling(source.NextAttackPoisonMultiplier),
+                        "Next attack poison enchant applied.",
+                        events);
+                    break;
+
+                case CardEffectType.PoisonDamageBonus:
+                    var poisonBonus = effect.Amount.Resolve(card.IsUpgraded);
+                    target.AddPoisonDamageBonus(poisonBonus);
+                    AddStatusEvent(source, target, card, target.PoisonDamageBonus,
+                        "Poison tick damage bonus applied.", events);
+                    break;
+
+                case CardEffectType.Vulnerability:
+                    var vulnerability = effect.Amount.Resolve(card.IsUpgraded);
+                    target.AddVulnerability(vulnerability, DefaultTimedEffectTurns);
+                    AddStatusEvent(source, target, card, target.VulnerabilityPercent,
+                        "Vulnerability applied.", events);
+                    break;
+
+                case CardEffectType.Immunity:
+                    var immunityTurns = Math.Max(1, effect.Amount.Resolve(card.IsUpgraded));
+                    source.AddImmunity(immunityTurns);
+                    AddStatusEvent(source, source, card, source.ImmunityTurns,
+                        "Immunity applied.", events);
+                    break;
+
+                case CardEffectType.SummonCompanion:
+                    var companionTurns = Math.Max(1, effect.Amount.Resolve(card.IsUpgraded));
+                    source.AddCompanionTurns(companionTurns);
+                    AddStatusEvent(source, source, card, source.CompanionTurns,
+                        "Companion summoned.", events);
+                    break;
+
+                case CardEffectType.PlayCardsFromDiscard:
+                    ResolveCardsFromDiscard(
+                        source,
+                        target,
+                        card,
+                        sourceDeck,
+                        handLimit,
+                        allowExecution,
+                        effect,
+                        result,
+                        events,
+                        replayDepth);
                     break;
             }
         }
@@ -424,6 +516,8 @@ namespace KiKs.Combat
                     isUpgraded: card.IsUpgraded);
             }
 
+            if (hits > 0)
+                ApplyPendingNextAttackPoison(source, target, card.InstanceId, amount, events);
             return totalDamage;
         }
 
@@ -440,7 +534,10 @@ namespace KiKs.Combat
             var requestedDamage = percentOfMaxHealth
                 ? (int)Math.Ceiling(target.MaxHealth * value / 100d)
                 : value;
-            var actualDamage = ApplyDamage(
+            if (!percentOfMaxHealth && target.BleedStacks > 0)
+                requestedDamage *= 2;
+
+            var actualDamage = ResolveAttackDamage(
                 source,
                 target,
                 requestedDamage,
@@ -461,6 +558,105 @@ namespace KiKs.Combat
                 "Life steal healed " + source.DisplayName + "."));
         }
 
+        private void ResolveCardsFromDiscard(
+            CombatantState source,
+            CombatantState selectedTarget,
+            CardInstance sourceCard,
+            DeckState sourceDeck,
+            int handLimit,
+            bool allowExecution,
+            CardEffectSpec effect,
+            CombatFlowResult result,
+            List<CombatEvent> events,
+            int replayDepth)
+        {
+            if (sourceDeck == null)
+            {
+                AddStatusEvent(source, source, sourceCard, 0,
+                    "No discard pile is available for replay.", events);
+                return;
+            }
+
+            if (replayDepth >= MaxDiscardReplayDepth)
+            {
+                AddStatusEvent(source, source, sourceCard, replayDepth,
+                    "Discard replay depth limit reached.", events);
+                return;
+            }
+
+            var requestedCount = Math.Max(1, effect.Amount.Resolve(sourceCard.IsUpgraded));
+            var replayedCount = 0;
+            for (var i = 0; i < requestedCount && !source.IsDead; i++)
+            {
+                var cards = sourceDeck.TakeFromDiscard(1);
+                if (cards.Count == 0) break;
+
+                var replayedCard = cards[0];
+                var replayTarget = ResolveReplayTarget(source, selectedTarget, replayedCard);
+                if (replayTarget == null || replayTarget.IsDead)
+                {
+                    sourceDeck.ReturnToDiscard(replayedCard);
+                    continue;
+                }
+
+                events.Add(new CombatEvent(
+                    CombatEventType.CardPlayed,
+                    source.Id,
+                    replayTarget.Id,
+                    replayedCard.InstanceId,
+                    0,
+                    source.DisplayName + " replayed " + replayedCard.Spec.DisplayName +
+                    " from the discard pile."));
+
+                var replayResult = ResolveCard(
+                    source,
+                    replayTarget,
+                    replayedCard,
+                    sourceDeck,
+                    handLimit,
+                    allowExecution,
+                    events,
+                    replayDepth + 1);
+                MergeFlowResult(result, replayResult);
+
+                sourceDeck.ReturnToDiscard(replayedCard);
+                events.Add(new CombatEvent(
+                    CombatEventType.CardDiscarded,
+                    source.Id,
+                    cardInstanceId: replayedCard.InstanceId,
+                    message: "Replayed card returned to the discard pile."));
+                replayedCount++;
+
+                if (source.IsDead || replayTarget.IsDead) break;
+            }
+
+            if (replayedCount == 0)
+            {
+                AddStatusEvent(source, source, sourceCard, 0,
+                    "No cards were available to replay from discard.", events);
+            }
+        }
+
+        private CombatantState ResolveReplayTarget(
+            CombatantState source,
+            CombatantState selectedTarget,
+            CardInstance replayedCard)
+        {
+            if (replayedCard.Spec.TargetType == CardTargetType.Self) return source;
+            if (selectedTarget != null && !selectedTarget.IsDead && selectedTarget.Side != source.Side)
+                return selectedTarget;
+            return _state.FindFirstLivingOpponent(source);
+        }
+
+        private static void MergeFlowResult(CombatFlowResult destination, CombatFlowResult replay)
+        {
+            destination.TotalDamage += replay.TotalDamage;
+            destination.ToughnessBroken |= replay.ToughnessBroken;
+            destination.WasNullified |= replay.WasNullified;
+            destination.SourceDied |= replay.SourceDied;
+            destination.TargetDied |= replay.TargetDied;
+        }
+
         private bool ApplyToughnessDamage(
             CombatantState source,
             CombatantState target,
@@ -470,6 +666,18 @@ namespace KiKs.Combat
             string sourceActionId,
             List<CombatEvent> events)
         {
+            if (target.IsImmune)
+            {
+                events.Add(new CombatEvent(
+                    CombatEventType.StatusApplied,
+                    source?.Id,
+                    target.Id,
+                    sourceActionId,
+                    target.ImmunityTurns,
+                    "Toughness damage prevented by immunity."));
+                return false;
+            }
+
             var amount = unit == ValueUnit.Percent
                 ? (int)Math.Ceiling(target.MaxToughness * rawAmount / 100d)
                 : rawAmount;
@@ -528,6 +736,16 @@ namespace KiKs.Combat
 
             if (target.IsDead) return;
 
+            // 处决造成大量伤害后，眩晕目标一回合（停止行动）
+            target.AddStun(1);
+            events.Add(new CombatEvent(
+                CombatEventType.StunApplied,
+                source.Id,
+                target.Id,
+                sourceActionId,
+                target.StunTurns,
+                "Execution stunned " + target.DisplayName + " for 1 turn."));
+
             var restored = target.RestoreToughness(_state.Rules.GetToughnessRestoreAmount(target));
             events.Add(new CombatEvent(
                 CombatEventType.ToughnessChanged,
@@ -561,6 +779,61 @@ namespace KiKs.Combat
             result.SourceDied = source.IsDead;
         }
 
+        private int ResolveAttackDamage(
+            CombatantState source,
+            CombatantState target,
+            int requestedDamage,
+            string sourceActionId,
+            string message,
+            bool applyMitigation,
+            List<CombatEvent> events,
+            string sourceIdOverride = null,
+            CombatEventType eventType = CombatEventType.DamageApplied,
+            bool isUpgraded = false)
+        {
+            var actualDamage = ApplyDamage(
+                source,
+                target,
+                requestedDamage,
+                sourceActionId,
+                message,
+                applyMitigation,
+                events,
+                sourceIdOverride,
+                eventType,
+                isUpgraded);
+
+            if (applyMitigation)
+                ApplyPendingNextAttackPoison(source, target, sourceActionId, requestedDamage, events);
+            return actualDamage;
+        }
+
+        private void ApplyPendingNextAttackPoison(
+            CombatantState source,
+            CombatantState target,
+            string sourceActionId,
+            int attemptedDamage,
+            List<CombatEvent> events)
+        {
+            if (source == null || target == null || source.Side == target.Side) return;
+            if (attemptedDamage <= 0 || source.NextAttackPoisonMultiplier <= 0d) return;
+
+            var multiplier = source.ConsumeNextAttackPoisonMultiplier();
+            if (target.IsDead || target.IsImmune) return;
+
+            var addedStacks = (int)Math.Ceiling(target.PoisonStacks * multiplier);
+            if (addedStacks <= 0) return;
+
+            target.AddPoisonStacks(addedStacks);
+            events.Add(new CombatEvent(
+                CombatEventType.StatusApplied,
+                source.Id,
+                target.Id,
+                sourceActionId,
+                target.PoisonStacks,
+                "Next attack poison stacks applied."));
+        }
+
         private int ApplyDamage(
             CombatantState source,
             CombatantState target,
@@ -576,19 +849,36 @@ namespace KiKs.Combat
             if (target == null) throw new ArgumentNullException(nameof(target));
             if (requestedDamage < 0) throw new ArgumentOutOfRangeException(nameof(requestedDamage));
 
+            var sourceId = sourceIdOverride ?? source?.Id;
+            if (target.IsImmune)
+            {
+                events.Add(new CombatEvent(
+                    eventType,
+                    sourceId,
+                    target.Id,
+                    sourceActionId,
+                    0,
+                    "Damage prevented by immunity.",
+                    isUpgraded: isUpgraded));
+                return 0;
+            }
+
             var damageAfterReduction = requestedDamage;
             var blockedDamage = 0;
 
             if (applyMitigation)
             {
+                if (target.VulnerabilityPercent > 0)
+                    damageAfterReduction = (int)Math.Ceiling(
+                        damageAfterReduction * (100 + target.VulnerabilityPercent) / 100d);
+
                 damageAfterReduction = (int)Math.Ceiling(
-                    requestedDamage * (100 - target.DamageReductionPercent) / 100d);
+                    damageAfterReduction * (100 - target.DamageReductionPercent) / 100d);
                 blockedDamage = target.ConsumeBlockPoints(Math.Max(0, damageAfterReduction));
             }
 
             var wasDead = target.IsDead;
             var actualDamage = target.ApplyDamage(Math.Max(0, damageAfterReduction - blockedDamage));
-            var sourceId = sourceIdOverride ?? source?.Id;
 
             events.Add(new CombatEvent(
                 eventType,
@@ -625,9 +915,11 @@ namespace KiKs.Combat
                 effect.Type == CardEffectType.Vulnerability ||
                 effect.Type == CardEffectType.Bleed ||
                 effect.Type == CardEffectType.Poison ||
+                effect.Type == CardEffectType.PoisonDamageBonus ||
                 effect.Type == CardEffectType.BleedScaledDamage ||
                 effect.Type == CardEffectType.LifeSteal ||
-                effect.Type == CardEffectType.LifeStealMaxHealth);
+                effect.Type == CardEffectType.LifeStealMaxHealth ||
+                effect.Type == CardEffectType.BlockScaledDamage);
         }
 
         private static void AddStatusEvent(

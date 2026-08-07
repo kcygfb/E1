@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
 using KiKs.UI;
@@ -12,6 +13,13 @@ namespace KiKs.Combat
     public class CoffeeSelectionUI : MonoBehaviour
     {
         private static readonly string[] AvailableCoffeeIds = { "PourOver", "BloodGarment" };
+
+        [System.Serializable]
+        private sealed class CoffeeTutorialJson
+        {
+            public string coffeeId;
+            public TutorialHintJson tutorial;
+        }
 
         private static Font _uiFont;
         private static Font UIFont
@@ -52,8 +60,13 @@ namespace KiKs.Combat
         [SerializeField] private Button openPopupButton;
         [SerializeField] private Button beginButton;
 
+        [Header("Tutorial")]
+        [SerializeField] private TutorialController tutorialController;
+        [SerializeField] private string coffeeTutorialDirectory = "CoffeeData";
+
         private const int MaxCoffees = 2;
         private readonly List<string> selectedCoffeeIds = new();
+        private readonly Dictionary<string, TutorialHintJson> coffeeTutorials = new();
 
         private Sprite GetIconForCoffee(string coffeeId)
         {
@@ -67,6 +80,9 @@ namespace KiKs.Combat
 
         private void Start()
         {
+            if (tutorialController == null)
+                tutorialController = FindFirstObjectByType<TutorialController>();
+
             if (openPopupButton != null)
                 openPopupButton.onClick.AddListener(OpenPopup);
             if (beginButton != null)
@@ -76,6 +92,12 @@ namespace KiKs.Combat
 
             PopulateCoffeeList();
             RefreshUI();
+        }
+
+        private void OnDestroy()
+        {
+            if (tutorialController != null)
+                tutorialController.UnregisterJsonCallouts(this);
         }
 
         private void OpenPopup()
@@ -102,6 +124,11 @@ namespace KiKs.Combat
         {
             if (coffeeListContent == null) return;
 
+            if (tutorialController != null)
+                tutorialController.UnregisterJsonCallouts(this);
+
+            LoadCoffeeTutorials();
+
             for (int i = coffeeListContent.childCount - 1; i >= 0; i--)
                 Destroy(coffeeListContent.GetChild(i).gameObject);
 
@@ -124,10 +151,46 @@ namespace KiKs.Combat
                 btn.onClick.AddListener(() => OnCoffeeClicked(id));
 
                 UpdateItemHighlight(go, coffeeId);
+
+                var tutorial = GetCoffeeTutorial(coffeeId);
+                if (tutorialController != null)
+                    tutorialController.RegisterJsonCallout(
+                        this,
+                        go.GetComponent<RectTransform>(),
+                        tutorial);
             }
         }
 
         /// <summary>预制体实例化后，�?coffeeId 设置图标/名字/描述�?/summary>
+        // Combat cannot reference CoffeeShop's loader assembly, so this reads the same coffee JSON files.
+        private void LoadCoffeeTutorials()
+        {
+            coffeeTutorials.Clear();
+            if (string.IsNullOrWhiteSpace(coffeeTutorialDirectory)) return;
+
+            var directory = Path.Combine(Application.streamingAssetsPath, coffeeTutorialDirectory);
+            if (!Directory.Exists(directory)) return;
+
+            foreach (var filePath in Directory.GetFiles(directory, "*.json", SearchOption.TopDirectoryOnly))
+            {
+                try
+                {
+                    var data = JsonUtility.FromJson<CoffeeTutorialJson>(File.ReadAllText(filePath));
+                    if (data != null && !string.IsNullOrWhiteSpace(data.coffeeId))
+                        coffeeTutorials[data.coffeeId] = data.tutorial;
+                }
+                catch (System.Exception exception)
+                {
+                    Debug.LogWarning($"[CoffeeSelectionUI] Cannot read tutorial data from {Path.GetFileName(filePath)}: {exception.Message}", this);
+                }
+            }
+        }
+
+        private TutorialHintJson GetCoffeeTutorial(string coffeeId)
+        {
+            return coffeeTutorials.TryGetValue(coffeeId, out var tutorial) ? tutorial : null;
+        }
+
         private void ApplyCoffeeDataToItem(GameObject go, string coffeeId)
         {
             var icon = go.transform.Find("Icon");

@@ -366,6 +366,172 @@ namespace KiKs.Combat.Tests
         }
 
         [Test]
+        public void BlockScaledDamage_UsesCurrentBlockWithoutConsumingIt()
+        {
+            var block = CreateCard("block", 0, CardResourceType.ActionPoint,
+                CreateEffect(CardEffectType.BlockDamage, amount: 12));
+            var shieldBash = CreateCard("shield_bash", 0, CardResourceType.ActionPoint,
+                CreateEffect(CardEffectType.BlockScaledDamage));
+            var engine = CreateEngine(new[] { block, shieldBash, block, shieldBash });
+            engine.StartBattle();
+
+            var blockCard = engine.State.Deck.Hand.First(card => card.Spec.Id == "block");
+            Assert.That(engine.PlayCard(blockCard.InstanceId, null).Success, Is.True);
+            Assert.That(engine.State.Player.BlockPoints, Is.EqualTo(12));
+
+            var bashCard = engine.State.Deck.Hand.First(card => card.Spec.Id == "shield_bash");
+            Assert.That(engine.PlayCard(bashCard.InstanceId, "enemy").Success, Is.True);
+
+            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(88));
+            Assert.That(engine.State.Player.BlockPoints, Is.EqualTo(12));
+        }
+
+        [Test]
+        public void PoisonEnchant_AddsStacksFromCurrentTargetPoisonOnNextAttack()
+        {
+            var poison = CreateCard("poison", 0, CardResourceType.ActionPoint,
+                CreateEffect(CardEffectType.Poison, amount: 2));
+            var enchant = CreateCard("enchant", 0, CardResourceType.ActionPoint,
+                CreateEffect(CardEffectType.PoisonScaledNextAttack, multiplier: 5));
+            var attack = CreateDamageCard("attack", 0, 1);
+            var engine = CreateEngine(new[] { poison, enchant, attack, attack });
+            engine.StartBattle();
+
+            Assert.That(engine.PlayCard(
+                engine.State.Deck.Hand.First(card => card.Spec.Id == "poison").InstanceId,
+                "enemy").Success, Is.True);
+            Assert.That(engine.PlayCard(
+                engine.State.Deck.Hand.First(card => card.Spec.Id == "enchant").InstanceId,
+                null).Success, Is.True);
+            Assert.That(engine.PlayCard(
+                engine.State.Deck.Hand.First(card => card.Spec.Id == "attack").InstanceId,
+                "enemy").Success, Is.True);
+
+            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(99));
+            Assert.That(engine.State.Enemies[0].PoisonStacks, Is.EqualTo(12));
+            Assert.That(engine.State.Player.NextAttackPoisonMultiplier, Is.EqualTo(0d));
+        }
+
+        [Test]
+        public void PoisonDamageBonus_IncreasesPoisonTicksUntilPoisonExpires()
+        {
+            var poison = CreateCard("poison", 0, CardResourceType.ActionPoint,
+                CreateEffect(CardEffectType.Poison, amount: 2));
+            var dragon = CreateCard("dragon", 0, CardResourceType.ActionPoint,
+                CreateEffect(CardEffectType.PoisonDamageBonus, amount: 5));
+            var engine = CreateEngine(new[] { poison, dragon, poison, dragon });
+            engine.StartBattle();
+
+            Assert.That(engine.PlayCard(
+                engine.State.Deck.Hand.First(card => card.Spec.Id == "poison").InstanceId,
+                "enemy").Success, Is.True);
+            Assert.That(engine.PlayCard(
+                engine.State.Deck.Hand.First(card => card.Spec.Id == "dragon").InstanceId,
+                "enemy").Success, Is.True);
+
+            engine.EndPlayerTurn();
+            engine.CompleteEnemyTurn();
+            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(93));
+            Assert.That(engine.State.Enemies[0].PoisonStacks, Is.EqualTo(1));
+            Assert.That(engine.State.Enemies[0].PoisonDamageBonus, Is.EqualTo(5));
+
+            engine.EndPlayerTurn();
+            engine.CompleteEnemyTurn();
+            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(87));
+            Assert.That(engine.State.Enemies[0].PoisonStacks, Is.EqualTo(0));
+            Assert.That(engine.State.Enemies[0].PoisonDamageBonus, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void SummonCompanion_GrantsBonusManaForThreePlayerTurns()
+        {
+            var summon = CreateCard("summon", 0, CardResourceType.ActionPoint,
+                CreateEffect(CardEffectType.SummonCompanion, amount: 3));
+            var engine = CreateEngine(summon, 8);
+            engine.StartBattle();
+
+            Assert.That(engine.PlayCard(
+                engine.State.Deck.Hand.First(card => card.Spec.Id == "summon").InstanceId,
+                null).Success, Is.True);
+            Assert.That(engine.State.Player.CompanionTurns, Is.EqualTo(3));
+
+            for (var turn = 0; turn < 3; turn++)
+            {
+                engine.EndPlayerTurn();
+                engine.CompleteEnemyTurn();
+                Assert.That(engine.State.Mana.Current, Is.EqualTo(2));
+                Assert.That(engine.State.Mana.BonusPerTurn, Is.EqualTo(1));
+            }
+
+            engine.EndPlayerTurn();
+            engine.CompleteEnemyTurn();
+            Assert.That(engine.State.Mana.Current, Is.EqualTo(1));
+            Assert.That(engine.State.Player.CompanionTurns, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void VulnerabilityAndImmunity_ModifySharedDamageFlow()
+        {
+            var vulnerable = CreateCard("vulnerable", 0, CardResourceType.ActionPoint,
+                CreateEffect(CardEffectType.Vulnerability, amount: 50));
+            var attack = CreateDamageCard("attack", 0, 10);
+            var immune = CreateCard("immune", 0, CardResourceType.ActionPoint,
+                CreateEffect(CardEffectType.Immunity, amount: 1));
+            var engine = CreateEngine(new[] { vulnerable, attack, immune, attack });
+            engine.StartBattle();
+
+            Assert.That(engine.PlayCard(
+                engine.State.Deck.Hand.First(card => card.Spec.Id == "vulnerable").InstanceId,
+                "enemy").Success, Is.True);
+            Assert.That(engine.PlayCard(
+                engine.State.Deck.Hand.First(card => card.Spec.Id == "attack").InstanceId,
+                "enemy").Success, Is.True);
+            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(85));
+
+            Assert.That(engine.PlayCard(
+                engine.State.Deck.Hand.First(card => card.Spec.Id == "immune").InstanceId,
+                null).Success, Is.True);
+            engine.EndPlayerTurn();
+            Assert.That(engine.ResolveEnemyAttack("enemy", 20).Success, Is.True);
+            Assert.That(engine.State.Player.CurrentHealth, Is.EqualTo(30));
+        }
+
+        [Test]
+        public void PlayCardsFromDiscard_ReplaysTopDiscardCardForFree()
+        {
+            var attack = CreateDamageCard("attack", 0, 5);
+            var replay = CreateCard("replay", 0, CardResourceType.ActionPoint,
+                CreateEffect(CardEffectType.PlayCardsFromDiscard, amount: 1));
+            var engine = CreateEngine(new[] { attack, replay, attack, replay });
+            engine.StartBattle();
+
+            var attackCard = engine.State.Deck.Hand.First(card => card.Spec.Id == "attack");
+            Assert.That(engine.PlayCard(attackCard.InstanceId, "enemy").Success, Is.True);
+            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(95));
+
+            var replayCard = engine.State.Deck.Hand.First(card => card.Spec.Id == "replay");
+            var result = engine.PlayCard(replayCard.InstanceId, null);
+
+            Assert.That(result.Success, Is.True);
+            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(90));
+            Assert.That(result.Events.Count(e => e.Type == CombatEventType.CardPlayed), Is.EqualTo(2));
+        }
+
+        [Test]
+        public void LifeSteal_DoublesDamageAgainstBleedingTargets()
+        {
+            var lifesteal = CreateCard("lifesteal", 0, CardResourceType.ActionPoint,
+                CreateEffect(CardEffectType.LifeSteal, amount: 9));
+            var engine = CreateEngine(lifesteal, 4);
+            engine.StartBattle();
+            engine.State.Enemies[0].AddBleedStacks(1);
+
+            Assert.That(engine.PlayCard(engine.State.Deck.Hand.First().InstanceId, "enemy").Success, Is.True);
+
+            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(82));
+        }
+
+        [Test]
         public void UpgradeCard_SpendsManaAndAppliesToTheNextPlayOnly()
         {
             var engine = CreateEngine(CreateDamageCard("upgradeable", 1, 3, 9));
@@ -445,7 +611,7 @@ namespace KiKs.Combat.Tests
         }
         [TestCase(EnemyRank.Elite)]
         [TestCase(EnemyRank.Boss)]
-        public void Execution_DealsSixtyDamageWithoutStun_ForEveryEnemyRank(EnemyRank enemyRank)
+        public void Execution_DealsSixtyDamageAndStunsOneTurn_ForEveryEnemyRank(EnemyRank enemyRank)
         {
             var engine = CreateEngine(CreateToughnessCard("break", 1, 5), 4, enemyRank);
             engine.StartBattle();
@@ -456,7 +622,7 @@ namespace KiKs.Combat.Tests
             Assert.That(result.Success, Is.True);
             Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(40));
             Assert.That(engine.State.Enemies[0].CurrentToughness, Is.EqualTo(5));
-            Assert.That(engine.State.Enemies[0].StunTurns, Is.EqualTo(0));
+            Assert.That(engine.State.Enemies[0].StunTurns, Is.EqualTo(1));
             Assert.That(engine.State.Phase, Is.EqualTo(CombatPhase.PlayerInput));
         }
 
@@ -774,7 +940,9 @@ namespace KiKs.Combat.Tests
                 effect.Type == CardEffectType.BleedScaledDamage ||
                 effect.Type == CardEffectType.LifeSteal ||
                 effect.Type == CardEffectType.LifeStealMaxHealth ||
-                effect.Type == CardEffectType.Poison
+                effect.Type == CardEffectType.Poison ||
+                effect.Type == CardEffectType.PoisonDamageBonus ||
+                effect.Type == CardEffectType.BlockScaledDamage
                     ? CardTargetType.SingleEnemy
                     : CardTargetType.Self,
                 new[] { effect });

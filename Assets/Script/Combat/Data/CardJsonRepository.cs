@@ -116,6 +116,7 @@ namespace KiKs.Combat
             var special = OptionalBool(card, "special");
             var imagePath = OptionalString(card, "image");
             var descriptionEn = OptionalDescriptionEn(card);
+            var tutorial = OptionalTutorial(card);
             var rawEffects = RequiredList(card, "effects");
             if (rawEffects.Count == 0) throw new FormatException(id + " has no effects.");
 
@@ -135,7 +136,8 @@ namespace KiKs.Combat
                 effects,
                 deckCopies,
                 imagePath,
-                descriptionEn);
+                descriptionEn,
+                tutorial);
         }
 
         private static string OptionalDescriptionEn(Dictionary<string, object> card)
@@ -147,6 +149,22 @@ namespace KiKs.Combat
             return OptionalString(description, "en");
         }
 
+        private static TutorialHintJson OptionalTutorial(Dictionary<string, object> card)
+        {
+            if (!card.TryGetValue("tutorial", out var rawTutorial) || rawTutorial == null)
+                return null;
+
+            var tutorial = AsObject(rawTutorial, "tutorial");
+            var placement = OptionalString(tutorial, "placement");
+
+            return new TutorialHintJson
+            {
+                description = OptionalString(tutorial, "description"),
+                placement = string.IsNullOrWhiteSpace(placement) ? "Above" : placement,
+                offsetX = (float)OptionalDouble(tutorial, "offsetX", 0d),
+                offsetY = (float)OptionalDouble(tutorial, "offsetY", 20d)
+            };
+        }
         private static CardEffectSpec ParseEffect(Dictionary<string, object> effect)
         {
             var type = ParseEffectType(RequiredString(effect, "type"));
@@ -169,7 +187,9 @@ namespace KiKs.Combat
                 effect.Type == CardEffectType.BleedScaledDamage ||
                 effect.Type == CardEffectType.LifeSteal ||
                 effect.Type == CardEffectType.LifeStealMaxHealth ||
-                effect.Type == CardEffectType.Poison)
+                effect.Type == CardEffectType.Poison ||
+                effect.Type == CardEffectType.PoisonDamageBonus ||
+                effect.Type == CardEffectType.BlockScaledDamage)
                 ? CardTargetType.SingleEnemy
                 : CardTargetType.Self;
         }
@@ -195,6 +215,10 @@ namespace KiKs.Combat
                 case "life_steal": return CardEffectType.LifeSteal;
                 case "reflect_damage": return CardEffectType.ReflectDamage;
                 case "block_damage": return CardEffectType.BlockDamage;
+                case "block_scaled_damage": return CardEffectType.BlockScaledDamage;
+                case "heal": return CardEffectType.Heal;
+                case "poison_scaled_next_attack": return CardEffectType.PoisonScaledNextAttack;
+                case "poison_damage_bonus": return CardEffectType.PoisonDamageBonus;
                 case "gain_resource": return CardEffectType.GainResource;
                 case "play_cards_from_discard": return CardEffectType.PlayCardsFromDiscard;
                 default: throw new FormatException("Unknown card effect type: " + value);

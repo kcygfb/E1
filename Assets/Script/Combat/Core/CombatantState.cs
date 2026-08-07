@@ -19,12 +19,19 @@ namespace KiKs.Combat
         public int NullifyAttackCharges { get; private set; }
         public int DamageReductionPercent { get; private set; }
         public int DamageReductionTurns { get; private set; }
+        public int VulnerabilityPercent { get; private set; }
+        public int VulnerabilityTurns { get; private set; }
+        public int ImmunityTurns { get; private set; }
         public int SkipEnemyTurns { get; private set; }
         public int BleedStacks { get; private set; }
         public int PoisonStacks { get; private set; }
+        public int PoisonDamageBonus { get; private set; }
+        public double NextAttackPoisonMultiplier { get; private set; }
+        public int CompanionTurns { get; private set; }
         public int BlockPoints { get; private set; }
         public int PendingReflectDamage { get; private set; }
         public bool IsDead => CurrentHealth <= 0;
+        public bool IsImmune => ImmunityTurns > 0;
 
         public CombatantState(
             string id,
@@ -153,11 +160,35 @@ namespace KiKs.Combat
             DamageReductionTurns = Math.Max(DamageReductionTurns, turns);
         }
 
+        public void AddVulnerability(int percent, int turns)
+        {
+            if (percent < 0) throw new ArgumentOutOfRangeException(nameof(percent));
+            if (turns < 0) throw new ArgumentOutOfRangeException(nameof(turns));
+            VulnerabilityPercent = Math.Max(VulnerabilityPercent, percent);
+            VulnerabilityTurns = Math.Max(VulnerabilityTurns, turns);
+        }
+
+        public void AddImmunity(int turns)
+        {
+            if (turns < 0) throw new ArgumentOutOfRangeException(nameof(turns));
+            ImmunityTurns = Math.Max(ImmunityTurns, turns);
+        }
+
         public void AdvanceTurnStatuses()
         {
-            if (DamageReductionTurns <= 0) return;
-            DamageReductionTurns--;
-            if (DamageReductionTurns == 0) DamageReductionPercent = 0;
+            if (DamageReductionTurns > 0)
+            {
+                DamageReductionTurns--;
+                if (DamageReductionTurns == 0) DamageReductionPercent = 0;
+            }
+
+            if (VulnerabilityTurns > 0)
+            {
+                VulnerabilityTurns--;
+                if (VulnerabilityTurns == 0) VulnerabilityPercent = 0;
+            }
+
+            if (ImmunityTurns > 0) ImmunityTurns--;
         }
 
         public void AdvancePlayerTurnStatuses()
@@ -195,6 +226,38 @@ namespace KiKs.Combat
             PoisonStacks += amount;
         }
 
+        public void AddPoisonDamageBonus(int amount)
+        {
+            if (amount < 0) throw new ArgumentOutOfRangeException(nameof(amount));
+            PoisonDamageBonus = Math.Max(PoisonDamageBonus, amount);
+        }
+
+        public void AddNextAttackPoisonMultiplier(double multiplier)
+        {
+            if (multiplier < 0) throw new ArgumentOutOfRangeException(nameof(multiplier));
+            NextAttackPoisonMultiplier = Math.Max(NextAttackPoisonMultiplier, multiplier);
+        }
+
+        public double ConsumeNextAttackPoisonMultiplier()
+        {
+            var multiplier = NextAttackPoisonMultiplier;
+            NextAttackPoisonMultiplier = 0d;
+            return multiplier;
+        }
+
+        public void AddCompanionTurns(int turns)
+        {
+            if (turns < 0) throw new ArgumentOutOfRangeException(nameof(turns));
+            CompanionTurns += turns;
+        }
+
+        public bool TryConsumeCompanionTurn()
+        {
+            if (CompanionTurns <= 0) return false;
+            CompanionTurns--;
+            return true;
+        }
+
         /// <summary>
         /// Processes all ticking status effects (bleed, poison, etc.) and returns
         /// a list of tick results. Call once per combatant per turn start.
@@ -213,8 +276,10 @@ namespace KiKs.Combat
             // --- Poison: damage = stacks, stacks-- ---
             if (PoisonStacks > 0)
             {
-                results.Add(new StatusTickResult(StatusEffectType.Poison, PoisonStacks, PoisonStacks - 1));
+                var poisonDamage = PoisonStacks + PoisonDamageBonus;
+                results.Add(new StatusTickResult(StatusEffectType.Poison, poisonDamage, PoisonStacks - 1));
                 PoisonStacks--;
+                if (PoisonStacks == 0) PoisonDamageBonus = 0;
             }
 
             return results;

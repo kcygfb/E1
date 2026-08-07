@@ -13,6 +13,9 @@ public class CoffeeListPopulator : MonoBehaviour
     [Tooltip("咖啡按钮模板 Prefab，留空则用代码生成")]
     [SerializeField] private GameObject itemPrefab;
 
+    [Header("Tutorial")]
+    [SerializeField] private TutorialController tutorialController;
+
     [Header("Item Layout")]
     [SerializeField] private Vector2 itemSize = new(180, 180);
     [Tooltip("按钮之间的间距")]
@@ -39,6 +42,12 @@ public class CoffeeListPopulator : MonoBehaviour
     [Tooltip("锁定状态的文字颜色")]
     [SerializeField] private Color lockedTextColor = new(0.4f, 0.4f, 0.4f, 1f);
 
+    private void Awake()
+    {
+        if (tutorialController == null)
+            tutorialController = FindFirstObjectByType<TutorialController>();
+    }
+
     private void Start()
     {
         if (content != null)
@@ -59,6 +68,9 @@ public class CoffeeListPopulator : MonoBehaviour
             Debug.LogError("[CoffeeListPopulator] CoffeeDataLoader not ready");
             return;
         }
+
+        if (tutorialController != null)
+            tutorialController.UnregisterJsonCallouts(this);
 
         for (int i = content.childCount - 1; i >= 0; i--)
             Destroy(content.GetChild(i).gameObject);
@@ -142,6 +154,12 @@ public class CoffeeListPopulator : MonoBehaviour
         {
             button.interactable = false;
         }
+
+        if (tutorialController != null)
+            tutorialController.RegisterJsonCallout(
+                this,
+                go.GetComponent<RectTransform>(),
+                coffeeJson.tutorial);
     }
 
     private void OnCoffeeClicked(CoffeeDataJson coffeeJson)

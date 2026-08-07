@@ -7,14 +7,14 @@ using UnityEngine.UI;
 namespace KiKs.Combat
 {
     /// <summary>
-    /// 战斗单位血条 UI —— 纯 Fill 单层驱动。
-    /// 受击时 Fill 先闪烁高亮，再平滑下降至目标值。
+    /// 玩家血条 UI（玩家头顶）—— 纯 Fill 单层驱动。
+    /// 数据来源唯一：BattleController.PlayerHealthChanged（单条血量数据链路）。
+    /// 受击/持续伤害时 Fill 先闪烁高亮，再平滑下降至目标值；治疗时平滑上升。
     /// </summary>
     [DisallowMultipleComponent]
     public sealed class PlayerHealthBarUI : MonoBehaviour
     {
         [SerializeField] private BattleController battleController;
-        [SerializeField] private CombatantSide targetSide = CombatantSide.Player;
         [SerializeField] private Image fillImage;
         [SerializeField] private TMP_Text displayText;
 
@@ -74,7 +74,8 @@ namespace KiKs.Combat
                 yield return null;
 
             _initialRefreshRoutine = null;
-            RefreshInstant();
+            if (battleController?.State?.Player != null)
+                RefreshInstant(battleController.State.Player.CurrentHealth, battleController.State.Player.MaxHealth);
         }
 
         private void ResolveReferences()
@@ -112,80 +113,41 @@ namespace KiKs.Combat
 
             Unsubscribe();
             _subscribedController = battleController;
-            _subscribedController.CombatEventRaised += OnCombatEvent;
-            Debug.Log("[PlayerHealthBarUI] Subscribed to CombatEventRaised on " + battleController.name, this);
+            _subscribedController.PlayerHealthChanged += OnPlayerHealthChanged;
         }
 
         private void Unsubscribe()
         {
             if (_subscribedController != null)
-            {
-                _subscribedController.CombatEventRaised -= OnCombatEvent;
-                Debug.Log("[PlayerHealthBarUI] Unsubscribed from CombatEventRaised", this);
-            }
+                _subscribedController.PlayerHealthChanged -= OnPlayerHealthChanged;
 
             _subscribedController = null;
         }
 
-        private void OnCombatEvent(CombatEvent combatEvent)
+        private void OnPlayerHealthChanged(
+            int currentHealth,
+            int maxHealth,
+            BattleController.PlayerHealthChangeKind kind)
         {
-            Debug.Log("[PlayerHealthBarUI] OnCombatEvent: " + combatEvent.Type + " | Amount=" + combatEvent.Amount +
-                      " | TargetId=" + combatEvent.TargetId, this);
-
-            switch (combatEvent.Type)
+            switch (kind)
             {
-                case CombatEventType.BattleStarted:
-                    RefreshInstant();
+                case BattleController.PlayerHealthChangeKind.Initialize:
+                    RefreshInstant(currentHealth, maxHealth);
                     break;
-                case CombatEventType.DamageApplied:
-                    if (TryResolveEventTarget(combatEvent, out var damageTarget))
-                        RefreshWithDamageEffect(damageTarget);
+                case BattleController.PlayerHealthChangeKind.Damage:
+                case BattleController.PlayerHealthChangeKind.Tick:
+                    RefreshWithDamageEffect(currentHealth, maxHealth);
                     break;
-                case CombatEventType.HealingApplied:
-                    if (TryResolveEventTarget(combatEvent, out var healingTarget))
-                        RefreshWithHealEffect(healingTarget);
+                case BattleController.PlayerHealthChangeKind.Heal:
+                    RefreshWithHealEffect(currentHealth, maxHealth);
                     break;
             }
         }
 
-        private bool TryResolveEventTarget(CombatEvent combatEvent, out CombatantState target)
-        {
-            target = null;
-            var state = battleController != null ? battleController.State : null;
-            if (state == null)
-                return false;
-
-            if (targetSide == CombatantSide.Player)
-            {
-                target = state.Player;
-                return target != null && combatEvent.TargetId == target.Id;
-            }
-
-            target = state.FindEnemy(combatEvent.TargetId);
-            return target != null;
-        }
-
-        private CombatantState ResolveTrackedCombatant()
-        {
-            var state = battleController != null ? battleController.State : null;
-            if (state == null)
-                return null;
-
-            return targetSide == CombatantSide.Player
-                ? state.Player
-                : state.FindFirstLivingEnemy();
-        }
-
-        private void RefreshInstant()
+        private void RefreshInstant(int current, int maximum)
         {
             KillAllTween();
 
-            var combatant = ResolveTrackedCombatant();
-            if (combatant == null)
-                return;
-
-            var current = combatant.CurrentHealth;
-            var maximum = combatant.MaxHealth;
             var target = maximum > 0 ? (float)current / maximum : 0f;
 
             if (fillImage != null)
@@ -198,15 +160,10 @@ namespace KiKs.Combat
                 displayText.text = current + " / " + maximum;
 
             _displayedFillAmount = target;
-
-            Debug.Log("[PlayerHealthBarUI] RefreshInstant (" + targetSide + "): " + current + "/" + maximum +
-                      " | fillAmount=" + target.ToString("F2"), this);
         }
 
-        private void RefreshWithDamageEffect(CombatantState combatant)
+        private void RefreshWithDamageEffect(int current, int maximum)
         {
-            var current = combatant.CurrentHealth;
-            var maximum = combatant.MaxHealth;
             var target = maximum > 0 ? (float)current / maximum : 0f;
 
             if (displayText != null)
@@ -222,14 +179,9 @@ namespace KiKs.Combat
             if (_displayedFillAmount < 0f)
                 _displayedFillAmount = startFill;
 
-            Debug.Log("[PlayerHealthBarUI] RefreshWithDamageEffect: target=" + target.ToString("F2") +
-                      " | startFill=" + startFill.ToString("F2") +
-                      " | health=" + current + "/" + maximum, this);
-
             // 没有实际减少则不播放特效
             if (target >= startFill - 0.001f)
             {
-                Debug.Log("[PlayerHealthBarUI] No player health decrease detected.", this);
                 _displayedFillAmount = target;
                 return;
             }
@@ -238,8 +190,6 @@ namespace KiKs.Combat
 
             // 1) 冻结 Fill 在当前值
             fillImage.fillAmount = startFill;
-            Debug.Log("[PlayerHealthBarUI] Freezing fillAmount at " + startFill.ToString("F2") +
-                      " | Starting flash sequence...", this);
 
             // 2) Fill 颜色闪烁（高亮提示即将削减）
             _damageSequence = DOTween.Sequence();
@@ -262,14 +212,11 @@ namespace KiKs.Combat
 
                 _displayedFillAmount = target;
                 _damageSequence = null;
-                Debug.Log("[PlayerHealthBarUI] Animation sequence finished.", this);
             });
         }
 
-        private void RefreshWithHealEffect(CombatantState combatant)
+        private void RefreshWithHealEffect(int current, int maximum)
         {
-            var current = combatant.CurrentHealth;
-            var maximum = combatant.MaxHealth;
             var target = maximum > 0 ? (float)current / maximum : 0f;
 
             if (displayText != null)

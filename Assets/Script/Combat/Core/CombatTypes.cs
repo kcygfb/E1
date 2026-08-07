@@ -15,7 +15,20 @@ namespace KiKs.Combat
     public enum BattleOutcome { None, Victory, Defeat }
     public enum CombatantSide { Player, Enemy }
     public enum EnemyRank { None, Minion, Elite, Boss }
-    public enum EnemyArchetype { None, Dog, LittleGirl, BigEye }
+    public enum EnemyArchetype
+    {
+        None,
+        Dog,
+        LittleGirl,
+        BigEye,
+        Ghost,
+        Cat,
+        Nightmare,
+        Fatty,
+        Thief,
+        Merchant,
+        Butcher
+    }
     public enum CardTargetType { Self, SingleEnemy }
     public enum ToughnessRestoreMode { Full, FixedAmount }
     public enum CardResourceType { ActionPoint, Mana }
@@ -47,6 +60,10 @@ namespace KiKs.Combat
         LifeSteal,
         ReflectDamage,
         BlockDamage,
+        BlockScaledDamage,
+        Heal,
+        PoisonScaledNextAttack,
+        PoisonDamageBonus,
         GainResource,
         PlayCardsFromDiscard
     }

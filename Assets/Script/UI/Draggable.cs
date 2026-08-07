@@ -87,6 +87,16 @@ namespace KiKs.UI
 
         public void OnEndDrag(PointerEventData eventData)
         {
+            EndDragState();
+
+            if (returnOnEnd)
+            {
+                _rect.DOAnchorPos(_originPos, returnDuration).SetEase(Ease.OutQuint);
+            }
+        }
+
+        private void EndDragState()
+        {
             if (IsDragging)
             {
                 IsDragging = false;
@@ -97,11 +107,15 @@ namespace KiKs.UI
             {
                 _group.blocksRaycasts = true;
             }
+        }
 
-            if (returnOnEnd)
-            {
-                _rect.DOAnchorPos(_originPos, returnDuration).SetEase(Ease.OutQuint);
-            }
+        /// <summary>
+        /// 拖拽中途对象被销毁（如出牌动画中禁用/回收卡牌）时，EndDrag 不再触发，
+        /// 这里兜底释放全局拖拽计数，避免 AnyDragging 永久为 true 拦截后续点击。
+        /// </summary>
+        private void OnDestroy()
+        {
+            EndDragState();
         }
     }
 }

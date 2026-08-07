@@ -1,0 +1,265 @@
+{
+  "schemaVersion": 2,
+  "category": "hidden",
+  "categoryName": "暗器",
+  "cards": [
+    {
+      "id": "hidden_crossbow",
+      "name": {
+        "zhCN": "弩",
+        "en": "crossbow"
+      },
+      "description": {
+        "en": "Fire three barbed bolts."
+      },
+      "category": "hidden",
+      "copies": 1,
+      "cost": {
+        "resource": "action_point",
+        "amount": 1
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "damage",
+          "amount": {
+            "base": 2,
+            "upgraded": 3
+          },
+          "hits": {
+            "base": 3,
+            "upgraded": 3
+          }
+        },
+        {
+          "type": "toughness_damage",
+          "amount": {
+            "base": 1,
+            "upgraded": 2
+          }
+        },
+        {
+          "type": "bleed",
+          "amount": {
+            "base": 1,
+            "upgraded": 3
+          }
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "卡牌全套小数值",
+        "row": 38
+      },
+      "notes": []
+    },
+    {
+      "id": "hidden_kunai",
+      "name": {
+        "zhCN": "苦无",
+        "en": "kunai"
+      },
+      "description": {
+        "en": "Throw poisoned kunai in rapid succession."
+      },
+      "category": "hidden",
+      "copies": 1,
+      "cost": {
+        "resource": "action_point",
+        "amount": 1
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "damage",
+          "amount": {
+            "base": 1,
+            "upgraded": 2
+          },
+          "hits": {
+            "base": 3,
+            "upgraded": 3
+          }
+        },
+        {
+          "type": "bleed",
+          "amount": {
+            "base": 3,
+            "upgraded": 5
+          }
+        },
+        {
+          "type": "poison",
+          "amount": {
+            "base": 1,
+            "upgraded": 2
+          }
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "卡牌全套小数值",
+        "row": 39
+      },
+      "notes": []
+    },
+    {
+      "id": "hidden_smoke_bomb",
+      "name": {
+        "zhCN": "烟雾弹",
+        "en": "smoke bomb"
+      },
+      "description": {
+        "en": "Negate incoming attacks and draw cards."
+      },
+      "category": "hidden",
+      "copies": 1,
+      "cost": {
+        "resource": "action_point",
+        "amount": 0
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "nullify_attacks",
+          "amount": {
+            "base": 1,
+            "upgraded": 1
+          }
+        },
+        {
+          "type": "draw_cards",
+          "amount": {
+            "base": 3,
+            "upgraded": 5
+          }
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "卡牌全套小数值",
+        "row": 40,
+        "upgradeRow": 40
+      },
+      "notes": []
+    },
+    {
+      "id": "hidden_poison_sting",
+      "name": {
+        "zhCN": "毒针",
+        "en": "poison sting"
+      },
+      "description": {
+        "en": "Inflict bleed and poison with a toxic needle."
+      },
+      "category": "hidden",
+      "copies": 1,
+      "cost": {
+        "resource": "action_point",
+        "amount": 1
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "bleed",
+          "amount": {
+            "base": 3,
+            "upgraded": 6
+          }
+        },
+        {
+          "type": "poison",
+          "amount": {
+            "base": 3,
+            "upgraded": 6
+          }
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "卡牌全套小数值",
+        "row": 41
+      },
+      "notes": []
+    },
+    {
+      "id": "hidden_hidden_blade",
+      "name": {
+        "zhCN": "袖剑",
+        "en": "hidden blade"
+      },
+      "description": {
+        "en": "Cut from concealment to inflict bleed."
+      },
+      "category": "hidden",
+      "copies": 1,
+      "cost": {
+        "resource": "action_point",
+        "amount": 1
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "toughness_damage",
+          "amount": {
+            "base": 1,
+            "upgraded": 3
+          }
+        },
+        {
+          "type": "bleed",
+          "amount": {
+            "base": 5,
+            "upgraded": 7
+          }
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "卡牌全套小数值",
+        "row": 42
+      },
+      "notes": []
+    },
+    {
+      "id": "hidden_poisonous_gas",
+      "name": {
+        "zhCN": "毒粉",
+        "en": "poisonous gas"
+      },
+      "description": {
+        "en": "Poison the target and draw cards."
+      },
+      "category": "hidden",
+      "copies": 1,
+      "cost": {
+        "resource": "action_point",
+        "amount": 0
+      },
+      "special": true,
+      "effects": [
+        {
+          "type": "poison",
+          "amount": {
+            "base": 3,
+            "upgraded": 5
+          }
+        },
+        {
+          "type": "draw_cards",
+          "amount": {
+            "base": 2,
+            "upgraded": 3
+          }
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "卡牌全套小数值",
+        "row": 43,
+        "upgradeRow": 43
+      },
+      "notes": []
+    }
+  ]
+}

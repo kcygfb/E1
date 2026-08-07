@@ -1,0 +1,105 @@
+{
+  "schemaVersion": 2,
+  "category": "enemy_cat",
+  "categoryName": "猫群",
+  "cards": [
+    {
+      "id": "enemy_cat_imitate",
+      "name": {
+        "zhCN": "模仿",
+        "en": "imitate"
+      },
+      "description": {
+        "en": "Reduce incoming damage for two turns."
+      },
+      "category": "enemy_cat",
+      "copies": 1,
+      "cost": {
+        "resource": "action_point",
+        "amount": 1
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "damage_reduction",
+          "amount": 2
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "怪",
+        "row": 13
+      },
+      "notes": []
+    },
+    {
+      "id": "enemy_cat_howling",
+      "name": {
+        "zhCN": "嚎叫",
+        "en": "howling"
+      },
+      "description": {
+        "en": "Damage toughness and prepare an attack-nullify charge."
+      },
+      "category": "enemy_cat",
+      "copies": 1,
+      "cost": {
+        "resource": "action_point",
+        "amount": 1
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "toughness_damage",
+          "amount": 5
+        },
+        {
+          "type": "nullify_attacks",
+          "amount": 1
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "怪",
+        "row": 14
+      },
+      "notes": []
+    },
+    {
+      "id": "enemy_cat_group_attack",
+      "name": {
+        "zhCN": "群起攻之",
+        "en": "group attack"
+      },
+      "description": {
+        "en": "Attack repeatedly and inflict bleed."
+      },
+      "category": "enemy_cat",
+      "copies": 1,
+      "cost": {
+        "resource": "action_point",
+        "amount": 2
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "damage",
+          "amount": 3,
+          "hits": 6
+        },
+        {
+          "type": "bleed",
+          "amount": 3
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "怪",
+        "row": 15
+      },
+      "notes": [
+        "Cat group passive: revive once."
+      ]
+    }
+  ]
+}
