@@ -12,11 +12,19 @@ public class CupStack : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     private Canvas _canvas;
     private GameObject _dragIcon;
     private CraftController _craftController;
+    private ButtonGlow _glow;
 
     private void Awake()
     {
         _canvas = GetComponentInParent<Canvas>();
         _craftController = FindFirstObjectByType<CraftController>();
+        _glow = GetComponent<ButtonGlow>();
+    }
+
+    private void Update()
+    {
+        if (_glow == null || _craftController == null) return;
+        _glow.SetOn(!_craftController.HasActiveCup);
     }
 
     public void OnBeginDrag(PointerEventData eventData)

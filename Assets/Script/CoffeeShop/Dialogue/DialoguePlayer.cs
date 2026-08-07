@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
+using KiKs.UI;
 
 public class DialoguePlayer : MonoBehaviour
 {
@@ -19,7 +20,7 @@ public class DialoguePlayer : MonoBehaviour
     [SerializeField] private GameObject[] hideDuringDialogue;
 
     [Header("主角")]
-    [SerializeField] private string playerName = "艾薇儿";
+    [SerializeField] private string playerName = "Avril";
     [SerializeField] private Color playerColor = new Color(0.4f, 0.8f, 1f, 1f);
 
     private DialogueDataJson currentDialogue;
@@ -61,11 +62,18 @@ public class DialoguePlayer : MonoBehaviour
     private void OnEnable()
     {
         GameEvent.On("DialogueRequested", OnDialogueRequested);
+        DialogueBridge.OnAdvance += OnDialogueAdvance;
     }
 
     private void OnDisable()
     {
         GameEvent.Off("DialogueRequested", OnDialogueRequested);
+        DialogueBridge.OnAdvance -= OnDialogueAdvance;
+    }
+
+    private void OnDialogueAdvance()
+    {
+        if (isRunning) OnNextClicked();
     }
 
     private void OnDialogueRequested(object payload)
@@ -211,15 +219,15 @@ public class DialoguePlayer : MonoBehaviour
         }
         else
         {
-            var npcs = FindObjectsByType<CustomerController>(FindObjectsSortMode.None);
-            foreach (var npc in npcs)
+            foreach (var kvp in CustomerController.ActiveCustomers)
             {
-                if (npc.NPCData != null &&
-                    (npc.NPCData.npcName == speaker ||
-                     npc.NPCData.npcName.Contains(speaker) ||
-                     speaker.Contains(npc.NPCData.npcName)))
+                if (kvp.Value == null) continue;
+                var npcName = kvp.Key;
+                if (npcName == speaker ||
+                    npcName.Contains(speaker) ||
+                    speaker.Contains(npcName))
                 {
-                    target = npc.GetComponent<RectTransform>();
+                    target = kvp.Value.GetComponent<RectTransform>();
                     break;
                 }
             }

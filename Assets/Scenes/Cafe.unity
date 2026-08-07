@@ -445,7 +445,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -150, y: 60}
+  m_AnchoredPosition: {x: -83, y: 77}
   m_SizeDelta: {x: 80, y: 175}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!95 &65221891
@@ -776,6 +776,7 @@ GameObject:
   - component: {fileID: 100616420}
   - component: {fileID: 100616419}
   - component: {fileID: 100616418}
+  - component: {fileID: 100616421}
   m_Layer: 0
   m_Name: CupStack
   m_TagString: Untagged
@@ -854,6 +855,27 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 100616416}
   m_CullTransparentMesh: 1
+--- !u!114 &100616421
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100616416}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e5acd51201a76244abf6f3fc4d7cd19b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KiKs.UI::ButtonGlow
+  glowColor: {r: 1, g: 0.8, b: 0.2, a: 0.8}
+  glowRadius: 6
+  blurPasses: 2
+  pulse: 1
+  pulseSpeed: 2.5
+  pulseMin: 0.3
+  isOn: 1
+  maxTextureSize: 256
+  maxGlowRadiusTex: 16
 --- !u!1 &120668944
 GameObject:
   m_ObjectHideFlags: 0
@@ -3172,7 +3194,7 @@ MonoBehaviour:
   waterAll: {fileID: -1363922560767098174, guid: 5804220605670b346b2d72cfdb41a43f, type: 3}
   groundCoffee: {fileID: -597263913612561703, guid: 4243702164d285540b1cd16d5bbe8a9c, type: 3}
   espresso: {fileID: -6628592643747024680, guid: 27d94e7439412244db23e79b078791e4, type: 3}
-  steamedMilk: {fileID: 219260874038514419, guid: a553bc4a30cf5794595fa2f4d411b312, type: 3}
+  steamedMilk: {fileID: 21300000, guid: a553bc4a30cf5794595fa2f4d411b312, type: 3}
   pourOverCoffee: {fileID: 4755707237728103762, guid: 0539e0aa1165a6f479d7f773033ade77, type: 3}
   unknown: {fileID: -7195039478425478056, guid: ae7002e450456d54e810713ada8549a7, type: 3}
 --- !u!114 &374551731
@@ -6140,10 +6162,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MenuViewer
   menuPages:
-  - {fileID: -1166698304983147340, guid: 8846a32ebfc92714fb859f9328049d10, type: 3}
-  - {fileID: 4855474256985993746, guid: 161099a833b034249a902bfb7a07c2b3, type: 3}
+  - {fileID: -6682033542591033647, guid: e5dbd931aeb5b424289a9dea54bab8c9, type: 3}
   - {fileID: -1428265292491568398, guid: a6fa3d52b3bed7443bb4c8353d76b703, type: 3}
+  - {fileID: -1428265292491568398, guid: a6fa3d52b3bed7443bb4c8353d76b703, type: 3}
+  - {fileID: 4855474256985993746, guid: 161099a833b034249a902bfb7a07c2b3, type: 3}
   - {fileID: -5736492491705732828, guid: 6cab2c9c9e599f943b179f62b0db1ecc, type: 3}
+  - {fileID: -9152955162289648715, guid: 75a15418cb70df449996046c7d398ffd, type: 3}
   nextPageSprite: {fileID: 1717922672910551719, guid: 260dacfc3dd654c47988b4586c9b82dc, type: 3}
   openButton: {fileID: 1105153163}
   viewerPanel: {fileID: 1527099424}
@@ -9638,7 +9662,8 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: [{fileID: 65221890}]
+  m_Children:
+  - {fileID: 65221890}
   m_Father: {fileID: 1290630250}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -10068,6 +10093,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4280b1450b948524b83df0816ec8d259, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MaterialPalette
+  tutorialController: {fileID: 0}
   cellSize: {x: 90, y: 90}
   spacing: {x: 10, y: 10}
   labelHeight: 24
@@ -12703,7 +12729,7 @@ MonoBehaviour:
   hideDuringDialogue:
   - {fileID: 0}
   - {fileID: 0}
-  playerName: "\u827E\u8587\u513F"
+  playerName: Avril
   playerColor: {r: 0.4, g: 0.8, b: 1, a: 1}
 --- !u!1 &2117794879
 GameObject:

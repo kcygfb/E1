@@ -14,6 +14,9 @@ public enum NPCState
 
 public class CustomerController : MonoBehaviour
 {
+    /// <summary>按 npcName 注册的活跃顾客，供 DialoguePlayer.AnimateSpeaker 快速查找。</summary>
+    public static readonly Dictionary<string, CustomerController> ActiveCustomers = new();
+
     public NPCData NPCData { get; private set; }
     public CoffeeData CoffeeData { get; private set; }
     public NPCState State { get; private set; }
@@ -51,6 +54,9 @@ public class CustomerController : MonoBehaviour
         CoffeeData = coffeeData;
         this.counterPosition = counterPosition;
         this.exitPosition = exitPosition;
+
+        if (!string.IsNullOrEmpty(npcData.npcName))
+            ActiveCustomers[npcData.npcName] = this;
 
         transform.position = new Vector3(transform.position.x, counterPosition.y, transform.position.z);
         targetPosition = counterPosition;
@@ -177,6 +183,8 @@ public class CustomerController : MonoBehaviour
     private void LeaveFinished()
     {
         Debug.Log(NPCData.npcName + " left store");
+        if (NPCData != null && !string.IsNullOrEmpty(NPCData.npcName))
+            ActiveCustomers.Remove(NPCData.npcName);
         OnLeftStore?.Invoke(this);
         Destroy(gameObject);
     }
