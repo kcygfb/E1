@@ -3453,3 +3453,12 @@
 [2026-08-05T16:04:10.708Z] LiveUpdateForge: allowLiveUpdate = true (first real BeforeSend)
 [2026-08-05T16:04:16.656Z] LiveUpdateForge: EndTurn fallback flush
 [2026-08-05T16:04:16.656Z] onEndTurn: naturalStop=false toolCalls=42 nudgeMsg=no
+[2026-08-05T16:04:20.453Z] LiveUpdateForge: AfterToolExec flush
+[2026-08-05T16:05:07.445Z] LiveUpdateForge: EndTurn fallback flush
+[2026-08-05T16:05:07.446Z] onEndTurn: naturalStop=false toolCalls=43 nudgeMsg=no
+[2026-08-05T16:05:10.200Z] LiveUpdateForge: AfterToolExec flush
+[2026-08-05T16:05:19.000Z] LiveUpdateForge: EndTurn fallback flush
+[2026-08-05T16:05:19.000Z] onEndTurn: naturalStop=false toolCalls=44 nudgeMsg=no
+[2026-08-05T16:05:45.945Z] LiveUpdateForge: AfterToolExec flush
+[2026-08-05T16:05:52.612Z] LiveUpdateForge: EndTurn fallback flush
+[2026-08-05T16:05:52.613Z] onEndTurn: naturalStop=true toolCalls=45 nudgeMsg=no

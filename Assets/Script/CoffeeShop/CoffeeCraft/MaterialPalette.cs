@@ -34,7 +34,11 @@ public class MaterialPalette : MonoBehaviour
 
     private void BuildItems()
     {
-        var materials = MaterialDefinition.All;
+        // 只显示原始材料（isRaw=true），不显示机器产出
+        var materials = new System.Collections.Generic.List<MaterialDefinition.MatInfo>();
+        foreach (var m in MaterialDefinition.All)
+            if (m.isRaw)
+                materials.Add(m);
         if (materials.Count == 0) return;
 
         // Ensure GridLayoutGroup (不覆盖面板尺寸)

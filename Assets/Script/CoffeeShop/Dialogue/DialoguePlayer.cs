@@ -41,6 +41,17 @@ public class DialoguePlayer : MonoBehaviour
             nextButton.onClick.AddListener(OnNextClicked);
     }
 
+    private void Update()
+    {
+        if (!isRunning) return;
+        var kb = UnityEngine.InputSystem.Keyboard.current;
+        if (kb != null && kb[UnityEngine.InputSystem.Key.F8].wasPressedThisFrame)
+        {
+            Debug.Log("[DialoguePlayer] F8 skip dialogue");
+            EndDialogue();
+        }
+    }
+
     private void OnDestroy()
     {
         if (nextButton != null)

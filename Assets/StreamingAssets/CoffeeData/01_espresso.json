@@ -26,5 +26,6 @@
       "amount": 0,
       "qteType": "DropStop"
     }
-  ]
+  ],
+  "requiredMaterials": ["Espresso"]
 }

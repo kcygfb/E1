@@ -3,8 +3,8 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 /// <summary>九宫格格子拖拽组件。
-/// Shop 阶段：拖到步骤按钮上消耗材料触发 QTE。
-/// MorningCheck 阶段：拖出格子（未拖到步骤按钮）= 取消选取，清空该格。</summary>
+/// Shop 阶段：拖到 MaterialSlot 或 CupContainer/Kettle 触发对应逻辑。
+/// MorningCheck 阶段：拖出格子（未拖到有效目标）= 取消选取，清空该格。</summary>
 [RequireComponent(typeof(Image))]
 public class TraySlotDrag : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
@@ -18,7 +18,6 @@ public class TraySlotDrag : MonoBehaviour, IBeginDragHandler, IDragHandler, IEnd
     {
         if (string.IsNullOrEmpty(MaterialId)) return;
 
-        // Shop 阶段需要检查库存
         if (TrayGridUI.Instance != null && TrayGridUI.Instance.IsDragMode)
         {
             if (InventorySystem.Instance == null || InventorySystem.Instance.GetAmount(MaterialId) <= 0) return;
@@ -32,7 +31,7 @@ public class TraySlotDrag : MonoBehaviour, IBeginDragHandler, IDragHandler, IEnd
         _dragIcon.transform.SetAsLastSibling();
 
         var rt = _dragIcon.GetComponent<RectTransform>();
-        rt.sizeDelta = new Vector2(80f, 80f);
+        rt.sizeDelta = new Vector2(108f, 108f);
 
         var img = _dragIcon.GetComponent<Image>();
         var sprite = MaterialDefinition.GetSprite(MaterialId);
@@ -65,45 +64,116 @@ public class TraySlotDrag : MonoBehaviour, IBeginDragHandler, IDragHandler, IEnd
     {
         var cellImg = GetComponent<Image>();
         if (cellImg != null) cellImg.raycastTarget = true;
-
         if (_dragIcon == null) return;
 
         var results = new System.Collections.Generic.List<RaycastResult>();
         EventSystem.current.RaycastAll(eventData, results);
 
-        // 检测是否拖到步骤按钮
-        StepDropTarget stepTarget = null;
+        // 1. MaterialSlot → 放入机器槽位
         foreach (var r in results)
         {
-            stepTarget = r.gameObject.GetComponent<StepDropTarget>();
-            if (stepTarget != null) break;
+            var slot = r.gameObject.GetComponent<MaterialSlot>();
+            if (slot != null)
+            {
+                // 花库存 + 生成 MaterialIcon 放入槽
+                if (InventorySystem.Instance != null && InventorySystem.Instance.Spend(MaterialId, 1))
+                {
+                    if (TrayGridUI.Instance != null) TrayGridUI.Instance.RefreshCounts();
+                    CreateIconInSlot(slot);
+                }
+                Destroy(_dragIcon);
+                _dragIcon = null;
+                return;
+            }
         }
 
-        if (stepTarget != null)
+        // 2. CupContainer → 直接拖材料到杯子
+        foreach (var r in results)
         {
-            // Shop 阶段：消耗材料触发 QTE
-            stepTarget.OnDropMaterial(MaterialId);
+            var cup = r.gameObject.GetComponent<CupContainer>();
+            if (cup != null)
+            {
+                if (InventorySystem.Instance != null && InventorySystem.Instance.Spend(MaterialId, 1))
+                {
+                    if (TrayGridUI.Instance != null) TrayGridUI.Instance.RefreshCounts();
+                    CreateIconInContainer(cup.transform, cup.gameObject);
+                }
+                Destroy(_dragIcon);
+                _dragIcon = null;
+                return;
+            }
         }
-        else if (TrayGridUI.Instance != null && !TrayGridUI.Instance.IsDragMode)
+
+        // 3. Kettle → 拖材料到壶
+        foreach (var r in results)
         {
-            // MorningCheck 阶段：拖出格子且未拖到步骤按钮 = 取消选取
-            TrayGridUI.Instance.ClearCell(SlotIndex);
+            var kettle = r.gameObject.GetComponent<Kettle>();
+            if (kettle != null)
+            {
+                if (InventorySystem.Instance != null && InventorySystem.Instance.Spend(MaterialId, 1))
+                {
+                    if (TrayGridUI.Instance != null) TrayGridUI.Instance.RefreshCounts();
+                    kettle.AddContent(MaterialId);
+                }
+                Destroy(_dragIcon);
+                _dragIcon = null;
+                return;
+            }
+        }
+
+        // 4. MorningCheck 阶段：拖出未命中 = 清空格子
+        if (TrayGridUI.Instance != null && !TrayGridUI.Instance.IsDragMode)
+        {
+            bool hitTarget = false;
+            foreach (var r in results)
+            {
+                if (r.gameObject.GetComponent<MaterialSlot>() != null ||
+                    r.gameObject.GetComponent<CupContainer>() != null ||
+                    r.gameObject.GetComponent<Kettle>() != null ||
+                    r.gameObject.GetComponent<TrayCellDrop>() != null)
+                { hitTarget = true; break; }
+            }
+            if (!hitTarget) TrayGridUI.Instance.ClearCell(SlotIndex);
         }
 
         Destroy(_dragIcon);
         _dragIcon = null;
     }
 
+    private void CreateIconInSlot(MaterialSlot slot)
+    {
+        var go = new GameObject("Icon_" + MaterialId, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(MaterialIcon));
+        go.transform.SetParent(slot.transform, false);
+        go.transform.localPosition = Vector3.zero;
+        var rt = go.GetComponent<RectTransform>();
+        rt.sizeDelta = new Vector2(108, 108);
+        var icon = go.GetComponent<MaterialIcon>();
+        icon.Setup(MaterialId);
+        // 用反射调用 Accept（因为 MaterialSlot.Accept 需要 MaterialIcon）
+        slot.Accept(icon);
+    }
+
+    private void CreateIconInContainer(Transform parent, GameObject containerObj)
+    {
+        var go = new GameObject("Icon_" + MaterialId, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(MaterialIcon));
+        go.transform.SetParent(parent, false);
+        go.transform.localPosition = Vector3.zero;
+        var rt = go.GetComponent<RectTransform>();
+        rt.sizeDelta = new Vector2(72, 72);
+        var icon = go.GetComponent<MaterialIcon>();
+        icon.Setup(MaterialId);
+        // 如果是 CupContainer，调用 AcceptIcon
+        var cup = containerObj.GetComponent<CupContainer>();
+        if (cup != null) cup.AcceptIcon(icon);
+    }
+
     private void UpdateDragPosition(PointerEventData eventData)
     {
         if (_dragIcon == null || _canvas == null) return;
-
         RectTransformUtility.ScreenPointToLocalPointInRectangle(
-            _canvas.transform as RectTransform,
-            eventData.position,
+            _canvas.transform as RectTransform, eventData.position,
             _canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : _canvas.worldCamera,
             out Vector2 localPos);
-
         _dragIcon.GetComponent<RectTransform>().anchoredPosition = localPos;
     }
 }

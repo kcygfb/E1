@@ -32,6 +32,7 @@ public class CoffeeDataJson
     public TutorialHintJson tutorial;
     public List<RecipeEntryJson> recipe = new();
     public List<CraftStepJson> steps = new();
+    public List<string> requiredMaterials = new();
 }
 
 [DisallowMultipleComponent]

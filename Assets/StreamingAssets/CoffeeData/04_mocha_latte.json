@@ -55,5 +55,6 @@
       "amount": 1,
       "qteType": ""
     }
-  ]
+  ],
+  "requiredMaterials": ["Espresso", "SteamedMilk", "Sugar"]
 }

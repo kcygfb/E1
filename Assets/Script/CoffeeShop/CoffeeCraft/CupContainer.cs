@@ -3,32 +3,91 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-/// <summary>咖啡杯。纯可拖动 + 可接收材料。拖到 Deliver 提交，拖到步骤按钮触发逻辑。</summary>
+/// <summary>杯子。可拖动，接收MaterialIcon。
+/// 放入材料后自动检查配方匹配，匹配则合并为完成咖啡icon。</summary>
 [RequireComponent(typeof(Image))]
-public class CupContainer : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IDropHandler
+public class CupContainer : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
-    [Header("Sprites")]
-    [SerializeField] private Sprite emptyCupSprite;
-    [SerializeField] private Sprite filledCupSprite;
-
-    [Header("State")]
-    public List<string> Contents = new();
+    public List<string> Contents { get; } = new();
+    public List<MaterialIcon> Icons { get; } = new();
     public bool IsFilled => Contents.Count > 0;
 
+    /// <summary>合并后的咖啡ID（null=未合并，还是散装材料）。</summary>
+    public string MergedCoffeeId { get; private set; }
+
     private Image _image;
-    private Vector3 _dragStartWorldPos;
+    private Canvas _canvas;
+    private CraftController _craftController;
+    private Sprite _originalCupSprite;
 
     private void Awake()
     {
         _image = GetComponent<Image>();
-        UpdateVisual();
+        _originalCupSprite = _image.sprite;
+        _craftController = FindFirstObjectByType<CraftController>();
+    }
+
+    private void EnsureCanvas()
+    {
+        if (_canvas == null)
+            _canvas = GetComponentInParent<Canvas>();
+    }
+
+    public bool AcceptIcon(MaterialIcon icon)
+    {
+        if (icon == null) return false;
+
+        Contents.Add(icon.MaterialId);
+        Icons.Add(icon);
+        icon.transform.SetParent(transform, false);
+        icon.transform.localPosition = Vector3.zero;
+
+        // 检查是否匹配配方
+        TryMerge();
+        return true;
+    }
+
+    /// <summary>检查杯内材料是否匹配某咖啡配方，匹配则合并。</summary>
+    private void TryMerge()
+    {
+        if (CoffeeDataLoader.Instance == null || !CoffeeDataLoader.Instance.IsLoaded) return;
+
+        var cupSet = new HashSet<string>(Contents);
+        foreach (var coffee in CoffeeDataLoader.Instance.GetAllCoffees())
+        {
+            if (coffee.requiredMaterials == null || coffee.requiredMaterials.Count == 0) continue;
+            var recipeSet = new HashSet<string>(coffee.requiredMaterials);
+            if (!cupSet.SetEquals(recipeSet)) continue;
+
+            // 匹配成功 → 合并
+            MergedCoffeeId = coffee.coffeeId;
+
+            // 销毁所有子 icon
+            foreach (var icon in Icons)
+                if (icon != null) Destroy(icon.gameObject);
+            Icons.Clear();
+
+            // 杯子本身换成完成咖啡图
+            var sprite = CoffeeIconCache.Instance?.GetCoffeeSprite(coffee.coffeeId);
+            if (sprite != null)
+            {
+                _image.sprite = sprite;
+                _image.preserveAspect = true;
+                _image.color = Color.white;
+            }
+
+            Debug.Log($"[CupContainer] 合并为: {coffee.coffeeId}");
+            return;
+        }
     }
 
     // --- 拖动 ---
     public void OnBeginDrag(PointerEventData eventData)
     {
-        _dragStartWorldPos = transform.position;
+        EnsureCanvas();
+        if (_canvas != null) transform.SetParent(_canvas.transform, true);
         transform.SetAsLastSibling();
+        if (_image != null) _image.raycastTarget = false;
     }
 
     public void OnDrag(PointerEventData eventData)
@@ -38,62 +97,76 @@ public class CupContainer : MonoBehaviour, IBeginDragHandler, IDragHandler, IEnd
 
     public void OnEndDrag(PointerEventData eventData)
     {
+        if (_image != null) _image.raycastTarget = true;
+
         var results = new System.Collections.Generic.List<RaycastResult>();
         EventSystem.current.RaycastAll(eventData, results);
 
-        // 检测 Deliver
+        // 1. CupStack → 放回销毁
         foreach (var r in results)
         {
-            if (r.gameObject.name != "Btn_Deliver") continue;
-            var cc = FindFirstObjectByType<CraftController>();
-            if (cc != null) cc.OnCupDelivered(this);
-            transform.position = _dragStartWorldPos;
-            return;
+            if (r.gameObject.GetComponent<CupStack>() != null)
+            {
+                _craftController?.OnCupReturned(this);
+                return;
+            }
         }
 
-        // 检测步骤按钮
-        StepDropTarget target = null;
+        // 2. Btn_Deliver → 提交
         foreach (var r in results)
         {
-            target = r.gameObject.GetComponent<StepDropTarget>();
-            if (target != null) break;
+            if (r.gameObject.name == "Btn_Deliver")
+            {
+                _craftController?.OnCupDelivered(this);
+                return;
+            }
         }
 
-        if (target != null)
+        // 3. NPCArea / CustomerController → 给顾客
+        foreach (var r in results)
         {
-            var cc = FindFirstObjectByType<CraftController>();
-            if (cc != null) cc.OnCupDroppedOnStep(target.stepId, this);
-            transform.position = _dragStartWorldPos;
+            var customer = r.gameObject.GetComponent<CustomerController>();
+            if (customer != null)
+            {
+                _craftController?.OnCupDelivered(this);
+                return;
+            }
+            if (r.gameObject.name == "NPCArea" || r.gameObject.transform.root.name == "NPCArea")
+            {
+                _craftController?.OnCupDelivered(this);
+                return;
+            }
         }
-        // 否则留在松手位置
     }
 
-    // --- 接收材料 ---
-    public void OnDrop(PointerEventData eventData)
+    public void RemoveIcon(MaterialIcon icon)
     {
-        string matId = null;
-        var trayDrag = eventData.pointerDrag?.GetComponent<TraySlotDrag>();
-        if (trayDrag != null) matId = trayDrag.MaterialId;
-        if (string.IsNullOrEmpty(matId))
+        Icons.Remove(icon);
+        var idx = Contents.IndexOf(icon.MaterialId);
+        if (idx >= 0) Contents.RemoveAt(idx);
+        // 取消合并状态，恢复杯子原图
+        MergedCoffeeId = null;
+        if (_image != null && _originalCupSprite != null)
         {
-            var item = eventData.pointerDrag?.GetComponent<MaterialPaletteItem>();
-            if (item != null) matId = item.MaterialId;
+            _image.sprite = _originalCupSprite;
+            _image.preserveAspect = true;
+            _image.color = Color.white;
         }
-        if (string.IsNullOrEmpty(matId)) return;
-
-        Contents.Add(matId);
-        UpdateVisual();
     }
 
-    // --- 外部 ---
-    public void AddContent(string id) { Contents.Add(id); UpdateVisual(); }
-    public void Clear() { Contents.Clear(); UpdateVisual(); }
-
-    private void UpdateVisual()
+    public void ClearContents()
     {
-        if (_image == null) return;
-        var sp = IsFilled ? (filledCupSprite ?? emptyCupSprite) : emptyCupSprite;
-        if (sp != null) { _image.sprite = sp; _image.preserveAspect = true; _image.color = Color.white; }
-        else _image.color = IsFilled ? new Color(0.4f,0.25f,0.1f) : new Color(0.7f,0.7f,0.7f,0.8f);
+        Contents.Clear();
+        foreach (var icon in Icons)
+            if (icon != null) Destroy(icon.gameObject);
+        Icons.Clear();
+        MergedCoffeeId = null;
+        // 恢复杯子原图
+        if (_image != null && _originalCupSprite != null)
+        {
+            _image.sprite = _originalCupSprite;
+            _image.preserveAspect = true;
+            _image.color = Color.white;
+        }
     }
 }
