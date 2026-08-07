@@ -19,6 +19,9 @@ public class DialoguePlayer : MonoBehaviour
     [Header("对话时隐藏的 UI")]
     [SerializeField] private GameObject[] hideDuringDialogue;
 
+    [Header("下一句提示图标")]
+    [SerializeField] private GameObject nextWordIcon;
+
     [Header("主角")]
     [SerializeField] private string playerName = "Avril";
     [SerializeField] private Color playerColor = new Color(0.4f, 0.8f, 1f, 1f);
@@ -115,6 +118,7 @@ public class DialoguePlayer : MonoBehaviour
         currentContext = context;
 
         if (dialoguePanel != null) dialoguePanel.SetActive(true);
+        if (nextWordIcon != null) nextWordIcon.SetActive(false);
         HideUI(true);
         ShowLine(0);
     }
@@ -146,6 +150,7 @@ public class DialoguePlayer : MonoBehaviour
 
             if (typingRoutine != null) StopCoroutine(typingRoutine);
             currentFullText = text;
+            if (nextWordIcon != null) nextWordIcon.SetActive(false);
             typingRoutine = StartCoroutine(TypeText(text));
             AnimateSpeaker(speaker);
         }
@@ -163,6 +168,7 @@ public class DialoguePlayer : MonoBehaviour
         }
         lineText.text = fullText;
         isTyping = false;
+        if (nextWordIcon != null) nextWordIcon.SetActive(true);
     }
 
     public void OnNextClicked()
@@ -175,6 +181,7 @@ public class DialoguePlayer : MonoBehaviour
             if (typingRoutine != null) StopCoroutine(typingRoutine);
             lineText.text = currentFullText;
             isTyping = false;
+            if (nextWordIcon != null) nextWordIcon.SetActive(true);
             return;
         }
 
@@ -190,6 +197,7 @@ public class DialoguePlayer : MonoBehaviour
         isRunning = false;
         currentDialogue = null;
         currentIndex = 0;
+        if (nextWordIcon != null) nextWordIcon.SetActive(false);
         if (dialoguePanel != null) dialoguePanel.SetActive(false);
         HideUI(false);
         var ctx = currentContext;
