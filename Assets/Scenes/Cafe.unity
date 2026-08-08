@@ -1580,7 +1580,7 @@ Transform:
   m_GameObject: {fileID: 181298183}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 1725, y: 550, z: 0}
+  m_LocalPosition: {x: 765, y: 10, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3153,6 +3153,7 @@ RectTransform:
   - {fileID: 1894080201}
   - {fileID: 1032132691}
   - {fileID: 440765296}
+  - {fileID: 409946780}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -3599,7 +3600,7 @@ Transform:
   - {fileID: 822976074}
   - {fileID: 1918748199}
   - {fileID: 181298184}
-  m_Father: {fileID: 1596719260}
+  m_Father: {fileID: 374551729}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &409946781
 MonoBehaviour:
@@ -5308,7 +5309,7 @@ Transform:
   m_GameObject: {fileID: 822976073}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 1726, y: 551, z: 0}
+  m_LocalPosition: {x: 766, y: 11, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -6163,7 +6164,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MenuViewer
   menuPages:
   - {fileID: -6682033542591033647, guid: e5dbd931aeb5b424289a9dea54bab8c9, type: 3}
-  - {fileID: -1428265292491568398, guid: a6fa3d52b3bed7443bb4c8353d76b703, type: 3}
   - {fileID: -1428265292491568398, guid: a6fa3d52b3bed7443bb4c8353d76b703, type: 3}
   - {fileID: 4855474256985993746, guid: 161099a833b034249a902bfb7a07c2b3, type: 3}
   - {fileID: -5736492491705732828, guid: 6cab2c9c9e599f943b179f62b0db1ecc, type: 3}
@@ -9411,7 +9411,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 739931611}
-  - {fileID: 409946780}
   - {fileID: 391905252}
   - {fileID: 148957625}
   - {fileID: 1036488487}
@@ -11294,11 +11293,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: KiKs.UI::KiKs.UI.CafeBGMPlayer
   audioSource: {fileID: 0}
   bgmClips:
-  - {fileID: 8300000, guid: 5dafe2ed7624bee47827df19a88ecf47, type: 3}
-  - {fileID: 8300000, guid: 981ccf1e53754e648bc59d7e32b974c8, type: 3}
-  - {fileID: 8300000, guid: 967ebd7a30634ec4d976aaddd36fdc7d, type: 3}
-  - {fileID: 8300000, guid: 23e9f1bf8fc5e6e4cb183164aa42bceb, type: 3}
-  - {fileID: 8300000, guid: c274f2d816a734c4097a7e647a2c2103, type: 3}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
   mainButton: {fileID: 535284715}
   panel: {fileID: 57127207}
   playPauseButton: {fileID: 2006738369}
@@ -11306,7 +11305,7 @@ MonoBehaviour:
   playIcon: {fileID: 1232388905}
   pauseIcon: {fileID: 1789838918}
   trackNameText: {fileID: 959662409}
-  defaultVolume: 0.5
+  defaultVolume: 0.1
   expandDuration: 0.25
   expandEase: 27
 --- !u!114 &1894080204
@@ -11509,7 +11508,7 @@ Transform:
   m_GameObject: {fileID: 1918748198}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 1575, y: 557, z: 0}
+  m_LocalPosition: {x: 615, y: 17, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -12745,6 +12744,7 @@ GameObject:
   - component: {fileID: 2117794883}
   - component: {fileID: 2117794882}
   - component: {fileID: 2117794881}
+  - component: {fileID: 2117794884}
   m_Layer: 5
   m_Name: Btn_NextPage
   m_TagString: Untagged
@@ -12853,6 +12853,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2117794879}
   m_CullTransparentMesh: 1
+--- !u!114 &2117794884
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2117794879}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a2d29effaac0ec14ab5c1c5249a0dd5c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KiKs.UI::KiKs.UI.ButtonHoverSound
+  hoverSound: {fileID: 0}
+  hoverVolume: 1
+  clickSound: {fileID: 8300000, guid: 3bad75ebfe7f4114b97073eeb8d9c521, type: 3}
+  clickVolume: 1
 --- !u!1001 &964536765108245639
 PrefabInstance:
   m_ObjectHideFlags: 0

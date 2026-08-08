@@ -58,7 +58,6 @@ namespace KiKs.Combat
 
         [Header("按钮")]
         [SerializeField] private Button openPopupButton;
-        [SerializeField] private Button beginButton;
 
         [Header("Tutorial")]
         [SerializeField] private TutorialController tutorialController;
@@ -78,6 +77,8 @@ namespace KiKs.Combat
             };
         }
 
+        public bool IsSelectionComplete => selectedCoffeeIds.Count == MaxCoffees;
+
         private void Start()
         {
             if (tutorialController == null)
@@ -85,8 +86,6 @@ namespace KiKs.Combat
 
             if (openPopupButton != null)
                 openPopupButton.onClick.AddListener(OpenPopup);
-            if (beginButton != null)
-                beginButton.interactable = false;
 
             BindCloseButton();
 
@@ -310,8 +309,9 @@ namespace KiKs.Combat
             UpdateCoffeeSlots();
             UpdateListHighlights();
 
-            if (beginButton != null)
-                beginButton.interactable = selectedCoffeeIds.Count == MaxCoffees;
+            var cardUI = FindFirstObjectByType<CardSelectionUI>();
+            if (cardUI != null)
+                cardUI.RefreshSelectionUI();
         }
 
         private void UpdateCoffeeCountLabel()

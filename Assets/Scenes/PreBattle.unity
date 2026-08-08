@@ -956,7 +956,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 1ce01f4ebe34844469f37e882065626e, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 2dfd132948e4edb4c96b2c3a9c767828, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -990,7 +990,7 @@ Animator:
   m_GameObject: {fileID: 266310376}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 74a2a539d00768242a1095138c23dcaf, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -1026,8 +1026,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 157.60172, y: 121.5242}
-  m_SizeDelta: {x: 725.4565, y: 243.0484}
+  m_AnchoredPosition: {x: 418.19382, y: 144.33052}
+  m_SizeDelta: {x: 836.3895, y: 487.1225}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &267396173
 GameObject:
@@ -8748,8 +8748,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.4, y: 0}
   m_AnchorMax: {x: 0.4, y: 0}
-  m_AnchoredPosition: {x: 891.84, y: 98.465}
-  m_SizeDelta: {x: 520.3265, y: 196.9299}
+  m_AnchoredPosition: {x: 791.12714, y: 115.56818}
+  m_SizeDelta: {x: 721.7524, y: 231.1363}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1862050044
 MonoBehaviour:
@@ -8790,7 +8790,7 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 1
+  m_Interactable: 0
   m_TargetGraphic: {fileID: 266310377}
   m_OnClick:
     m_PersistentCalls:

@@ -259,7 +259,7 @@ namespace KiKs.Combat
             RefreshSelectionUI();
         }
 
-        private void RefreshSelectionUI()
+        public void RefreshSelectionUI()
         {
             UpdateDeckSlots();
             UpdateDeckLabel();
@@ -267,12 +267,17 @@ namespace KiKs.Combat
             if (undoButton != null)
                 undoButton.interactable = !_isStartingBattle && selectedCardIds.Count > 0;
             if (beginButton != null)
+            {
+                var coffeeUI = FindFirstObjectByType<CoffeeSelectionUI>();
+                var coffeeReady = coffeeUI == null || coffeeUI.IsSelectionComplete;
                 beginButton.interactable =
                     !_isStartingBattle &&
                     DailyAreaMapState.HasSelectedPoint &&
                     RuntimeGameRepository.HasSelectedDemoStage &&
                     RuntimeGameRepository.SelectedDemoStage == DemoFlowState.CurrentStage &&
-                    IsDeckComplete;
+                    IsDeckComplete &&
+                    coffeeReady;
+            }
             if (cardButton != null)
                 cardButton.interactable = !_isStartingBattle && !DemoFlowState.IsCompleted;
         }
