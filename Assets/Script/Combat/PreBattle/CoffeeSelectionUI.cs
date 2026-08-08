@@ -58,6 +58,7 @@ namespace KiKs.Combat
 
         [Header("按钮")]
         [SerializeField] private Button openPopupButton;
+        [SerializeField] private Button openPopupButton2;
 
         [Header("Tutorial")]
         [SerializeField] private TutorialController tutorialController;
@@ -86,6 +87,8 @@ namespace KiKs.Combat
 
             if (openPopupButton != null)
                 openPopupButton.onClick.AddListener(OpenPopup);
+            if (openPopupButton2 != null)
+                openPopupButton2.onClick.AddListener(OpenPopup);
 
             BindCloseButton();
 

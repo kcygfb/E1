@@ -120,8 +120,16 @@ public class MaterialIcon : MonoBehaviour, IBeginDragHandler, IDragHandler, IEnd
             }
         }
 
-        // 没命中 → 回到原位
-        transform.SetParent(_originalParent, true);
-        transform.localPosition = _originalPos;
+        // 5. Btn_Reset → 销毁
+        foreach (var r in results)
+        {
+            if (r.gameObject.name == "Btn_Reset")
+            {
+                Destroy(gameObject);
+                return;
+            }
+        }
+
+        // 没命中 → 留在松手位置（不回弹）
     }
 }

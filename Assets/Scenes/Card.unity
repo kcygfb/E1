@@ -1802,8 +1802,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -114.5, y: 297.1}
-  m_SizeDelta: {x: 200, y: 45}
+  m_AnchoredPosition: {x: -81.8844, y: 297.1}
+  m_SizeDelta: {x: 265.2312, y: 45}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &472929471
 MonoBehaviour:
@@ -1823,8 +1823,8 @@ MonoBehaviour:
   poisonIcon: {fileID: 21300000, guid: 6b9c8de69f9a5f844a13a24e6d56a785, type: 3}
   stunIcon: {fileID: 21300000, guid: 5925df8c285474b44952afefb970bb11, type: 3}
   vulnerabilityIcon: {fileID: 21300000, guid: 772006d01bb5d4044a308d3955410860, type: 3}
-  immunityIcon: {fileID: 0}
-  nullifyIcon: {fileID: 0}
+  immunityIcon: {fileID: 21300000, guid: 5925df8c285474b44952afefb970bb11, type: 3}
+  nullifyIcon: {fileID: 21300000, guid: 5925df8c285474b44952afefb970bb11, type: 3}
   iconSize: {x: 90, y: 90}
   spacing: 6
 --- !u!28 &506263464
@@ -4978,8 +4978,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 8.74, y: -2.88}
-  m_SizeDelta: {x: 132.2944, y: 50}
+  m_AnchoredPosition: {x: 7.8, y: -2.88}
+  m_SizeDelta: {x: 172.3411, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1443794274
 MonoBehaviour:
@@ -5463,8 +5463,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 28.5, y: 48.6}
-  m_SizeDelta: {x: 200, y: 45}
+  m_AnchoredPosition: {x: 34.787605, y: 48.6}
+  m_SizeDelta: {x: 291.73523, y: 45}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1563121776
 MonoBehaviour:
@@ -5484,9 +5484,9 @@ MonoBehaviour:
   poisonIcon: {fileID: 21300000, guid: 6b9c8de69f9a5f844a13a24e6d56a785, type: 3}
   stunIcon: {fileID: 21300000, guid: 5925df8c285474b44952afefb970bb11, type: 3}
   vulnerabilityIcon: {fileID: 21300000, guid: 772006d01bb5d4044a308d3955410860, type: 3}
-  immunityIcon: {fileID: 0}
-  nullifyIcon: {fileID: 0}
-  iconSize: {x: 280, y: 280}
+  immunityIcon: {fileID: 21300000, guid: 5925df8c285474b44952afefb970bb11, type: 3}
+  nullifyIcon: {fileID: 21300000, guid: 5925df8c285474b44952afefb970bb11, type: 3}
+  iconSize: {x: 90, y: 90}
   spacing: 6
 --- !u!1 &1571755146
 GameObject:
@@ -7085,8 +7085,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 8.268746, y: -2.8558078}
-  m_SizeDelta: {x: 118.0675, y: 41.94153}
+  m_AnchoredPosition: {x: 8.263384, y: -2.56}
+  m_SizeDelta: {x: 172.34113, y: 41.94153}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1963077114
 MonoBehaviour:
@@ -7632,8 +7632,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 44, y: 489.3}
-  m_SizeDelta: {x: 321.3543, y: 89.2688}
+  m_AnchoredPosition: {x: 31, y: 489.3}
+  m_SizeDelta: {x: 396.5482, y: 89.2688}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2039852072
 MonoBehaviour:

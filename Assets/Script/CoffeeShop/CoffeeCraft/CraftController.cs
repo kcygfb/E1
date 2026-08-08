@@ -242,14 +242,21 @@ public class CraftController : MonoBehaviour
         foreach (var slot in FindObjectsByType<KettleSlot>(FindObjectsSortMode.None))
             slot.Clear();
 
-        // 销毁所有游离的 MaterialIcon（不在 Slot/Cup/Kettle/Canvas层级里的）
+        // 销毁所有游离的 MaterialIcon（不在 Slot/Cup/Kettle 里的）
         var canvas = GameObject.Find("Canvas");
         foreach (var icon in FindObjectsByType<MaterialIcon>(FindObjectsSortMode.None))
         {
             if (icon == null) continue;
             var parent = icon.transform.parent;
-            // 如果父级是 Canvas（拖出后游离）或 null，销毁
-            if (parent == null || (canvas != null && parent == canvas.transform))
+            if (parent == null) { Destroy(icon.gameObject); continue; }
+            // 父级是 Canvas（拖出后游离）→ 销毁
+            if (canvas != null && parent == canvas.transform) { Destroy(icon.gameObject); continue; }
+            // 父级是 OutputPoint（机器产出后没拖走）→ 销毁
+            if (parent.name.StartsWith("Output_")) { Destroy(icon.gameObject); continue; }
+            // 父级没有 MaterialSlot/Kettle/CupContainer → 游离，销毁
+            if (parent.GetComponent<MaterialSlot>() == null
+                && parent.GetComponent<Kettle>() == null
+                && parent.GetComponent<CupContainer>() == null)
                 Destroy(icon.gameObject);
         }
 
