@@ -12,6 +12,7 @@ namespace KiKs.Combat
     {
         private const int DEFAULT_DECK_SIZE = 15;
         private const string BATTLE_SCENE_NAME = "Card";
+        private const string TREASURE_SCENE_NAME = "Treasure";
 
         [Header("Buttons")]
         [SerializeField] private Button cardButton;
@@ -388,17 +389,24 @@ namespace KiKs.Combat
 
         private void OnDemoMapPointClicked(int pointIndex)
         {
+            if (_isStartingBattle)
+                return;
+
             if (!DailyAreaMapState.TryGetPoint(pointIndex, out var point))
             {
                 Debug.LogError($"[AreaMap] Map point index {pointIndex} is invalid.", this);
                 return;
             }
 
-            if (point.Type != AreaPointType.Battle)
+            if (point.Type == AreaPointType.Event)
             {
-                WarningToast.Show(point.Type == AreaPointType.Event
-                    ? "Event areas are not available yet."
-                    : "Treasure areas are not available yet.");
+                WarningToast.Show("Event areas are not available yet.");
+                return;
+            }
+
+            if (point.Type == AreaPointType.Treasure)
+            {
+                StartTreasureArea(pointIndex);
                 return;
             }
 
@@ -432,6 +440,38 @@ namespace KiKs.Combat
 
             RefreshMapPoints();
             RefreshSelectionUI();
+        }
+
+        private void StartTreasureArea(int pointIndex)
+        {
+            if (!Application.CanStreamedLevelBeLoaded(TREASURE_SCENE_NAME))
+            {
+                Debug.LogError(
+                    $"[AreaMap] Scene '{TREASURE_SCENE_NAME}' is not included in the active build profile.",
+                    this);
+                WarningToast.Show("The treasure scene is unavailable.");
+                return;
+            }
+
+            if (!DailyAreaMapState.TrySelectPoint(pointIndex, out var failureReason))
+            {
+                WarningToast.Show(failureReason);
+                RefreshMapPoints();
+                return;
+            }
+
+            // Treasure does not need a combat deck or encounter slot.
+            RuntimeGameRepository.ClearSelectedDemoStage();
+            RuntimeGameRepository.ClearSelectedEncounterIndex();
+            _isStartingBattle = true;
+            RefreshMapPoints();
+            RefreshSelectionUI();
+
+            Debug.Log($"[AreaMap] Entering treasure point {pointIndex + 1}.", this);
+            if (TransitionEffect.Instance != null)
+                TransitionEffect.Instance.TransitionTo(TREASURE_SCENE_NAME);
+            else
+                StartCoroutine(LoadAreaScene(TREASURE_SCENE_NAME));
         }
 
         /// <summary>
@@ -734,6 +774,22 @@ namespace KiKs.Combat
                 _isStartingBattle = false;
                 RefreshSelectionUI();
                 Debug.LogError($"[CardSelectionUI] Failed to start loading scene '{BATTLE_SCENE_NAME}'.");
+                yield break;
+            }
+
+            while (!operation.isDone)
+                yield return null;
+        }
+
+        private IEnumerator LoadAreaScene(string sceneName)
+        {
+            var operation = SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Single);
+            if (operation == null)
+            {
+                _isStartingBattle = false;
+                DailyAreaMapState.CancelSelectedPoint();
+                RefreshMapPoints();
+                Debug.LogError($"[AreaMap] Failed to start loading scene '{sceneName}'.", this);
                 yield break;
             }
 

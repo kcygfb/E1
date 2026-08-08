@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "testStartingGold": 400,
+  "offers": [
+    {
+      "id": "claw_offer",
+      "price": 50,
+      "imagePath": "Art/Cards/treasure_50.png",
+      "productPool": [
+        {
+          "weight": 1,
+          "reward": { "type": "resource", "id": "claw", "displayName": "爪子", "amount": 2 }
+        }
+      ]
+    },
+    {
+      "id": "card_offer",
+      "price": 80,
+      "imagePath": "Art/Cards/treasure_80.png",
+      "productPool": [
+        {
+          "weight": 1,
+          "reward": { "type": "card", "id": "flexible_chain", "displayName": "绊脚锁", "amount": 1 }
+        }
+      ]
+    },
+    {
+      "id": "eye_offer",
+      "price": 100,
+      "imagePath": "Art/Cards/treasure_100.png",
+      "productPool": [
+        {
+          "weight": 1,
+          "reward": { "type": "resource", "id": "eye", "displayName": "眼珠", "amount": 2 }
+        }
+      ]
+    },
+    {
+      "id": "fire_offer",
+      "price": 150,
+      "imagePath": "Art/Cards/treasure_150.png",
+      "productPool": [
+        {
+          "weight": 1,
+          "reward": { "type": "resource", "id": "fire", "displayName": "紫色火焰", "amount": 1 }
+        }
+      ]
+    }
+  ]
+}

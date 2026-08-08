@@ -33,14 +33,14 @@ public static class CardDescriptionNodeBuilder
                 // sibling 顺序：CardArt 之后（在 FlashLayer 之前），文字盖在卡图上方
                 var cardArt = root.Find("CardArt");
                 node.SetSiblingIndex(cardArt != null ? cardArt.GetSiblingIndex() + 1 : root.childCount);
-
-                // 描述区：卡面下部偏上（进游戏后可按美术意见调锚点）
-                var rect = (RectTransform)node;
-                rect.anchorMin = new Vector2(0.06f, 0.14f);
-                rect.anchorMax = new Vector2(0.94f, 0.40f);
-                rect.pivot = new Vector2(0.5f, 1.0f);
-                rect.offsetMin = rect.offsetMax = rect.sizeDelta = Vector2.zero;
             }
+
+            // 描述区锚点（每次重跑都应用，方便调位置）：卡面下部靠下、紧凑窄条
+            var rect = (RectTransform)node;
+            rect.anchorMin = new Vector2(0.08f, 0.06f);
+            rect.anchorMax = new Vector2(0.92f, 0.22f);
+            rect.pivot = new Vector2(0.5f, 1.0f);
+            rect.offsetMin = rect.offsetMax = rect.sizeDelta = Vector2.zero;
 
             // 接上字体与图标图集引用（字号/颜色/换行由 CardView 运行时统一设置）
             var text = node.GetComponent<TextMeshProUGUI>();
@@ -55,6 +55,7 @@ public static class CardDescriptionNodeBuilder
             text.font = font; // Unity 6 TMP 属性名为 font（旧版叫 fontAsset）
             text.spriteAsset = spriteAsset;
             text.raycastTarget = false;
+            text.fontStyle = FontStyles.Bold; // 加粗
 
             PrefabUtility.SaveAsPrefabAsset(contents, PrefabPath);
             Debug.Log($"[CardDescriptionNodeBuilder] 完成：{PrefabPath}（font={font?.name}, icons={spriteAsset?.name ?? "未生成"}）");

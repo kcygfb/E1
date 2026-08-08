@@ -22,7 +22,7 @@ namespace KiKs.Combat
         public System.Action<CardView> OnHoverEnter;
         public System.Action<CardView> OnHoverExit;
 
-        /// <summary>拖拽结束但未进入出牌区时触发（例如拖到屏幕下半区），由 CardDealAnimator 负责拉回手牌</summary>
+        /// <summary>拖拽结束但卡牌中心未进入配置的 PlayArea 时触发，由 CardDealAnimator 负责拉回手牌。</summary>
         public System.Action<CardView> OnDragCanceled;
 
         [Header("Tutorial")]
@@ -43,8 +43,8 @@ namespace KiKs.Combat
         [SerializeField] private Vector2 upgradeFireOffset = Vector2.zero;
 
         [Header("Card Text Auto Size")]
-        [SerializeField] private float descriptionFontSizeMin = 18f;
-        [SerializeField] private float descriptionFontSizeMax = 32f;
+        [SerializeField] private float descriptionFontSizeMin = 15f;
+        [SerializeField] private float descriptionFontSizeMax = 23f;
         [SerializeField] private float statFontSizeMin = 28f;
         [SerializeField] private float statFontSizeMax = 48f;
 
@@ -52,6 +52,7 @@ namespace KiKs.Combat
         private Image _upgradeFireImage;
         private SpriteRenderer _upgradeFireSpriteRenderer;
         private RectTransform _rect;
+        private RectTransform _playArea;
         private float _lastDragEndTime;
         private bool _isAnimating;
         private bool _wasDragged;
@@ -118,6 +119,15 @@ namespace KiKs.Combat
             RefreshCardArt();
             SyncUpgradeFire();
             RegisterTutorialCallout(spec);
+        }
+
+        /// <summary>
+        /// Assigns the invisible UI rectangle that accepts a dragged card.
+        /// The card's center must be inside this rectangle when the drag ends.
+        /// </summary>
+        public void SetPlayArea(RectTransform playArea)
+        {
+            _playArea = playArea;
         }
 
         private void RegisterTutorialCallout(CardSpec spec)
@@ -384,7 +394,9 @@ namespace KiKs.Combat
             text.textWrappingMode = allowWrapping
                 ? TextWrappingModes.Normal
                 : TextWrappingModes.NoWrap;
-            text.overflowMode = TextOverflowModes.Ellipsis;
+            text.overflowMode = allowWrapping
+                ? TextOverflowModes.Overflow
+                : TextOverflowModes.Ellipsis;
             text.raycastTarget = false;
         }
 
@@ -504,28 +516,35 @@ namespace KiKs.Combat
             _wasDragged = false;
             _lastDragEndTime = Time.realtimeSinceStartup;
 
-            if (IsOverBattleArea())
+            if (IsOverPlayArea())
             {
                 TryPlayCard();
             }
             else
             {
-                WarningToast.Show("Drag cards into the battle area.");
+                WarningToast.Show("Drag cards into the play area.");
                 OnDragCanceled?.Invoke(this);
             }
         }
 
         /// <summary>
-        /// 判定卡牌是否已拖入战斗区：以卡牌自身中心位置为准（而非鼠标指针），
-        /// 当卡牌中心越过屏幕中线上方时视为进入战斗区。
+        /// 判定卡牌是否已拖入配置的出牌区域，以卡牌自身中心位置为准。
         /// </summary>
-        private bool IsOverBattleArea()
+        private bool IsOverPlayArea()
         {
-            if (_rect == null) return false;
+            if (_rect == null || _playArea == null) return false;
 
-            // 卡牌中心的世界坐标 → 屏幕坐标，兼容 Overlay / ScreenSpaceCamera 两种 Canvas 模式。
-            Vector3 cardScreenPos = RectTransformUtility.WorldToScreenPoint(null, _rect.position);
-            return cardScreenPos.y > Screen.height * 0.5f;
+            var canvas = _playArea.GetComponentInParent<Canvas>();
+            var eventCamera = canvas != null && canvas.renderMode != RenderMode.ScreenSpaceOverlay
+                ? canvas.worldCamera
+                : null;
+            Vector2 cardScreenPosition =
+                RectTransformUtility.WorldToScreenPoint(eventCamera, _rect.position);
+
+            return RectTransformUtility.RectangleContainsScreenPoint(
+                _playArea,
+                cardScreenPosition,
+                eventCamera);
         }
         private void TryPlayCard()
         {

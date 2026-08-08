@@ -37,8 +37,9 @@ namespace KiKs.Combat
         [Header("Deck source")]
         [Tooltip("Used only when no selection screen has filled RuntimeGameRepository.")]
         [SerializeField] private List<string> debugStartingCardIds = new List<string>();
+        [Tooltip("Enable only when reproducing a deterministic draw order for debugging.")]
+        [SerializeField] private bool useFixedRandomSeed;
         [SerializeField] private int randomSeed = 1;
-        [SerializeField] private bool shuffleAtBattleStart = true;
 
         [Header("Lifecycle")]
         [SerializeField] private bool autoStartBattle = true;
@@ -141,6 +142,7 @@ namespace KiKs.Combat
 
                 var rules = rulesConfig.CreateRuntimeRules();
                 var cards = CreateCardInstances(selectedIds);
+                var battleRandomSeed = useFixedRandomSeed ? randomSeed : Guid.NewGuid().GetHashCode();
                 if (cards.Count != rules.ExpectedInitialDeckSize)
                 {
                     if (usesSelectedDeck)
@@ -157,9 +159,9 @@ namespace KiKs.Combat
                     rules,
                     playerDefinition.CreateRuntimeState(),
                     CreateEnemies(),
-                    new DeckState(cards, randomSeed, shuffleAtBattleStart));
+                    new DeckState(cards, battleRandomSeed, true));
 
-                CreateEnemyDecks(state);
+                CreateEnemyDecks(state, battleRandomSeed);
 
                 _engine = new CombatEngine(state);
                 _engine.EventRaised += ForwardEvent;
@@ -522,7 +524,7 @@ namespace KiKs.Combat
             return FindFirstObjectByType<TutorialController>();
         }
 
-        private void CreateEnemyDecks(BattleState state)
+        private void CreateEnemyDecks(BattleState state, int battleRandomSeed)
         {
             for (var i = 0; i < enemyDefinitions.Count; i++)
             {
@@ -580,10 +582,10 @@ namespace KiKs.Combat
                         " rules expect " + turnRules.DeckSize + ".", this);
                 }
 
-                var enemySeed = randomSeed + i + 1;
+                var enemySeed = unchecked(battleRandomSeed + i + 1);
                 state.RegisterEnemyDeck(
                     enemy.Id,
-                    new DeckState(enemyCards, enemySeed, shuffleAtBattleStart));
+                    new DeckState(enemyCards, enemySeed, true));
                 state.RegisterEnemyBaseActionPoints(enemy.Id, turnRules.BaseActionPoints);
 
                 if (specialCard != null)

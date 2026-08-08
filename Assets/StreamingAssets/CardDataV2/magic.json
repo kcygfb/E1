@@ -10,7 +10,8 @@
         "en": "blizzard"
       },
       "description": {
-        "en": "Consume all bleed stacks to deal double damage per stack."
+        "en": "Consume all bleed stacks to deal double damage per stack.",
+        "zhCN": "消耗所有流血层数，每层造成{剑}2点伤害"
       },
       "category": "magic",
       "copies": 1,
@@ -42,7 +43,8 @@
         "en": "tornado"
       },
       "description": {
-        "en": "Hit eight times, damage toughness, and negate attacks."
+        "en": "Hit eight times, damage toughness, and negate attacks.",
+        "zhCN": "连续攻击8次，每次造成{剑}1点伤害，削减{盾}1点韧性，获得{闪}3次攻击无效"
       },
       "category": "magic",
       "copies": 1,
@@ -81,7 +83,8 @@
         "en": "summon"
       },
       "description": {
-        "en": "Summon another magic hand for three turns."
+        "en": "Summon another magic hand for three turns.",
+        "zhCN": "召唤魔法手，持续3回合"
       },
       "category": "magic",
       "copies": 1,
@@ -110,7 +113,8 @@
         "en": "lifesteal"
       },
       "description": {
-        "en": "Deal 9 damage and heal for the damage dealt. Damage is doubled against bleeding targets."
+        "en": "Deal 9 damage and heal for the damage dealt. Damage is doubled against bleeding targets.",
+        "zhCN": "造成{剑}9点伤害并回复等量生命；目标处于流血状态时，伤害和吸血量翻倍"
       },
       "category": "magic",
       "copies": 1,
@@ -142,7 +146,8 @@
         "en": "shield bash"
       },
       "description": {
-        "en": "Deal damage equal to the current temporary block."
+        "en": "Deal damage equal to the current temporary block.",
+        "zhCN": "造成{盾}与当前格挡值等量的伤害"
       },
       "category": "magic",
       "copies": 1,
@@ -170,7 +175,8 @@
         "en": "biochemical enchant"
       },
       "description": {
-        "en": "Your next attack adds poison equal to five times the current poison stacks."
+        "en": "Your next attack adds poison equal to five times the current poison stacks.",
+        "zhCN": "下次攻击附加{毒}5倍当前中毒层数的中毒"
       },
       "category": "magic",
       "copies": 1,
@@ -199,7 +205,8 @@
         "en": "poison dragon"
       },
       "description": {
-        "en": "Poison ticks deal 5 additional damage until the mark disappears."
+        "en": "Poison ticks deal 5 additional damage until the mark disappears.",
+        "zhCN": "{毒}中毒伤害额外+5点"
       },
       "category": "magic",
       "copies": 1,

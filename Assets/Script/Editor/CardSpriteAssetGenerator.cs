@@ -82,6 +82,12 @@ public static class CardSpriteAssetGenerator
         var spriteAsset = ScriptableObject.CreateInstance<TMP_SpriteAsset>();
         AssetDatabase.CreateAsset(spriteAsset, OutPath);
 
+        // 设置版本号（TMP_Asset.version 的 setter 是 internal，需反射）。
+        // 不设置的话 TMP_SpriteAsset.Awake 会认为资源是旧版，在资源导入期间触发
+        // UpgradeSpriteAsset()（内部调用 SaveAssets 被 Unity 禁止）而报错。
+        typeof(TMP_Asset).GetField("m_Version", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+            ?.SetValue(spriteAsset, "1.1.0");
+
         spriteAsset.spriteSheet = atlasTex;
         spriteAsset.hashCode = TMP_TextUtilities.GetSimpleHashCode(spriteAsset.name);
         // 关键：设基准尺寸 100，图标渲染尺寸 = 字号 × sprite.scale(1.3)
@@ -98,7 +104,7 @@ public static class CardSpriteAssetGenerator
             var glyph = new TMP_SpriteGlyph
             {
                 index = (uint)spriteAsset.spriteGlyphTable.Count,
-                metrics = new GlyphMetrics(100f, 100f, -50f, 50f, 100f),
+                metrics = new GlyphMetrics(100f, 100f, 3f, 95f, 100f),
                 glyphRect = new GlyphRect((int)kv.Value.x, (int)kv.Value.y, (int)kv.Value.width, (int)kv.Value.height),
                 scale = 1f,
                 sprite = Sprite.Create(atlasTex, kv.Value, new Vector2(0.5f, 0.5f)),

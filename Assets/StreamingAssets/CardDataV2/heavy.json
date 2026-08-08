@@ -10,7 +10,8 @@
         "en": "labrys"
       },
       "description": {
-        "en": "Strike with a heavy axe."
+        "en": "Strike with a heavy axe.",
+        "zhCN": "造成{剑}4点伤害，削减{盾}8点韧性"
       },
       "category": "heavy",
       "copies": 1,
@@ -50,7 +51,8 @@
         "en": "pickax"
       },
       "description": {
-        "en": "Drive a pick into the target's toughness."
+        "en": "Drive a pick into the target's toughness.",
+        "zhCN": "造成{剑}2点伤害，削减{盾}12点韧性"
       },
       "category": "heavy",
       "copies": 1,
@@ -90,7 +92,8 @@
         "en": "maul"
       },
       "description": {
-        "en": "Crush health and toughness with a massive hammer."
+        "en": "Crush health and toughness with a massive hammer.",
+        "zhCN": "造成{剑}8点伤害，削减{盾}25点韧性"
       },
       "category": "heavy",
       "copies": 1,
@@ -130,7 +133,8 @@
         "en": "chain flail"
       },
       "description": {
-        "en": "Strike three times with a chain flail."
+        "en": "Strike three times with a chain flail.",
+        "zhCN": "连续攻击3次，每次造成{剑}1点伤害，削减{盾}3点韧性"
       },
       "category": "heavy",
       "copies": 1,
@@ -174,7 +178,8 @@
         "en": "greatsword"
       },
       "description": {
-        "en": "Deliver a heavy greatsword blow."
+        "en": "Deliver a heavy greatsword blow.",
+        "zhCN": "造成{剑}5点伤害，削减{盾}22点韧性"
       },
       "category": "heavy",
       "copies": 1,
@@ -214,7 +219,8 @@
         "en": "fire axe"
       },
       "description": {
-        "en": "A sharp fire-axe strike."
+        "en": "A sharp fire-axe strike.",
+        "zhCN": "造成{剑}3点伤害，削减{盾}10点韧性"
       },
       "category": "heavy",
       "copies": 1,
@@ -255,7 +261,8 @@
         "en": "hydraulic breaker"
       },
       "description": {
-        "en": "Deal 6 damage (11 upgraded). The next execution damage is doubled."
+        "en": "Deal 6 damage (11 upgraded). The next execution damage is doubled.",
+        "zhCN": "造成{剑}6点伤害，使下次处决伤害翻倍"
       },
       "category": "heavy",
       "copies": 1,

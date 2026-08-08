@@ -10,7 +10,8 @@
         "en": "nightmare"
       },
       "description": {
-        "en": "Deal severe toughness damage."
+        "en": "Deal severe toughness damage.",
+        "zhCN": "削减10点韧性"
       },
       "category": "enemy_nightmare",
       "copies": 1,
@@ -39,7 +40,8 @@
         "en": "chill"
       },
       "description": {
-        "en": "Chill the target and reduce incoming damage."
+        "en": "Chill the target and reduce incoming damage.",
+        "zhCN": "削减4点韧性，获得2次攻击无效，获得减伤，持续2回合"
       },
       "category": "enemy_nightmare",
       "copies": 1,
@@ -76,7 +78,8 @@
         "en": "xyster"
       },
       "description": {
-        "en": "Scrape away toughness and inflict bleed."
+        "en": "Scrape away toughness and inflict bleed.",
+        "zhCN": "削减8点韧性，施加5层流血"
       },
       "category": "enemy_nightmare",
       "copies": 1,

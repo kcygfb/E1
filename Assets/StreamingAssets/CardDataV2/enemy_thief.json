@@ -10,7 +10,8 @@
         "en": "smoke bomb"
       },
       "description": {
-        "en": "Poison, evade attacks, reduce damage, and gain block."
+        "en": "Poison, evade attacks, reduce damage, and gain block.",
+        "zhCN": "施加2层中毒，获得2次攻击无效，获得减伤，持续2回合，获得2点格挡"
       },
       "category": "enemy_thief",
       "copies": 1,
@@ -51,7 +52,8 @@
         "en": "laser cutting"
       },
       "description": {
-        "en": "Cut with a laser."
+        "en": "Cut with a laser.",
+        "zhCN": "造成6点伤害，削减6点韧性"
       },
       "category": "enemy_thief",
       "copies": 1,
@@ -85,7 +87,8 @@
         "en": "diversion"
       },
       "description": {
-        "en": "Attack twice, gain block, and recover health."
+        "en": "Attack twice, gain block, and recover health.",
+        "zhCN": "连续攻击2次，每次造成8点伤害，削减4点韧性，获得10点格挡，恢复10点生命"
       },
       "category": "enemy_thief",
       "copies": 1,
@@ -127,7 +130,8 @@
         "en": "reckless smash"
       },
       "description": {
-        "en": "Smash recklessly and inflict bleed."
+        "en": "Smash recklessly and inflict bleed.",
+        "zhCN": "造成15点伤害，削减10点韧性，施加2层流血"
       },
       "category": "enemy_thief",
       "copies": 1,
