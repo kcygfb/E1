@@ -10,7 +10,8 @@
         "en": "labrys"
       },
       "description": {
-        "en": "Strike with a heavy axe."
+        "en": "Strike with a heavy axe.",
+        "zhCN": "挥舞巨斧，造成{剑}4点伤害"
       },
       "category": "heavy",
       "copies": 1,
@@ -174,7 +175,8 @@
         "en": "greatsword"
       },
       "description": {
-        "en": "Deliver a heavy greatsword blow."
+        "en": "Deliver a heavy greatsword blow.",
+        "zhCN": "挥舞巨剑，造成{剑}5点伤害，并削减{盾}22点韧性"
       },
       "category": "heavy",
       "copies": 1,
@@ -247,6 +249,45 @@
       },
       "notes": [],
       "image": "Art/Cards/fireaxe.png"
+    },
+    {
+      "id": "heavy_hydraulic_breaker",
+      "name": {
+        "zhCN": "冲击钻",
+        "en": "hydraulic breaker"
+      },
+      "description": {
+        "en": "Deal 6 damage (11 upgraded). The next execution damage is doubled."
+      },
+      "category": "heavy",
+      "copies": 1,
+      "cost": {
+        "resource": "action_point",
+        "amount": 1
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "damage",
+          "amount": {
+            "base": 6,
+            "upgraded": 11
+          }
+        },
+        {
+          "type": "execution_double",
+          "amount": 2
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "卡牌全套小数值",
+        "row": 18
+      },
+      "notes": [
+        "使用该牌触发处决后，使处决伤害翻倍。"
+      ],
+      "image": "Art/Cards/hydraulicbreaker.png"
     }
   ]
 }

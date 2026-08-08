@@ -1,0 +1,229 @@
+{
+  "schemaVersion": 2,
+  "category": "misc",
+  "categoryName": "杂牌",
+  "cards": [
+    {
+      "id": "misc_zigzag",
+      "name": {
+        "zhCN": "反复横跳",
+        "en": "zigzag"
+      },
+      "description": {
+        "en": "Attack 2 times (4 upgraded) for 1 damage and 1 toughness damage each."
+      },
+      "category": "misc",
+      "copies": 1,
+      "cost": {
+        "resource": "action_point",
+        "amount": 0
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "damage",
+          "amount": {
+            "base": 1,
+            "upgraded": 1
+          },
+          "hits": {
+            "base": 2,
+            "upgraded": 4
+          }
+        },
+        {
+          "type": "toughness_damage",
+          "amount": {
+            "base": 1,
+            "upgraded": 1
+          }
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "卡牌全套小数值",
+        "row": 46
+      },
+      "notes": [],
+      "image": "Art/Cards/zigzag.png"
+    },
+    {
+      "id": "misc_parry",
+      "name": {
+        "zhCN": "格挡",
+        "en": "parry"
+      },
+      "description": {
+        "en": "Deal 4 toughness damage (8 upgraded) and counter the enemy's attacks with toughness damage."
+      },
+      "category": "misc",
+      "copies": 1,
+      "cost": {
+        "resource": "action_point",
+        "amount": 1
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "parry_counter",
+          "amount": {
+            "base": 4,
+            "upgraded": 8
+          }
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "卡牌全套小数值",
+        "row": 47
+      },
+      "notes": [
+        "怪物攻击次数乘削韧值。"
+      ],
+      "image": "Art/Cards/parry.png"
+    },
+    {
+      "id": "misc_ambush",
+      "name": {
+        "zhCN": "隐身",
+        "en": "ambush"
+      },
+      "description": {
+        "en": "Hide (skip the enemy's next turn), then deal 10 damage (30 upgraded)."
+      },
+      "category": "misc",
+      "copies": 1,
+      "cost": {
+        "resource": "action_point",
+        "amount": 2
+      },
+      "special": true,
+      "effects": [
+        {
+          "type": "invisible_attack",
+          "amount": {
+            "base": 10,
+            "upgraded": 30
+          }
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "卡牌全套小数值",
+        "row": 48
+      },
+      "notes": [
+        "主角先隐身再打伤害。"
+      ],
+      "image": "Art/Cards/ambush.png"
+    },
+    {
+      "id": "misc_muscle_boost",
+      "name": {
+        "zhCN": "肌肉强化",
+        "en": "muscle boost"
+      },
+      "description": {
+        "en": "Deal 8 damage (15 upgraded) and 8 toughness damage (15 upgraded)."
+      },
+      "category": "misc",
+      "copies": 1,
+      "cost": {
+        "resource": "action_point",
+        "amount": 2
+      },
+      "special": true,
+      "effects": [
+        {
+          "type": "damage",
+          "amount": {
+            "base": 8,
+            "upgraded": 15
+          }
+        },
+        {
+          "type": "toughness_damage",
+          "amount": {
+            "base": 8,
+            "upgraded": 15
+          }
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "卡牌全套小数值",
+        "row": 49
+      },
+      "notes": [],
+      "image": "Art/Cards/muscleboost.png"
+    },
+    {
+      "id": "misc_reflect",
+      "name": {
+        "zhCN": "反伤",
+        "en": "reflect"
+      },
+      "description": {
+        "en": "Reflect 6 damage (13 upgraded) back to the attacker."
+      },
+      "category": "misc",
+      "copies": 1,
+      "cost": {
+        "resource": "action_point",
+        "amount": 1
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "reflect_damage",
+          "amount": {
+            "base": 6,
+            "upgraded": 13
+          }
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "卡牌全套小数值",
+        "row": 50
+      },
+      "notes": [],
+      "image": "Art/Cards/reflect.png"
+    },
+    {
+      "id": "misc_magic_burst",
+      "name": {
+        "zhCN": "魔法爆破",
+        "en": "magic burst"
+      },
+      "description": {
+        "en": "Deal 5 damage (8 upgraded) for each mana card spent this turn."
+      },
+      "category": "misc",
+      "copies": 1,
+      "cost": {
+        "resource": "action_point",
+        "amount": 0
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "mana_card_burst",
+          "amount": {
+            "base": 5,
+            "upgraded": 8
+          }
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "卡牌全套小数值",
+        "row": 51
+      },
+      "notes": [
+        "每消耗过一张魔法牌，便造成5（8）点伤害。"
+      ],
+      "image": "Art/Cards/magicburst.png"
+    }
+  ]
+}

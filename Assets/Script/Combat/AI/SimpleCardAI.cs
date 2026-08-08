@@ -56,8 +56,10 @@ namespace KiKs.Combat
                 yield break;
             }
 
-            // 1. 抽牌
-            engine.DrawEnemyCards(enemyId, turnRules.CardsDrawnPerTurn, turnRules.HandLimit);
+            // 1. 手牌已在玩家回合抽好（BeginPlayerTurn 统一抽牌，供玩家提前看到）。
+            //    仅当手牌为空（极端情况）时兜底抽牌。
+            if (deck.Hand.Count == 0)
+                engine.DrawEnemyCards(enemyId, turnRules.CardsDrawnPerTurn, turnRules.HandLimit);
             yield return new WaitForSeconds(drawDelay);
 
             // 2. 按伤害降序出牌（AP 限制）

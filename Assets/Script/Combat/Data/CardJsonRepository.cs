@@ -116,6 +116,7 @@ namespace KiKs.Combat
             var special = OptionalBool(card, "special");
             var imagePath = OptionalString(card, "image");
             var descriptionEn = OptionalDescriptionEn(card);
+            var descriptionZhCn = OptionalDescriptionZhCn(card);
             var tutorial = OptionalTutorial(card);
             var rawEffects = RequiredList(card, "effects");
             if (rawEffects.Count == 0) throw new FormatException(id + " has no effects.");
@@ -137,7 +138,8 @@ namespace KiKs.Combat
                 deckCopies,
                 imagePath,
                 descriptionEn,
-                tutorial);
+                tutorial,
+                descriptionZhCn);
         }
 
         private static string OptionalDescriptionEn(Dictionary<string, object> card)
@@ -147,6 +149,15 @@ namespace KiKs.Combat
 
             var description = AsObject(rawDescription, "description");
             return OptionalString(description, "en");
+        }
+
+        private static string OptionalDescriptionZhCn(Dictionary<string, object> card)
+        {
+            if (!card.TryGetValue("description", out var rawDescription) || rawDescription == null)
+                return string.Empty;
+
+            var description = AsObject(rawDescription, "description");
+            return OptionalString(description, "zhCN");
         }
 
         private static TutorialHintJson OptionalTutorial(Dictionary<string, object> card)
@@ -189,7 +200,11 @@ namespace KiKs.Combat
                 effect.Type == CardEffectType.LifeStealMaxHealth ||
                 effect.Type == CardEffectType.Poison ||
                 effect.Type == CardEffectType.PoisonDamageBonus ||
-                effect.Type == CardEffectType.BlockScaledDamage)
+                effect.Type == CardEffectType.BlockScaledDamage ||
+                effect.Type == CardEffectType.InvisibleAttack ||
+                effect.Type == CardEffectType.ManaCardBurst ||
+                effect.Type == CardEffectType.ExecutionDouble ||
+                effect.Type == CardEffectType.ParryCounter)
                 ? CardTargetType.SingleEnemy
                 : CardTargetType.Self;
         }
@@ -221,6 +236,10 @@ namespace KiKs.Combat
                 case "poison_damage_bonus": return CardEffectType.PoisonDamageBonus;
                 case "gain_resource": return CardEffectType.GainResource;
                 case "play_cards_from_discard": return CardEffectType.PlayCardsFromDiscard;
+                case "parry_counter": return CardEffectType.ParryCounter;
+                case "invisible_attack": return CardEffectType.InvisibleAttack;
+                case "mana_card_burst": return CardEffectType.ManaCardBurst;
+                case "execution_double": return CardEffectType.ExecutionDouble;
                 default: throw new FormatException("Unknown card effect type: " + value);
             }
         }

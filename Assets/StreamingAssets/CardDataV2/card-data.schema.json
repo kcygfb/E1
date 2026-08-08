@@ -129,6 +129,12 @@
             "en": {
               "type": "string",
               "minLength": 1
+            },
+            "zhCN": {
+              "type": [
+                "string",
+                "null"
+              ]
             }
           }
         },
@@ -286,7 +292,11 @@
             "summon_companion",
             "life_steal_max_health",
             "gain_resource",
-            "play_cards_from_discard"
+            "play_cards_from_discard",
+            "parry_counter",
+            "invisible_attack",
+            "mana_card_burst",
+            "execution_double"
           ]
         },
         "amount": {

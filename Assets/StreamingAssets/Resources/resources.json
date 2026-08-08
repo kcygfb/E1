@@ -30,9 +30,7 @@
       "displayName": "爪子",
       "startingAmount": 5,
       "tutorial": {
-        "description": "材料一",
-        "placement": "Above",
-        "offsetY": 20
+        "description": "Claw: A crafting material dropped by Nightmare. Rich in high-quality calcium, it's perfect for those with weak bones."
       }
     },
     {
@@ -40,9 +38,7 @@
       "displayName": "狼毫",
       "startingAmount": 5,
       "tutorial": {
-        "description": "材料二",
-        "placement": "Above",
-        "offsetY": 20
+        "description": "Wolf Fur: A crafting material dropped by Corrupt Merchant. It has a rich, pleasant aroma and is a superior substitute for cat fur."
       }
     },
     {
@@ -53,22 +49,34 @@
     {
       "id": "eye",
       "displayName": "眼珠",
-      "startingAmount": 5
+      "startingAmount": 5,
+      "tutorial": {
+        "description": "Eyes: A crafting material dropped by Big Eye. Soft and chewy, with an indescribable flavor that lingers on the palate."
+      }
     },
     {
       "id": "fire",
       "displayName": "紫色火焰",
-      "startingAmount": 5
+      "startingAmount": 5,
+      "tutorial": {
+        "description": "Flame: A crafting material dropped by Butcher. Sweet, spicy, tingling, and melts in your mouth."
+      }
     },
     {
       "id": "snake",
       "displayName": "蛇干",
-      "startingAmount": 5
+      "startingAmount": 5,
+      "tutorial": {
+        "description": "Snake Jerk: A crafting material dropped by Ghost. Packed with protein and makes an excellent base for monster coffee."
+      }
     },
     {
       "id": "tentacle",
       "displayName": "触手",
-      "startingAmount": 5
+      "startingAmount": 5,
+      "tutorial": {
+        "description": "Tentacle: A crafting material dropped by Little Girl. Surprisingly delicious when fully cooked—everyone who tries it, loves it."
+      }
     },
     {
       "id": "Water",

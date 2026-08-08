@@ -15,6 +15,7 @@ namespace KiKs.Combat
         public string InstanceId { get; private set; }
         public CardSpec Spec { get; private set; }
         public bool IsUpgraded { get; private set; }
+        public bool IsActivated { get; private set; }
 
         public System.Action<CardView> OnPlayRequested;
         public System.Action<CardView> OnShootRequested;
@@ -95,6 +96,7 @@ namespace KiKs.Combat
             CardId = spec.Id;
             InstanceId = instanceId ?? spec.Id;
             IsUpgraded = false;
+            IsActivated = false;
             gameObject.name = $"Card_{spec.Id}";
             transform.localScale = Vector3.one;
 
@@ -127,9 +129,10 @@ namespace KiKs.Combat
                 tutorialController.RegisterJsonCallout(this, _rect, spec?.Tutorial);
         }
 
-        public void SetUpgraded(bool isUpgraded)
+        internal void SetEmpowermentState(bool isUpgraded, bool isActivated)
         {
             IsUpgraded = isUpgraded;
+            IsActivated = isActivated;
             RefreshCardText();
             RefreshCardArt();
             SyncUpgradeFire();
@@ -138,7 +141,21 @@ namespace KiKs.Combat
         /// <summary>强化翻转动画：Y轴翻转，中途切换为强化精灵图</summary>
         public void PlayUpgradeFlip(System.Action onComplete = null)
         {
-            IsUpgraded = true;
+            PlayEmpowermentFlip(activateMagicCard: false, onComplete: onComplete);
+        }
+
+        /// <summary>Magic activation uses the same flip and fire treatment as an upgrade.</summary>
+        public void PlayActivationFlip(System.Action onComplete = null)
+        {
+            PlayEmpowermentFlip(activateMagicCard: true, onComplete: onComplete);
+        }
+
+        private void PlayEmpowermentFlip(bool activateMagicCard, System.Action onComplete)
+        {
+            if (activateMagicCard)
+                IsActivated = true;
+            else
+                IsUpgraded = true;
             RefreshCardText();
             SyncUpgradeFire();
 
@@ -158,7 +175,8 @@ namespace KiKs.Combat
             // 前半段：Y轴旋转 0→90°（卡牌侧转消失）
             seq.Append(_rect.DOLocalRotate(new Vector3(0, 90, 0), 0.18f).SetEase(Ease.InCubic));
             // 中点：切换为强化精灵图
-            seq.AppendCallback(RefreshCardArt);
+            if (!activateMagicCard)
+                seq.AppendCallback(RefreshCardArt);
             // 后半段：Y轴旋转 90→0°（翻回正面，显示强化图）
             seq.Append(_rect.DOLocalRotate(Vector3.zero, 0.18f).SetEase(Ease.OutCubic));
             // 翻转时轻微放大，结束回弹
@@ -181,7 +199,11 @@ namespace KiKs.Combat
             if (Spec == null)
                 return;
 
-            SetText(descriptionText, Spec.DescriptionEn, false);
+            SetText(descriptionText,
+                !string.IsNullOrWhiteSpace(Spec.DescriptionZhCn)
+                    ? CardDescriptionFormatter.Format(Spec.DescriptionZhCn) // 中文优先，含图标转换
+                    : Spec.DescriptionEn,                                   // 回退英文
+                false);
             SetText(damageText, FormatEffectValue("Damage", CardEffectType.Damage), true);
             SetText(toughnessText, FormatEffectValue("Toughness", CardEffectType.ToughnessDamage), true);
         }
@@ -191,7 +213,10 @@ namespace KiKs.Combat
             if (cardNameText == null || Spec == null)
                 return;
 
-            var name = Spec.DisplayName + (IsUpgraded ? " (UPGRADED)" : string.Empty);
+            var stateLabel = IsUpgraded
+                ? " (UPGRADED)"
+                : IsActivated ? " (ACTIVATED)" : string.Empty;
+            var name = Spec.DisplayName + stateLabel;
             if (_totalShots >= 1)
                 name += $" [{_remainingShots}/{_totalShots}]";
             cardNameText.text = name;
@@ -327,7 +352,9 @@ namespace KiKs.Combat
             if (upgradeFireEffect == null)
                 return;
 
-            var shouldShow = IsUpgraded && Spec != null && Spec.CanUpgrade;
+            var shouldShow = Spec != null &&
+                ((IsUpgraded && Spec.CanUpgrade) ||
+                 (IsActivated && Spec.CostResource == CardResourceType.Mana));
             if (upgradeFireEffect.activeSelf != shouldShow)
                 upgradeFireEffect.SetActive(shouldShow);
 

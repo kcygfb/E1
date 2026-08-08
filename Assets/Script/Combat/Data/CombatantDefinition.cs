@@ -25,6 +25,9 @@ namespace KiKs.Combat
         [SerializeField] private Vector2 portraitOffset = Vector2.zero;
         [Min(0.01f)]
         [SerializeField] private float portraitScale = 1f;
+        [TextArea(3, 6)]
+        [Tooltip("敌人介绍。悬停立绘时跟随鼠标显示；留空则不显示。")]
+        [SerializeField] private string description = string.Empty;
 
         [Header("Enemy Deck")]
         [Tooltip("Selects the dedicated enemy JSON deck. Turn rules come from Enemy Rank in CombatRules.")]
@@ -55,10 +58,13 @@ namespace KiKs.Combat
         public CombatantSide Side => side;
         public EnemyRank EnemyRank => enemyRank;
         public EnemyArchetype EnemyArchetype => enemyArchetype;
+        public int MaxHealth => maxHealth;
+        public int MaxToughness => maxToughness;
         public Sprite Portrait => portrait;
         public Vector2 PortraitSize => portraitSize;
         public Vector2 PortraitOffset => portraitOffset;
         public float PortraitScale => portraitScale;
+        public string Description => description;
         public string EnemyCardCategory
         {
             get

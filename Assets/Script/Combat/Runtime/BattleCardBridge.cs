@@ -20,7 +20,7 @@ namespace KiKs.Combat
             if (animator == null) animator = GetComponent<CardDealAnimator>();
             if (battleController == null) battleController = FindFirstObjectByType<BattleController>();
 
-            ConfigureMagicHandUpgradeBridge();
+            ConfigureMagicHandCardBridge();
 
             if (animator != null)
             {
@@ -72,7 +72,7 @@ namespace KiKs.Combat
 
             foreach (var cardInstance in hand)
             {
-                var cardView = animator.DrawCard(cardInstance.Spec, cardInstance.InstanceId, cardInstance.IsUpgraded);
+                var cardView = animator.DrawCard(cardInstance.Spec, cardInstance.InstanceId, cardInstance.IsUpgraded, cardInstance.IsActivated);
                 if (cardView != null)
                     HookCardHover(cardView);
             }
@@ -241,13 +241,13 @@ namespace KiKs.Combat
 
             foreach (var cardInstance in hand)
             {
-                var cardView = animator.DrawCard(cardInstance.Spec, cardInstance.InstanceId, cardInstance.IsUpgraded);
+                var cardView = animator.DrawCard(cardInstance.Spec, cardInstance.InstanceId, cardInstance.IsUpgraded, cardInstance.IsActivated);
                 if (cardView != null)
                     HookCardHover(cardView);
             }
         }
 
-        private void ConfigureMagicHandUpgradeBridge()
+        private void ConfigureMagicHandCardBridge()
         {
             var magicHand = GameObject.Find("Magichand");
             if (magicHand == null)
@@ -258,10 +258,10 @@ namespace KiKs.Combat
                 return;
             }
 
-            var upgradeBridge = magicHand.GetComponent<MagicHandUpgradeBridge>();
-            if (upgradeBridge == null)
-                upgradeBridge = magicHand.AddComponent<MagicHandUpgradeBridge>();
-            upgradeBridge.Configure(battleController, animator);
+            var cardBridge = magicHand.GetComponent<MagicHandCardBridge>();
+            if (cardBridge == null)
+                cardBridge = magicHand.AddComponent<MagicHandCardBridge>();
+            cardBridge.Configure(battleController, animator);
         }
     }
 }

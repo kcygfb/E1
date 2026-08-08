@@ -141,7 +141,8 @@
         "row": 40,
         "upgradeRow": 40
       },
-      "notes": []
+      "notes": [],
+      "image": "Art/Cards/smokebomb.png"
     },
     {
       "id": "hidden_poison_sting",

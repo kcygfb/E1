@@ -157,6 +157,16 @@ namespace KiKs.Combat
 
             var rt = cardView.GetComponent<RectTransform>();
             var seq = DOTween.Sequence();
+            // 先快速左右晃动几下（增强打出确认感），再侧滑向玩家区域
+            var originPos = rt.anchoredPosition;
+            seq.Append(rt.DOShakeAnchorPos(
+                0.4f,
+                new Vector2(26f, 0f),
+                vibrato: 7,
+                randomness: 15,
+                snapping: false,
+                fadeOut: true).SetEase(Ease.OutQuad));
+            seq.AppendCallback(() => rt.anchoredPosition = originPos);
             seq.Append(rt.DOMove(targetPos, playDuration).SetEase(Ease.InCubic));
             seq.Join(rt.DOScale(cardScale * 0.5f, playDuration).SetEase(Ease.InCubic));
             seq.OnComplete(() =>

@@ -171,6 +171,8 @@ namespace KiKs.Combat
                     events);
             }
 
+            ResolveParryCounter(source, target, sourceActionId, result, events);
+
             if (!source.IsDead)
                 ResolveReflection(source, target, sourceActionId, result, events);
 
@@ -489,6 +491,69 @@ namespace KiKs.Combat
                         events,
                         replayDepth);
                     break;
+
+                case CardEffectType.ParryCounter:
+                    // Toughness damage now, plus a counter: reflect toughness damage
+                    // equal to this value multiplied by the enemy's attacks-per-turn.
+                    result.ToughnessBroken |= ApplyToughnessDamage(
+                        source,
+                        target,
+                        effect.Amount.Resolve(card.IsUpgraded),
+                        effect.Hits.Resolve(card.IsUpgraded),
+                        effect.Unit,
+                        card.InstanceId,
+                        events);
+                    source.AddParryCounter(
+                        effect.Amount.Resolve(card.IsUpgraded),
+                        _state.Rules.GetEnemyTurnRules(target.EnemyRank).CardsPlayedPerTurn,
+                        target.Id);
+                    AddStatusEvent(source, source, card, source.ParryCounter,
+                        "Parry counter prepared.", events);
+                    break;
+
+                case CardEffectType.InvisibleAttack:
+                    // Hide first (skip the enemy turn), then strike.
+                    source.AddSkipEnemyTurns(1);
+                    AddStatusEvent(source, source, card, source.SkipEnemyTurns,
+                        "Ambush: player hidden.", events);
+                    if (!target.IsDead)
+                    {
+                        result.TotalDamage += ResolveAttackDamage(
+                            source,
+                            target,
+                            effect.Amount.Resolve(card.IsUpgraded),
+                            card.InstanceId,
+                            "Ambush damage resolved.",
+                            true,
+                            events,
+                            isUpgraded: card.IsUpgraded);
+                    }
+                    break;
+
+                case CardEffectType.ManaCardBurst:
+                    var perCard = effect.Amount.Resolve(card.IsUpgraded);
+                    var spent = _state.Mana?.ManaCardsSpentThisTurn ?? 0;
+                    if (perCard > 0 && spent > 0)
+                    {
+                        result.TotalDamage += ResolveAttackDamage(
+                            source,
+                            target,
+                            perCard * spent,
+                            card.InstanceId,
+                            "Magic burst dealt " + perCard + " per mana card spent (" + spent + ").",
+                            true,
+                            events,
+                            isUpgraded: card.IsUpgraded);
+                    }
+                    break;
+
+                case CardEffectType.ExecutionDouble:
+                    // Deal damage and double the next execution damage.
+                    result.TotalDamage += ResolveDamageEffect(source, target, card, effect, events);
+                    source.AddExecutionMultiplier(2);
+                    AddStatusEvent(source, source, card, source.ExecutionMultiplier,
+                        "Next execution damage doubled.", events);
+                    break;
             }
         }
 
@@ -709,6 +774,41 @@ namespace KiKs.Combat
             return broken;
         }
 
+        /// <summary>
+        /// When an enemy attacks the player and the player has a parry counter aimed at that enemy,
+        /// deal the stored toughness damage back to the enemy, then clear the counter (one-time use).
+        /// </summary>
+        private void ResolveParryCounter(
+            CombatantState source,
+            CombatantState target,
+            string sourceActionId,
+            CombatFlowResult result,
+            List<CombatEvent> events)
+        {
+            if (source.Side == target.Side) return;
+            if (target.ParryCounter <= 0) return;
+            if (!string.Equals(target.ParryEnemyId, source.Id, StringComparison.Ordinal)) return;
+            if (source.IsDead) return;
+
+            var parryAmount = target.ParryCounter;
+            target.ClearParryCounter();
+            result.ToughnessBroken |= ApplyToughnessDamage(
+                target,
+                source,
+                parryAmount,
+                1,
+                ValueUnit.Points,
+                sourceActionId,
+                events);
+            events.Add(new CombatEvent(
+                CombatEventType.StatusApplied,
+                target.Id,
+                source.Id,
+                sourceActionId,
+                parryAmount,
+                "Parry countered " + parryAmount + " toughness damage."));
+        }
+
         private void ResolveExecution(
             CombatantState source,
             CombatantState target,
@@ -716,12 +816,16 @@ namespace KiKs.Combat
             CombatFlowResult result,
             List<CombatEvent> events)
         {
+            var multiplier = source != null ? source.ConsumeExecutionMultiplier() : 1;
+            var executionDamage = _state.Rules.ExecutionDamage * multiplier;
             var actualDamage = ApplyDamage(
                 source,
                 target,
-                _state.Rules.ExecutionDamage,
+                executionDamage,
                 sourceActionId,
-                "Execution damage resolved.",
+                multiplier > 1
+                    ? "Execution damage resolved (x" + multiplier + ")."
+                    : "Execution damage resolved.",
                 true,
                 events);
             result.TotalDamage += actualDamage;
@@ -762,8 +866,7 @@ namespace KiKs.Combat
             string sourceActionId,
             CombatFlowResult result,
             List<CombatEvent> events)
-        {
-            if (target == null || source == null || source.Side == target.Side) return;
+        {            if (target == null || source == null || source.Side == target.Side) return;
 
             var reflectedDamage = target.ConsumeReflectDamage();
             if (reflectedDamage <= 0 || source.IsDead) return;
@@ -919,7 +1022,11 @@ namespace KiKs.Combat
                 effect.Type == CardEffectType.BleedScaledDamage ||
                 effect.Type == CardEffectType.LifeSteal ||
                 effect.Type == CardEffectType.LifeStealMaxHealth ||
-                effect.Type == CardEffectType.BlockScaledDamage);
+                effect.Type == CardEffectType.BlockScaledDamage ||
+                effect.Type == CardEffectType.InvisibleAttack ||
+                effect.Type == CardEffectType.ManaCardBurst ||
+                effect.Type == CardEffectType.ExecutionDouble ||
+                effect.Type == CardEffectType.ParryCounter);
         }
 
         private static void AddStatusEvent(

@@ -1609,6 +1609,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 924b6a0ddef5498bb73b7618c4e31d0a, type: 2}
   enemyPortraitImage: {fileID: 970831849}
   bigEyePortraitOverlay: {fileID: 438658506}
+  tutorialController: {fileID: 0}
   debugStartingCardIds:
   - heavy_fire_axe
   - heavy_fire_axe
@@ -1617,12 +1618,12 @@ MonoBehaviour:
   - ranged_sniper_rifle
   - magic_blizzard
   - magic_blizzard
-  - defense_block
-  - defense_block
+  - hidden_smoke_bomb
+  - hidden_smoke_bomb
   - ranged_pistol
   - ranged_pistol
   - bleed_dagger
-  - defense_evade
+  - bleed_scalpel
   - magic_lifesteal
   - magic_lifesteal
   randomSeed: 1
@@ -2986,6 +2987,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 924b6a0ddef5498bb73b7618c4e31d0a, type: 2}
   enemyPortraitImage: {fileID: 970831849}
   bigEyePortraitOverlay: {fileID: 438658506}
+  tutorialController: {fileID: 0}
   debugStartingCardIds:
   - heavy_fire_axe
   - heavy_fire_axe
@@ -2994,12 +2996,12 @@ MonoBehaviour:
   - ranged_sniper_rifle
   - magic_blizzard
   - magic_blizzard
-  - defense_block
-  - defense_block
+  - hidden_smoke_bomb
+  - hidden_smoke_bomb
   - ranged_pistol
   - ranged_pistol
   - bleed_dagger
-  - defense_evade
+  - bleed_scalpel
   - magic_lifesteal
   - magic_lifesteal
   randomSeed: 1
@@ -7877,6 +7879,54 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2057379886}
   m_CullTransparentMesh: 1
+--- !u!1 &2072098605
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2072098607}
+  - component: {fileID: 2072098606}
+  m_Layer: 0
+  m_Name: GameObject
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &2072098606
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2072098605}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f2c4f70a9d24ca89e66d7b8a765c931, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KiKs.UI::KiKs.UI.TutorialController
+  tooltipPrefab: {fileID: 7524191139530786084, guid: 8dcbd99d61a1f9d4f9d90dcdd9aab524, type: 3}
+  tooltipParent: {fileID: 0}
+  showSceneCalloutsOnStart: 1
+  sceneCallouts: []
+--- !u!4 &2072098607
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2072098605}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2087300866
 GameObject:
   m_ObjectHideFlags: 0
@@ -8207,3 +8257,4 @@ SceneRoots:
   - {fileID: 875998995}
   - {fileID: 2104238183}
   - {fileID: 673101657}
+  - {fileID: 2072098607}

@@ -1,12 +1,15 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 namespace KiKs.UI
 {
     /// <summary>
-    /// 挂在场景空物体上。
-    /// Scene Callouts 由 Inspector 手动配置；程序化对象通过 RegisterJsonCallout 读取 JSON 配置。
+    /// 挂在场景空物体上。所有教学提示统一为"悬停目标显示、跟随鼠标"：
+    /// 程序化对象通过 RegisterJsonCallout 读取 JSON 配置；场景静态对象通过 Scene Callouts 配置。
+    /// 唯一的注册入口是 RegisterJsonCallout，全部走同一套悬停逻辑。
     /// </summary>
     [DisallowMultipleComponent]
     public sealed class TutorialController : MonoBehaviour
@@ -20,8 +23,9 @@ namespace KiKs.UI
             [TextArea(2, 5)]
             public string description;
 
-            public TutorialTooltip.Placement placement = TutorialTooltip.Placement.Above;
-            public Vector2 offset = new Vector2(0f, 20f);
+            [Tooltip("提示框相对鼠标的偏移。默认 (0, 48) 显示在鼠标上方；Offset 为 0 时同样视为未配置，自动显示在鼠标上方。")]
+            public Vector2 offset = new Vector2(0f, 48f);
+
             public bool showOnStart = true;
         }
 
@@ -33,34 +37,51 @@ namespace KiKs.UI
         [SerializeField] private bool showSceneCalloutsOnStart = true;
         [SerializeField] private SceneCallout[] sceneCallouts = Array.Empty<SceneCallout>();
 
-        [Header("Behavior")]
-        [SerializeField] private bool refreshPositionsEveryFrame = true;
+        private readonly List<HoverCallout> _callouts = new();
 
-        private readonly List<ActiveCallout> _activeCallouts = new();
-
-        private sealed class ActiveCallout
+        /// <summary>
+        /// 挂在目标 UI 上的悬停监听。指针进入时显示提示框并记录鼠标位置，移出时隐藏；
+        /// 提示框的位置跟随由 TutorialController.LateUpdate 统一驱动。
+        /// </summary>
+        private sealed class HoverCallout : MonoBehaviour, IPointerEnterHandler, IPointerMoveHandler, IPointerExitHandler
         {
-            public readonly Component Owner;
-            public readonly RectTransform Target;
-            public readonly TutorialTooltip Tooltip;
-            public readonly TutorialTooltip.Placement Placement;
-            public readonly Vector2 Offset;
-            public readonly bool IsJsonCallout;
+            public Component Owner;
+            public TutorialTooltip Tooltip;
+            public Vector2 Offset;
+            public Vector2 LastMousePosition;
 
-            public ActiveCallout(
-                Component owner,
-                RectTransform target,
-                TutorialTooltip tooltip,
-                TutorialTooltip.Placement placement,
-                Vector2 offset,
-                bool isJsonCallout)
+            public static HoverCallout Attach(RectTransform target, TutorialTooltip tooltip, Vector2 offset)
             {
-                Owner = owner;
-                Target = target;
-                Tooltip = tooltip;
-                Placement = placement;
-                Offset = offset;
-                IsJsonCallout = isJsonCallout;
+                var callout = target.GetComponent<HoverCallout>();
+                if (callout == null)
+                    callout = target.gameObject.AddComponent<HoverCallout>();
+                callout.Tooltip = tooltip;
+                callout.Offset = offset;
+                return callout;
+            }
+
+            public void OnPointerEnter(PointerEventData eventData)
+            {
+                if (Tooltip == null)
+                    return;
+
+                LastMousePosition = eventData.position;
+                Tooltip.gameObject.SetActive(true);
+                Tooltip.transform.SetAsLastSibling();
+                Tooltip.AttachToScreenPosition(LastMousePosition, Offset);
+            }
+
+            public void OnPointerExit(PointerEventData eventData)
+            {
+                // 立即隐藏，不延迟：提示框已禁用射线检测，不会遮挡目标造成 enter/exit 循环；
+                // 延迟反而会在鼠标快速滑过相邻物品时留下旧框残影。
+                if (Tooltip != null)
+                    Tooltip.gameObject.SetActive(false);
+            }
+
+            public void OnPointerMove(PointerEventData eventData)
+            {
+                LastMousePosition = eventData.position;
             }
         }
 
@@ -72,22 +93,19 @@ namespace KiKs.UI
 
         private void LateUpdate()
         {
-            for (var i = _activeCallouts.Count - 1; i >= 0; i--)
+            for (var i = _callouts.Count - 1; i >= 0; i--)
             {
-                var callout = _activeCallouts[i];
-                if (callout.Target == null || callout.Tooltip == null)
+                var callout = _callouts[i];
+                if (callout == null || callout.Tooltip == null)
                 {
-                    DestroyTooltip(callout.Tooltip);
-                    _activeCallouts.RemoveAt(i);
+                    _callouts.RemoveAt(i);
                     continue;
                 }
 
-                var targetIsVisible = callout.Target.gameObject.activeInHierarchy;
-                if (callout.Tooltip.gameObject.activeSelf != targetIsVisible)
-                    callout.Tooltip.gameObject.SetActive(targetIsVisible);
+                if (!callout.Tooltip.gameObject.activeSelf)
+                    continue;
 
-                if (targetIsVisible && refreshPositionsEveryFrame)
-                    callout.Tooltip.AttachTo(callout.Target, callout.Placement, callout.Offset);
+                callout.Tooltip.AttachToScreenPosition(callout.LastMousePosition, callout.Offset);
             }
         }
 
@@ -96,28 +114,27 @@ namespace KiKs.UI
             HideAll();
         }
 
-        /// <summary>显示 Inspector 中所有勾选 Show On Start 的场景对象提示。</summary>
+        /// <summary>注册 Inspector 中所有勾选 Show On Start 的场景对象悬停提示。</summary>
         public void ShowSceneCallouts()
         {
-            ClearCallouts(isJsonCallout: false, owner: null);
+            for (var i = _callouts.Count - 1; i >= 0; i--)
+            {
+                if (_callouts[i].Owner == null)
+                    DestroyCalloutAt(i);
+            }
 
             foreach (var callout in sceneCallouts)
             {
                 if (callout == null || !callout.showOnStart || callout.target == null)
                     continue;
 
-                CreateCallout(
-                    owner: null,
-                    target: callout.target,
-                    description: callout.description,
-                    placement: callout.placement,
-                    offset: callout.offset,
-                    isJsonCallout: false);
+                RegisterCallout(null, callout.target, callout.description, callout.offset);
             }
         }
 
         /// <summary>
-        /// 程序化对象创建后调用。提示文字、位置和偏移全部读取对应 JSON 的 tutorial 字段。
+        /// 唯一的公共注册入口。提示文字与偏移读取对应 JSON 的 tutorial 字段，
+        /// 悬停 target 时显示并跟随鼠标；description 为空则不注册。
         /// </summary>
         public void RegisterJsonCallout(
             Component owner,
@@ -127,134 +144,139 @@ namespace KiKs.UI
             if (owner == null || target == null)
                 return;
 
-            RemoveJsonCallout(owner, target);
+            // One owner can create an entire list of targets (for example all cafe materials).
+            // Registering one target must only replace that target's previous callout; otherwise
+            // later entries overwrite the earlier ones and an entry without tutorial data clears all.
+            UnregisterJsonCallout(owner, target);
 
             if (tutorial == null || string.IsNullOrWhiteSpace(tutorial.description))
                 return;
 
-            CreateCallout(
+            RegisterCallout(
                 owner,
                 target,
                 tutorial.description,
-                GetPlacement(tutorial.placement),
-                new Vector2(tutorial.offsetX, tutorial.offsetY),
-                isJsonCallout: true);
+                new Vector2(tutorial.offsetX, tutorial.offsetY));
         }
 
-        /// <summary>程序化 UI 被隐藏、回收或销毁时调用，移除其教学提示。</summary>
-        public void UnregisterJsonCallouts(Component owner)
+        /// <summary>移除 owner 注册的全部悬停提示（owner 为 null 时移除场景静态提示）。</summary>
+        private void UnregisterJsonCallout(Component owner, RectTransform target)
         {
-            if (owner == null)
-                return;
-
-            ClearCallouts(isJsonCallout: true, owner: owner);
-        }
-
-        /// <summary>隐藏当前 Controller 创建的全部教学提示。</summary>
-        public void HideAll()
-        {
-            for (var i = _activeCallouts.Count - 1; i >= 0; i--)
+            for (var i = _callouts.Count - 1; i >= 0; i--)
             {
-                DestroyTooltip(_activeCallouts[i].Tooltip);
-                _activeCallouts.RemoveAt(i);
+                var callout = _callouts[i];
+                if (callout != null && callout.Owner == owner && callout.transform == target)
+                    DestroyCalloutAt(i);
             }
         }
 
-        private void CreateCallout(
-            Component owner,
-            RectTransform target,
-            string description,
-            TutorialTooltip.Placement placement,
-            Vector2 offset,
-            bool isJsonCallout)
+        public void UnregisterJsonCallouts(Component owner)
+        {
+            for (var i = _callouts.Count - 1; i >= 0; i--)
+            {
+                if (_callouts[i].Owner == owner)
+                    DestroyCalloutAt(i);
+            }
+        }
+
+        /// <summary>隐藏并销毁全部教学提示。</summary>
+        public void HideAll()
+        {
+            for (var i = _callouts.Count - 1; i >= 0; i--)
+                DestroyCalloutAt(i);
+        }
+
+        /// <summary>默认提示框位置：鼠标上方 48px（offset 未配置时使用）。</summary>
+        private static readonly Vector2 DefaultOffset = new(0f, 48f);
+
+        private void RegisterCallout(Component owner, RectTransform target, string description, Vector2 offset)
+        {
+            if (string.IsNullOrWhiteSpace(description) || target == null)
+                return;
+
+            // offset 为 0 视为未配置，默认显示在鼠标上方，避免提示框正中盖住鼠标。
+            if (offset.x == 0f && offset.y == 0f)
+                offset = DefaultOffset;
+
+            var tooltip = CreateTooltipInstance(description, target);
+            if (tooltip == null)
+                return;
+
+            tooltip.name = $"Tutorial_{target.name}";
+            tooltip.gameObject.SetActive(false);
+
+            var callout = HoverCallout.Attach(target, tooltip, offset);
+            callout.Owner = owner;
+            _callouts.Add(callout);
+        }
+
+        private TutorialTooltip CreateTooltipInstance(string description, RectTransform target)
         {
             if (string.IsNullOrWhiteSpace(description))
-                return;
+                return null;
 
             if (tooltipPrefab == null)
             {
                 Debug.LogWarning("[TutorialController] Assign Tooltip Prefab in the Inspector.", this);
-                return;
+                return null;
             }
 
-            var parent = ResolveTooltipParent();
+            var parent = ResolveTooltipParent(target);
             if (parent == null)
             {
                 Debug.LogWarning("[TutorialController] Assign Tooltip Parent in the Inspector.", this);
-                return;
+                return null;
             }
 
             var tooltip = Instantiate(tooltipPrefab, parent, false);
-            tooltip.name = $"Tutorial_{target.name}";
             tooltip.SetMessage(description);
-
-            if (target.gameObject.activeInHierarchy)
-                tooltip.AttachTo(target, placement, offset);
-            else
-                tooltip.gameObject.SetActive(false);
-
-            tooltip.transform.SetAsLastSibling();
-
-            _activeCallouts.Add(new ActiveCallout(
-                owner,
-                target,
-                tooltip,
-                placement,
-                offset,
-                isJsonCallout));
+            DisableRaycastTargets(tooltip.gameObject);
+            return tooltip;
         }
 
-        private void RemoveJsonCallout(Component owner, RectTransform target)
+        /// <summary>
+        /// 关闭提示框上所有 Graphic 的射线检测。
+        /// 否则提示框遮挡目标时会把鼠标事件抢走，导致目标 enter/exit 反复切换（频闪）。
+        /// </summary>
+        private static void DisableRaycastTargets(GameObject root)
         {
-            for (var i = _activeCallouts.Count - 1; i >= 0; i--)
-            {
-                var callout = _activeCallouts[i];
-                if (!callout.IsJsonCallout || callout.Owner != owner || callout.Target != target)
-                    continue;
-
-                DestroyTooltip(callout.Tooltip);
-                _activeCallouts.RemoveAt(i);
-            }
+            foreach (var graphic in root.GetComponentsInChildren<Graphic>(true))
+                graphic.raycastTarget = false;
         }
 
-        private void ClearCallouts(bool isJsonCallout, Component owner)
+        private void DestroyCalloutAt(int index)
         {
-            for (var i = _activeCallouts.Count - 1; i >= 0; i--)
-            {
-                var callout = _activeCallouts[i];
-                if (callout.IsJsonCallout != isJsonCallout ||
-                    (owner != null && callout.Owner != owner))
-                {
-                    continue;
-                }
+            var callout = _callouts[index];
+            _callouts.RemoveAt(index);
 
+            if (callout == null)
+                return;
+
+            if (callout.Tooltip != null)
                 DestroyTooltip(callout.Tooltip);
-                _activeCallouts.RemoveAt(i);
-            }
+            Destroy(callout);
         }
 
-        private RectTransform ResolveTooltipParent()
+        private RectTransform ResolveTooltipParent(RectTransform target)
         {
             if (tooltipParent != null)
                 return tooltipParent;
 
-            var canvas = GetComponentInParent<Canvas>();
-            if (canvas == null)
-                canvas = FindFirstObjectByType<Canvas>();
+            // Keep the tooltip in the target's screen-space coordinate system. This avoids
+            // editor Game-view scaling and multiple-Canvas coordinate mismatches.
+            var targetCanvas = target != null ? target.GetComponentInParent<Canvas>() : null;
+            if (targetCanvas != null && targetCanvas.renderMode != RenderMode.WorldSpace)
+                return targetCanvas.rootCanvas.transform as RectTransform;
 
-            return canvas != null ? canvas.transform as RectTransform : null;
-        }
-
-        private static TutorialTooltip.Placement GetPlacement(string placement)
-        {
-            return placement?.Trim().ToLowerInvariant() switch
+            // 优先选非 WorldSpace 的 Canvas：WorldSpace Canvas 会把提示框挂进 3D 世界，屏幕上看不到。
+            foreach (var canvas in FindObjectsByType<Canvas>(FindObjectsSortMode.None))
             {
-                "below" => TutorialTooltip.Placement.Below,
-                "left" => TutorialTooltip.Placement.Left,
-                "right" => TutorialTooltip.Placement.Right,
-                "center" => TutorialTooltip.Placement.Center,
-                _ => TutorialTooltip.Placement.Above
-            };
+                if (canvas != null && canvas.renderMode != RenderMode.WorldSpace)
+                    return canvas.transform as RectTransform;
+            }
+
+            var fallback = FindFirstObjectByType<Canvas>();
+            return fallback != null ? fallback.transform as RectTransform : null;
         }
 
         private static void DestroyTooltip(TutorialTooltip tooltip)
