@@ -44,7 +44,7 @@ namespace KiKs.Combat.Tests
         }
 
         [Test]
-        public void CardLibrary_ParsesChineseDescription()
+        public void CardLibrary_MissingZhCn_DefaultsToEmpty()
         {
             var root = CardDataRoot;
             var manifest = File.ReadAllText(Path.Combine(root, "manifest.json"));
@@ -52,19 +52,10 @@ namespace KiKs.Combat.Tests
                 manifest,
                 fileName => File.ReadAllText(Path.Combine(root, fileName)));
 
-            var labrys = repository.GetRequiredCard("heavy_labrys");
-            Assert.That(labrys.DescriptionZhCn, Is.EqualTo("挥舞巨斧，造成{剑}4点伤害"));
-            Assert.That(labrys.DescriptionEn, Is.EqualTo("Strike with a heavy axe."));
-
-            var greatsword = repository.GetRequiredCard("heavy_greatsword");
-            Assert.That(greatsword.DescriptionZhCn, Is.EqualTo("挥舞巨剑，造成{剑}5点伤害，并削减{盾}22点韧性"));
-
-            var sniper = repository.GetRequiredCard("ranged_sniper_rifle");
-            Assert.That(sniper.DescriptionZhCn, Is.EqualTo("精准射击，造成{箭}12点伤害"));
-
-            // 未配置 zhCN 的卡回退为空串，不抛异常
+            // 当前全部卡都未配置 zhCN：DescriptionZhCn 为空串、不抛异常，en 不受影响
             Assert.That(repository.Cards.All(card => card.DescriptionZhCn != null), Is.True);
-            Assert.That(repository.Cards.Count(card => card.DescriptionZhCn.Length > 0), Is.EqualTo(3));
+            Assert.That(repository.Cards.All(card => card.DescriptionZhCn.Length == 0), Is.True);
+            Assert.That(repository.Cards.All(card => !string.IsNullOrWhiteSpace(card.DescriptionEn)), Is.True);
         }
 
         [Test]
