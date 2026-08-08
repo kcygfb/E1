@@ -65,6 +65,38 @@ namespace KiKs.Combat
             return Complete(true, string.Empty, events);
         }
 
+        /// <summary>
+        /// Spends this turn's mana to permanently activate one physical magic-card instance.
+        /// The activated state survives discarding, reshuffling and later plays.
+        /// </summary>
+        public CombatResult ActivateCard(string cardInstanceId)
+        {
+            if (State.Phase != CombatPhase.PlayerInput)
+                return Reject("Magic cards can only be activated during player input.");
+
+            var card = State.Deck.FindInHand(cardInstanceId);
+            if (card == null) return Reject("The selected card is not in hand.");
+            if (card.Spec.CostResource != CardResourceType.Mana)
+                return Reject("Only magic cards can be activated.");
+            if (card.IsActivated) return Reject("This magic card instance is already activated.");
+            if (!CanSpendMana(card.Spec.CostAmount))
+                return Reject("Not enough mana for this turn.");
+
+            var events = new List<CombatEvent>();
+            SpendMana(card.Spec.CostAmount, events, "Mana spent to activate a magic card.");
+            State.Mana.RecordManaCardSpent();
+            card.TryActivate();
+            events.Add(new CombatEvent(
+                CombatEventType.CardActivated,
+                State.Player.Id,
+                cardInstanceId: card.InstanceId,
+                amount: card.Spec.CostAmount,
+                message: "Magic card activated for this battle instance."));
+
+            EvaluateOutcome(events);
+            return Complete(true, string.Empty, events);
+        }
+
         public CombatResult PlayCard(string cardInstanceId, string targetId)
         {
             return SubmitCardAction(new CombatActionIntent(
@@ -152,8 +184,8 @@ namespace KiKs.Combat
             {
                 if (source.Side != CombatantSide.Player)
                     return Reject("Enemy mana resources are not configured.");
-                if (!CanSpendMana(card.Spec.CostAmount))
-                    return Reject("Not enough mana for this turn.");
+                if (!card.IsActivated)
+                    return Reject("This magic card must be activated before it can be played.");
             }
 
             var events = new List<CombatEvent>();
@@ -168,17 +200,13 @@ namespace KiKs.Combat
                     amount: source.CurrentActionPoints,
                     message: source.DisplayName + " spent " + card.Spec.CostAmount + " action points."));
             }
-            else
-            {
-                SpendMana(card.Spec.CostAmount, events, "Mana spent to play a magic card.");
-            }
 
             events.Add(new CombatEvent(
                 CombatEventType.CardPlayed,
                 source.Id,
                 target.Id,
                 card.InstanceId,
-                card.Spec.CostAmount,
+                card.Spec.CostResource == CardResourceType.ActionPoint ? card.Spec.CostAmount : 0,
                 source.DisplayName + " played " + card.Spec.DisplayName +
                 (card.IsUpgraded ? " (upgraded)." : ".")));
 
@@ -610,6 +638,25 @@ namespace KiKs.Combat
                 amount: State.Mana.Current, message: "Mana restored for the turn."));
 
             DrawCards(State.Rules.CardsDrawnPerTurn, events);
+
+            // 玩家回合开始即为每个存活敌人抽牌：CardDrawn 事件在玩家回合就发出，
+            // EnemyCardPresenter 顶部常驻显示敌人将出的牌，供玩家见招拆招。
+            foreach (var enemy in State.Enemies)
+            {
+                if (enemy.IsDead) continue;
+
+                var enemyDeck = State.GetEnemyDeck(enemy.Id);
+                if (enemyDeck == null) continue;
+
+                var enemyRules = State.Rules.GetEnemyTurnRules(enemy.EnemyRank);
+                _flow.DrawCards(
+                    enemy,
+                    enemyDeck,
+                    enemyRules.CardsDrawnPerTurn,
+                    enemyRules.HandLimit,
+                    events);
+            }
+
             SetPhase(CombatPhase.PlayerInput, events);
         }
 

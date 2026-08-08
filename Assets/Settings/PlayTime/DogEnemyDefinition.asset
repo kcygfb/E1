@@ -22,6 +22,12 @@ MonoBehaviour:
   portraitSize: {x: 100, y: 100}
   portraitOffset: {x: 0, y: -5}
   portraitScale: 1
+  description: "Born from the fear surrounding a tragedy that shocked the public.
+    They have no fixed appearance, but they all share one thing in common\u2014a
+    broken section of metal fencing lodged through their neck.\r\nThey relentlessly
+    chase the living, as if searching for something... or fleeing from something.
+    No one knows what terrifies them so deeply. Only the bloodstained fence remains,
+    following them wherever they appear."
   enemyArchetype: 1
   enemyCardIds: []
   cardsPerTurn: 1

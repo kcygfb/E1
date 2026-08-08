@@ -19,6 +19,21 @@ namespace KiKs.Combat.Tests
             Assert.That(secondDraw.ReshuffleCount, Is.EqualTo(1));
             Assert.That(deck.Hand.Count, Is.EqualTo(4));
         }
+        [Test]
+        public void DrawAfterDiscard_ReshufflesTheSamePhysicalCardInstances()
+        {
+            var deck = new DeckState(CreateCards(3), 123, false);
+            var firstDraw = deck.Draw(3, 10);
+
+            deck.DiscardHand();
+            var secondDraw = deck.Draw(3, 10);
+
+            Assert.That(secondDraw.ReshuffleCount, Is.EqualTo(1));
+            CollectionAssert.AreEquivalent(firstDraw.DrawnCards, secondDraw.DrawnCards);
+            Assert.That(deck.DrawPile.Count, Is.EqualTo(0));
+            Assert.That(deck.DiscardPile.Count, Is.EqualTo(0));
+            Assert.That(deck.Hand.Count, Is.EqualTo(3));
+        }
 
         [Test]
         public void TakeFromDiscard_RemovesTopDiscardCards_AndReturnAddsThemBack()

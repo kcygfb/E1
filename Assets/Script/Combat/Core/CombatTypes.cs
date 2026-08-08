@@ -65,7 +65,15 @@ namespace KiKs.Combat
         PoisonScaledNextAttack,
         PoisonDamageBonus,
         GainResource,
-        PlayCardsFromDiscard
+        PlayCardsFromDiscard,
+        /// <summary>Parry: deal toughness damage and reflect it per incoming enemy attack count.</summary>
+        ParryCounter,
+        /// <summary>Ambush: skip the enemy's turn, then deal damage.</summary>
+        InvisibleAttack,
+        /// <summary>Magic burst: deal damage per mana card spent this turn.</summary>
+        ManaCardBurst,
+        /// <summary>Hydraulic breaker: next execution damage is doubled.</summary>
+        ExecutionDouble
     }
 
     public enum CombatEventType
@@ -96,6 +104,7 @@ namespace KiKs.Combat
         EnemyTurnStarted,
         Victory,
         Defeat,
-        ActionRejected
+        ActionRejected,
+        CardActivated
     }
 }

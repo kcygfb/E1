@@ -549,7 +549,71 @@ namespace KiKs.Combat.Tests
             Assert.That(card.IsUpgraded, Is.False);
         }
         [Test]
-        public void ManaPerTurn_IsSharedByUpgradeAndMagicCard()
+        public void PlayCard_RejectsUnactivatedMagicCard()
+        {
+            var magic = CreateDamageCard("magic", 1, 5, null, CardResourceType.Mana);
+            var engine = CreateEngine(magic);
+            engine.StartBattle();
+            var card = engine.State.Deck.Hand[0];
+
+            var result = engine.PlayCard(card.InstanceId, "enemy");
+
+            Assert.That(result.Success, Is.False);
+            Assert.That(engine.State.Mana.Current, Is.EqualTo(engine.State.Mana.PerTurn));
+            Assert.That(engine.State.Player.CurrentActionPoints, Is.EqualTo(3));
+            Assert.That(engine.State.Deck.FindInHand(card.InstanceId), Is.SameAs(card));
+        }
+
+        [Test]
+        public void ActivateCard_SpendsMana_ThenPlayCostsNoActionPointsOrMana()
+        {
+            var magic = CreateDamageCard("magic", 1, 5, null, CardResourceType.Mana);
+            var engine = CreateEngine(magic);
+            engine.StartBattle();
+            var card = engine.State.Deck.Hand[0];
+            var actionPointsBefore = engine.State.Player.CurrentActionPoints;
+
+            var activation = engine.ActivateCard(card.InstanceId);
+
+            Assert.That(activation.Success, Is.True);
+            Assert.That(card.IsActivated, Is.True);
+            Assert.That(engine.State.Mana.Current, Is.EqualTo(0));
+            Assert.That(engine.State.Player.CurrentActionPoints, Is.EqualTo(actionPointsBefore));
+            Assert.That(activation.Events.Any(e => e.Type == CombatEventType.CardActivated), Is.True);
+
+            var play = engine.PlayCard(card.InstanceId, "enemy");
+
+            Assert.That(play.Success, Is.True);
+            Assert.That(engine.State.Mana.Current, Is.EqualTo(0));
+            Assert.That(engine.State.Player.CurrentActionPoints, Is.EqualTo(actionPointsBefore));
+            Assert.That(card.IsActivated, Is.True);
+            Assert.That(engine.State.Deck.DiscardPile.Single(), Is.SameAs(card));
+            Assert.That(play.Events.Any(e => e.Type == CombatEventType.ActionPointsChanged), Is.False);
+            Assert.That(play.Events.Any(e => e.Type == CombatEventType.ManaChanged), Is.False);
+        }
+
+        [Test]
+        public void ActivatedMagicCard_SurvivesTurnEndDiscardAndReshuffle()
+        {
+            var magic = CreateDamageCard("magic", 1, 1, null, CardResourceType.Mana);
+            var engine = CreateEngine(magic);
+            engine.StartBattle();
+            var activatedCard = engine.State.Deck.Hand[0];
+
+            Assert.That(engine.ActivateCard(activatedCard.InstanceId).Success, Is.True);
+            Assert.That(engine.EndPlayerTurn().Success, Is.True);
+            Assert.That(engine.State.Deck.DiscardPile.Contains(activatedCard), Is.True);
+            Assert.That(activatedCard.IsActivated, Is.True);
+
+            var nextTurn = engine.CompleteEnemyTurn();
+
+            Assert.That(nextTurn.Success, Is.True);
+            Assert.That(engine.State.Deck.FindInHand(activatedCard.InstanceId), Is.SameAs(activatedCard));
+            Assert.That(engine.State.Deck.FindInHand(activatedCard.InstanceId).IsActivated, Is.True);
+            Assert.That(nextTurn.Events.Any(e => e.Type == CombatEventType.DeckReshuffled), Is.True);
+        }
+        [Test]
+        public void ManaPerTurn_IsSharedByUpgradeAndMagicActivation()
         {
             var basic = CreateDamageCard("basic", 1, 1, 2);
             var magic = CreateDamageCard("magic", 1, 1, null, CardResourceType.Mana);
@@ -560,7 +624,7 @@ namespace KiKs.Combat.Tests
             var magicCard = engine.State.Deck.Hand.First(card => card.Spec.Id == "magic");
 
             Assert.That(engine.UpgradeCard(basicCard.InstanceId).Success, Is.True);
-            var magicResult = engine.PlayCard(magicCard.InstanceId, "enemy");
+            var magicResult = engine.ActivateCard(magicCard.InstanceId);
 
             Assert.That(magicResult.Success, Is.False);
             Assert.That(engine.State.Mana.Current, Is.EqualTo(0));
@@ -646,7 +710,6 @@ namespace KiKs.Combat.Tests
 
             engine.State.Player.AddBlockPoints(4);
             Assert.That(engine.EndPlayerTurn().Success, Is.True);
-            engine.DrawEnemyCards("enemy", 1, 10);
             var enemyCard = engine.State.GetDeck("enemy").Hand.Single();
             var enemyResult = engine.PlayEnemyCard("enemy", enemyCard.InstanceId);
 
@@ -685,7 +748,6 @@ namespace KiKs.Combat.Tests
             Assert.That(engine.State.Enemies[0].BleedStacks, Is.EqualTo(2));
 
             engine.EndPlayerTurn();
-            engine.DrawEnemyCards("enemy", 1, 10);
             var enemyCard = engine.State.GetDeck("enemy").Hand.Single();
             Assert.That(engine.PlayEnemyCard("enemy", enemyCard.InstanceId).Success, Is.True);
             Assert.That(engine.State.Player.BleedStacks, Is.EqualTo(3));
@@ -713,7 +775,6 @@ namespace KiKs.Combat.Tests
 
             engine.StartBattle();
             engine.EndPlayerTurn();
-            engine.DrawEnemyCards("enemy", 1, 10);
             var enemyCard = engine.State.GetDeck("enemy").Hand.Single();
             Assert.That(engine.PlayEnemyCard("enemy", enemyCard.InstanceId).Success, Is.True);
             Assert.That(engine.State.Enemies[0].DamageReductionPercent, Is.EqualTo(50));
@@ -744,7 +805,6 @@ namespace KiKs.Combat.Tests
 
             engine.State.Player.AddNullifyAttackCharges(1);
             engine.EndPlayerTurn();
-            engine.DrawEnemyCards("enemy", 1, 10);
             var enemyCard = engine.State.GetDeck("enemy").Hand.Single();
             var nullifiedEnemyCard = engine.PlayEnemyCard("enemy", enemyCard.InstanceId);
 
@@ -772,7 +832,6 @@ namespace KiKs.Combat.Tests
 
             engine.StartBattle();
             engine.EndPlayerTurn();
-            engine.DrawEnemyCards("enemy", 1, 10);
             var enemyCard = engine.State.GetDeck("enemy").Hand.Single();
 
             var firstAttempt = engine.PlayEnemyCard("enemy", enemyCard.InstanceId);
@@ -805,7 +864,6 @@ namespace KiKs.Combat.Tests
 
             engine.StartBattle();
             engine.EndPlayerTurn();
-            engine.DrawEnemyCards("enemy", 1, 10);
             var enemyCard = engine.State.GetDeck("enemy").Hand.Single();
             Assert.That(engine.PlayEnemyCard("enemy", enemyCard.InstanceId).Success, Is.True);
             Assert.That(engine.State.Player.StunTurns, Is.EqualTo(1));
@@ -924,6 +982,192 @@ namespace KiKs.Combat.Tests
                 1));
         }
 
+        [Test]
+        public void Zigzag_DealsMultiHitDamageAndToughness()
+        {
+            var zigzag = new CardSpec(
+                "zigzag", "zigzag", "zigzag", "test",
+                CardResourceType.ActionPoint, 0, false, CardTargetType.SingleEnemy,
+                new[]
+                {
+                    new CardEffectSpec(CardEffectType.Damage,
+                        new UpgradeableNumber(1, 1), new UpgradeableNumber(2, 4),
+                        ValueUnit.Points, 1),
+                    new CardEffectSpec(CardEffectType.ToughnessDamage,
+                        new UpgradeableNumber(1, 1), UpgradeableNumber.One,
+                        ValueUnit.Points, 1)
+                });
+            var engine = CreateEngine(zigzag, 4);
+            engine.StartBattle();
+            var card = engine.State.Deck.Hand.First();
+
+            var result = engine.PlayCard(card.InstanceId, "enemy");
+
+            Assert.That(result.Success, Is.True);
+            // 2 hits x 1 damage, toughness 25-1 = 24
+            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(28));
+            Assert.That(engine.State.Enemies[0].CurrentToughness, Is.EqualTo(4));
+        }
+
+        [Test]
+        public void Parry_PreparesCounter_AndReturnsToughnessDamageWhenAttacked()
+        {
+            var parry = new CardSpec(
+                "parry", "parry", "parry", "test",
+                CardResourceType.ActionPoint, 1, false, CardTargetType.SingleEnemy,
+                new[]
+                {
+                    new CardEffectSpec(CardEffectType.ParryCounter,
+                        new UpgradeableNumber(4, 8), UpgradeableNumber.One,
+                        ValueUnit.Points, 1)
+                });
+            var engine = CreateEngine(parry, 4);
+            engine.StartBattle();
+            var card = engine.State.Deck.Hand.First();
+
+            Assert.That(engine.PlayCard(card.InstanceId, "enemy").Success, Is.True);
+            // Enemy toughness reduced by 4 immediately.
+            Assert.That(engine.State.Enemies[0].CurrentToughness, Is.EqualTo(1));
+            Assert.That(engine.State.Player.ParryCounter, Is.EqualTo(4 * 3)); // minion attacks-per-turn = 1? -> cardsPlayedPerTurn minion = 1
+
+            engine.EndPlayerTurn();
+            var parryResult = engine.ResolveEnemyAttack("enemy", 5, 2);
+            Assert.That(parryResult.Success, Is.True);
+            // Enemy toughness takes counter damage, then player takes the hit.
+            Assert.That(engine.State.Player.CurrentHealth, Is.EqualTo(25));
+            // Parry counter consumed after use.
+            Assert.That(engine.State.Player.ParryCounter, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void Ambush_SkipsEnemyTurn_AndDealsDamage()
+        {
+            var ambush = new CardSpec(
+                "ambush", "ambush", "ambush", "test",
+                CardResourceType.ActionPoint, 2, false, CardTargetType.SingleEnemy,
+                new[]
+                {
+                    new CardEffectSpec(CardEffectType.InvisibleAttack,
+                        new UpgradeableNumber(10, 30), UpgradeableNumber.One,
+                        ValueUnit.Points, 1)
+                });
+            var engine = CreateEngine(ambush, 4);
+            engine.StartBattle();
+            var card = engine.State.Deck.Hand.First();
+
+            var result = engine.PlayCard(card.InstanceId, "enemy");
+
+            Assert.That(result.Success, Is.True);
+            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(90));
+            Assert.That(engine.State.Player.SkipEnemyTurns, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void MuscleBoost_DealsDamageAndToughness()
+        {
+            var muscle = new CardSpec(
+                "muscle", "muscle", "muscle", "test",
+                CardResourceType.ActionPoint, 2, false, CardTargetType.SingleEnemy,
+                new[]
+                {
+                    new CardEffectSpec(CardEffectType.Damage,
+                        new UpgradeableNumber(8, 15), UpgradeableNumber.One,
+                        ValueUnit.Points, 1),
+                    new CardEffectSpec(CardEffectType.ToughnessDamage,
+                        new UpgradeableNumber(8, 15), UpgradeableNumber.One,
+                        ValueUnit.Points, 1)
+                });
+            var engine = CreateEngine(muscle, 4);
+            engine.StartBattle();
+            var card = engine.State.Deck.Hand.First();
+
+            Assert.That(engine.PlayCard(card.InstanceId, "enemy").Success, Is.True);
+            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(22));
+            Assert.That(engine.State.Enemies[0].CurrentToughness, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void Reflect_ReflectsDamageBackToAttacker()
+        {
+            var reflect = new CardSpec(
+                "reflect", "reflect", "reflect", "test",
+                CardResourceType.ActionPoint, 1, false, CardTargetType.SingleEnemy,
+                new[]
+                {
+                    new CardEffectSpec(CardEffectType.ReflectDamage,
+                        new UpgradeableNumber(6, 13), UpgradeableNumber.One,
+                        ValueUnit.Points, 1)
+                });
+            var engine = CreateEngine(CreateDamageCard("player_attack", 0, 1), 4);
+            RegisterEnemyDeck(engine, CreateDamageCard("enemy_attack", 0, 10));
+            engine.StartBattle();
+            var card = engine.State.Deck.Hand.First(c => c.Spec.Id == "reflect");
+
+            Assert.That(engine.PlayCard(card.InstanceId, "enemy").Success, Is.True);
+            Assert.That(engine.State.Player.PendingReflectDamage, Is.EqualTo(6));
+
+            engine.EndPlayerTurn();
+            var enemyCard = engine.State.GetDeck("enemy").Hand.Single();
+            Assert.That(engine.PlayEnemyCard("enemy", enemyCard.InstanceId).Success, Is.True);
+            // Enemy takes 6 reflected damage.
+            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(94));
+        }
+
+        [Test]
+        public void MagicBurst_DealsDamagePerManaCardSpentThisTurn()
+        {
+            var burst = new CardSpec(
+                "burst", "burst", "burst", "test",
+                CardResourceType.ActionPoint, 0, false, CardTargetType.SingleEnemy,
+                new[]
+                {
+                    new CardEffectSpec(CardEffectType.ManaCardBurst,
+                        new UpgradeableNumber(5, 8), UpgradeableNumber.One,
+                        ValueUnit.Points, 1)
+                });
+            var manaCard = new CardSpec(
+                "mana", "mana", "mana", "test",
+                CardResourceType.Mana, 1, false, CardTargetType.SingleEnemy,
+                new[] { new CardEffectSpec(CardEffectType.Damage, new UpgradeableNumber(1, null), UpgradeableNumber.One, ValueUnit.Points, 1) });
+            var engine = CreateEngine(new[] { burst, manaCard, manaCard, burst });
+            engine.StartBattle();
+
+            // Activate one mana card -> 1 spent.
+            var manaInstance = engine.State.Deck.Hand.First(c => c.Spec.Id == "mana");
+            Assert.That(engine.ActivateCard(manaInstance.InstanceId).Success, Is.True);
+            Assert.That(engine.State.Mana.ManaCardsSpentThisTurn, Is.EqualTo(1));
+
+            var burstCard = engine.State.Deck.Hand.First(c => c.Spec.Id == "burst");
+            var result = engine.PlayCard(burstCard.InstanceId, "enemy");
+            Assert.That(result.Success, Is.True);
+            // 5 damage per mana card (1 spent) -> 5 damage.
+            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(95));
+        }
+
+        [Test]
+        public void HydraulicBreaker_DoublesNextExecutionDamage()
+        {
+            var breaker = new CardSpec(
+                "breaker", "breaker", "breaker", "test",
+                CardResourceType.ActionPoint, 1, false, CardTargetType.SingleEnemy,
+                new[]
+                {
+                    new CardEffectSpec(CardEffectType.Damage,
+                        new UpgradeableNumber(6, 11), UpgradeableNumber.One,
+                        ValueUnit.Points, 1),
+                    new CardEffectSpec(CardEffectType.ExecutionDouble,
+                        new UpgradeableNumber(2, null), UpgradeableNumber.One,
+                        ValueUnit.Points, 1)
+                });
+            var engine = CreateEngine(breaker, 4);
+            engine.StartBattle();
+            var card = engine.State.Deck.Hand.First();
+
+            Assert.That(engine.PlayCard(card.InstanceId, "enemy").Success, Is.True);
+            Assert.That(engine.State.Player.ExecutionMultiplier, Is.EqualTo(2));
+            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(94));
+        }
+
         private static CardSpec CreateCard(
             string id,
             int cost,
@@ -942,7 +1186,11 @@ namespace KiKs.Combat.Tests
                 effect.Type == CardEffectType.LifeStealMaxHealth ||
                 effect.Type == CardEffectType.Poison ||
                 effect.Type == CardEffectType.PoisonDamageBonus ||
-                effect.Type == CardEffectType.BlockScaledDamage
+                effect.Type == CardEffectType.BlockScaledDamage ||
+                effect.Type == CardEffectType.InvisibleAttack ||
+                effect.Type == CardEffectType.ManaCardBurst ||
+                effect.Type == CardEffectType.ExecutionDouble ||
+                effect.Type == CardEffectType.ParryCounter
                     ? CardTargetType.SingleEnemy
                     : CardTargetType.Self,
                 new[] { effect });

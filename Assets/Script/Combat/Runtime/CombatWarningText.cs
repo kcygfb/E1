@@ -12,6 +12,10 @@ namespace KiKs.Combat
             if (string.IsNullOrEmpty(message))
                 return "This action is unavailable.";
 
+            if (Contains(message, "must be activated"))
+                return "Activate this magic card first.";
+            if (Contains(message, "already activated"))
+                return "This magic card is already activated.";
             if (Contains(message, "action points"))
                 return "Not enough action points.";
             if (Contains(message, "mana"))

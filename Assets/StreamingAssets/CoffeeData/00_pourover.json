@@ -5,6 +5,10 @@
   "locked": false,
   "unlockItemId": "",
   "unlockAmount": 1,
+  "tutorial": {
+    "targetId": "PourOver",
+    "description": "Brew with the pour-over kettle to wash each ingredient's flavor and aroma right into the coffee."
+  },
   "recipe": [
     {
       "resourceId": "CoffeeBean",

@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using KiKs.UI;
 
 /// <summary>通用机器。1个MaterialSlot + 按钮 + 配方查找 → 在outputPoint生成MaterialIcon。
 /// 子类 PourOverMachine 增加壶槽，产出进壶而非生成Icon。</summary>
@@ -18,6 +19,7 @@ public class CraftMachine : MonoBehaviour
     protected CraftController craftController;
     private UnityEngine.UI.Image _buttonImage;
     private ButtonGlow _buttonGlow;
+    private TutorialController _tutorialController;
 
     protected virtual void Awake()
     {
@@ -26,6 +28,43 @@ public class CraftMachine : MonoBehaviour
             startButton.onClick.AddListener(OnStartClicked);
         _buttonImage = startButton != null ? startButton.GetComponent<UnityEngine.UI.Image>() : null;
         _buttonGlow = startButton != null ? startButton.GetComponent<ButtonGlow>() : null;
+    }
+
+    protected virtual void Start()
+    {
+        RegisterTutorialCallout();
+    }
+
+    protected virtual void OnDestroy()
+    {
+        if (_tutorialController != null)
+            _tutorialController.UnregisterJsonCallouts(this);
+    }
+
+    private void RegisterTutorialCallout()
+    {
+        if (startButton == null || string.IsNullOrWhiteSpace(machineId))
+            return;
+
+        _tutorialController = FindFirstObjectByType<TutorialController>();
+        var loader = CoffeeDataLoader.Instance;
+        if (_tutorialController == null || loader == null || !loader.IsLoaded)
+            return;
+
+        TutorialHintJson tutorial = null;
+        foreach (var coffee in loader.GetAllCoffees())
+        {
+            if (coffee?.tutorial == null ||
+                !string.Equals(coffee.tutorial.targetId, machineId,
+                    System.StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            tutorial = coffee.tutorial;
+            break;
+        }
+
+        _tutorialController.RegisterJsonCallout(
+            this, startButton.transform as RectTransform, tutorial);
     }
 
     protected virtual void Update()

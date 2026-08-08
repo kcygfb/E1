@@ -8,6 +8,11 @@ namespace KiKs.Combat
         public string InstanceId { get; }
         public CardSpec Spec { get; }
         public bool IsUpgraded { get; private set; }
+        /// <summary>
+        /// Whether this physical magic card has been activated for the battle.
+        /// Activation belongs to the instance and is deliberately not cleared when the card is discarded.
+        /// </summary>
+        public bool IsActivated { get; private set; }
 
         public CardInstance(string instanceId, CardSpec spec)
         {
@@ -28,6 +33,13 @@ namespace KiKs.Combat
         internal void ConsumeUpgrade()
         {
             IsUpgraded = false;
+        }
+
+        internal bool TryActivate()
+        {
+            if (IsActivated || Spec.CostResource != CardResourceType.Mana) return false;
+            IsActivated = true;
+            return true;
         }
     }
 }

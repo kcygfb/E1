@@ -7,7 +7,8 @@ using System;
 public class TutorialHintJson
 {
     public string description;
+    public string targetId;
     public string placement = "Above";
     public float offsetX;
-    public float offsetY = 20f;
+    public float offsetY = 48f;
 }

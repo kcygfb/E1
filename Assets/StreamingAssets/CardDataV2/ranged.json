@@ -48,7 +48,8 @@
         "en": "sniper rifle"
       },
       "description": {
-        "en": "Deal one precise, high-damage shot."
+        "en": "Deal one precise, high-damage shot.",
+        "zhCN": "精准射击，造成{箭}12点伤害"
       },
       "category": "ranged",
       "copies": 1,

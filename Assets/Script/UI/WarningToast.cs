@@ -9,8 +9,8 @@ namespace KiKs.UI
     public sealed class WarningToast : MonoBehaviour
     {
         private const string PrefabResourceName = "UI/\u63d0\u793a\u6846";
-        private const float VisibleDuration = 0.65f;
-        private const float FadeDuration = 0.15f;
+        private const float VisibleDuration = 1.5f;
+        private const float FadeDuration = 0.3f;
 
         private static WarningToast _instance;
 

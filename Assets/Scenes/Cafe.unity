@@ -2069,7 +2069,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -10757,6 +10757,7 @@ MonoBehaviour:
   craftController: {fileID: 0}
   coffeeIconSprite: {fileID: 2068562838272378459, guid: 4277fb712df4b464b962404423d1ba0f, type: 3}
   itemPrefab: {fileID: 7052699518832345552, guid: b4ace011556ce3a4289a52f3ce9e10c9, type: 3}
+  tutorialController: {fileID: 0}
   itemSize: {x: 180, y: 180}
   itemSpacing: 64
   lockedColor: {r: 0.4, g: 0.4, b: 0.4, a: 1}
@@ -13435,6 +13436,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4280b1450b948524b83df0816ec8d259, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MaterialPalette
+  tutorialController: {fileID: 0}
   cellSize: {x: 90, y: 90}
   spacing: {x: 10, y: 10}
   labelHeight: 24
@@ -16270,7 +16272,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 8948db5118f28d04d8f786a146e8b8c8, type: 3}
+  m_Sprite: {fileID: 8165975938005288843, guid: 3af7b3353bcdb9045b5f03939dd653a5, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -17066,6 +17068,54 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2117794879}
   m_CullTransparentMesh: 1
+--- !u!1 &4000000001
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4000000002}
+  - component: {fileID: 4000000003}
+  m_Layer: 0
+  m_Name: TutorialController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4000000002
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4000000001}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4000000003
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4000000001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f2c4f70a9d24ca89e66d7b8a765c931, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KiKs.UI::KiKs.UI.TutorialController
+  tooltipPrefab: {fileID: 7524191139530786084, guid: 8dcbd99d61a1f9d4f9d90dcdd9aab524, type: 3}
+  tooltipParent: {fileID: 0}
+  showSceneCalloutsOnStart: 1
+  sceneCallouts: []
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -17076,3 +17126,4 @@ SceneRoots:
   - {fileID: 374551729}
   - {fileID: 152632472}
   - {fileID: 154823945}
+  - {fileID: 4000000002}

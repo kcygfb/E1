@@ -131,6 +131,7 @@ namespace KiKs.Combat
         public void ReturnToDiscard(CardInstance card)
         {
             if (card == null) throw new ArgumentNullException(nameof(card));
+            // Upgrades are temporary; persistent magic activation deliberately survives this move.
             card.ConsumeUpgrade();
             _discardPile.Add(card);
         }
@@ -145,6 +146,7 @@ namespace KiKs.Combat
             if (discardedCard == null) return false;
 
             discardedCard.ConsumeUpgrade();
+            // The same physical instance enters discard, so IsActivated is intentionally untouched.
             _hand.Remove(discardedCard);
             _discardPile.Add(discardedCard);
             return true;
@@ -157,6 +159,7 @@ namespace KiKs.Combat
         {
             var discarded = new List<CardInstance>(_hand);
             foreach (var card in discarded)
+                // Turn-end discard clears temporary upgrades, never persistent magic activation.
                 card.ConsumeUpgrade();
             _discardPile.AddRange(_hand);
             _hand.Clear();

@@ -5,6 +5,10 @@
   "locked": false,
   "unlockItemId": "",
   "unlockAmount": 1,
+  "tutorial": {
+    "targetId": "Grinder",
+    "description": "Start with the grinder — fine powder releases more flavor from every ingredient."
+  },
   "recipe": [
     {
       "resourceId": "CoffeeBean",

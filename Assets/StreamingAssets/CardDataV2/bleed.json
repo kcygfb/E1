@@ -40,7 +40,8 @@
         "sheet": "卡牌全套小数值",
         "row": 21
       },
-      "notes": []
+      "notes": [],
+      "image": "Art/Cards/dagger.png"
     },
     {
       "id": "bleed_chainsaw",
@@ -83,7 +84,8 @@
         "sheet": "卡牌全套小数值",
         "row": 22
       },
-      "notes": []
+      "notes": [],
+      "image": "Art/Cards/chainsaw.png"
     },
     {
       "id": "bleed_scalpel",
@@ -122,7 +124,8 @@
         "sheet": "卡牌全套小数值",
         "row": 23
       },
-      "notes": []
+      "notes": [],
+      "image": "Art/Cards/scalpel.png"
     },
     {
       "id": "bleed_scourge",
@@ -172,7 +175,8 @@
         "sheet": "卡牌全套小数值",
         "row": 24
       },
-      "notes": []
+      "notes": [],
+      "image": "Art/Cards/scourge.png"
     },
     {
       "id": "bleed_shuriken",
@@ -218,7 +222,8 @@
         "sheet": "卡牌全套小数值",
         "row": 25
       },
-      "notes": []
+      "notes": [],
+      "image": "Art/Cards/shuriken.png"
     },
     {
       "id": "bleed_reaper",
@@ -257,7 +262,8 @@
         "sheet": "卡牌全套小数值",
         "row": 26
       },
-      "notes": []
+      "notes": [],
+      "image": "Art/Cards/reaper.png"
     }
   ]
 }

@@ -25,7 +25,7 @@ namespace KiKs.Combat
         public System.Func<CardView, bool> OnCardPlayed;
         public System.Func<CardView, bool> OnCardShot;
 
-        public CardView DrawCard(CardSpec spec, string instanceId = null, bool isUpgraded = false)
+        public CardView DrawCard(CardSpec spec, string instanceId = null, bool isUpgraded = false, bool isActivated = false)
         {
             if (cardPrefab == null)
             {
@@ -39,7 +39,7 @@ namespace KiKs.Combat
                 cardView = cardObj.AddComponent<CardView>();
 
             cardView.Setup(spec, instanceId);
-            cardView.SetUpgraded(isUpgraded);
+            cardView.SetEmpowermentState(isUpgraded, isActivated);
             cardView.OnPlayRequested += HandleCardPlayed;
             cardView.OnShootRequested += HandleCardShot;
             cardView.OnDragCanceled += HandleCardDragCanceled;

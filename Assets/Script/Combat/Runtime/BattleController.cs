@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using KiKs.UI;
 
 namespace KiKs.Combat
 {
@@ -28,6 +29,10 @@ namespace KiKs.Combat
         [SerializeField] private Image enemyPortraitImage;
         [Tooltip("Optional Big Eye-only overlay. It is hidden automatically for the Dog and Little Girl.")]
         [SerializeField] private GameObject bigEyePortraitOverlay;
+
+        [Header("Tutorial")]
+        [Tooltip("悬停敌人立绘显示介绍框。留空时自动查找场景中的 TutorialController。")]
+        [SerializeField] private TutorialController tutorialController;
 
         [Header("Deck source")]
         [Tooltip("Used only when no selection screen has filled RuntimeGameRepository.")]
@@ -230,6 +235,11 @@ namespace KiKs.Combat
             return GetEngineOrThrow().UpgradeCard(cardInstanceId);
         }
 
+        public CombatResult ActivateCard(string cardInstanceId)
+        {
+            return GetEngineOrThrow().ActivateCard(cardInstanceId);
+        }
+
         public CombatResult PlaySingleShot(string cardInstanceId, string targetId)
         {
             return GetEngineOrThrow().PlaySingleShot(cardInstanceId, targetId);
@@ -409,27 +419,23 @@ namespace KiKs.Combat
 
         private void ApplySelectedDemoEncounter()
         {
-            if (!RuntimeGameRepository.HasSelectedDemoStage)
+            // 敌人由选中的地图点决定（每局随机分配到 3 个战斗点），不再是"第几次进入"的固定顺序。
+            if (!RuntimeGameRepository.HasSelectedEncounterIndex)
                 return;
 
-            var stage = RuntimeGameRepository.SelectedDemoStage;
-            if (!DemoFlowState.IsStageAvailable(stage))
-                throw new InvalidOperationException(
-                    $"Selected demo stage {stage} does not match current stage {DemoFlowState.CurrentStage}.");
-
-            var index = (int)stage;
+            var index = RuntimeGameRepository.SelectedEncounterIndex;
             if (demoEnemyDefinitions == null || index < 0 || index >= demoEnemyDefinitions.Count)
                 throw new InvalidOperationException(
-                    $"Demo enemy slot {index + 1} ({stage}) is not configured on BattleController.");
+                    $"Demo enemy slot {index + 1} is not configured on BattleController.");
 
             var definition = demoEnemyDefinitions[index];
             if (definition == null)
-                throw new InvalidOperationException($"Demo enemy slot {index + 1} ({stage}) is null.");
+                throw new InvalidOperationException($"Demo enemy slot {index + 1} is null.");
 
             enemyDefinitions = new List<CombatantDefinition> { definition };
             Debug.Log(
                 $"[DemoFlow] BattleController selected {definition.DisplayName} / " +
-                $"{definition.EnemyArchetype} / {definition.EnemyRank} for {stage}.",
+                $"{definition.EnemyArchetype} / {definition.EnemyRank} for encounter {index}.",
                 this);
         }
 
@@ -473,7 +479,46 @@ namespace KiKs.Combat
             if (hitFeedback != null)
                 hitFeedback.RefreshOrigin();
 
+            RegisterEnemyIntroCallout(definition);
+
             Debug.Log($"[Combat] Applied portrait for {definition.DisplayName} at scale {definition.PortraitScale:0.###}.", this);
+        }
+
+        /// <summary>
+        /// 敌人定义填写了 Description 时，为立绘注册悬停介绍框（跟随鼠标）。
+        /// </summary>
+        private void RegisterEnemyIntroCallout(CombatantDefinition definition)
+        {
+            if (string.IsNullOrWhiteSpace(definition?.Description))
+                return;
+            if (enemyPortraitImage == null)
+                return;
+
+            var controller = ResolveTutorialController();
+            if (controller == null)
+            {
+                Debug.LogWarning(
+                    "[Combat] Enemy has a description but no TutorialController exists in the scene; " +
+                    "the intro tooltip will not show.", this);
+                return;
+            }
+
+            // 立绘需要接收指针事件才能触发悬停。
+            enemyPortraitImage.raycastTarget = true;
+
+            controller.RegisterJsonCallout(this, enemyPortraitImage.rectTransform, new TutorialHintJson
+            {
+                description = definition.Description,
+                offsetX = 24f,
+                offsetY = -24f
+            });
+        }
+
+        private TutorialController ResolveTutorialController()
+        {
+            if (tutorialController != null)
+                return tutorialController;
+            return FindFirstObjectByType<TutorialController>();
         }
 
         private void CreateEnemyDecks(BattleState state)
@@ -625,6 +670,11 @@ namespace KiKs.Combat
 
         private void DisposeEngine()
         {
+            // 重开战斗或切场景时，先移除本控制器注册的悬停介绍。
+            var controller = ResolveTutorialController();
+            if (controller != null)
+                controller.UnregisterJsonCallouts(this);
+
             if (_engine != null)
             {
                 // Sync final HP to global stats before disposing

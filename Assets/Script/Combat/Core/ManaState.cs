@@ -10,6 +10,9 @@ namespace KiKs.Combat
         public int BonusPerTurn { get; private set; }
         public int PerTurn { get; private set; }
 
+        /// <summary>Mana cards (played or activated) spent during the current player turn. Reset each turn.</summary>
+        public int ManaCardsSpentThisTurn { get; private set; }
+
         public ManaState(int manaPerTurn)
         {
             if (manaPerTurn <= 0) throw new ArgumentOutOfRangeException(nameof(manaPerTurn));
@@ -36,6 +39,13 @@ namespace KiKs.Combat
             BonusPerTurn = bonusPerTurn;
             PerTurn = BasePerTurn + bonusPerTurn;
             Current = PerTurn;
+            ManaCardsSpentThisTurn = 0;
+        }
+
+        /// <summary>Record that one mana card was spent this turn (for mana-burst style effects).</summary>
+        internal void RecordManaCardSpent()
+        {
+            ManaCardsSpentThisTurn++;
         }
     }
 }

@@ -21,11 +21,16 @@ namespace KiKs.Combat
         private static readonly Dictionary<string, int> FallbackResources = new(StringComparer.Ordinal);
         private static readonly List<string> LastBattleRewardCardIds = new();
         private static DemoStage? _selectedDemoStage;
+        private static int? _selectedEncounterIndex;
 
         public static IReadOnlyList<string> SelectedCardIds => _selectedCardIds;
         public static bool HasSelectedDeck => _selectedCardIds.Count > 0;
         public static bool HasSelectedDemoStage => _selectedDemoStage.HasValue;
         public static DemoStage SelectedDemoStage => _selectedDemoStage ?? DemoStage.Completed;
+
+        /// <summary>当前选中战斗点的敌人槽位索引（0=狗, 1=小女孩, 2=大眼）。</summary>
+        public static bool HasSelectedEncounterIndex => _selectedEncounterIndex.HasValue;
+        public static int SelectedEncounterIndex => _selectedEncounterIndex ?? 0;
         public static IReadOnlyList<string> SelectedCoffeeIds => _selectedCoffeeIds;
         public static bool HasSelectedCoffees => _selectedCoffeeIds.Count > 0;
         public static int Gold => GetResourceAmount(GoldResourceId);
@@ -65,6 +70,20 @@ namespace KiKs.Combat
         public static void ClearSelectedDemoStage()
         {
             _selectedDemoStage = null;
+            _selectedEncounterIndex = null;
+        }
+
+        public static void SetSelectedEncounterIndex(int index)
+        {
+            if (index < 0 || index > 2)
+                throw new ArgumentOutOfRangeException(nameof(index), "Encounter slot must be 0..2.");
+
+            _selectedEncounterIndex = index;
+        }
+
+        public static void ClearSelectedEncounterIndex()
+        {
+            _selectedEncounterIndex = null;
         }
 
         public static void SetSelectedCoffees(IEnumerable<string> coffeeIds)

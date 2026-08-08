@@ -44,6 +44,10 @@ namespace KiKs.Combat
         [Header("Tutorial")]
         [SerializeField] private TutorialController tutorialController;
 
+        [Header("Demo Encounters")]
+        [Tooltip("三个敌人定义，槽位 0=Dog, 1=Little Girl, 2=Big Eye（与 BattleController.demoEnemyDefinitions 一致）。战斗点教学框按此生成 Boss 描述。")]
+        [SerializeField] private List<CombatantDefinition> demoEnemyDefinitions = new();
+
         [Header("Deck Slots")]
         [SerializeField] private Transform deckGridContent;
         [SerializeField] private Text deckLabel;
@@ -124,7 +128,12 @@ namespace KiKs.Combat
             }
 
             allCards.Clear();
-            allCards.AddRange(StaticGameRepository.PlayerCards);
+            foreach (var card in StaticGameRepository.PlayerCards)
+            {
+                // 当前版本只使用有卡面的卡牌；无卡面（ImagePath 为空）的卡不进入选牌界面
+                if (!string.IsNullOrEmpty(card.ImagePath))
+                    allCards.Add(card);
+            }
 
             PopulateCardGrid();
             RefreshSelectionUI();
@@ -406,8 +415,10 @@ namespace KiKs.Combat
             }
 
             RuntimeGameRepository.SetSelectedDemoStage(DemoFlowState.CurrentStage);
+            RuntimeGameRepository.SetSelectedEncounterIndex(point.EncounterIndex);
             Debug.Log(
                 $"[AreaMap] Selected map point {pointIndex + 1}: {point.Type}; " +
+                $"encounter slot {point.EncounterIndex}; " +
                 $"battle stage is {DemoFlowState.CurrentStage}.",
                 this);
 
@@ -416,6 +427,72 @@ namespace KiKs.Combat
 
             RefreshMapPoints();
             RefreshSelectionUI();
+        }
+
+        /// <summary>
+        /// 为每个战斗点程序化注册教学框：显示"里面的 Boss 名字 / 血量 / 韧性"。
+        /// 描述按该点随机分配到的敌人槽位生成，每局重开（重新生成地图）后自动更新。
+        /// </summary>
+        private void RegisterMapPointCallouts()
+        {
+            if (tutorialController == null)
+                return;
+
+            var count = Mathf.Min(demoMapPoints.Count, DailyAreaMapState.PointCount);
+            for (var i = 0; i < count; i++)
+            {
+                var mapPoint = demoMapPoints[i];
+                if (mapPoint == null)
+                    continue;
+
+                var owner = mapPoint.GetComponent<RectTransform>();
+                if (owner == null)
+                    continue;
+
+                tutorialController.UnregisterJsonCallouts(owner);
+
+                if (!DailyAreaMapState.TryGetPoint(i, out var point) || point.Type != AreaPointType.Battle)
+                    continue;
+
+                var definition = GetEncounterDefinition(point.EncounterIndex);
+                if (definition == null)
+                    continue;
+
+                tutorialController.RegisterJsonCallout(
+                    owner,
+                    owner,
+                    new TutorialHintJson { description = BuildEncounterDescription(definition) });
+            }
+        }
+
+        private CombatantDefinition GetEncounterDefinition(int encounterIndex)
+        {
+            if (demoEnemyDefinitions == null || encounterIndex < 0 || encounterIndex >= demoEnemyDefinitions.Count)
+                return null;
+
+            return demoEnemyDefinitions[encounterIndex];
+        }
+
+        private static string BuildEncounterDescription(CombatantDefinition definition)
+        {
+            var enemyName = definition.EnemyArchetype switch
+            {
+                EnemyArchetype.Dog => "Dog",
+                EnemyArchetype.LittleGirl => "Little Girl",
+                EnemyArchetype.BigEye => "Big Eye",
+                _ => definition.DisplayName
+            };
+
+            // 敌人等级写在 CombatantDefinition.EnemyRank（Minion/Elite/Boss）。
+            var rankLabel = definition.EnemyRank switch
+            {
+                EnemyRank.Minion => "Minion",
+                EnemyRank.Elite => "Elite",
+                EnemyRank.Boss => "Boss",
+                _ => "Enemy"
+            };
+
+            return $"{rankLabel}: {enemyName} | HP {definition.MaxHealth} | Toughness {definition.MaxToughness}";
         }
         public void RefreshMapPoints()
         {
@@ -457,6 +534,7 @@ namespace KiKs.Combat
                 Debug.Log("[DemoFlow] Demo Complete. No completion panel is configured.", this);
             }
 
+            RegisterMapPointCallouts();
             RefreshSelectionUI();
         }
 
@@ -705,8 +783,8 @@ namespace KiKs.Combat
                 "flexible" => new Color(0.3f, 0.55f, 0.25f, 1),
                 "hidden" => new Color(0.28f, 0.28f, 0.38f, 1),
                 "ranged" => new Color(0.2f, 0.4f, 0.6f, 1),
-                "defense" => new Color(0.2f, 0.5f, 0.5f, 1),
                 "magic" => new Color(0.5f, 0.2f, 0.5f, 1),
+                "misc" => new Color(0.45f, 0.4f, 0.3f, 1),
                 _ => new Color(0.4f, 0.4f, 0.4f, 1),
             };
         }

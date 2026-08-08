@@ -164,6 +164,8 @@ namespace KiKs.Combat
             {
                 foreach (var card in StaticGameRepository.PlayerCards)
                 {
+                    // 当前版本只发放有卡面的卡牌
+                    if (string.IsNullOrEmpty(card.ImagePath)) continue;
                     candidates.Add(card);
                 }
             }

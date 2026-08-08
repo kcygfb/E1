@@ -16,9 +16,20 @@ namespace KiKs.Combat
         public bool IsSelected { get; private set; }
         public bool IsCompleted { get; private set; }
 
+        /// <summary>
+        /// 敌人槽位索引（0/1/2，对应 BattleController.demoEnemyDefinitions）。
+        /// 仅战斗点有效；非战斗点恒为 -1。每局开始随机分配。
+        /// </summary>
+        public int EncounterIndex { get; private set; } = -1;
+
         internal DailyAreaMapPoint(AreaPointType type)
         {
             Type = type;
+        }
+
+        internal void SetEncounterIndex(int index)
+        {
+            EncounterIndex = index;
         }
 
         internal void Select()
@@ -87,6 +98,31 @@ namespace KiKs.Combat
 
             foreach (var type in typeBag)
                 Points.Add(new DailyAreaMapPoint(type));
+
+            AssignBattleEncounters();
+        }
+
+        /// <summary>
+        /// 把 3 个敌人（槽位 0/1/2）随机均匀分配给 3 个战斗点：每局重开时分配不同。
+        /// </summary>
+        private static void AssignBattleEncounters()
+        {
+            var order = new List<int> { 0, 1, 2 };
+            for (var i = order.Count - 1; i > 0; i--)
+            {
+                var swapIndex = Random.Range(0, i + 1);
+                (order[i], order[swapIndex]) = (order[swapIndex], order[i]);
+            }
+
+            var battleIndex = 0;
+            foreach (var point in Points)
+            {
+                if (point.Type != AreaPointType.Battle)
+                    continue;
+
+                point.SetEncounterIndex(order[battleIndex]);
+                battleIndex++;
+            }
         }
 
         public static bool TryGetPoint(int pointIndex, out DailyAreaMapPoint point)

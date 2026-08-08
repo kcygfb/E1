@@ -5,6 +5,10 @@
   "locked": false,
   "unlockItemId": "",
   "unlockAmount": 1,
+  "tutorial": {
+    "targetId": "Extractor",
+    "description": "Use the espresso machine to force the ingredients' rich oils and flavors out at high pressure."
+  },
   "recipe": [
     {
       "resourceId": "CoffeeBean",
