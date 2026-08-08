@@ -14,10 +14,11 @@ public static class IngredientTray
     public static readonly string[] SelectableMaterials =
     {
         "claw",
-        "wolfHair",
-        "eyeball",
-        "purpleFlame",
-        "snakeDried",
+        "wolffur",
+        "eye",
+        "fire",
+        "oil",
+        "snake",
         "tentacle",
         "CoffeeBean",
         "Milk",
