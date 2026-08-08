@@ -1,7 +1,7 @@
 {
   "coffeeId": "Latte",
   "coffeeName": "Latte",
-  "sellPrice": 14,
+  "sellPrice": 20,
   "locked": false,
   "unlockItemId": "",
   "unlockAmount": 1,

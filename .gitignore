@@ -34,3 +34,10 @@ Thumbs.db
 # Codely runtime state (auto-generated heartbeat)
 .com-unity-codely.json
 /.codely/
+
+# WorkBuddy workspace data (memory/logs, auto-generated; keep on disk, don't commit)
+/.workbuddy/
+
+# Build verification artifacts
+obj_verify*/
+TempSetup.csx

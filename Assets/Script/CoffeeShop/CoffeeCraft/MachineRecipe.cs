@@ -28,13 +28,39 @@ public static class MachineRecipeLibrary
 
     static MachineRecipeLibrary()
     {
-        // 单输入配方
+        // === 通用配方 ===
         Register("Grinder", "CoffeeBean", "GroundCoffee");
         Register("Extractor", "GroundCoffee", "Espresso");
         Register("Steamer", "Milk", "SteamedMilk");
-
-        // 多输入配方：手冲需要 咖啡粉 + 水
         RegisterMulti("PourOver", new[] { "GroundCoffee", "Water" }, "PourOverCoffee");
+
+        // === 7种特殊材料磨粉配方（Grinder: 原材料 → 粉） ===
+        Register("Grinder", "claw", "clawPowder");
+        Register("Grinder", "eye", "eyePowder");
+        Register("Grinder", "fire", "firePowder");
+        Register("Grinder", "oil", "oilPowder");
+        Register("Grinder", "snake", "snakePowder");
+        Register("Grinder", "tentacle", "tentaclePowder");
+        Register("Grinder", "wolffur", "wolffurPowder");
+
+        // === 7种特殊材料萃取配方（Extractor: 粉 → 萃取液） ===
+        Register("Extractor", "clawPowder", "clawEspresso");
+        Register("Extractor", "eyePowder", "eyeEspresso");
+        Register("Extractor", "firePowder", "fireEspresso");
+        Register("Extractor", "oilPowder", "oilEspresso");
+        Register("Extractor", "snakePowder", "snakeEspresso");
+        Register("Extractor", "tentaclePowder", "tentacleEspresso");
+        // wolffur 用多输入：wolffurPowder + GroundCoffee → wolffurEspresso
+        RegisterMulti("Extractor", new[] { "wolffurPowder", "GroundCoffee" }, "wolffurEspresso");
+
+        // === 7种特殊材料手冲配方（PourOver: 粉 + 水 → 手冲球） ===
+        RegisterMulti("PourOver", new[] { "clawPowder", "Water" }, "clawBall");
+        RegisterMulti("PourOver", new[] { "eyePowder", "Water" }, "eyeBall");
+        RegisterMulti("PourOver", new[] { "firePowder", "Water" }, "fireBall");
+        RegisterMulti("PourOver", new[] { "oilPowder", "Water" }, "oilBall");
+        RegisterMulti("PourOver", new[] { "snakePowder", "Water" }, "snakeBall");
+        RegisterMulti("PourOver", new[] { "tentaclePowder", "Water" }, "tentacleBall");
+        RegisterMulti("PourOver", new[] { "wolffurPowder", "Water" }, "wolffurBall");
     }
 
     // === 单输入配方 ===

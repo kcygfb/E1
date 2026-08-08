@@ -21,6 +21,13 @@ public class CraftStepJson
 }
 
 [Serializable]
+public class HalfProductJson
+{
+    public List<string> materials = new();
+    public string displayName;
+}
+
+[Serializable]
 public class CoffeeDataJson
 {
     public string coffeeId;
@@ -33,6 +40,7 @@ public class CoffeeDataJson
     public List<RecipeEntryJson> recipe = new();
     public List<CraftStepJson> steps = new();
     public List<string> requiredMaterials = new();
+    public List<HalfProductJson> halfProducts = new();
 }
 
 [DisallowMultipleComponent]

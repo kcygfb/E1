@@ -20,6 +20,13 @@ public class CraftStep
     public string qteType;
 }
 
+[Serializable]
+public class HalfProduct
+{
+    public string[] materials;
+    public string displayName;
+}
+
 [CreateAssetMenu(fileName = "CoffeeData", menuName = "Game/Coffee Data")]
 public class CoffeeData : ScriptableObject
 {
@@ -49,6 +56,10 @@ public class CoffeeData : ScriptableObject
     [Header("Required Materials (v3: content set matching)")]
     [SerializeField] private string[] requiredMaterials = Array.Empty<string>();
     public string[] RequiredMaterials => requiredMaterials;
+
+    [Header("Half Products (intermediate visual states)")]
+    [SerializeField] private HalfProduct[] halfProducts = Array.Empty<HalfProduct>();
+    public HalfProduct[] HalfProducts => halfProducts;
 
     /// <summary>运行时从 CoffeeDataLoader 加载 JSON 数据覆盖此 SO 实例</summary>
     public void ApplyJson(CoffeeDataJson json)
@@ -95,6 +106,19 @@ public class CoffeeData : ScriptableObject
             requiredMaterials = new string[json.requiredMaterials.Count];
             for (int i = 0; i < json.requiredMaterials.Count; i++)
                 requiredMaterials[i] = json.requiredMaterials[i];
+        }
+
+        if (json.halfProducts != null && json.halfProducts.Count > 0)
+        {
+            halfProducts = new HalfProduct[json.halfProducts.Count];
+            for (int i = 0; i < json.halfProducts.Count; i++)
+            {
+                halfProducts[i] = new HalfProduct
+                {
+                    materials = json.halfProducts[i].materials?.ToArray() ?? Array.Empty<string>(),
+                    displayName = json.halfProducts[i].displayName ?? ""
+                };
+            }
         }
     }
 }

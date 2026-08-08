@@ -10,8 +10,7 @@
         "en": "labrys"
       },
       "description": {
-        "en": "Strike with a heavy axe.",
-        "zhCN": "挥舞巨斧，造成{剑}4点伤害"
+        "en": "Strike with a heavy axe."
       },
       "category": "heavy",
       "copies": 1,
@@ -175,8 +174,7 @@
         "en": "greatsword"
       },
       "description": {
-        "en": "Deliver a heavy greatsword blow.",
-        "zhCN": "挥舞巨剑，造成{剑}5点伤害，并削减{盾}22点韧性"
+        "en": "Deliver a heavy greatsword blow."
       },
       "category": "heavy",
       "copies": 1,
