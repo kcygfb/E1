@@ -66,9 +66,6 @@ namespace KiKs.Combat
     /// </summary>
     public sealed class CombatFlowController
     {
-        private const int DefaultTimedEffectTurns = 1;
-        private const int MaxDiscardReplayDepth = 3;
-
         private readonly BattleState _state;
 
         public CombatFlowController(BattleState state)
@@ -83,8 +80,7 @@ namespace KiKs.Combat
             DeckState sourceDeck,
             int handLimit,
             bool allowExecution,
-            List<CombatEvent> events,
-            int replayDepth = 0)
+            List<CombatEvent> events)
         {
             if (source == null) throw new ArgumentNullException(nameof(source));
             if (target == null) throw new ArgumentNullException(nameof(target));
@@ -108,7 +104,7 @@ namespace KiKs.Combat
 
             foreach (var effect in card.Spec.Effects)
             {
-                ResolveEffect(source, target, card, sourceDeck, handLimit, allowExecution, effect, result, events, replayDepth);
+                ResolveEffect(source, target, card, sourceDeck, handLimit, allowExecution, effect, result, events);
                 if (target.IsDead || source.IsDead) break;
             }
 
@@ -297,8 +293,7 @@ namespace KiKs.Combat
             bool allowExecution,
             CardEffectSpec effect,
             CombatFlowResult result,
-            List<CombatEvent> events,
-            int replayDepth)
+            List<CombatEvent> events)
         {
             switch (effect.Type)
             {
@@ -315,17 +310,6 @@ namespace KiKs.Combat
                         effect.Unit,
                         card.InstanceId,
                         events);
-                    break;
-
-                case CardEffectType.Stun:
-                    target.AddStun(Math.Max(1, effect.Amount.Resolve(card.IsUpgraded)));
-                    events.Add(new CombatEvent(
-                        CombatEventType.StunApplied,
-                        source.Id,
-                        target.Id,
-                        card.InstanceId,
-                        target.StunTurns,
-                        "Stun applied."));
                     break;
 
                 case CardEffectType.Bleed:
@@ -353,12 +337,6 @@ namespace KiKs.Combat
                     AddStatusEvent(source, source, card, reduction, "Damage reduction applied.", events);
                     break;
 
-                case CardEffectType.SkipEnemyTurns:
-                    source.AddSkipEnemyTurns(Math.Max(1, effect.Amount.Resolve(card.IsUpgraded)));
-                    AddStatusEvent(source, source, card, source.SkipEnemyTurns,
-                        "Opponent-turn skip applied.", events);
-                    break;
-
                 case CardEffectType.DrawCards:
                     DrawCards(
                         source,
@@ -366,10 +344,6 @@ namespace KiKs.Combat
                         effect.Amount.Resolve(card.IsUpgraded),
                         handLimit,
                         events);
-                    break;
-
-                case CardEffectType.LifeStealMaxHealth:
-                    ResolveLifeSteal(source, target, card, effect, true, result, events);
                     break;
 
                 case CardEffectType.BleedScaledDamage:
@@ -387,7 +361,7 @@ namespace KiKs.Combat
                     break;
 
                 case CardEffectType.LifeSteal:
-                    ResolveLifeSteal(source, target, card, effect, false, result, events);
+                    ResolveLifeSteal(source, target, card, effect, result, events);
                     break;
 
                 case CardEffectType.ReflectDamage:
@@ -411,16 +385,6 @@ namespace KiKs.Combat
                         card.InstanceId,
                         healing,
                         "Healing applied."));
-                    break;
-
-                case CardEffectType.GainResource:
-                    source.AddActionPoints(effect.Amount.Resolve(card.IsUpgraded));
-                    events.Add(new CombatEvent(
-                        CombatEventType.ActionPointsChanged,
-                        source.Id,
-                        cardInstanceId: card.InstanceId,
-                        amount: source.CurrentActionPoints,
-                        message: "Action points gained."));
                     break;
 
                 case CardEffectType.BlockScaledDamage:
@@ -457,39 +421,11 @@ namespace KiKs.Combat
                         "Poison tick damage bonus applied.", events);
                     break;
 
-                case CardEffectType.Vulnerability:
-                    var vulnerability = effect.Amount.Resolve(card.IsUpgraded);
-                    target.AddVulnerability(vulnerability, DefaultTimedEffectTurns);
-                    AddStatusEvent(source, target, card, target.VulnerabilityPercent,
-                        "Vulnerability applied.", events);
-                    break;
-
-                case CardEffectType.Immunity:
-                    var immunityTurns = Math.Max(1, effect.Amount.Resolve(card.IsUpgraded));
-                    source.AddImmunity(immunityTurns);
-                    AddStatusEvent(source, source, card, source.ImmunityTurns,
-                        "Immunity applied.", events);
-                    break;
-
                 case CardEffectType.SummonCompanion:
                     var companionTurns = Math.Max(1, effect.Amount.Resolve(card.IsUpgraded));
                     source.AddCompanionTurns(companionTurns);
                     AddStatusEvent(source, source, card, source.CompanionTurns,
                         "Companion summoned.", events);
-                    break;
-
-                case CardEffectType.PlayCardsFromDiscard:
-                    ResolveCardsFromDiscard(
-                        source,
-                        target,
-                        card,
-                        sourceDeck,
-                        handLimit,
-                        allowExecution,
-                        effect,
-                        result,
-                        events,
-                        replayDepth);
                     break;
 
                 case CardEffectType.ParryCounter:
@@ -591,15 +527,11 @@ namespace KiKs.Combat
             CombatantState target,
             CardInstance card,
             CardEffectSpec effect,
-            bool percentOfMaxHealth,
             CombatFlowResult result,
             List<CombatEvent> events)
         {
-            var value = effect.Amount.Resolve(card.IsUpgraded);
-            var requestedDamage = percentOfMaxHealth
-                ? (int)Math.Ceiling(target.MaxHealth * value / 100d)
-                : value;
-            if (!percentOfMaxHealth && target.BleedStacks > 0)
+            var requestedDamage = effect.Amount.Resolve(card.IsUpgraded);
+            if (target.BleedStacks > 0)
                 requestedDamage *= 2;
 
             var actualDamage = ResolveAttackDamage(
@@ -623,105 +555,6 @@ namespace KiKs.Combat
                 "Life steal healed " + source.DisplayName + "."));
         }
 
-        private void ResolveCardsFromDiscard(
-            CombatantState source,
-            CombatantState selectedTarget,
-            CardInstance sourceCard,
-            DeckState sourceDeck,
-            int handLimit,
-            bool allowExecution,
-            CardEffectSpec effect,
-            CombatFlowResult result,
-            List<CombatEvent> events,
-            int replayDepth)
-        {
-            if (sourceDeck == null)
-            {
-                AddStatusEvent(source, source, sourceCard, 0,
-                    "No discard pile is available for replay.", events);
-                return;
-            }
-
-            if (replayDepth >= MaxDiscardReplayDepth)
-            {
-                AddStatusEvent(source, source, sourceCard, replayDepth,
-                    "Discard replay depth limit reached.", events);
-                return;
-            }
-
-            var requestedCount = Math.Max(1, effect.Amount.Resolve(sourceCard.IsUpgraded));
-            var replayedCount = 0;
-            for (var i = 0; i < requestedCount && !source.IsDead; i++)
-            {
-                var cards = sourceDeck.TakeFromDiscard(1);
-                if (cards.Count == 0) break;
-
-                var replayedCard = cards[0];
-                var replayTarget = ResolveReplayTarget(source, selectedTarget, replayedCard);
-                if (replayTarget == null || replayTarget.IsDead)
-                {
-                    sourceDeck.ReturnToDiscard(replayedCard);
-                    continue;
-                }
-
-                events.Add(new CombatEvent(
-                    CombatEventType.CardPlayed,
-                    source.Id,
-                    replayTarget.Id,
-                    replayedCard.InstanceId,
-                    0,
-                    source.DisplayName + " replayed " + replayedCard.Spec.DisplayName +
-                    " from the discard pile."));
-
-                var replayResult = ResolveCard(
-                    source,
-                    replayTarget,
-                    replayedCard,
-                    sourceDeck,
-                    handLimit,
-                    allowExecution,
-                    events,
-                    replayDepth + 1);
-                MergeFlowResult(result, replayResult);
-
-                sourceDeck.ReturnToDiscard(replayedCard);
-                events.Add(new CombatEvent(
-                    CombatEventType.CardDiscarded,
-                    source.Id,
-                    cardInstanceId: replayedCard.InstanceId,
-                    message: "Replayed card returned to the discard pile."));
-                replayedCount++;
-
-                if (source.IsDead || replayTarget.IsDead) break;
-            }
-
-            if (replayedCount == 0)
-            {
-                AddStatusEvent(source, source, sourceCard, 0,
-                    "No cards were available to replay from discard.", events);
-            }
-        }
-
-        private CombatantState ResolveReplayTarget(
-            CombatantState source,
-            CombatantState selectedTarget,
-            CardInstance replayedCard)
-        {
-            if (replayedCard.Spec.TargetType == CardTargetType.Self) return source;
-            if (selectedTarget != null && !selectedTarget.IsDead && selectedTarget.Side != source.Side)
-                return selectedTarget;
-            return _state.FindFirstLivingOpponent(source);
-        }
-
-        private static void MergeFlowResult(CombatFlowResult destination, CombatFlowResult replay)
-        {
-            destination.TotalDamage += replay.TotalDamage;
-            destination.ToughnessBroken |= replay.ToughnessBroken;
-            destination.WasNullified |= replay.WasNullified;
-            destination.SourceDied |= replay.SourceDied;
-            destination.TargetDied |= replay.TargetDied;
-        }
-
         private bool ApplyToughnessDamage(
             CombatantState source,
             CombatantState target,
@@ -731,18 +564,6 @@ namespace KiKs.Combat
             string sourceActionId,
             List<CombatEvent> events)
         {
-            if (target.IsImmune)
-            {
-                events.Add(new CombatEvent(
-                    CombatEventType.StatusApplied,
-                    source?.Id,
-                    target.Id,
-                    sourceActionId,
-                    target.ImmunityTurns,
-                    "Toughness damage prevented by immunity."));
-                return false;
-            }
-
             var amount = unit == ValueUnit.Percent
                 ? (int)Math.Ceiling(target.MaxToughness * rawAmount / 100d)
                 : rawAmount;
@@ -922,7 +743,7 @@ namespace KiKs.Combat
             if (attemptedDamage <= 0 || source.NextAttackPoisonMultiplier <= 0d) return;
 
             var multiplier = source.ConsumeNextAttackPoisonMultiplier();
-            if (target.IsDead || target.IsImmune) return;
+            if (target.IsDead) return;
 
             var addedStacks = (int)Math.Ceiling(target.PoisonStacks * multiplier);
             if (addedStacks <= 0) return;
@@ -953,28 +774,11 @@ namespace KiKs.Combat
             if (requestedDamage < 0) throw new ArgumentOutOfRangeException(nameof(requestedDamage));
 
             var sourceId = sourceIdOverride ?? source?.Id;
-            if (target.IsImmune)
-            {
-                events.Add(new CombatEvent(
-                    eventType,
-                    sourceId,
-                    target.Id,
-                    sourceActionId,
-                    0,
-                    "Damage prevented by immunity.",
-                    isUpgraded: isUpgraded));
-                return 0;
-            }
-
             var damageAfterReduction = requestedDamage;
             var blockedDamage = 0;
 
             if (applyMitigation)
             {
-                if (target.VulnerabilityPercent > 0)
-                    damageAfterReduction = (int)Math.Ceiling(
-                        damageAfterReduction * (100 + target.VulnerabilityPercent) / 100d);
-
                 damageAfterReduction = (int)Math.Ceiling(
                     damageAfterReduction * (100 - target.DamageReductionPercent) / 100d);
                 blockedDamage = target.ConsumeBlockPoints(Math.Max(0, damageAfterReduction));
@@ -1014,14 +818,11 @@ namespace KiKs.Combat
             return card.Spec.Effects.Any(effect =>
                 effect.Type == CardEffectType.Damage ||
                 effect.Type == CardEffectType.ToughnessDamage ||
-                effect.Type == CardEffectType.Stun ||
-                effect.Type == CardEffectType.Vulnerability ||
                 effect.Type == CardEffectType.Bleed ||
                 effect.Type == CardEffectType.Poison ||
                 effect.Type == CardEffectType.PoisonDamageBonus ||
                 effect.Type == CardEffectType.BleedScaledDamage ||
                 effect.Type == CardEffectType.LifeSteal ||
-                effect.Type == CardEffectType.LifeStealMaxHealth ||
                 effect.Type == CardEffectType.BlockScaledDamage ||
                 effect.Type == CardEffectType.InvisibleAttack ||
                 effect.Type == CardEffectType.ManaCardBurst ||

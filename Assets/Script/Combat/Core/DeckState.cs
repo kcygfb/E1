@@ -54,6 +54,13 @@ namespace KiKs.Combat
             _drawPile = new List<CardInstance>(cards);
             if (_drawPile.Count == 0) throw new ArgumentException("A battle deck cannot be empty.", nameof(cards));
 
+            // A deck owns fresh per-battle state even if callers reuse the same physical instances.
+            foreach (var card in _drawPile)
+            {
+                if (card == null) throw new ArgumentException("A battle deck cannot contain null cards.", nameof(cards));
+                card.ResetForBattle();
+            }
+
             _random = new Random(randomSeed);
             if (shuffleAtStart) Shuffle(_drawPile);
         }
@@ -111,31 +118,6 @@ namespace KiKs.Combat
             return _hand.Find(card => card.InstanceId == instanceId);
         }
 
-        /// <summary>Removes cards from the top of the discard pile without moving them elsewhere.</summary>
-        public IReadOnlyList<CardInstance> TakeFromDiscard(int count)
-        {
-            if (count < 0) throw new ArgumentOutOfRangeException(nameof(count));
-
-            var cards = new List<CardInstance>();
-            for (var i = 0; i < count && _discardPile.Count > 0; i++)
-            {
-                var topIndex = _discardPile.Count - 1;
-                var card = _discardPile[topIndex];
-                _discardPile.RemoveAt(topIndex);
-                cards.Add(card);
-            }
-
-            return cards.AsReadOnly();
-        }
-
-        public void ReturnToDiscard(CardInstance card)
-        {
-            if (card == null) throw new ArgumentNullException(nameof(card));
-            // Upgrades are temporary; persistent magic activation deliberately survives this move.
-            card.ConsumeUpgrade();
-            _discardPile.Add(card);
-        }
-
         /// <summary>
         /// 从手牌中弃掉指定卡牌（按实例 ID 匹配），被弃的卡牌移入弃牌堆。
         /// 成功返回 true，卡牌不在手牌中返回 false。
@@ -146,9 +128,23 @@ namespace KiKs.Combat
             if (discardedCard == null) return false;
 
             discardedCard.ConsumeUpgrade();
-            // The same physical instance enters discard, so IsActivated is intentionally untouched.
             _hand.Remove(discardedCard);
             _discardPile.Add(discardedCard);
+            return true;
+        }
+
+        /// <summary>
+        /// Removes a card from this battle entirely instead of moving it to the discard pile.
+        /// The player's persistent deck is unaffected because battle decks contain runtime instances.
+        /// </summary>
+        public bool DestroyFromHand(string instanceId, out CardInstance destroyedCard)
+        {
+            destroyedCard = FindInHand(instanceId);
+            if (destroyedCard == null) return false;
+
+            destroyedCard.ConsumeUpgrade();
+            destroyedCard.ConsumeActivation();
+            _hand.Remove(destroyedCard);
             return true;
         }
 
@@ -159,7 +155,7 @@ namespace KiKs.Combat
         {
             var discarded = new List<CardInstance>(_hand);
             foreach (var card in discarded)
-                // Turn-end discard clears temporary upgrades, never persistent magic activation.
+                // Turn-end discard is not a use, so an activated magic card remains ready.
                 card.ConsumeUpgrade();
             _discardPile.AddRange(_hand);
             _hand.Clear();

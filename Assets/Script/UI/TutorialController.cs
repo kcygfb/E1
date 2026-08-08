@@ -39,22 +39,51 @@ namespace KiKs.UI
 
         private readonly List<HoverCallout> _callouts = new();
 
+        private bool _calloutsEnabled = true;
+
+        /// <summary>本场景教程框开关。关闭时本场景所有悬停提示不再显示，已显示的立即隐藏。</summary>
+        public bool CalloutsEnabled => _calloutsEnabled;
+
+        public void SetCalloutsEnabled(bool enabled)
+        {
+            if (_calloutsEnabled == enabled)
+                return;
+
+            _calloutsEnabled = enabled;
+            if (!_calloutsEnabled)
+            {
+                // 关闭开关时立即隐藏当前所有已显示的提示框（保留注册，重新开启后恢复悬停显示）。
+                HideAllTooltips();
+            }
+        }
+
+        private void HideAllTooltips()
+        {
+            foreach (var callout in _callouts)
+            {
+                if (callout != null && callout.Tooltip != null)
+                    callout.Tooltip.gameObject.SetActive(false);
+            }
+        }
+
         /// <summary>
         /// 挂在目标 UI 上的悬停监听。指针进入时显示提示框并记录鼠标位置，移出时隐藏；
         /// 提示框的位置跟随由 TutorialController.LateUpdate 统一驱动。
         /// </summary>
         private sealed class HoverCallout : MonoBehaviour, IPointerEnterHandler, IPointerMoveHandler, IPointerExitHandler
         {
+            public TutorialController Controller;
             public Component Owner;
             public TutorialTooltip Tooltip;
             public Vector2 Offset;
             public Vector2 LastMousePosition;
 
-            public static HoverCallout Attach(RectTransform target, TutorialTooltip tooltip, Vector2 offset)
+            public static HoverCallout Attach(RectTransform target, TutorialTooltip tooltip, Vector2 offset, TutorialController controller)
             {
                 var callout = target.GetComponent<HoverCallout>();
                 if (callout == null)
                     callout = target.gameObject.AddComponent<HoverCallout>();
+                callout.Controller = controller;
                 callout.Tooltip = tooltip;
                 callout.Offset = offset;
                 return callout;
@@ -63,6 +92,10 @@ namespace KiKs.UI
             public void OnPointerEnter(PointerEventData eventData)
             {
                 if (Tooltip == null)
+                    return;
+
+                // 场景级开关：本场景关闭时悬停不显示。
+                if (Controller != null && !Controller.CalloutsEnabled)
                     return;
 
                 LastMousePosition = eventData.position;
@@ -205,7 +238,7 @@ namespace KiKs.UI
             tooltip.name = $"Tutorial_{target.name}";
             tooltip.gameObject.SetActive(false);
 
-            var callout = HoverCallout.Attach(target, tooltip, offset);
+            var callout = HoverCallout.Attach(target, tooltip, offset, this);
             callout.Owner = owner;
             _callouts.Add(callout);
         }

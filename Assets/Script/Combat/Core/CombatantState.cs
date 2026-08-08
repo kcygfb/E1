@@ -19,9 +19,6 @@ namespace KiKs.Combat
         public int NullifyAttackCharges { get; private set; }
         public int DamageReductionPercent { get; private set; }
         public int DamageReductionTurns { get; private set; }
-        public int VulnerabilityPercent { get; private set; }
-        public int VulnerabilityTurns { get; private set; }
-        public int ImmunityTurns { get; private set; }
         public int SkipEnemyTurns { get; private set; }
         public int BleedStacks { get; private set; }
         public int PoisonStacks { get; private set; }
@@ -37,7 +34,6 @@ namespace KiKs.Combat
         /// <summary>Enemy this combatant's parry counter is aimed at.</summary>
         public string ParryEnemyId { get; private set; }
         public bool IsDead => CurrentHealth <= 0;
-        public bool IsImmune => ImmunityTurns > 0;
 
         public CombatantState(
             string id,
@@ -166,20 +162,6 @@ namespace KiKs.Combat
             DamageReductionTurns = Math.Max(DamageReductionTurns, turns);
         }
 
-        public void AddVulnerability(int percent, int turns)
-        {
-            if (percent < 0) throw new ArgumentOutOfRangeException(nameof(percent));
-            if (turns < 0) throw new ArgumentOutOfRangeException(nameof(turns));
-            VulnerabilityPercent = Math.Max(VulnerabilityPercent, percent);
-            VulnerabilityTurns = Math.Max(VulnerabilityTurns, turns);
-        }
-
-        public void AddImmunity(int turns)
-        {
-            if (turns < 0) throw new ArgumentOutOfRangeException(nameof(turns));
-            ImmunityTurns = Math.Max(ImmunityTurns, turns);
-        }
-
         public void AdvanceTurnStatuses()
         {
             if (DamageReductionTurns > 0)
@@ -188,13 +170,6 @@ namespace KiKs.Combat
                 if (DamageReductionTurns == 0) DamageReductionPercent = 0;
             }
 
-            if (VulnerabilityTurns > 0)
-            {
-                VulnerabilityTurns--;
-                if (VulnerabilityTurns == 0) VulnerabilityPercent = 0;
-            }
-
-            if (ImmunityTurns > 0) ImmunityTurns--;
         }
 
         public void AdvancePlayerTurnStatuses()

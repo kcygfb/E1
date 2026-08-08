@@ -124,7 +124,7 @@ AI 只能选择动作，不计算实际伤害，也不能直接修改目标状�
 
 - `BattleController.cs`：Unity 场景适配器，并暴露 `SubmitCardAction`；
 - `CardDatabaseService.cs`：从 StreamingAssets 加载 JSON；
-- `CardEnemyAI.cs` / `SimpleEnemyAI.cs`：驱动 AI 回合；
+- `CardEnemyAI.cs`：根据敌方牌组和策略驱动 AI 回合；
 - Presenter/View/VFX：只消费 `CombatEvent`。
 
 玩家 UI 和敌方 AI 最终都进入同一个 Runtime/Core 提交入口。

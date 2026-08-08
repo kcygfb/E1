@@ -75,8 +75,6 @@ namespace KiKs.Combat
         [Header("魔法姿态")]
         [Tooltip("悬浮魔法牌/魔手时切换为这张图")]
         [SerializeField] private Sprite magicPoseSprite;
-        [Tooltip("魔法立绘额外缩放倍率")]
-        [SerializeField] private float magicSpriteScaleMultiplier = 1f;
         [Tooltip("魔法立绘位置偏移")]
         [SerializeField] private Vector2 magicSpriteOffset = Vector2.zero;
 

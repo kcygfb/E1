@@ -15,8 +15,6 @@ namespace KiKs.Combat
         [SerializeField] private Sprite bleedIcon;
         [SerializeField] private Sprite poisonIcon;
         [SerializeField] private Sprite stunIcon;
-        [SerializeField] private Sprite vulnerabilityIcon;
-        [SerializeField] private Sprite immunityIcon;
         [SerializeField] private Sprite nullifyIcon;
 
         [Header("Layout")]
@@ -28,19 +26,17 @@ namespace KiKs.Combat
             public readonly int Bleed;
             public readonly int Poison;
             public readonly int Stun;
-            public readonly int Vulnerability;
-            public readonly int Immunity;
             public readonly int Nullify;
 
-            public BuffSnapshot(int bleed, int poison, int stun, int vuln, int immune, int nullify)
+            public BuffSnapshot(int bleed, int poison, int stun, int nullify)
             {
                 Bleed = bleed; Poison = poison; Stun = stun;
-                Vulnerability = vuln; Immunity = immune; Nullify = nullify;
+                Nullify = nullify;
             }
 
             public bool Equals(BuffSnapshot other) =>
                 Bleed == other.Bleed && Poison == other.Poison && Stun == other.Stun &&
-                Vulnerability == other.Vulnerability && Immunity == other.Immunity && Nullify == other.Nullify;
+                Nullify == other.Nullify;
         }
 
         private BuffSnapshot _lastSnapshot;
@@ -81,8 +77,6 @@ namespace KiKs.Combat
                 combatant.BleedStacks,
                 combatant.PoisonStacks,
                 combatant.StunTurns,
-                combatant.VulnerabilityTurns,
-                combatant.ImmunityTurns,
                 combatant.NullifyAttackCharges
             );
 
@@ -97,8 +91,6 @@ namespace KiKs.Combat
             UpdateIcon("Bleed", snap.Bleed, bleedIcon);
             UpdateIcon("Poison", snap.Poison, poisonIcon);
             UpdateIcon("Stun", snap.Stun, stunIcon);
-            UpdateIcon("Vulnerability", snap.Vulnerability, vulnerabilityIcon);
-            UpdateIcon("Immunity", snap.Immunity, immunityIcon);
             UpdateIcon("Nullify", snap.Nullify, nullifyIcon);
         }
 

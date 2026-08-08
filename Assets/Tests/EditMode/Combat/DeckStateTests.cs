@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using NUnit.Framework;
 
 namespace KiKs.Combat.Tests
@@ -29,6 +30,7 @@ namespace KiKs.Combat.Tests
             var secondDraw = deck.Draw(3, 10);
 
             Assert.That(secondDraw.ReshuffleCount, Is.EqualTo(1));
+            CollectionAssert.AreNotEqual(firstDraw.DrawnCards, secondDraw.DrawnCards);
             CollectionAssert.AreEquivalent(firstDraw.DrawnCards, secondDraw.DrawnCards);
             Assert.That(deck.DrawPile.Count, Is.EqualTo(0));
             Assert.That(deck.DiscardPile.Count, Is.EqualTo(0));
@@ -36,24 +38,15 @@ namespace KiKs.Combat.Tests
         }
 
         [Test]
-        public void TakeFromDiscard_RemovesTopDiscardCards_AndReturnAddsThemBack()
+        public void Constructor_WithShuffleAtStart_RandomizesBeforeFirstDraw()
         {
-            var deck = new DeckState(CreateCards(3), 123, false);
-            var firstDraw = deck.Draw(2, 10);
-            var firstCard = firstDraw.DrawnCards[0];
-            var secondCard = firstDraw.DrawnCards[1];
-            deck.DiscardFromHand(firstCard.InstanceId, out _);
-            deck.DiscardFromHand(secondCard.InstanceId, out _);
+            var originalOrder = new List<CardInstance>(CreateCards(7));
+            var deck = new DeckState(originalOrder, 123, true);
 
-            var taken = deck.TakeFromDiscard(1);
+            var drawnIds = deck.Draw(7, 7).DrawnCards.Select(card => card.InstanceId);
+            var unshuffledDrawIds = originalOrder.AsEnumerable().Reverse().Select(card => card.InstanceId);
 
-            Assert.That(taken.Count, Is.EqualTo(1));
-            Assert.That(taken[0], Is.SameAs(secondCard));
-            Assert.That(deck.DiscardPile.Count, Is.EqualTo(1));
-
-            deck.ReturnToDiscard(taken[0]);
-            Assert.That(deck.DiscardPile.Count, Is.EqualTo(2));
-            Assert.That(deck.DiscardPile[1], Is.SameAs(secondCard));
+            CollectionAssert.AreNotEqual(unshuffledDrawIds, drawnIds);
         }
 
         [Test]
