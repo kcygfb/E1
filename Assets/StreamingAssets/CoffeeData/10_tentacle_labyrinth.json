@@ -1,0 +1,22 @@
+{
+  "coffeeId": "TentacleLabyrinth",
+  "coffeeName": "Tentacle Labyrinth",
+  "sellPrice": 120,
+  "locked": false,
+  "unlockItemId": "",
+  "unlockAmount": 1,
+  "recipe": [
+    { "resourceId": "CoffeeBean", "amount": 1 },
+    { "resourceId": "tentacle", "amount": 2 },
+    { "resourceId": "Milk", "amount": 1 }
+  ],
+  "steps": [
+    { "id": "Grind", "displayName": "研磨咖啡豆", "resourceId": "CoffeeBean", "amount": 1, "qteType": "RotationStop" },
+    { "id": "Grind", "displayName": "研磨触手", "resourceId": "tentacle", "amount": 1, "qteType": "RotationStop" },
+    { "id": "SteamMilk", "displayName": "打发奶泡", "resourceId": "Milk", "amount": 1, "qteType": "RhythmTap" }
+  ],
+  "requiredMaterials": ["GroundCoffee", "tentaclePowder", "tentacle", "SteamedMilk"],
+  "halfProducts": [
+    { "materials": ["GroundCoffee", "tentaclePowder"], "displayName": "Tentacle Labyrinth Half" }
+  ]
+}
