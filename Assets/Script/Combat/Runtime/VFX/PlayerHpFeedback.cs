@@ -34,6 +34,7 @@ namespace KiKs.Combat
         private TMP_Text _hpText;
         private RectTransform _iconRect;
         private Color _iconOriginColor;
+        private Vector3 _iconOriginScale = Vector3.one;
         private Color _textOriginColor;
         private int _displayedHp;
         private Sequence _iconSeq;
@@ -49,6 +50,8 @@ namespace KiKs.Combat
                 _iconRect = icon.GetComponent<RectTransform>();
                 if (_iconImage != null)
                     _iconOriginColor = _iconImage.color;
+                if (_iconRect != null)
+                    _iconOriginScale = _iconRect.localScale;
             }
 
             var text = transform.Find("HpText");
@@ -85,7 +88,11 @@ namespace KiKs.Combat
         {
             if (battleController != null && _subscribed)
                 battleController.PlayerHealthChanged -= OnHealthChanged;
-            _iconSeq?.Kill();
+            if (_iconSeq != null)
+            {
+                _iconSeq.Kill();
+                if (_iconRect != null) _iconRect.localScale = _iconOriginScale;
+            }
             _textSeq?.Kill();
         }
 
@@ -121,13 +128,13 @@ namespace KiKs.Combat
                 _iconSeq?.Kill();
                 _iconImage.color = iconFlashColor;
 
-                var currentScale = _iconRect.localScale;
-                _iconRect.localScale = currentScale * iconScalePunch;
+                // 始终从基准缩放放大，再回到基准 —— 与当前值无关，避免被打断后不断累积变大
+                _iconRect.localScale = _iconOriginScale * iconScalePunch;
 
                 _iconSeq = DOTween.Sequence();
                 _iconSeq.Join(_iconRect.DOShakePosition(iconShakeDuration, iconShakeStrength, iconShakeVibrato, 90f, false)
                     .SetEase(Ease.InOutQuad));
-                _iconSeq.Join(_iconRect.DOScale(currentScale, iconScaleDuration).SetEase(Ease.OutBack));
+                _iconSeq.Join(_iconRect.DOScale(_iconOriginScale, iconScaleDuration).SetEase(Ease.OutBack));
                 _iconSeq.Join(DOTween.To(() => _iconImage.color, c => _iconImage.color = c, _iconOriginColor, iconFlashDuration)
                     .SetEase(Ease.OutQuart));
             }

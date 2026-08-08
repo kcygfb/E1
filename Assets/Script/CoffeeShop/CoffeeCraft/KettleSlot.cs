@@ -5,6 +5,9 @@ using UnityEngine.UI;
 [RequireComponent(typeof(Image))]
 public class KettleSlot : MonoBehaviour
 {
+    [Tooltip("场景中默认放在槽里的壶（可选）")]
+    [SerializeField] private Kettle initialKettle;
+
     public Kettle Current { get; private set; }
     public bool IsFilled => Current != null;
 
@@ -31,6 +34,14 @@ public class KettleSlot : MonoBehaviour
         else
         {
             _hintLabel = labelT.GetComponent<Text>();
+        }
+
+        // 场景中预设的壶 → 启动时自动注册
+        if (initialKettle != null)
+        {
+            Current = initialKettle;
+            initialKettle.SetSlot(this);
+            if (_hintLabel != null) _hintLabel.gameObject.SetActive(false);
         }
     }
 

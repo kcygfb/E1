@@ -464,6 +464,7 @@ namespace KiKs.Combat
                 return;
             }
 
+            enemyPortraitImage.overrideSprite = null;
             enemyPortraitImage.sprite = definition.Portrait;
             enemyPortraitImage.preserveAspect = true;
 

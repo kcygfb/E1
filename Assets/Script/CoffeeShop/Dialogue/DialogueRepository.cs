@@ -19,6 +19,13 @@ public class DialogueDataJson
     public List<DialogueLineJson> lines = new List<DialogueLineJson>();
 }
 
+/// <summary>多对话文件容器。一个 JSON 文件可包含多个 dialogue。</summary>
+[Serializable]
+public class DialogueFileJson
+{
+    public List<DialogueDataJson> dialogues = new List<DialogueDataJson>();
+}
+
 [DisallowMultipleComponent]
 public class DialogueRepository : MonoBehaviour
 {
@@ -103,24 +110,35 @@ public class DialogueRepository : MonoBehaviour
                 yield break;
             }
 
-            DialogueDataJson data;
             try
             {
-                data = JsonUtility.FromJson<DialogueDataJson>(jsonText);
+                // Try multi-dialogue format first
+                var fileData = JsonUtility.FromJson<DialogueFileJson>(jsonText);
+                if (fileData != null && fileData.dialogues != null && fileData.dialogues.Count > 0)
+                {
+                    foreach (var d in fileData.dialogues)
+                    {
+                        if (d == null || string.IsNullOrEmpty(d.dialogueId)) continue;
+                        _dialogues[d.dialogueId] = d;
+                    }
+                }
+                else
+                {
+                    // Fall back to old single-dialogue format
+                    var single = JsonUtility.FromJson<DialogueDataJson>(jsonText);
+                    if (single == null || string.IsNullOrEmpty(single.dialogueId))
+                    {
+                        Fail("Invalid dialogue data in " + Path.GetFileName(filePath));
+                        yield break;
+                    }
+                    _dialogues[single.dialogueId] = single;
+                }
             }
             catch (Exception e)
             {
                 Fail("Cannot parse " + Path.GetFileName(filePath) + ": " + e.Message);
                 yield break;
             }
-
-            if (data == null || string.IsNullOrEmpty(data.dialogueId))
-            {
-                Fail("Invalid dialogue data in " + Path.GetFileName(filePath));
-                yield break;
-            }
-
-            _dialogues[data.dialogueId] = data;
         }
 
         IsLoading = false;

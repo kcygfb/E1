@@ -24,8 +24,34 @@ public class CraftController : MonoBehaviour
         if (resetBtn != null) resetBtn.onClick.AddListener(ResetCraft);
     }
 
-    private void OnEnable() => GameEvent.On("OrderCreated", OnOrderCreated);
-    private void OnDisable() => GameEvent.Off("OrderCreated", OnOrderCreated);
+    private void OnEnable()
+    {
+        GameEvent.On("OrderCreated", OnOrderCreated);
+        GameEvent.On("DialogueRequested", OnDialogueRequested);
+        GameEvent.On("DialogueEnded", OnDialogueEnded);
+    }
+    private void OnDisable()
+    {
+        GameEvent.Off("OrderCreated", OnOrderCreated);
+        GameEvent.Off("DialogueRequested", OnDialogueRequested);
+        GameEvent.Off("DialogueEnded", OnDialogueEnded);
+    }
+
+    private void OnDialogueRequested(object payload)
+    {
+        if (!_isCrafting) return;
+        if (coffeeMakeGroup != null) coffeeMakeGroup.SetActive(false);
+        if (TrayGridUI.Instance != null) TrayGridUI.Instance.HideAll();
+    }
+
+    private void OnDialogueEnded(object payload)
+    {
+        if (payload is not string context) return;
+        if (context != "wrong_coffee") return;
+        if (coffeeMakeGroup != null) coffeeMakeGroup.SetActive(true);
+        if (TrayGridUI.Instance != null) TrayGridUI.Instance.ShowDrag();
+        ResetCraft();
+    }
 
     private void OnOrderCreated(object payload) => StartCraft();
 
@@ -103,42 +129,53 @@ public class CraftController : MonoBehaviour
     // === 判定 ===
     private void Deliver(CupContainer cup)
     {
-        // 优先用合并后的咖啡ID，否则尝试匹配
         string coffeeId = cup.MergedCoffeeId;
         CoffeeDataJson matched = null;
 
         if (!string.IsNullOrEmpty(coffeeId))
-        {
             CoffeeDataLoader.Instance?.TryGetCoffee(coffeeId, out matched);
-        }
         else
-        {
             matched = MatchCoffeeByContents(cup.Contents);
-        }
-
-        if (matched == null)
-        {
-            Debug.Log("[CraftController] 没有匹配的咖啡配方");
-            return;
-        }
 
         if (orderSystem == null) orderSystem = FindFirstObjectByType<OrderSystem>();
+
         if (orderSystem != null && orderSystem.HasActiveOrder)
         {
             var order = orderSystem.ActiveOrder;
-            if (order != null && order.CoffeeId == matched.coffeeId)
+
+            if (matched != null && order != null && order.CoffeeId == matched.coffeeId)
             {
                 var coffeeData = ScriptableObject.CreateInstance<CoffeeData>();
                 coffeeData.ApplyJson(matched);
                 orderSystem.TryServeCoffee(coffeeData);
                 EndCraft();
+                return;
             }
-            else
-            {
-                Debug.Log($"[CraftController] 做了 {matched.coffeeId}，订单要 {order?.CoffeeId}");
-                ResetCraft();
-            }
+
+            Debug.Log($"[CraftController] 做了 {matched?.coffeeId ?? "未知"}，订单要 {order?.CoffeeId}");
+            TriggerWrongCoffeeFeedback(order);
+            return;
         }
+
+        if (matched == null)
+            Debug.Log("[CraftController] 没有匹配的咖啡配方");
+        ResetCraft();
+    }
+
+    private void TriggerWrongCoffeeFeedback(OrderTicket order)
+    {
+        string npcName = order?.NpcName ?? "Customer";
+        Color speakerColor = Color.white;
+        if (order?.Owner != null && order.Owner.NPCData != null)
+            speakerColor = order.Owner.NPCData.speakerColor;
+
+        var tokens = new Dictionary<string, string>
+        {
+            { "coffee", order?.CoffeeName ?? "coffee" }
+        };
+
+        GameEvent.Emit("DialogueRequested",
+            new DialogueRequest("generic_wrongcoffee", "wrong_coffee", tokens, npcName, speakerColor));
     }
 
     private CoffeeDataJson MatchCoffeeByContents(List<string> contents)

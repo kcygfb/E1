@@ -81,11 +81,7 @@ public class MaterialIcon : MonoBehaviour, IBeginDragHandler, IDragHandler, IEnd
         {
             var slot = r.gameObject.GetComponent<MaterialSlot>();
             if (slot != null && slot.Accept(this))
-            {
-                // 放入槽位后设为不拦截raycast，避免挡住slot
-                if (_image != null) _image.raycastTarget = false;
                 return;
-            }
         }
 
         // 2. CupContainer → 放入杯子

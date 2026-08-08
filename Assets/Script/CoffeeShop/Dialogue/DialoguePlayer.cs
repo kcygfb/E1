@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
+using KiKs.UI;
 
 public class DialoguePlayer : MonoBehaviour
 {
@@ -18,8 +19,11 @@ public class DialoguePlayer : MonoBehaviour
     [Header("对话时隐藏的 UI")]
     [SerializeField] private GameObject[] hideDuringDialogue;
 
+    [Header("下一句提示图标")]
+    [SerializeField] private GameObject nextWordIcon;
+
     [Header("主角")]
-    [SerializeField] private string playerName = "艾薇儿";
+    [SerializeField] private string playerName = "Avril";
     [SerializeField] private Color playerColor = new Color(0.4f, 0.8f, 1f, 1f);
 
     private DialogueDataJson currentDialogue;
@@ -61,11 +65,18 @@ public class DialoguePlayer : MonoBehaviour
     private void OnEnable()
     {
         GameEvent.On("DialogueRequested", OnDialogueRequested);
+        DialogueBridge.OnAdvance += OnDialogueAdvance;
     }
 
     private void OnDisable()
     {
         GameEvent.Off("DialogueRequested", OnDialogueRequested);
+        DialogueBridge.OnAdvance -= OnDialogueAdvance;
+    }
+
+    private void OnDialogueAdvance()
+    {
+        if (isRunning) OnNextClicked();
     }
 
     private void OnDialogueRequested(object payload)
@@ -107,6 +118,7 @@ public class DialoguePlayer : MonoBehaviour
         currentContext = context;
 
         if (dialoguePanel != null) dialoguePanel.SetActive(true);
+        if (nextWordIcon != null) nextWordIcon.SetActive(false);
         HideUI(true);
         ShowLine(0);
     }
@@ -138,6 +150,7 @@ public class DialoguePlayer : MonoBehaviour
 
             if (typingRoutine != null) StopCoroutine(typingRoutine);
             currentFullText = text;
+            if (nextWordIcon != null) nextWordIcon.SetActive(false);
             typingRoutine = StartCoroutine(TypeText(text));
             AnimateSpeaker(speaker);
         }
@@ -155,6 +168,7 @@ public class DialoguePlayer : MonoBehaviour
         }
         lineText.text = fullText;
         isTyping = false;
+        if (nextWordIcon != null) nextWordIcon.SetActive(true);
     }
 
     public void OnNextClicked()
@@ -167,6 +181,7 @@ public class DialoguePlayer : MonoBehaviour
             if (typingRoutine != null) StopCoroutine(typingRoutine);
             lineText.text = currentFullText;
             isTyping = false;
+            if (nextWordIcon != null) nextWordIcon.SetActive(true);
             return;
         }
 
@@ -182,6 +197,7 @@ public class DialoguePlayer : MonoBehaviour
         isRunning = false;
         currentDialogue = null;
         currentIndex = 0;
+        if (nextWordIcon != null) nextWordIcon.SetActive(false);
         if (dialoguePanel != null) dialoguePanel.SetActive(false);
         HideUI(false);
         var ctx = currentContext;
@@ -211,15 +227,15 @@ public class DialoguePlayer : MonoBehaviour
         }
         else
         {
-            var npcs = FindObjectsByType<CustomerController>(FindObjectsSortMode.None);
-            foreach (var npc in npcs)
+            foreach (var kvp in CustomerController.ActiveCustomers)
             {
-                if (npc.NPCData != null &&
-                    (npc.NPCData.npcName == speaker ||
-                     npc.NPCData.npcName.Contains(speaker) ||
-                     speaker.Contains(npc.NPCData.npcName)))
+                if (kvp.Value == null) continue;
+                var npcName = kvp.Key;
+                if (npcName == speaker ||
+                    npcName.Contains(speaker) ||
+                    speaker.Contains(npcName))
                 {
-                    target = npc.GetComponent<RectTransform>();
+                    target = kvp.Value.GetComponent<RectTransform>();
                     break;
                 }
             }
