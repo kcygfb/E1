@@ -44,7 +44,7 @@ namespace KiKs.Combat.Tests
         }
 
         [Test]
-        public void CardLibrary_MissingZhCn_DefaultsToEmpty()
+        public void CardLibrary_ParsesGeneratedChineseDescriptions()
         {
             var root = CardDataRoot;
             var manifest = File.ReadAllText(Path.Combine(root, "manifest.json"));
@@ -52,10 +52,25 @@ namespace KiKs.Combat.Tests
                 manifest,
                 fileName => File.ReadAllText(Path.Combine(root, fileName)));
 
-            // 当前全部卡都未配置 zhCN：DescriptionZhCn 为空串、不抛异常，en 不受影响
-            Assert.That(repository.Cards.All(card => card.DescriptionZhCn != null), Is.True);
-            Assert.That(repository.Cards.All(card => card.DescriptionZhCn.Length == 0), Is.True);
+            // 全部 85 张卡都已生成 zhCN 文案（含图标标记），en 不受影响
+            Assert.That(repository.Cards.All(card => !string.IsNullOrWhiteSpace(card.DescriptionZhCn)), Is.True);
             Assert.That(repository.Cards.All(card => !string.IsNullOrWhiteSpace(card.DescriptionEn)), Is.True);
+
+            // 抽样验证文案语义
+            Assert.That(repository.GetRequiredCard("heavy_labrys").DescriptionZhCn,
+                Is.EqualTo("造成{剑}4点伤害，削减{盾}8点韧性"));
+            Assert.That(repository.GetRequiredCard("ranged_sniper_rifle").DescriptionZhCn,
+                Is.EqualTo("造成{剑}12点伤害"));
+            Assert.That(repository.GetRequiredCard("magic_lifesteal").DescriptionZhCn,
+                Is.EqualTo("造成{剑}9点伤害并回复等量生命"));
+            Assert.That(repository.GetRequiredCard("magic_shield_bash").DescriptionZhCn,
+                Is.EqualTo("造成{盾}与当前格挡值等量的伤害"));
+
+            // 敌人卡纯文字：不包含任何图标标记
+            Assert.That(repository.GetRequiredCard("enemy_fatty_devour").DescriptionZhCn,
+                Is.EqualTo("恢复20点生命"));
+            Assert.That(repository.Cards.Where(card => card.IsEnemyCard)
+                .All(card => !card.DescriptionZhCn.Contains("{")), Is.True);
         }
 
         [Test]

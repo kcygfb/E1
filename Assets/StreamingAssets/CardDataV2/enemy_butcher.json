@@ -10,7 +10,8 @@
         "en": "road sign slam"
       },
       "description": {
-        "en": "Slam the target with a road sign."
+        "en": "Slam the target with a road sign.",
+        "zhCN": "造成10点伤害，削减15点韧性"
       },
       "category": "enemy_butcher",
       "copies": 1,
@@ -44,7 +45,8 @@
         "en": "chain bind"
       },
       "description": {
-        "en": "Bind the target and prepare attack-nullify charges."
+        "en": "Bind the target and prepare attack-nullify charges.",
+        "zhCN": "造成3点伤害，获得3次攻击无效"
       },
       "category": "enemy_butcher",
       "copies": 1,
@@ -77,7 +79,8 @@
         "en": "magic burn"
       },
       "description": {
-        "en": "Burn the target with three magical attacks."
+        "en": "Burn the target with three magical attacks.",
+        "zhCN": "连续攻击3次，每次造成5点伤害，削减8点韧性"
       },
       "category": "enemy_butcher",
       "copies": 1,
@@ -111,7 +114,8 @@
         "en": "slap"
       },
       "description": {
-        "en": "Strike with a brutal slap."
+        "en": "Strike with a brutal slap.",
+        "zhCN": "造成7点伤害，削减5点韧性"
       },
       "category": "enemy_butcher",
       "copies": 1,
@@ -145,7 +149,8 @@
         "en": "road sign jungle"
       },
       "description": {
-        "en": "Ultimate road-sign assault."
+        "en": "Ultimate road-sign assault.",
+        "zhCN": "连续攻击3次，每次造成12点伤害，削减6点韧性，获得5次攻击无效"
       },
       "category": "enemy_butcher",
       "copies": 1,

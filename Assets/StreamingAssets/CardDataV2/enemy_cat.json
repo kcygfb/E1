@@ -10,7 +10,8 @@
         "en": "imitate"
       },
       "description": {
-        "en": "Reduce incoming damage for two turns."
+        "en": "Reduce incoming damage for two turns.",
+        "zhCN": "获得减伤，持续2回合"
       },
       "category": "enemy_cat",
       "copies": 1,
@@ -39,7 +40,8 @@
         "en": "howling"
       },
       "description": {
-        "en": "Damage toughness and prepare an attack-nullify charge."
+        "en": "Damage toughness and prepare an attack-nullify charge.",
+        "zhCN": "削减5点韧性，获得1次攻击无效"
       },
       "category": "enemy_cat",
       "copies": 1,
@@ -72,7 +74,8 @@
         "en": "group attack"
       },
       "description": {
-        "en": "Attack repeatedly and inflict bleed."
+        "en": "Attack repeatedly and inflict bleed.",
+        "zhCN": "连续攻击6次，每次造成3点伤害，施加3层流血"
       },
       "category": "enemy_cat",
       "copies": 1,

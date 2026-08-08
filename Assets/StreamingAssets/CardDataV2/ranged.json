@@ -10,7 +10,8 @@
         "en": "pistol"
       },
       "description": {
-        "en": "Fire a six-shot pistol burst."
+        "en": "Fire a six-shot pistol burst.",
+        "zhCN": "连续攻击6次，每次造成{剑}1点伤害"
       },
       "category": "ranged",
       "copies": 1,
@@ -48,7 +49,8 @@
         "en": "sniper rifle"
       },
       "description": {
-        "en": "Deal one precise, high-damage shot."
+        "en": "Deal one precise, high-damage shot.",
+        "zhCN": "造成{剑}12点伤害"
       },
       "category": "ranged",
       "copies": 1,
@@ -82,7 +84,8 @@
         "en": "shotgun"
       },
       "description": {
-        "en": "Fire two blasts and damage the target's toughness."
+        "en": "Fire two blasts and damage the target's toughness.",
+        "zhCN": "连续攻击2次，每次造成{剑}5点伤害，削减{盾}3点韧性"
       },
       "category": "ranged",
       "copies": 1,
@@ -127,7 +130,8 @@
         "en": "rocket launcher"
       },
       "description": {
-        "en": "Launch a single devastating explosive round."
+        "en": "Launch a single devastating explosive round.",
+        "zhCN": "造成{剑}18点伤害"
       },
       "category": "ranged",
       "copies": 1,
@@ -161,7 +165,8 @@
         "en": "revolver"
       },
       "description": {
-        "en": "Fire three rounds and chip the target's toughness."
+        "en": "Fire three rounds and chip the target's toughness.",
+        "zhCN": "连续攻击3次，每次造成{剑}1点伤害，削减{盾}3点韧性"
       },
       "category": "ranged",
       "copies": 1,
@@ -206,7 +211,8 @@
         "en": "submachine gun"
       },
       "description": {
-        "en": "Spray eight rapid bullets."
+        "en": "Spray eight rapid bullets.",
+        "zhCN": "连续攻击8次，每次造成{剑}1点伤害"
       },
       "category": "ranged",
       "copies": 1,
@@ -243,7 +249,8 @@
         "en": "flamethrower"
       },
       "description": {
-        "en": "Scorch repeatedly and inflict bleed."
+        "en": "Scorch repeatedly and inflict bleed.",
+        "zhCN": "连续攻击8次，每次造成{剑}1点伤害，施加{血}5层流血"
       },
       "category": "ranged",
       "copies": 1,
@@ -288,7 +295,8 @@
         "en": "grenade launcher"
       },
       "description": {
-        "en": "Launch two explosive shells."
+        "en": "Launch two explosive shells.",
+        "zhCN": "连续攻击2次，每次造成{剑}8点伤害"
       },
       "category": "ranged",
       "copies": 1,

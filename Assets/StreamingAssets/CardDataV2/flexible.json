@@ -10,7 +10,8 @@
         "en": "chain"
       },
       "description": {
-        "en": "Trip the target and heavily damage toughness."
+        "en": "Trip the target and heavily damage toughness.",
+        "zhCN": "造成{剑}1点伤害，削减{盾}15点韧性"
       },
       "category": "flexible",
       "copies": 1,
@@ -49,7 +50,8 @@
         "en": "morning star"
       },
       "description": {
-        "en": "Smash the target's toughness with a morning star."
+        "en": "Smash the target's toughness with a morning star.",
+        "zhCN": "造成{剑}3点伤害，削减{盾}27点韧性"
       },
       "category": "flexible",
       "copies": 1,
@@ -88,7 +90,8 @@
         "en": "kusarigama"
       },
       "description": {
-        "en": "Slash, break toughness, and poison."
+        "en": "Slash, break toughness, and poison.",
+        "zhCN": "造成{剑}9点伤害，削减{盾}6点韧性，施加{毒}2层中毒"
       },
       "category": "flexible",
       "copies": 1,
@@ -134,7 +137,8 @@
         "en": "rope dart"
       },
       "description": {
-        "en": "Strike repeatedly with a poisoned rope dart."
+        "en": "Strike repeatedly with a poisoned rope dart.",
+        "zhCN": "连续攻击2次，每次造成{剑}6点伤害，施加{毒}1层中毒"
       },
       "category": "flexible",
       "copies": 1,
@@ -177,7 +181,8 @@
         "en": "urumi"
       },
       "description": {
-        "en": "A special flexible blade that inflicts bleed and poison."
+        "en": "A special flexible blade that inflicts bleed and poison.",
+        "zhCN": "造成{剑}8点伤害，施加{血}8层流血，施加{毒}4层中毒"
       },
       "category": "flexible",
       "copies": 1,
@@ -223,7 +228,8 @@
         "en": "chain mace"
       },
       "description": {
-        "en": "Hit with a chained mace."
+        "en": "Hit with a chained mace.",
+        "zhCN": "造成{剑}5点伤害，削减{盾}3点韧性"
       },
       "category": "flexible",
       "copies": 1,

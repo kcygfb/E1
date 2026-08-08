@@ -10,7 +10,8 @@
         "en": "mountain fall"
       },
       "description": {
-        "en": "Crash down for damage."
+        "en": "Crash down for damage.",
+        "zhCN": "造成10点伤害"
       },
       "category": "enemy_fatty",
       "copies": 1,
@@ -40,7 +41,8 @@
         "en": "devour"
       },
       "description": {
-        "en": "Recover 20 health."
+        "en": "Recover 20 health.",
+        "zhCN": "恢复20点生命"
       },
       "category": "enemy_fatty",
       "copies": 1,
@@ -69,7 +71,8 @@
         "en": "inhalation"
       },
       "description": {
-        "en": "Gain block and recover health."
+        "en": "Gain block and recover health.",
+        "zhCN": "获得10点格挡，恢复35点生命"
       },
       "category": "enemy_fatty",
       "copies": 1,
@@ -102,7 +105,8 @@
         "en": "stomach attack"
       },
       "description": {
-        "en": "Attack while gaining block."
+        "en": "Attack while gaining block.",
+        "zhCN": "造成20点伤害，获得10点格挡"
       },
       "category": "enemy_fatty",
       "copies": 1,

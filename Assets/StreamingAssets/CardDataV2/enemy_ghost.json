@@ -10,7 +10,8 @@
         "en": "illusion"
       },
       "description": {
-        "en": "Prepare two attack-nullify charges."
+        "en": "Prepare two attack-nullify charges.",
+        "zhCN": "获得2次攻击无效"
       },
       "category": "enemy_ghost",
       "copies": 1,
@@ -39,7 +40,8 @@
         "en": "flash"
       },
       "description": {
-        "en": "Blink in for a quick strike."
+        "en": "Blink in for a quick strike.",
+        "zhCN": "造成8点伤害"
       },
       "category": "enemy_ghost",
       "copies": 1,
@@ -69,7 +71,8 @@
         "en": "snake poison"
       },
       "description": {
-        "en": "Apply poison while striking toughness."
+        "en": "Apply poison while striking toughness.",
+        "zhCN": "削减2点韧性，施加3层中毒"
       },
       "category": "enemy_ghost",
       "copies": 1,

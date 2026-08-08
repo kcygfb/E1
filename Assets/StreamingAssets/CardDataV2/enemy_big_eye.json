@@ -10,7 +10,8 @@
         "en": "eye beam"
       },
       "description": {
-        "en": "Fire a focused eye beam."
+        "en": "Fire a focused eye beam.",
+        "zhCN": "造成14点伤害"
       },
       "category": "enemy_big_eye",
       "copies": 1,
@@ -41,7 +42,8 @@
         "en": "scratch"
       },
       "description": {
-        "en": "Scratch twice."
+        "en": "Scratch twice.",
+        "zhCN": "连续攻击2次，每次造成7点伤害，削减2点韧性"
       },
       "category": "enemy_big_eye",
       "copies": 1,
@@ -76,7 +78,8 @@
         "en": "mind control"
       },
       "description": {
-        "en": "Control the fight by nullifying attacks and reducing damage."
+        "en": "Control the fight by nullifying attacks and reducing damage.",
+        "zhCN": "获得6次攻击无效，获得减伤，持续3回合"
       },
       "category": "enemy_big_eye",
       "copies": 1,
@@ -110,7 +113,8 @@
         "en": "suffocate"
       },
       "description": {
-        "en": "Suffocate the target."
+        "en": "Suffocate the target.",
+        "zhCN": "造成20点伤害，削减10点韧性"
       },
       "category": "enemy_big_eye",
       "copies": 1,
@@ -145,7 +149,8 @@
         "en": "ten thousand hands"
       },
       "description": {
-        "en": "Ultimate barrage of grasping hands."
+        "en": "Ultimate barrage of grasping hands.",
+        "zhCN": "连续攻击10次，每次造成3点伤害，削减5点韧性，施加5层流血"
       },
       "category": "enemy_big_eye",
       "copies": 1,
@@ -185,7 +190,8 @@
         "en": "mind control break"
       },
       "description": {
-        "en": "Break a large amount of toughness with mental control."
+        "en": "Break a large amount of toughness with mental control.",
+        "zhCN": "削减40点韧性"
       },
       "category": "enemy_big_eye",
       "copies": 1,

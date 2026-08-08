@@ -10,7 +10,8 @@
         "en": "crossbow"
       },
       "description": {
-        "en": "Fire three barbed bolts."
+        "en": "Fire three barbed bolts.",
+        "zhCN": "连续攻击3次，每次造成{剑}2点伤害，削减{盾}1点韧性，施加{血}1层流血"
       },
       "category": "hidden",
       "copies": 1,
@@ -60,7 +61,8 @@
         "en": "kunai"
       },
       "description": {
-        "en": "Throw poisoned kunai in rapid succession."
+        "en": "Throw poisoned kunai in rapid succession.",
+        "zhCN": "连续攻击3次，每次造成{剑}1点伤害，施加{血}3层流血，施加{毒}1层中毒"
       },
       "category": "hidden",
       "copies": 1,
@@ -110,7 +112,8 @@
         "en": "smoke bomb"
       },
       "description": {
-        "en": "Negate incoming attacks and draw cards."
+        "en": "Negate incoming attacks and draw cards.",
+        "zhCN": "获得{闪}1次攻击无效，抽3张牌"
       },
       "category": "hidden",
       "copies": 1,
@@ -151,7 +154,8 @@
         "en": "poison sting"
       },
       "description": {
-        "en": "Inflict bleed and poison with a toxic needle."
+        "en": "Inflict bleed and poison with a toxic needle.",
+        "zhCN": "施加{血}3层流血，施加{毒}3层中毒"
       },
       "category": "hidden",
       "copies": 1,
@@ -190,7 +194,8 @@
         "en": "hidden blade"
       },
       "description": {
-        "en": "Cut from concealment to inflict bleed."
+        "en": "Cut from concealment to inflict bleed.",
+        "zhCN": "削减{盾}1点韧性，施加{血}5层流血"
       },
       "category": "hidden",
       "copies": 1,
@@ -229,7 +234,8 @@
         "en": "poisonous gas"
       },
       "description": {
-        "en": "Poison the target and draw cards."
+        "en": "Poison the target and draw cards.",
+        "zhCN": "施加{毒}3层中毒，抽2张牌"
       },
       "category": "hidden",
       "copies": 1,

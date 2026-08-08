@@ -19,12 +19,9 @@ namespace KiKs.Combat
             { "盾", "shield" },     // 韧性/格挡
             { "心", "heart" },      // 治疗
             { "血", "blood" },      // 流血/吸血
-            { "火", "fire" },       // 燃烧/灼烧
             { "星", "star" },       // 眩晕
             { "毒", "poison" },     // 中毒
-            { "箭", "arrow" },      // 射击
             { "甲", "armor" },      // 减伤
-            { "抽", "draw" },       // 抽牌
             { "闪", "dodge" },      // 闪避/攻击无效
             { "处", "execution" },  // 处决
         };

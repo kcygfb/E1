@@ -10,7 +10,8 @@
         "en": "fur armor"
       },
       "description": {
-        "en": "Gain thick fur block."
+        "en": "Gain thick fur block.",
+        "zhCN": "获得20点格挡"
       },
       "category": "enemy_merchant",
       "copies": 1,
@@ -39,7 +40,8 @@
         "en": "claw"
       },
       "description": {
-        "en": "Claw twice."
+        "en": "Claw twice.",
+        "zhCN": "连续攻击2次，每次造成4点伤害，削减5点韧性"
       },
       "category": "enemy_merchant",
       "copies": 1,
@@ -73,7 +75,8 @@
         "en": "bribe"
       },
       "description": {
-        "en": "Prepare five attack-nullify charges."
+        "en": "Prepare five attack-nullify charges.",
+        "zhCN": "获得5次攻击无效"
       },
       "category": "enemy_merchant",
       "copies": 1,
@@ -102,7 +105,8 @@
         "en": "coinfall"
       },
       "description": {
-        "en": "Rain down coins in six attacks."
+        "en": "Rain down coins in six attacks.",
+        "zhCN": "连续攻击6次，每次造成2点伤害，削减2点韧性"
       },
       "category": "enemy_merchant",
       "copies": 1,

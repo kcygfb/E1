@@ -179,12 +179,28 @@ namespace KiKs.Combat
 
         public static void CompleteSelectedPoint()
         {
+            CompleteSelectedPoint(countExploration: true);
+        }
+
+        /// <summary>
+        /// Completes and hides the selected point without advancing the current three-battle
+        /// playtest counter. Treasure uses this temporary path until the unified daily
+        /// exploration/save flow replaces the battle-only demo progression.
+        /// </summary>
+        public static void CompleteSelectedPointWithoutCountingExploration()
+        {
+            CompleteSelectedPoint(countExploration: false);
+        }
+
+        private static void CompleteSelectedPoint(bool countExploration)
+        {
             if (!HasSelectedPoint || !TryGetPoint(selectedPointIndex, out var point))
                 return;
 
             point.Complete();
             selectedPointIndex = -1;
-            CompletedExplorationCount++;
+            if (countExploration)
+                CompletedExplorationCount++;
         }
 
         public static void CancelSelectedPoint()

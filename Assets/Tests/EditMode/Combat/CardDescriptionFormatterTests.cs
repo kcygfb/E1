@@ -21,8 +21,8 @@ namespace KiKs.Combat.Tests
         [Test]
         public void Format_IconThenNumber_KeepsNumberAsPlainText()
         {
-            var result = CardDescriptionFormatter.Format("精准射击，造成{箭}12点伤害");
-            Assert.That(result, Is.EqualTo("精准射击，造成<sprite name=\"arrow\">12点伤害"));
+            var result = CardDescriptionFormatter.Format("精准射击，造成{剑}12点伤害");
+            Assert.That(result, Is.EqualTo("精准射击，造成<sprite name=\"sword\">12点伤害"));
         }
 
         [Test]
@@ -70,9 +70,13 @@ namespace KiKs.Combat.Tests
         [Test]
         public void CoreTokens_AllRegistered()
         {
-            foreach (var token in new[] { "剑", "盾", "心", "血", "火", "星", "毒", "箭", "甲", "抽", "闪", "处" })
+            // 当前保留的 token：剑盾心血星毒甲闪处（箭/火/抽已按用户要求移除映射）
+            foreach (var token in new[] { "剑", "盾", "心", "血", "星", "毒", "甲", "闪", "处" })
                 Assert.That(CardDescriptionFormatter.HasToken(token), Is.True, $"token {token} 应已注册");
             Assert.That(CardDescriptionFormatter.HasToken("不存在的token"), Is.False);
+            // 已移除的 token 应返回 false
+            foreach (var token in new[] { "箭", "火", "抽" })
+                Assert.That(CardDescriptionFormatter.HasToken(token), Is.False, $"token {token} 应已移除");
         }
     }
 }

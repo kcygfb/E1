@@ -10,7 +10,8 @@
         "en": "tearing"
       },
       "description": {
-        "en": "Bite for damage and toughness damage."
+        "en": "Bite for damage and toughness damage.",
+        "zhCN": "造成6点伤害，削减2点韧性"
       },
       "category": "enemy_dog",
       "copies": 1,
@@ -45,7 +46,8 @@
         "en": "scratching"
       },
       "description": {
-        "en": "Scratch three times and inflict bleed."
+        "en": "Scratch three times and inflict bleed.",
+        "zhCN": "连续攻击3次，每次造成2点伤害，施加2层流血"
       },
       "category": "enemy_dog",
       "copies": 1,
@@ -80,7 +82,8 @@
         "en": "double hit"
       },
       "description": {
-        "en": "Strike twice with a heavy attack."
+        "en": "Strike twice with a heavy attack.",
+        "zhCN": "连续攻击2次，每次造成7点伤害，削减2点韧性"
       },
       "category": "enemy_dog",
       "copies": 1,
