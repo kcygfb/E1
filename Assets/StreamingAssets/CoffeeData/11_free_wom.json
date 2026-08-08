@@ -1,0 +1,19 @@
+{
+  "coffeeId": "FreeWom",
+  "coffeeName": "FreeWom",
+  "sellPrice": 130,
+  "locked": false,
+  "unlockItemId": "",
+  "unlockAmount": 1,
+  "recipe": [
+    { "resourceId": "wolffur", "amount": 1 },
+    { "resourceId": "CoffeeBean", "amount": 1 },
+    { "resourceId": "Water", "amount": 1 }
+  ],
+  "steps": [
+    { "id": "Grind", "displayName": "研磨狼毫", "resourceId": "wolffur", "amount": 1, "qteType": "RotationStop" },
+    { "id": "Grind", "displayName": "研磨咖啡豆", "resourceId": "CoffeeBean", "amount": 1, "qteType": "RotationStop" },
+    { "id": "Extract", "displayName": "萃取混合粉", "resourceId": "", "amount": 0, "qteType": "DropStop" }
+  ],
+  "requiredMaterials": ["wolffurEspresso", "Water"]
+}

@@ -47,12 +47,15 @@ public class CupContainer : MonoBehaviour, IBeginDragHandler, IDragHandler, IEnd
         return true;
     }
 
-    /// <summary>检查杯内材料是否匹配某咖啡配方，匹配则合并。</summary>
+    /// <summary>检查杯内材料是否匹配某咖啡配方，匹配则合并。
+    /// 也检查半成品：杯内材料是某咖啡 requiredMaterials 的真子集且匹配 halfProducts 定义时，切换为半成品外观。</summary>
     private void TryMerge()
     {
         if (CoffeeDataLoader.Instance == null || !CoffeeDataLoader.Instance.IsLoaded) return;
 
         var cupSet = new HashSet<string>(Contents);
+
+        // 1. 检查完整配方匹配
         foreach (var coffee in CoffeeDataLoader.Instance.GetAllCoffees())
         {
             if (coffee.requiredMaterials == null || coffee.requiredMaterials.Count == 0) continue;
@@ -78,6 +81,48 @@ public class CupContainer : MonoBehaviour, IBeginDragHandler, IDragHandler, IEnd
 
             Debug.Log($"[CupContainer] 合并为: {coffee.coffeeId}");
             return;
+        }
+
+        // 2. 检查半成品匹配（cupSet 是 requiredMaterials 的真子集 + 匹配 halfProducts 定义）
+        if (MergedCoffeeId == null)
+        {
+            foreach (var coffee in CoffeeDataLoader.Instance.GetAllCoffees())
+            {
+                if (coffee.halfProducts == null || coffee.halfProducts.Count == 0) continue;
+                if (coffee.requiredMaterials == null || coffee.requiredMaterials.Count == 0) continue;
+
+                var fullSet = new HashSet<string>(coffee.requiredMaterials);
+                // cupSet 必须是 fullSet 的真子集（还没完成）
+                if (cupSet.Count >= fullSet.Count) continue;
+                bool isSubset = true;
+                foreach (var item in cupSet)
+                    if (!fullSet.Contains(item)) { isSubset = false; break; }
+                if (!isSubset) continue;
+
+                // 检查是否匹配某个 halfProducts 定义
+                foreach (var half in coffee.halfProducts)
+                {
+                    if (half.materials == null || half.materials.Count == 0) continue;
+                    var halfSet = new HashSet<string>(half.materials);
+                    if (cupSet.SetEquals(halfSet))
+                    {
+                        // 半成品匹配 → 销毁杯内 icon，切换杯子外观为半成品图
+                        foreach (var icon in Icons)
+                            if (icon != null) Destroy(icon.gameObject);
+                        Icons.Clear();
+
+                        var halfSprite = CoffeeIconCache.Instance?.GetHalfProductSprite(coffee.coffeeId);
+                        if (halfSprite != null)
+                        {
+                            _image.sprite = halfSprite;
+                            _image.preserveAspect = true;
+                            _image.color = Color.white;
+                        }
+                        Debug.Log($"[CupContainer] 半成品匹配: {coffee.coffeeId} ({half.displayName})");
+                        return;
+                    }
+                }
+            }
         }
     }
 

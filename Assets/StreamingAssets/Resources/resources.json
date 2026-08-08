@@ -34,7 +34,7 @@
       }
     },
     {
-      "id": "wolfHair",
+      "id": "wolffur",
       "displayName": "狼毫",
       "startingAmount": 5,
       "tutorial": {
@@ -42,7 +42,12 @@
       }
     },
     {
-      "id": "eyeball",
+      "id": "oil",
+      "displayName": "肥油",
+      "startingAmount": 5
+    },
+    {
+      "id": "eye",
       "displayName": "眼珠",
       "startingAmount": 5,
       "tutorial": {
@@ -50,7 +55,7 @@
       }
     },
     {
-      "id": "purpleFlame",
+      "id": "fire",
       "displayName": "紫色火焰",
       "startingAmount": 5,
       "tutorial": {
@@ -58,7 +63,7 @@
       }
     },
     {
-      "id": "snakeDried",
+      "id": "snake",
       "displayName": "蛇干",
       "startingAmount": 5,
       "tutorial": {

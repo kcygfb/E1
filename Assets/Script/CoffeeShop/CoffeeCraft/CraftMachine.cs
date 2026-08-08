@@ -92,15 +92,21 @@ public class CraftMachine : MonoBehaviour
     {
         if (!CanStart()) return;
 
-        var inputId = materialSlot.GetMaterialId();
-        if (string.IsNullOrEmpty(inputId)) return;
+        var allIds = materialSlot.GetAllMaterialIds();
+        if (allIds == null || allIds.Count == 0) return;
 
-        // 查不到配方 → 产出 Unknown
-        string outputId;
-        if (!MachineRecipeLibrary.TryGetOutput(machineId, inputId, out outputId))
+        string outputId = null;
+
+        // 先试单输入配方
+        if (allIds.Count == 1 && MachineRecipeLibrary.TryGetOutput(machineId, allIds[0], out outputId))
+        {
+            // 单输入命中
+        }
+        // 再试多输入配方
+        else if (!MachineRecipeLibrary.TryGetOutputMulti(machineId, allIds, out outputId))
         {
             outputId = "Unknown";
-            Debug.Log($"[CraftMachine] {machineId} + {inputId} 无配方，产出 Unknown");
+            Debug.Log($"[CraftMachine] {machineId} + [{string.Join(", ", allIds)}] 无配方，产出 Unknown");
         }
 
         // 消耗所有输入材料（销毁全部icon）

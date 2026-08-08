@@ -1,0 +1,17 @@
+{
+  "coffeeId": "FinalGaze",
+  "coffeeName": "Final Gaze",
+  "sellPrice": 70,
+  "locked": false,
+  "unlockItemId": "",
+  "unlockAmount": 1,
+  "recipe": [
+    { "resourceId": "eye", "amount": 1 },
+    { "resourceId": "Water", "amount": 1 }
+  ],
+  "steps": [
+    { "id": "Grind", "displayName": "研磨眼珠", "resourceId": "eye", "amount": 1, "qteType": "RotationStop" },
+    { "id": "PourOver", "displayName": "手冲注水", "resourceId": "", "amount": 0, "qteType": "HoldRelease" }
+  ],
+  "requiredMaterials": ["eyeBall"]
+}
