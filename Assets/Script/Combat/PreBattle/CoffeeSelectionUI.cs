@@ -89,8 +89,21 @@ namespace KiKs.Combat
 
             BindCloseButton();
 
+            EnsureDefaultPreselection();
+
             PopulateCoffeeList();
             RefreshUI();
+        }
+
+        /// <summary>
+        /// 进入战备界面时自动预选默认咖啡（玩家仍可在弹窗里随意更改）。
+        /// </summary>
+        private void EnsureDefaultPreselection()
+        {
+            if (selectedCoffeeIds.Count > 0) return;
+
+            for (int i = 0; i < AvailableCoffeeIds.Length && selectedCoffeeIds.Count < MaxCoffees; i++)
+                selectedCoffeeIds.Add(AvailableCoffeeIds[i]);
         }
 
         private void OnDestroy()
@@ -381,6 +394,17 @@ namespace KiKs.Combat
         /// <summary>�?CardSelectionUI.OnBeginClicked 调用�?/summary>
         public void ConfirmSelection()
         {
+            // 进游戏前兜底补满默认咖啡，保证无论玩家如何更改，出战前始终带满 2 杯
+            if (selectedCoffeeIds.Count < MaxCoffees)
+            {
+                foreach (var coffeeId in AvailableCoffeeIds)
+                {
+                    if (selectedCoffeeIds.Count >= MaxCoffees) break;
+                    if (!selectedCoffeeIds.Contains(coffeeId))
+                        selectedCoffeeIds.Add(coffeeId);
+                }
+            }
+
             if (selectedCoffeeIds.Count != MaxCoffees) return;
             RuntimeGameRepository.SetSelectedCoffees(selectedCoffeeIds);
         }

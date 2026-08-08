@@ -49,6 +49,11 @@ public class MenuViewer : MonoBehaviour
 
     private void Awake()
     {
+        // MenuImage is display-only and overlaps the price tier buttons.
+        // It must not intercept pointer events intended for those buttons.
+        if (menuImage != null)
+            menuImage.raycastTarget = false;
+
         if (openButton != null)
         {
             openButton.onClick.AddListener(Toggle);
