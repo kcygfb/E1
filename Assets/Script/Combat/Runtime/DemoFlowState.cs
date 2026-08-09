@@ -13,7 +13,7 @@ namespace KiKs.Combat
         private static int _currentBattleIndex;
 
         public static int CurrentBattleIndex => _currentBattleIndex;
-        public static int CurrentDay => Math.Min(_currentBattleIndex + 1, BattleCount);
+        public static int CurrentExplorationNumber => Math.Min(_currentBattleIndex + 1, BattleCount);
         public static DemoStage CurrentStage => (DemoStage)_currentBattleIndex;
         public static bool IsCompleted => _currentBattleIndex >= BattleCount;
 
@@ -23,6 +23,7 @@ namespace KiKs.Combat
             _currentBattleIndex = 0;
             RuntimeGameRepository.ResetRunState();
             DailyAreaMapState.Reset();
+            PlayerGlobalStats.ResetToFull(100);
         }
 
         public static bool IsStageAvailable(DemoStage stage)
@@ -42,9 +43,9 @@ namespace KiKs.Combat
 
             _currentBattleIndex++;
             if (IsCompleted)
-                Debug.Log("[DemoFlow] Demo Complete. All three battles were cleared in order.");
+                Debug.Log("[DemoFlow] Demo Complete. All three explorations were cleared during the same day.");
             else
-                Debug.Log($"[DemoFlow] Advanced to day {CurrentDay}: {CurrentStage}.");
+                Debug.Log($"[DemoFlow] Advanced to exploration {CurrentExplorationNumber} of {BattleCount}: {CurrentStage}.");
 
             return true;
         }
@@ -54,7 +55,8 @@ namespace KiKs.Combat
             _currentBattleIndex = 0;
             RuntimeGameRepository.ResetRunState();
             DailyAreaMapState.Reset();
-            Debug.Log("[DemoFlow] Progress reset to day 1 / DogBattle.");
+            PlayerGlobalStats.ResetToFull(100);
+            Debug.Log("[DemoFlow] Progress reset to exploration 1 / DogBattle.");
         }
     }
 }

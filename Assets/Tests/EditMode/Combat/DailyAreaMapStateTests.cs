@@ -72,4 +72,44 @@ namespace KiKs.Combat.Tests
             Assert.That(DailyAreaMapState.MapPoints[battlePointIndexes[1]].IsSelected, Is.True);
         }
     }
+
+    public sealed class PlayerGlobalStatsTests
+    {
+        [SetUp]
+        public void SetUp()
+        {
+            PlayerGlobalStats.ResetToFull(100);
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            PlayerGlobalStats.ResetToFull(100);
+        }
+
+        [Test]
+        public void BattleStartingHealthPersistsAcrossMapPointsWithinTheSameDay()
+        {
+            PlayerGlobalStats.SetHealth(63, 100);
+            DailyAreaMapState.Reset();
+            DailyAreaMapState.EnsureGenerated();
+
+            var nextBattlePlayer = new CombatantState(
+                "player", "Player", CombatantSide.Player, EnemyRank.None, 100, 0);
+            nextBattlePlayer.RestoreCurrentHealth(PlayerGlobalStats.PrepareForBattle(100));
+
+            Assert.That(nextBattlePlayer.CurrentHealth, Is.EqualTo(63));
+        }
+
+        [Test]
+        public void ExplicitRunResetRestoresTheDailyHealthPool()
+        {
+            PlayerGlobalStats.SetHealth(17, 100);
+
+            DemoFlowState.ResetDemoProgress();
+
+            Assert.That(PlayerGlobalStats.CurrentHealth, Is.EqualTo(100));
+            Assert.That(PlayerGlobalStats.MaxHealth, Is.EqualTo(100));
+        }
+    }
 }

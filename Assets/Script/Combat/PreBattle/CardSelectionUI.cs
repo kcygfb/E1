@@ -11,6 +11,7 @@ namespace KiKs.Combat
     public class CardSelectionUI : MonoBehaviour
     {
         private const int DEFAULT_DECK_SIZE = 15;
+        private const int MaxSpecialCardsInDeck = 2;
         private const string BATTLE_SCENE_NAME = "Card";
         private const string TREASURE_SCENE_NAME = "Treasure";
 
@@ -74,7 +75,6 @@ namespace KiKs.Combat
             BindDemoMapPoints();
             DailyAreaMapState.EnsureGenerated();
             RefreshMapPoints();
-            SyncCafeDayCounter(DemoFlowState.CurrentDay);
 
             yield return TransitionEffect.WaitEntrance();
 
@@ -217,7 +217,8 @@ namespace KiKs.Combat
 
             // Cost
             var costText = card.CostResource == CardResourceType.ActionPoint ? "AP" : "MP";
-            CreateText("CardCost", go.transform, $"{costText}: {card.CostAmount}  x{card.DeckCopies}", 14, new Color(0.8f, 0.6f, 0.3f, 1),
+            var copiesLabel = card.IsSpecial ? "x1（特殊）" : "x2";
+            CreateText("CardCost", go.transform, $"{costText}: {card.CostAmount}  {copiesLabel}", 14, new Color(0.8f, 0.6f, 0.3f, 1),
                 new Vector2(0, 0), new Vector2(1, 0), new Vector2(3, 3), new Vector2(-3, 20));
 
             // Effects summary
@@ -240,22 +241,51 @@ namespace KiKs.Combat
             {
                 if (selectedId == cardId) selectedCopies++;
             }
-            if (selectedCopies >= card.DeckCopies)
+            if (selectedCopies >= GetMaxCopies(card))
             {
                 Debug.Log("[CardSelectionUI] No more copies are available for " + card.DisplayName + ".");
-                WarningToast.Show("This card has reached its copy limit.");
+                WarningToast.Show(card.IsSpecial
+                    ? "该特殊卡牌最多选择1张"
+                    : "普通卡牌最多选择2张");
+                return;
+            }
+
+            if (card.IsSpecial && CountSelectedSpecialCards() >= MaxSpecialCardsInDeck)
+            {
+                Debug.Log("[CardSelectionUI] Special card quota reached.");
+                WarningToast.Show(string.Format(
+                    "特殊卡牌总共最多选择{0}张（且必须为不同的两张）", MaxSpecialCardsInDeck));
                 return;
             }
 
             if (selectedCardIds.Count >= RequiredDeckSize)
             {
                 Debug.Log("[CardSelectionUI] Deck is full.");
-                WarningToast.Show(string.Format("Card limit reached: {0}.", RequiredDeckSize));
+                WarningToast.Show(string.Format("卡组已满：最多{0}张", RequiredDeckSize));
                 return;
             }
 
             selectedCardIds.Add(cardId);
             RefreshSelectionUI();
+        }
+
+        /// <summary>每张卡牌在卡组中允许选入的数量：特殊卡 1 张，普通卡 2 张。</summary>
+        private static int GetMaxCopies(CardSpec card)
+        {
+            return card.IsSpecial ? 1 : 2;
+        }
+
+        /// <summary>统计已选卡组中特殊卡牌的张数（每张特殊卡最多 1 张，因此张数即特殊牌种类数）。</summary>
+        private int CountSelectedSpecialCards()
+        {
+            var count = 0;
+            foreach (var selectedId in selectedCardIds)
+            {
+                var selected = allCards.Find(candidate => candidate.Id == selectedId);
+                if (selected != null && selected.IsSpecial) count++;
+            }
+
+            return count;
         }
         private void OnUndoClicked()
         {
@@ -415,7 +445,7 @@ namespace KiKs.Combat
                 if (openCardSelectionAfterMapClick && cardPopup != null)
                     cardPopup.SetActive(true);
 
-                WarningToast.Show(string.Format("You still need to select all {0} cards.", RequiredDeckSize));
+                WarningToast.Show(string.Format("还需选择{0}张卡牌", RequiredDeckSize));
                 RefreshSelectionUI();
                 return;
             }
@@ -601,7 +631,6 @@ namespace KiKs.Combat
             RuntimeGameRepository.ClearSelectedDemoStage();
             RuntimeGameRepository.ClearSelectedDeck();
             selectedCardIds.Clear();
-            SyncCafeDayCounter(1);
 
             if (demoCompletePanel != null)
             {
@@ -612,15 +641,6 @@ namespace KiKs.Combat
             RefreshMapPoints();
         }
 
-        private static void SyncCafeDayCounter(int day)
-        {
-            var timeSystemType = System.Type.GetType("TimeSystem, Assembly-CSharp");
-            var setDayMethod = timeSystemType?.GetMethod(
-                "SetSavedDayCountForDemo",
-                System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
-            if (setDayMethod != null)
-                setDayMethod.Invoke(null, new object[] { day });
-        }
 
         private void UpdateDeckSlots()
         {
@@ -723,7 +743,7 @@ namespace KiKs.Combat
             {
                 Debug.LogWarning(
                     "[AreaMap] Click an available battle point before starting battle.", this);
-                WarningToast.Show("Choose a battle area first.");
+                WarningToast.Show("请先选择一个战斗区域");
                 return;
             }
 
@@ -732,7 +752,7 @@ namespace KiKs.Combat
             {
                 Debug.LogWarning(
                     $"[CardSelectionUI] Select exactly {requiredDeckSize} cards before starting.");
-                WarningToast.Show(string.Format("Select {0} cards before starting.", requiredDeckSize));
+                WarningToast.Show(string.Format("请先选择{0}张卡牌再开始", requiredDeckSize));
                 return;
             }
 

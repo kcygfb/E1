@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 316a2eb137882d84985460c503455672
+guid: 1d2679cd99e6ced479361fb0e14fc8aa
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 1711504910390415380
-    second: rocketlauncher_0
+      213: -2494323855482236629
+    second: 100C_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -100,7 +100,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: rocketlauncher_0
+      name: 100C_0
       rect:
         serializedVersion: 2
         x: 0
@@ -115,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 4105827e5ac70c710800000000000000
-      internalID: 1711504910390415380
+      spriteID: b21d23f3ba1626dd0800000000000000
+      internalID: -2494323855482236629
       vertices: []
       indices: 
       edges: []
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      rocketlauncher_0: 1711504910390415380
+      100C_0: -2494323855482236629
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -16,6 +16,9 @@ namespace KiKs.Combat
     {
         public const string SceneName = "Treasure";
         private const string ReturnSceneName = "PreBattle";
+        private const string ChineseFontResourcePath = "Fonts & Materials/站酷文艺体 SDF";
+
+        private static TMP_FontAsset chineseFont;
 
         private readonly Dictionary<CardView, TreasureOfferDefinition> offersByCard = new();
         private TreasurePurchaseSession session;
@@ -84,7 +87,10 @@ namespace KiKs.Combat
 
                 var tmpLabel = leaveButton.GetComponentInChildren<TMP_Text>(true);
                 if (tmpLabel != null)
+                {
+                    ApplyChineseFont(tmpLabel);
                     tmpLabel.text = "离开";
+                }
 
                 var legacyLabel = leaveButton.GetComponentInChildren<Text>(true);
                 if (legacyLabel != null)
@@ -194,12 +200,11 @@ namespace KiKs.Combat
             if (rewardTray != null || canvasRect == null)
                 return;
 
-            // Reward presentation remains a temporary test readout. NPC and cards themselves
-            // are never generated here.
+            // Temporary reward readout until the authored acquisition UI is ready.
             rewardTray = CreateRuntimeArea(
                 "TreasureRewardTray",
                 canvasRect,
-                new Vector2(300f, -155f),
+                new Vector2(0f, -155f),
                 new Vector2(760f, 110f));
             var background = rewardTray.gameObject.AddComponent<Image>();
             background.color = new Color32(32, 28, 39, 185);
@@ -333,6 +338,7 @@ namespace KiKs.Combat
             rect.offsetMax = Vector2.zero;
 
             var text = textObject.GetComponent<TextMeshProUGUI>();
+            ApplyChineseFont(text);
             text.text = content;
             text.fontSize = fontSize;
             text.fontStyle = FontStyles.Bold;
@@ -340,6 +346,21 @@ namespace KiKs.Combat
             text.color = color;
             text.raycastTarget = false;
             return text;
+        }
+
+        private static void ApplyChineseFont(TMP_Text text)
+        {
+            if (text == null)
+                return;
+
+            if (chineseFont == null)
+                chineseFont = Resources.Load<TMP_FontAsset>(ChineseFontResourcePath);
+
+            if (chineseFont != null)
+                text.font = chineseFont;
+            else
+                Debug.LogWarning(
+                    $"[Treasure] Chinese TMP font not found at Resources/{ChineseFontResourcePath}.");
         }
 
         private Vector2 GetCanvasPosition(RectTransform target)
