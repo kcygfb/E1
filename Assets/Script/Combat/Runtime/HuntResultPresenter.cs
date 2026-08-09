@@ -343,7 +343,6 @@ namespace KiKs.Combat
             else
                 DailyAreaMapState.CancelSelectedPoint();
 
-            SyncCafeDayCounter(DemoFlowState.CurrentDay);
 
             if (!advanced)
                 Debug.LogError(
@@ -367,15 +366,6 @@ namespace KiKs.Combat
                 SceneManager.LoadScene(sceneName);
         }
 
-        private static void SyncCafeDayCounter(int day)
-        {
-            Type timeSystemType = Type.GetType("TimeSystem, Assembly-CSharp");
-            MethodInfo setDayMethod = timeSystemType?.GetMethod(
-                "SetSavedDayCountForDemo",
-                BindingFlags.Public | BindingFlags.Static);
-            if (setDayMethod != null)
-                setDayMethod.Invoke(null, new object[] { day });
-        }
 
         private void BuildPlaceholderUI()
         {

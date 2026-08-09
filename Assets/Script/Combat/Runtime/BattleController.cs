@@ -155,9 +155,12 @@ namespace KiKs.Combat
                         rules.ExpectedInitialDeckSize + ".", this);
                 }
 
+                var player = playerDefinition.CreateRuntimeState();
+                player.RestoreCurrentHealth(PlayerGlobalStats.PrepareForBattle(player.MaxHealth));
+
                 var state = new BattleState(
                     rules,
-                    playerDefinition.CreateRuntimeState(),
+                    player,
                     CreateEnemies(),
                     new DeckState(cards, battleRandomSeed, true));
 

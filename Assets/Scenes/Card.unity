@@ -392,8 +392,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 154, y: -14.297}
-  m_SizeDelta: {x: 65.1062, y: 48.078}
+  m_AnchoredPosition: {x: 162, y: -17.578}
+  m_SizeDelta: {x: 57.8106, y: 42.6905}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &117942840
 MonoBehaviour:
@@ -509,8 +509,6 @@ MonoBehaviour:
   battleController: {fileID: 875998994}
   icon: {fileID: 117942841}
   label: {fileID: 1191480760}
-  pourOverIcon: {fileID: 21300000, guid: da3f3f6ddfe426e4d9835d21baa5640a, type: 3}
-  bloodGarmentIcon: {fileID: 21300000, guid: 97c5880d64c98ca489a9a2012c5f2246, type: 3}
 --- !u!1 &159614892
 GameObject:
   m_ObjectHideFlags: 0
@@ -1818,8 +1816,6 @@ MonoBehaviour:
   bleedIcon: {fileID: 21300000, guid: 86a75a9eeca68084a87cd0dcb125c88f, type: 3}
   poisonIcon: {fileID: 21300000, guid: 6b9c8de69f9a5f844a13a24e6d56a785, type: 3}
   stunIcon: {fileID: 21300000, guid: 5925df8c285474b44952afefb970bb11, type: 3}
-  vulnerabilityIcon: {fileID: 21300000, guid: 772006d01bb5d4044a308d3955410860, type: 3}
-  immunityIcon: {fileID: 21300000, guid: 5925df8c285474b44952afefb970bb11, type: 3}
   nullifyIcon: {fileID: 21300000, guid: 5925df8c285474b44952afefb970bb11, type: 3}
   iconSize: {x: 90, y: 90}
   spacing: 6
@@ -2653,8 +2649,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 97, y: -99}
-  m_SizeDelta: {x: 113.9386, y: 50}
+  m_AnchoredPosition: {x: 101.9, y: -95}
+  m_SizeDelta: {x: 185.3563, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &771073795
 MonoBehaviour:
@@ -2678,8 +2674,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: coffee
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: acd271856cd45d14a8a548f28067c775, type: 2}
+  m_sharedMaterial: {fileID: -7339178315947629143, guid: acd271856cd45d14a8a548f28067c775, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -2710,7 +2706,7 @@ MonoBehaviour:
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
-  m_HorizontalAlignment: 1
+  m_HorizontalAlignment: 2
   m_VerticalAlignment: 256
   m_textAlignment: 65535
   m_characterSpacing: 0
@@ -5342,8 +5338,6 @@ MonoBehaviour:
   bleedIcon: {fileID: 21300000, guid: 86a75a9eeca68084a87cd0dcb125c88f, type: 3}
   poisonIcon: {fileID: 21300000, guid: 6b9c8de69f9a5f844a13a24e6d56a785, type: 3}
   stunIcon: {fileID: 21300000, guid: 5925df8c285474b44952afefb970bb11, type: 3}
-  vulnerabilityIcon: {fileID: 21300000, guid: 772006d01bb5d4044a308d3955410860, type: 3}
-  immunityIcon: {fileID: 21300000, guid: 5925df8c285474b44952afefb970bb11, type: 3}
   nullifyIcon: {fileID: 21300000, guid: 5925df8c285474b44952afefb970bb11, type: 3}
   iconSize: {x: 90, y: 90}
   spacing: 6
@@ -5514,8 +5508,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 37, y: -14.364}
-  m_SizeDelta: {x: 61.0363, y: 47.944}
+  m_AnchoredPosition: {x: 34, y: -19.462}
+  m_SizeDelta: {x: 49.5519, y: 38.923}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1618126561
 MonoBehaviour:
@@ -5631,8 +5625,6 @@ MonoBehaviour:
   battleController: {fileID: 875998994}
   icon: {fileID: 1618126562}
   label: {fileID: 935782684}
-  pourOverIcon: {fileID: 21300000, guid: da3f3f6ddfe426e4d9835d21baa5640a, type: 3}
-  bloodGarmentIcon: {fileID: 21300000, guid: 97c5880d64c98ca489a9a2012c5f2246, type: 3}
 --- !u!1 &1641691384
 GameObject:
   m_ObjectHideFlags: 0
@@ -5882,8 +5874,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: KiKs.UI::KiKs.UI.TutorialToggleButton
   tutorialController: {fileID: 0}
   iconImage: {fileID: 1656560738}
-  onSprite: {fileID: 0}
-  offSprite: {fileID: -307881882, guid: a580ee847b232724b81e2f493b68226e, type: 3}
+  onSprite: {fileID: 21300000, guid: 105d9def0f28f864fb994e7c69b6bc11, type: 3}
+  offSprite: {fileID: 21300000, guid: dea8a5b8865392a488fd9c55ccdecc3a, type: 3}
 --- !u!114 &1656560737
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5948,7 +5940,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -2080756948, guid: b610bb0f1ba00214c9737e6ec000f38e, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 105d9def0f28f864fb994e7c69b6bc11, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1

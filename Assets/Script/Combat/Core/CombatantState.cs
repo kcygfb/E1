@@ -57,6 +57,13 @@ namespace KiKs.Combat
             CurrentToughness = maxToughness;
         }
 
+        /// <summary>Restores persisted health before a battle starts.</summary>
+        public void RestoreCurrentHealth(int currentHealth)
+        {
+            if (currentHealth < 0) throw new ArgumentOutOfRangeException(nameof(currentHealth));
+            CurrentHealth = Math.Min(currentHealth, MaxHealth);
+        }
+
         public int ApplyDamage(int requestedDamage)
         {
             if (requestedDamage < 0) throw new ArgumentOutOfRangeException(nameof(requestedDamage));

@@ -97,11 +97,6 @@ public class TimeSystem : MonoBehaviour
         SceneManager.LoadScene("Cafe");
     }
 
-    public static void SetSavedDayCountForDemo(int day)
-    {
-        savedDayCount = Mathf.Max(1, day);
-        Debug.Log($"[TimeSystem] Demo flow synced -> Day {savedDayCount}");
-    }
 
     private void EnterMorningCheck()
     {
@@ -121,6 +116,7 @@ public class TimeSystem : MonoBehaviour
         if (CurrentPhase == DayPhase.Shop) return; // Guard against double-call
         CurrentPhase = DayPhase.Shop;
         Debug.Log($"[TimeSystem] StartShopPhase -> Day {dayCount}");
+        KiKs.Combat.RuntimeGameRepository.ClearCraftedCoffees();
         EmitPhaseChanged();
         GameEvent.Emit("DayStarted", dayCount);
 
