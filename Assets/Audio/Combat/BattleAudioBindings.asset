@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: da29ce840dcf4176844b7892eaccc587, type: 3}
+  m_Name: BattleAudioBindings
+  m_EditorClassIdentifier: KiKs.Audio.Combat::KiKs.Combat.BattleAudioBindings
+  cardDraw: {fileID: 11400000, guid: 08292fef92848364baeeb9ca5d8da080, type: 2}
+  deckReshuffled: {fileID: 0}
+  cardDiscard: {fileID: 11400000, guid: f6eef553e5312e142baf0498ffefd7bd, type: 2}
+  meleeCardPlayed: {fileID: 0}
+  rangedCardPlayed: {fileID: 0}
+  magicCardPlayed: {fileID: 11400000, guid: 2536fb5cc8337714aa06a6eaa38fbe24, type: 2}
+  defenseCardPlayed: {fileID: 11400000, guid: eb5decd6dca98eb4dbdcaf44cd3c651d, type: 2}
+  fallbackCardPlayed: {fileID: 0}
+  playerHit: {fileID: 0}
+  enemyHit: {fileID: 0}
+  enemyKilled: {fileID: 0}
+  toughnessBroken: {fileID: 11400000, guid: c8a2d1f3268aabc4388d104db8a1154e, type: 2}
+  healing: {fileID: 11400000, guid: 79bc18c066b2eca40ac0ac8c1da7a7af, type: 2}
+  statusApplied: {fileID: 11400000, guid: 9e5684a449c8ceb40ba94d1db3c1b904, type: 2}
+  victory: {fileID: 11400000, guid: 9facaa3581a94fb4cb27b46bd53adcc5, type: 2}
+  defeat: {fileID: 11400000, guid: 68fa28323e1816144a7a5163b275c62b, type: 2}

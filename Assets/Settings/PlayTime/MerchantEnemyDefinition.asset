@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4754d7bc2fd800f4287cf59ee457d044, type: 3}
+  m_Name: MerchantEnemyDefinition
+  m_EditorClassIdentifier: KiKs.Combat::KiKs.Combat.CombatantDefinition
+  combatantId: demo_merchant
+  displayName: "\u9ed1\u5fc3\u72fc\u4eba"
+  side: 1
+  enemyRank: 2
+  maxHealth: 100
+  maxToughness: 150
+  portrait: {fileID: 1885142161314593408, guid: 939732c84e3aa9f45982c7a526971b12, type: 3}
+  portraitSize: {x: 100, y: 100}
+  portraitOffset: {x: 0, y: -5}
+  portraitScale: 1
+  description: "A merchant cut down for his ill-gotten wealth. His fur guards him like gold, and his claws strike with greed. He bribes the living to stay his hand, but the coins he rains down always come with a price.\r\n\u4e00\u4e2a\u56e0\u9ed1\u5fc3\u94b1\u8d22\u800c\u6b7b\u7684\u5546\u4eba\u3002\u4ed6\u7684\u6bdb\u53d1\u5982\u91d1\u5e01\u822c\u62a4\u4f53\uff0c\u5229\u722a\u5e26\u7740\u8d2a\u5a6a\u6325\u51fa\u3002\u4ed6\u4f1a\u7528\u8d3f\u8d42\u8ba9\u751f\u8005\u505c\u624b\uff0c\u4f46\u5929\u964d\u7684\u91d1\u5e01\u4ece\u4e0d\u514d\u8d39\u3002"
+  enemyArchetype: 9
+  enemyCardIds: []
+  cardsPerTurn: 2
+  enemyHandLimit: 5
+  enemyActionsPerTurn: 2
+  fallbackDamage: 18
+  fallbackToughnessDamage: 10
+  baseActionPoints: 4

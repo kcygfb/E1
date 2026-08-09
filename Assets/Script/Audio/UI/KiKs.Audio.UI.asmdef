@@ -1,0 +1,17 @@
+{
+  "name": "KiKs.Audio.UI",
+  "rootNamespace": "KiKs.Audio",
+  "references": [
+    "KiKs.Audio",
+    "UnityEngine.UI"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

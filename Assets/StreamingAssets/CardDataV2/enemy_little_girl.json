@@ -1,151 +1,151 @@
 {
-  "schemaVersion": 2,
-  "category": "enemy_little_girl",
-  "categoryName": "小女孩",
-  "cards": [
+ "schemaVersion": 2,
+ "category": "enemy_little_girl",
+ "categoryName": "小女孩",
+ "cards": [
+  {
+   "id": "enemy_little_girl_tentacle_attack",
+   "name": {
+    "zhCN": "触手攻击",
+    "en": "tentacle attack"
+   },
+   "description": {
+    "en": "Strike with three tentacle attacks.",
+    "zhCN": "连续攻击3次，每次造成3点伤害，削减2点韧性"
+   },
+   "category": "enemy_little_girl",
+   "copies": 1,
+   "cost": {
+    "resource": "action_point",
+    "amount": 1
+   },
+   "special": false,
+   "effects": [
     {
-      "id": "enemy_little_girl_tentacle_attack",
-      "name": {
-        "zhCN": "触手攻击",
-        "en": "tentacle attack"
-      },
-      "description": {
-        "en": "Strike with three tentacle attacks.",
-        "zhCN": "连续攻击3次，每次造成3点伤害，削减2点韧性"
-      },
-      "category": "enemy_little_girl",
-      "copies": 1,
-      "cost": {
-        "resource": "action_point",
-        "amount": 1
-      },
-      "special": false,
-      "effects": [
-        {
-          "type": "damage",
-          "amount": 3,
-          "hits": 3
-        },
-        {
-          "type": "toughness_damage",
-          "amount": 2
-        }
-      ],
-      "source": {
-        "workbook": "Killkiss全套卡牌.xlsx",
-        "sheet": "怪",
-        "row": 24
-      },
-      "notes": [],
-      "image": "Art/Cards/小女孩触手打击.png"
+     "type": "damage",
+     "amount": 3,
+     "hits": 3
     },
     {
-      "id": "enemy_little_girl_screaming",
-      "name": {
-        "zhCN": "尖叫",
-        "en": "screaming"
-      },
-      "description": {
-        "en": "Scream to inflict bleed and reduce incoming damage.",
-        "zhCN": "造成1点伤害，施加3层流血，获得减伤，持续3回合"
-      },
-      "category": "enemy_little_girl",
-      "copies": 1,
-      "cost": {
-        "resource": "action_point",
-        "amount": 1
-      },
-      "special": false,
-      "effects": [
-        {
-          "type": "damage",
-          "amount": 1,
-          "hits": 1
-        },
-        {
-          "type": "bleed",
-          "amount": 3
-        },
-        {
-          "type": "damage_reduction",
-          "amount": 3
-        }
-      ],
-      "source": {
-        "workbook": "Killkiss全套卡牌.xlsx",
-        "sheet": "怪",
-        "row": 25
-      },
-      "notes": [],
-      "image": "Art/Cards/小女孩尖叫.png"
-    },
-    {
-      "id": "enemy_little_girl_drag_to_abyss",
-      "name": {
-        "zhCN": "拖入深渊",
-        "en": "drag to abyss"
-      },
-      "description": {
-        "en": "Drag the target into the abyss.",
-        "zhCN": "造成20点伤害"
-      },
-      "category": "enemy_little_girl",
-      "copies": 1,
-      "cost": {
-        "resource": "action_point",
-        "amount": 2
-      },
-      "special": false,
-      "effects": [
-        {
-          "type": "damage",
-          "amount": 20,
-          "hits": 1
-        }
-      ],
-      "source": {
-        "workbook": "Killkiss全套卡牌.xlsx",
-        "sheet": "怪",
-        "row": 26
-      },
-      "notes": [],
-      "image": "Art/Cards/小女孩拖入深渊.png"
-    },
-    {
-      "id": "enemy_little_girl_feel_my_pain",
-      "name": {
-        "zhCN": "感受我的痛苦",
-        "en": "feel my pain"
-      },
-      "description": {
-        "en": "Deal damage and a large toughness hit.",
-        "zhCN": "造成5点伤害，削减30点韧性"
-      },
-      "category": "enemy_little_girl",
-      "copies": 1,
-      "cost": {
-        "resource": "action_point",
-        "amount": 2
-      },
-      "special": false,
-      "effects": [
-        {
-          "type": "damage",
-          "amount": 5,
-          "hits": 1
-        },
-        {
-          "type": "toughness_damage",
-          "amount": 30
-        }
-      ],
-      "source": {
-        "workbook": "Killkiss全套卡牌.xlsx",
-        "sheet": "怪",
-        "row": 27
-      },
-      "notes": [],
-      "image": "Art/Cards/小女孩感受我的痛苦.png"
+     "type": "toughness_damage",
+     "amount": 2
     }
-  ]
+   ],
+   "source": {
+    "workbook": "Killkiss全套卡牌.xlsx",
+    "sheet": "怪",
+    "row": 24
+   },
+   "notes": [],
+   "image": "Art/Cards/tentacleattack.png"
+  },
+  {
+   "id": "enemy_little_girl_screaming",
+   "name": {
+    "zhCN": "尖叫",
+    "en": "screaming"
+   },
+   "description": {
+    "en": "Scream to inflict bleed and reduce incoming damage.",
+    "zhCN": "造成1点伤害，施加3层流血，获得减伤，持续3回合"
+   },
+   "category": "enemy_little_girl",
+   "copies": 1,
+   "cost": {
+    "resource": "action_point",
+    "amount": 1
+   },
+   "special": false,
+   "effects": [
+    {
+     "type": "damage",
+     "amount": 1,
+     "hits": 1
+    },
+    {
+     "type": "bleed",
+     "amount": 3
+    },
+    {
+     "type": "damage_reduction",
+     "amount": 3
+    }
+   ],
+   "source": {
+    "workbook": "Killkiss全套卡牌.xlsx",
+    "sheet": "怪",
+    "row": 25
+   },
+   "notes": [],
+   "image": "Art/Cards/scream.png"
+  },
+  {
+   "id": "enemy_little_girl_drag_to_abyss",
+   "name": {
+    "zhCN": "拖入深渊",
+    "en": "drag to abyss"
+   },
+   "description": {
+    "en": "Drag the target into the abyss.",
+    "zhCN": "造成20点伤害"
+   },
+   "category": "enemy_little_girl",
+   "copies": 1,
+   "cost": {
+    "resource": "action_point",
+    "amount": 2
+   },
+   "special": false,
+   "effects": [
+    {
+     "type": "damage",
+     "amount": 20,
+     "hits": 1
+    }
+   ],
+   "source": {
+    "workbook": "Killkiss全套卡牌.xlsx",
+    "sheet": "怪",
+    "row": 26
+   },
+   "notes": [],
+   "image": "Art/Cards/dragtoabyss.png"
+  },
+  {
+   "id": "enemy_little_girl_feel_my_pain",
+   "name": {
+    "zhCN": "感受我的痛苦",
+    "en": "feel my pain"
+   },
+   "description": {
+    "en": "Deal damage and a large toughness hit.",
+    "zhCN": "造成5点伤害，削减30点韧性"
+   },
+   "category": "enemy_little_girl",
+   "copies": 1,
+   "cost": {
+    "resource": "action_point",
+    "amount": 2
+   },
+   "special": false,
+   "effects": [
+    {
+     "type": "damage",
+     "amount": 5,
+     "hits": 1
+    },
+    {
+     "type": "toughness_damage",
+     "amount": 30
+    }
+   ],
+   "source": {
+    "workbook": "Killkiss全套卡牌.xlsx",
+    "sheet": "怪",
+    "row": 27
+   },
+   "notes": [],
+   "image": "Art/Cards/feelmypain.png"
+  }
+ ]
 }

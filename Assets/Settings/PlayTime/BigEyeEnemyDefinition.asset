@@ -18,10 +18,11 @@ MonoBehaviour:
   enemyRank: 3
   maxHealth: 200
   maxToughness: 200
-  portrait: {fileID: 5658643199818266800, guid: 96c0ca5f9fd91f8498021daf580092ea, type: 3}
+  portrait: {fileID: -1722761347682505692, guid: 5c8f647b7ec80b345bade26673e5a197, type: 3}
   portraitSize: {x: 100, y: 100}
   portraitOffset: {x: 2.5, y: -7.6}
   portraitScale: 0.7761966
+  description: "It was not born from death, but from fear itself. There was once a serial killer obsessed with collecting the arms of his victims. Though he was eventually executed, the gruesome crime scenes, the growing list of disappearances, and the relentless media coverage left a wound on the public that never truly healed. When the last witness finally closed their eyes, people believed the nightmare had come to an end.\r\nBut something remained. Not the killer\u2014only the gaze that had been watching all along. It has no mouth, no ears\u2014only a single eye that never blinks, hundreds of human arms coiling around it like tentacles. They say that once it sees you, it silently remembers your arms... and waits for the day you cross its path again.\r\n\u5B83\u5E76\u975E\u8BDE\u751F\u4E8E\u6B7B\u4EA1\uFF0C\u800C\u662F\u8BDE\u751F\u4E8E\u6050\u60E7\u672C\u8EAB\u3002\u66FE\u6709\u4E00\u540D\u8FDE\u73AF\u6740\u624B\uFF0C\u7591\u8FF7\u4E8E\u6536\u96C6\u53D7\u5BB3\u8005\u7684\u624B\u81C2\u3002\u5373\u4F7F\u6700\u7EC8\u88AB\u5224\u5904\u6B7B\u5211\uFF0C\u90A3\u4E9B\u8840\u8165\u7684\u73B0\u573A\u3001\u4E0D\u65AD\u589E\u52A0\u7684\u5931\u8E2A\u8005\uFF0C\u4EE5\u53CA\u5A92\u4F53\u8FDE\u7BC7\u7684\u62A5\u9053\uFF0C\u4F9D\u65E7\u5728\u4EBA\u4EEC\u5FC3\u4E2D\u7559\u4E0B\u4E86\u65E0\u6CD5\u64A6\u53BB\u7684\u9634\u5F71\u3002\u5F53\u6700\u540E\u4E00\u540D\u76EE\u51FB\u8005\u95ED\u4E0A\u53CC\u773C\u65F6\uFF0C\u4EBA\u4EEC\u4EE5\u4E3A\u4E00\u5207\u7EC8\u4E8E\u7ED3\u675F\u3002\u4F46\u771F\u6B63\u7559\u4E0B\u6765\u7684\uFF0C\u5E76\u4E0D\u662F\u51F6\u624B\u3002\u800C\u662F\u90A3\u9053\u59CB\u7EC8\u6CE8\u89C6\u7740\u6240\u6709\u4EBA\u7684\u76EE\u5149\u3002\u5B83\u6CA1\u6709\u5634\uFF0C\u4E5F\u6CA1\u6709\u8033\u6735\uFF0C\u53EA\u6709\u4E00\u53EA\u6C38\u8FDC\u7741\u5F00\u7684\u5DE8\u773C\u3002\u4F20\u8BF4\uFF0C\u53EA\u8981\u88AB\u5B83\u770B\u89C1\uFF0C\u5B83\u4FBF\u4F1A\u9ED8\u9ED8\u8BB0\u4F4F\u4F60\u7684\u624B\u81C2\uFF0C\u7B49\u5F85\u4E0B\u4E00\u6B21\u4E0E\u4F60\u76F8\u9047\u3002"
   enemyArchetype: 3
   enemyCardIds: []
   cardsPerTurn: 2

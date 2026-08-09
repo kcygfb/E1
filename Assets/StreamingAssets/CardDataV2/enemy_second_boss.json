@@ -1,0 +1,168 @@
+{
+  "schemaVersion": 2,
+  "category": "enemy_second_boss",
+  "categoryName": "刮骨虐杀",
+  "cards": [
+    {
+      "id": "enemy_second_boss_scrape_bones",
+      "name": {
+        "zhCN": "刮骨",
+        "en": "bone scraping"
+      },
+      "description": {
+        "en": "Scrape the bones and stack heavy bleed.",
+        "zhCN": "施加5层流血"
+      },
+      "category": "enemy_second_boss",
+      "copies": 1,
+      "cost": {
+        "resource": "action_point",
+        "amount": 1
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "bleed",
+          "amount": 5
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "怪 Manifestation",
+        "row": 82
+      },
+      "notes": []
+    },
+    {
+      "id": "enemy_second_boss_pierce",
+      "name": {
+        "zhCN": "穿刺",
+        "en": "pierce"
+      },
+      "description": {
+        "en": "Pierce through toughness and inflict bleed.",
+        "zhCN": "削减15点韧性，施加3层流血"
+      },
+      "category": "enemy_second_boss",
+      "copies": 1,
+      "cost": {
+        "resource": "action_point",
+        "amount": 1
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "toughness_damage",
+          "amount": 15
+        },
+        {
+          "type": "bleed",
+          "amount": 3
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "怪 Manifestation",
+        "row": 83
+      },
+      "notes": []
+    },
+    {
+      "id": "enemy_second_boss_ambush",
+      "name": {
+        "zhCN": "偷袭",
+        "en": "ambush"
+      },
+      "description": {
+        "en": "Ambush from behind, shredding toughness and bleed.",
+        "zhCN": "削减20点韧性，施加8层流血"
+      },
+      "category": "enemy_second_boss",
+      "copies": 1,
+      "cost": {
+        "resource": "action_point",
+        "amount": 2
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "toughness_damage",
+          "amount": 20
+        },
+        {
+          "type": "bleed",
+          "amount": 8
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "怪 Manifestation",
+        "row": 84
+      },
+      "notes": []
+    },
+    {
+      "id": "enemy_second_boss_blood_drink",
+      "name": {
+        "zhCN": "饮血",
+        "en": "blood drink"
+      },
+      "description": {
+        "en": "Drink the blood and restore health.",
+        "zhCN": "恢复40点生命"
+      },
+      "category": "enemy_second_boss",
+      "copies": 1,
+      "cost": {
+        "resource": "action_point",
+        "amount": 2
+      },
+      "special": false,
+      "effects": [
+        {
+          "type": "heal",
+          "amount": 40
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "怪 Manifestation",
+        "row": 85
+      },
+      "notes": []
+    },
+    {
+      "id": "enemy_second_boss_blood_burst",
+      "name": {
+        "zhCN": "血爆",
+        "en": "blood burst"
+      },
+      "description": {
+        "en": "Detonate all bleed stacks: each stack explodes for 3 damage.",
+        "zhCN": "所有流血层数爆炸，每层造成3点伤害"
+      },
+      "category": "enemy_second_boss",
+      "copies": 1,
+      "cost": {
+        "resource": "action_point",
+        "amount": 3
+      },
+      "special": true,
+      "effects": [
+        {
+          "type": "bleed_scaled_damage",
+          "amount": 1,
+          "multiplier": 3
+        }
+      ],
+      "source": {
+        "workbook": "Killkiss全套卡牌.xlsx",
+        "sheet": "怪 Manifestation",
+        "row": 86
+      },
+      "notes": [
+        "Ultimate: required on turn 12."
+      ]
+    }
+  ]
+}

@@ -81,6 +81,7 @@ namespace KiKs.Combat
                     case EnemyArchetype.Thief: return "enemy_thief";
                     case EnemyArchetype.Merchant: return "enemy_merchant";
                     case EnemyArchetype.Butcher: return "enemy_butcher";
+                    case EnemyArchetype.SecondBoss: return "enemy_second_boss";
                     default: return string.Empty;
                 }
             }

@@ -27,7 +27,8 @@ namespace KiKs.Combat
         Fatty,
         Thief,
         Merchant,
-        Butcher
+        Butcher,
+        SecondBoss
     }
     public enum CardTargetType { Self, SingleEnemy }
     public enum ToughnessRestoreMode { Full, FixedAmount }

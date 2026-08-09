@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bee247b46b228ce448ae88a1e6636e27, type: 3}
+  m_Name: "\u62BD\u724C"
+  m_EditorClassIdentifier: KiKs.Audio::KiKs.Audio.AudioCue
+  displayName: "\u62BD\u724C"
+  clips:
+  - {fileID: 8300000, guid: 954a26d2c44b8f34980c0d7801b25962, type: 3}
+  bus: 0
+  output: {fileID: 0}
+  volume: 1
+  pitchRange: {x: 1, y: 1}
+  priority: 128
+  cooldown: 0
+  maxSimultaneous: 4
+  overflowMode: 1
+  avoidImmediateRepeat: 1
+  spatialBlend: 0
+  minDistance: 1
+  maxDistance: 30
+  rolloffMode: 0
+  ignoreListenerPause: 0

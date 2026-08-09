@@ -84,7 +84,10 @@ namespace KiKs.Combat
             var bgmObj = GameObject.Find("BattleBGM");
             var bgmSource = bgmObj?.GetComponent<AudioSource>();
             if (bgmSource != null && bgmSource.clip != null && !bgmSource.isPlaying)
+            {
+                if (!bgmSource.enabled) bgmSource.enabled = true;
                 bgmSource.Play();
+            }
         }
 
         private void HookCardHover(CardView cardView)
@@ -149,6 +152,7 @@ namespace KiKs.Combat
 
             return true;
         }
+
         private bool OnCardShot(CardView cardView)
         {
             if (cardView == null) return false;
@@ -174,6 +178,7 @@ namespace KiKs.Combat
                 _playerAttackFeedback.PlayRangedSingleShot(cardView.IsUpgraded);
             return true;
         }
+
         public void EndTurn()
         {
             if (!_engineReady || battleController == null || !battleController.IsInitialized)
@@ -232,6 +237,7 @@ namespace KiKs.Combat
             Debug.Log("[BattleCardBridge] EndPlayerTurn: success");
             StartCoroutine(DrawNewHandNextTurn());
         }
+
         private IEnumerator DrawNewHandNextTurn()
         {
             // 等引擎回到 PlayerInput 阶段

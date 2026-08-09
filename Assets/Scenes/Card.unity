@@ -1427,81 +1427,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 414708344}
   m_CullTransparentMesh: 1
---- !u!1 &438658506
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 438658507}
-  - component: {fileID: 438658509}
-  - component: {fileID: 438658508}
-  m_Layer: 5
-  m_Name: BigEyePortraitOverlay
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &438658507
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 438658506}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 6.1}
-  m_LocalScale: {x: 0.9293, y: 0.9293, z: 0.9293}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 970831848}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -1.7, y: -2}
-  m_SizeDelta: {x: 100, y: 100}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &438658508
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 438658506}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
-  m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_Sprite: {fileID: -1722761347682505692, guid: 5c8f647b7ec80b345bade26673e5a197, type: 3}
-  m_Type: 0
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
---- !u!222 &438658509
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 438658506}
-  m_CullTransparentMesh: 1
 --- !u!1 &449327847
 GameObject:
   m_ObjectHideFlags: 0
@@ -1513,9 +1438,6 @@ GameObject:
   - component: {fileID: 449327848}
   - component: {fileID: 449327850}
   - component: {fileID: 449327849}
-  - component: {fileID: 449327851}
-  - component: {fileID: 449327853}
-  - component: {fileID: 449327854}
   m_Layer: 5
   m_Name: BattleRoot/HandCardPanel
   m_TagString: Untagged
@@ -1580,64 +1502,13 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 449327847}
   m_CullTransparentMesh: 1
---- !u!114 &449327851
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 449327847}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 80b9cf0a1ed4cbc4087e91a002cab055, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: KiKs.Combat::KiKs.Combat.BattleController
-  cardDatabase: {fileID: 0}
-  rulesConfig: {fileID: 11400000, guid: a3bb6ee28ee6f144aaf43b96d914eb96, type: 2}
-  playerDefinition: {fileID: 11400000, guid: 192373106e9cd45478816be416f17b41, type: 2}
-  enemyDefinitions:
-  - {fileID: 11400000, guid: 38af5df9514dad94d8d74b87d9eb5912, type: 2}
-  demoEnemyDefinitions:
-  - {fileID: 11400000, guid: d318f1d79cda4e4f9d82a1087c2b4071, type: 2}
-  - {fileID: 11400000, guid: 83e0d896a3114ab8af4e2bdfc5c292f1, type: 2}
-  - {fileID: 11400000, guid: 924b6a0ddef5498bb73b7618c4e31d0a, type: 2}
-  enemyPortraitImage: {fileID: 970831849}
-  bigEyePortraitOverlay: {fileID: 438658506}
-  tutorialController: {fileID: 0}
-  debugStartingCardIds:
-  - heavy_fire_axe
-  - heavy_fire_axe
-  - bleed_chainsaw
-  - bleed_chainsaw
-  - ranged_sniper_rifle
-  - magic_blizzard
-  - magic_blizzard
-  - hidden_smoke_bomb
-  - hidden_smoke_bomb
-  - ranged_pistol
-  - ranged_pistol
-  - bleed_dagger
-  - bleed_scalpel
-  - magic_lifesteal
-  - magic_lifesteal
-  useFixedRandomSeed: 0
-  randomSeed: 1
-  autoStartBattle: 0
-  huntGoldReward: 100
-  huntLootRewards:
-  - resourceId: CocoaPowder
-    displayName: Cocoa Powder
-    amount: 1
-  huntRewardCardCount: 3
-  huntRewardCardPool: []
-  huntResultDelay: 0.75
 --- !u!114 &449327853
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 449327847}
+  m_GameObject: {fileID: 875998993}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2b8d7c30adbc4b949b83eac5891061e6, type: 3}
@@ -1654,24 +1525,6 @@ MonoBehaviour:
   goldText: {fileID: 1997413818}
   extraCardsText: {fileID: 946558172}
   confirmButton: {fileID: 159614893}
---- !u!114 &449327854
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 449327847}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fbeac5b692a9bf14db626fe55cfd109a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: KiKs.Combat::KiKs.Combat.CardEnemyAI
-  battleController: {fileID: 449327851}
-  strategy: {fileID: 0}
-  useFallbackIfNoStrategy: 1
-  fallbackDamage: 20
-  fallbackToughnessDamage: 10
-  fallbackDelay: 0.3
 --- !u!1 &467355309
 GameObject:
   m_ObjectHideFlags: 0
@@ -2118,6 +1971,7 @@ GameObject:
   - component: {fileID: 673101657}
   - component: {fileID: 673101656}
   - component: {fileID: 673101658}
+  - component: {fileID: 673101659}
   m_Layer: 0
   m_Name: BattleBGM
   m_TagString: Untagged
@@ -2250,6 +2104,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: KiKs.Combat::KiKs.Combat.BattleBGMController
   battleController: {fileID: 875998994}
+--- !u!114 &673101659
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 673101655}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a21524f0bb04d93a22bd7a85b58cafe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KiKs.Audio.Combat::KiKs.Combat.BattleAudioPresenter
+  battleController: {fileID: 875998994}
+  bindings: {fileID: 11400000, guid: 6506dba2fc40c9e46a83c06b5168e1a1, type: 2}
 --- !u!1 &690054691
 GameObject:
   m_ObjectHideFlags: 0
@@ -2947,6 +2815,7 @@ GameObject:
   - component: {fileID: 875998994}
   - component: {fileID: 875998996}
   - component: {fileID: 875998997}
+  - component: {fileID: 449327853}
   m_Layer: 0
   m_Name: BattleController
   m_TagString: Untagged
@@ -2970,7 +2839,7 @@ MonoBehaviour:
   rulesConfig: {fileID: 11400000, guid: a3bb6ee28ee6f144aaf43b96d914eb96, type: 2}
   playerDefinition: {fileID: 11400000, guid: 192373106e9cd45478816be416f17b41, type: 2}
   enemyDefinitions:
-  - {fileID: 11400000, guid: d318f1d79cda4e4f9d82a1087c2b4071, type: 2}
+  - {fileID: 11400000, guid: b744dae21588459abbe0af32e77dd939, type: 2}
   - {fileID: 11400000, guid: 83e0d896a3114ab8af4e2bdfc5c292f1, type: 2}
   - {fileID: 11400000, guid: 924b6a0ddef5498bb73b7618c4e31d0a, type: 2}
   demoEnemyDefinitions:
@@ -2978,7 +2847,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 83e0d896a3114ab8af4e2bdfc5c292f1, type: 2}
   - {fileID: 11400000, guid: 924b6a0ddef5498bb73b7618c4e31d0a, type: 2}
   enemyPortraitImage: {fileID: 970831849}
-  bigEyePortraitOverlay: {fileID: 438658506}
+  bigEyePortraitOverlay: {fileID: 0}
   tutorialController: {fileID: 0}
   debugStartingCardIds:
   - heavy_fire_axe
@@ -3500,8 +3369,7 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: -0.14411}
   m_LocalScale: {x: 0.7761966, y: 0.7761966, z: 0.7761966}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 438658507}
+  m_Children: []
   m_Father: {fileID: 1755753980}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -3529,7 +3397,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 5658643199818266800, guid: 96c0ca5f9fd91f8498021daf580092ea, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 5c8f647b7ec80b345bade26673e5a197, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -7016,7 +6884,7 @@ MonoBehaviour:
   shakeStrength: 25
   shakeDuration: 0.25
   shakeVibrato: 20
-  battleController: {fileID: 449327851}
+  battleController: {fileID: 875998994}
 --- !u!95 &1946663940
 Animator:
   serializedVersion: 7
@@ -7878,7 +7746,7 @@ GameObject:
   - component: {fileID: 2072098607}
   - component: {fileID: 2072098606}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: "\u6559\u5B66\u6846\u63A7\u5236\u5668"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

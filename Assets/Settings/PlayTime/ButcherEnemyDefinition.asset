@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4754d7bc2fd800f4287cf59ee457d044, type: 3}
+  m_Name: ButcherEnemyDefinition
+  m_EditorClassIdentifier: KiKs.Combat::KiKs.Combat.CombatantDefinition
+  combatantId: demo_butcher
+  displayName: "\u5c60\u592b"
+  side: 1
+  enemyRank: 3
+  maxHealth: 200
+  maxToughness: 150
+  portrait: {fileID: -3318583585889705142, guid: 768d716eebbb3bd479f9addcf2a2b017, type: 3}
+  portraitSize: {x: 100, y: 100}
+  portraitOffset: {x: 0, y: -5}
+  portraitScale: 1
+  description: "A butcher who beat his victims with a road sign. He drags chains to bind the living, and his strikes are heavy enough to break bones. On the twelfth turn, he unleashes a jungle of road signs upon his prey.\r\n\u4e00\u4e2a\u624b\u6301\u8def\u724c\u8650\u6740\u53d7\u5bb3\u8005\u7684\u5c60\u592b\u3002\u4ed6\u62d6\u66f3\u9501\u94fe\u675f\u7f1a\u751f\u8005\uff0c\u91cd\u51fb\u8db3\u4ee5\u788e\u88c2\u9aa8\u9abc\u3002\u7b2c12\u56de\u5408\uff0c\u4ed6\u4f1a\u53ec\u5524\u4e00\u7247\u8def\u724c\u4e1b\u6797\uff0c\u5c06\u730e\u7269\u78be\u788e\u3002"
+  enemyArchetype: 10
+  enemyCardIds: []
+  cardsPerTurn: 2
+  enemyHandLimit: 5
+  enemyActionsPerTurn: 2
+  fallbackDamage: 20
+  fallbackToughnessDamage: 12
+  baseActionPoints: 5

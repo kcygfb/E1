@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4754d7bc2fd800f4287cf59ee457d044, type: 3}
+  m_Name: GhostEnemyDefinition
+  m_EditorClassIdentifier: KiKs.Combat::KiKs.Combat.CombatantDefinition
+  combatantId: demo_ghost
+  displayName: "\u5e7d\u7075"
+  side: 1
+  enemyRank: 1
+  maxHealth: 50
+  maxToughness: 50
+  portrait: {fileID: 4448715427215634006, guid: 00c43520447fd1446812bd4b150553f3, type: 3}
+  portraitSize: {x: 100, y: 100}
+  portraitOffset: {x: 0, y: -5}
+  portraitScale: 1
+  description: "Born from the fear surrounding deaths caused by snakes. Its body is pale and twisted, while countless snakes coil around its head like the crown of Medusa. It wanders aimlessly, as if still searching for the serpent that claimed its life. Though called a ghost, it remembers nothing of its former life. The only thing left is the terror it felt in its final moments\u2014and an instinctive hatred of anything still alive.\r\n\u8bde\u751f\u4e8e\u88ab\u86c7\u6740\u6b7b\u4e4b\u4eba\u7684\u6050\u60e7\u3002\u5b83\u4eec\u9762\u8272\u60e8\u767d\u3001\u8eab\u4f53\u626d\u66f2\uff0c\u5934\u9876\u76d8\u8e1e\u7740\u65e0\u6570\u6bd2\u86c7\uff0c\u5b9b\u5982\u7f8e\u675c\u838e\u4e00\u822c\u3002\u5b83\u4eec\u6f2b\u65e0\u76ee\u7684\u5730\u6e38\u8361\u7740\uff0c\u4eff\u4f5b\u4ecd\u5728\u5bfb\u627e\u90a3\u6761\u593a\u8d70\u81ea\u5df1\u751f\u547d\u7684\u86c7\u3002\u867d\u88ab\u79f0\u4e3a\u5e7d\u7075\uff0c\u5b83\u4eec\u5374\u65e9\u5df2\u5fd8\u8bb0\u751f\u524d\u7684\u4e00\u5207\u3002\u552f\u4e00\u6b8b\u7559\u4e0b\u6765\u7684\uff0c\u53ea\u6709\u4e34\u6b7b\u524d\u7684\u6050\u60e7\uff0c\u4ee5\u53ca\u5bf9\u4e00\u5207\u6d3b\u7269\u8fd1\u4e4e\u672c\u80fd\u7684\u618e\u6068\u3002"
+  enemyArchetype: 4
+  enemyCardIds: []
+  cardsPerTurn: 1
+  enemyHandLimit: 5
+  enemyActionsPerTurn: 1
+  fallbackDamage: 15
+  fallbackToughnessDamage: 8
+  baseActionPoints: 3

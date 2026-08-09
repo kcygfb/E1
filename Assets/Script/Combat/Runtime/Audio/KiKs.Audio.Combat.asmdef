@@ -1,0 +1,17 @@
+{
+  "name": "KiKs.Audio.Combat",
+  "rootNamespace": "KiKs.Combat",
+  "references": [
+    "KiKs.Audio",
+    "KiKs.Combat"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

@@ -1,217 +1,217 @@
 {
-  "schemaVersion": 2,
-  "category": "enemy_big_eye",
-  "categoryName": "大眼",
-  "cards": [
+ "schemaVersion": 2,
+ "category": "enemy_big_eye",
+ "categoryName": "大眼",
+ "cards": [
+  {
+   "id": "enemy_big_eye_eye_beam",
+   "name": {
+    "zhCN": "眼棱",
+    "en": "eye beam"
+   },
+   "description": {
+    "en": "Fire a focused eye beam.",
+    "zhCN": "造成14点伤害"
+   },
+   "category": "enemy_big_eye",
+   "copies": 1,
+   "cost": {
+    "resource": "action_point",
+    "amount": 1
+   },
+   "special": false,
+   "effects": [
     {
-      "id": "enemy_big_eye_eye_beam",
-      "name": {
-        "zhCN": "眼棱",
-        "en": "eye beam"
-      },
-      "description": {
-        "en": "Fire a focused eye beam.",
-        "zhCN": "造成14点伤害"
-      },
-      "category": "enemy_big_eye",
-      "copies": 1,
-      "cost": {
-        "resource": "action_point",
-        "amount": 1
-      },
-      "special": false,
-      "effects": [
-        {
-          "type": "damage",
-          "amount": 14,
-          "hits": 1
-        }
-      ],
-      "source": {
-        "workbook": "Killkiss全套卡牌.xlsx",
-        "sheet": "怪",
-        "row": 56
-      },
-      "notes": [],
-      "image": "Art/Cards/大眼眼棱.png"
-    },
-    {
-      "id": "enemy_big_eye_scratch",
-      "name": {
-        "zhCN": "抓挠",
-        "en": "scratch"
-      },
-      "description": {
-        "en": "Scratch twice.",
-        "zhCN": "连续攻击2次，每次造成7点伤害，削减2点韧性"
-      },
-      "category": "enemy_big_eye",
-      "copies": 1,
-      "cost": {
-        "resource": "action_point",
-        "amount": 1
-      },
-      "special": false,
-      "effects": [
-        {
-          "type": "damage",
-          "amount": 7,
-          "hits": 2
-        },
-        {
-          "type": "toughness_damage",
-          "amount": 2
-        }
-      ],
-      "source": {
-        "workbook": "Killkiss全套卡牌.xlsx",
-        "sheet": "怪",
-        "row": 57
-      },
-      "notes": [],
-      "image": "Art/Cards/大眼抓挠.png"
-    },
-    {
-      "id": "enemy_big_eye_mind_control",
-      "name": {
-        "zhCN": "精神控制",
-        "en": "mind control"
-      },
-      "description": {
-        "en": "Control the fight by nullifying attacks and reducing damage.",
-        "zhCN": "获得6次攻击无效，获得减伤，持续3回合"
-      },
-      "category": "enemy_big_eye",
-      "copies": 1,
-      "cost": {
-        "resource": "action_point",
-        "amount": 2
-      },
-      "special": false,
-      "effects": [
-        {
-          "type": "nullify_attacks",
-          "amount": 6
-        },
-        {
-          "type": "damage_reduction",
-          "amount": 3
-        }
-      ],
-      "source": {
-        "workbook": "Killkiss全套卡牌.xlsx",
-        "sheet": "怪",
-        "row": 58
-      },
-      "notes": [],
-      "image": "Art/Cards/大眼精神控制.png"
-    },
-    {
-      "id": "enemy_big_eye_suffocate",
-      "name": {
-        "zhCN": "窒息",
-        "en": "suffocate"
-      },
-      "description": {
-        "en": "Suffocate the target.",
-        "zhCN": "造成20点伤害，削减10点韧性"
-      },
-      "category": "enemy_big_eye",
-      "copies": 1,
-      "cost": {
-        "resource": "action_point",
-        "amount": 2
-      },
-      "special": false,
-      "effects": [
-        {
-          "type": "damage",
-          "amount": 20,
-          "hits": 1
-        },
-        {
-          "type": "toughness_damage",
-          "amount": 10
-        }
-      ],
-      "source": {
-        "workbook": "Killkiss全套卡牌.xlsx",
-        "sheet": "怪",
-        "row": 59
-      },
-      "notes": [],
-      "image": "Art/Cards/大眼窒息.png"
-    },
-    {
-      "id": "enemy_big_eye_ten_thousand_hands",
-      "name": {
-        "zhCN": "万手缠身",
-        "en": "ten thousand hands"
-      },
-      "description": {
-        "en": "Ultimate barrage of grasping hands.",
-        "zhCN": "连续攻击10次，每次造成3点伤害，削减5点韧性，施加5层流血"
-      },
-      "category": "enemy_big_eye",
-      "copies": 1,
-      "cost": {
-        "resource": "action_point",
-        "amount": 3
-      },
-      "special": true,
-      "effects": [
-        {
-          "type": "damage",
-          "amount": 3,
-          "hits": 10
-        },
-        {
-          "type": "toughness_damage",
-          "amount": 5
-        },
-        {
-          "type": "bleed",
-          "amount": 5
-        }
-      ],
-      "source": {
-        "workbook": "Killkiss全套卡牌.xlsx",
-        "sheet": "怪",
-        "row": 60
-      },
-      "notes": [
-        "Ultimate: required on turn 12."
-      ]
-    },
-    {
-      "id": "enemy_big_eye_mind_control_break",
-      "name": {
-        "zhCN": "精神控制",
-        "en": "mind control break"
-      },
-      "description": {
-        "en": "Break a large amount of toughness with mental control.",
-        "zhCN": "削减40点韧性"
-      },
-      "category": "enemy_big_eye",
-      "copies": 1,
-      "cost": {
-        "resource": "action_point",
-        "amount": 2
-      },
-      "special": false,
-      "effects": [
-        {
-          "type": "toughness_damage",
-          "amount": 40
-        }
-      ],
-      "source": {
-        "workbook": "Killkiss全套卡牌.xlsx",
-        "sheet": "怪",
-        "row": 62
-      },
-      "notes": []
+     "type": "damage",
+     "amount": 14,
+     "hits": 1
     }
-  ]
+   ],
+   "source": {
+    "workbook": "Killkiss全套卡牌.xlsx",
+    "sheet": "怪",
+    "row": 56
+   },
+   "notes": [],
+   "image": "Art/Cards/eyebeam.png"
+  },
+  {
+   "id": "enemy_big_eye_scratch",
+   "name": {
+    "zhCN": "抓挠",
+    "en": "scratch"
+   },
+   "description": {
+    "en": "Scratch twice.",
+    "zhCN": "连续攻击2次，每次造成7点伤害，削减2点韧性"
+   },
+   "category": "enemy_big_eye",
+   "copies": 1,
+   "cost": {
+    "resource": "action_point",
+    "amount": 1
+   },
+   "special": false,
+   "effects": [
+    {
+     "type": "damage",
+     "amount": 7,
+     "hits": 2
+    },
+    {
+     "type": "toughness_damage",
+     "amount": 2
+    }
+   ],
+   "source": {
+    "workbook": "Killkiss全套卡牌.xlsx",
+    "sheet": "怪",
+    "row": 57
+   },
+   "notes": [],
+   "image": "Art/Cards/shred.png"
+  },
+  {
+   "id": "enemy_big_eye_mind_control",
+   "name": {
+    "zhCN": "精神控制",
+    "en": "mind control"
+   },
+   "description": {
+    "en": "Control the fight by nullifying attacks and reducing damage.",
+    "zhCN": "获得6次攻击无效，获得减伤，持续3回合"
+   },
+   "category": "enemy_big_eye",
+   "copies": 1,
+   "cost": {
+    "resource": "action_point",
+    "amount": 2
+   },
+   "special": false,
+   "effects": [
+    {
+     "type": "nullify_attacks",
+     "amount": 6
+    },
+    {
+     "type": "damage_reduction",
+     "amount": 3
+    }
+   ],
+   "source": {
+    "workbook": "Killkiss全套卡牌.xlsx",
+    "sheet": "怪",
+    "row": 58
+   },
+   "notes": [],
+   "image": "Art/Cards/mindcontrol.png"
+  },
+  {
+   "id": "enemy_big_eye_suffocate",
+   "name": {
+    "zhCN": "窒息",
+    "en": "suffocate"
+   },
+   "description": {
+    "en": "Suffocate the target.",
+    "zhCN": "造成20点伤害，削减10点韧性"
+   },
+   "category": "enemy_big_eye",
+   "copies": 1,
+   "cost": {
+    "resource": "action_point",
+    "amount": 2
+   },
+   "special": false,
+   "effects": [
+    {
+     "type": "damage",
+     "amount": 20,
+     "hits": 1
+    },
+    {
+     "type": "toughness_damage",
+     "amount": 10
+    }
+   ],
+   "source": {
+    "workbook": "Killkiss全套卡牌.xlsx",
+    "sheet": "怪",
+    "row": 59
+   },
+   "notes": [],
+   "image": "Art/Cards/suffocate.png"
+  },
+  {
+   "id": "enemy_big_eye_ten_thousand_hands",
+   "name": {
+    "zhCN": "万手缠身",
+    "en": "ten thousand hands"
+   },
+   "description": {
+    "en": "Ultimate barrage of grasping hands.",
+    "zhCN": "连续攻击10次，每次造成3点伤害，削减5点韧性，施加5层流血"
+   },
+   "category": "enemy_big_eye",
+   "copies": 1,
+   "cost": {
+    "resource": "action_point",
+    "amount": 3
+   },
+   "special": true,
+   "effects": [
+    {
+     "type": "damage",
+     "amount": 3,
+     "hits": 10
+    },
+    {
+     "type": "toughness_damage",
+     "amount": 5
+    },
+    {
+     "type": "bleed",
+     "amount": 5
+    }
+   ],
+   "source": {
+    "workbook": "Killkiss全套卡牌.xlsx",
+    "sheet": "怪",
+    "row": 60
+   },
+   "notes": [
+    "Ultimate: required on turn 12."
+   ]
+  },
+  {
+   "id": "enemy_big_eye_mind_control_break",
+   "name": {
+    "zhCN": "精神控制",
+    "en": "mind control break"
+   },
+   "description": {
+    "en": "Break a large amount of toughness with mental control.",
+    "zhCN": "削减40点韧性"
+   },
+   "category": "enemy_big_eye",
+   "copies": 1,
+   "cost": {
+    "resource": "action_point",
+    "amount": 2
+   },
+   "special": false,
+   "effects": [
+    {
+     "type": "toughness_damage",
+     "amount": 40
+    }
+   ],
+   "source": {
+    "workbook": "Killkiss全套卡牌.xlsx",
+    "sheet": "怪",
+    "row": 62
+   },
+   "notes": []
+  }
+ ]
 }

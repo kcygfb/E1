@@ -32,7 +32,8 @@
         "enemy_thief",
         "enemy_merchant",
         "enemy_butcher",
-        "enemy_big_eye"
+        "enemy_big_eye",
+        "enemy_second_boss"
       ]
     },
     "categoryName": {
@@ -156,7 +157,8 @@
             "enemy_thief",
             "enemy_merchant",
             "enemy_butcher",
-            "enemy_big_eye"
+            "enemy_big_eye",
+            "enemy_second_boss"
           ]
         },
         "copies": {
