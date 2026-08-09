@@ -382,11 +382,7 @@ namespace KiKs.Combat
                 {
                     var coffeeId = selectedCoffeeIds[i];
                     if (label != null)
-                    {
-                        label.text = CoffeeEffectRegistry.GetDisplayName(coffeeId);
-                        label.fontSize = 14;
-                        label.color = new Color(0.9f, 0.85f, 0.7f, 1);
-                    }
+                        label.text = "";
                     if (img != null)
                         img.color = new Color(0.2f, 0.18f, 0.14f, 1);
 

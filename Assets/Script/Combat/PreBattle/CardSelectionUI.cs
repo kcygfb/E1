@@ -4,6 +4,9 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using UnityEngine.Events;
+using UnityEngine.EventSystems;
+using TMPro;
+using DG.Tweening;
 using KiKs.UI;
 
 namespace KiKs.Combat
@@ -56,6 +59,29 @@ namespace KiKs.Combat
 
         [Header("Card Art")]
         [SerializeField] private Vector2 cardArtSize = new Vector2(120, 100);
+
+        [Header("卡牌预览面板")]
+        [Tooltip("悬浮卡牌时显示的预览面板（右侧）。不配则不显示。")]
+        [SerializeField] private GameObject cardPreviewPanel;
+        [SerializeField] private Image cardPreviewImage;
+        [SerializeField] private TMP_Text cardPreviewName;
+        [SerializeField] private TMP_Text cardPreviewDesc;
+
+        [Header("转场 Override（不配则用默认）")]
+        [Tooltip("进入战斗场景的转场")]
+        [SerializeField] private Material battleExitMaterial;
+        [SerializeField] private Sprite battleCenterSprite;
+        [SerializeField] private Material battleEntranceMaterial;
+
+        [Tooltip("进入宝藏场景的转场")]
+        [SerializeField] private Material treasureExitMaterial;
+        [SerializeField] private Sprite treasureCenterSprite;
+        [SerializeField] private Material treasureEntranceMaterial;
+
+        [Tooltip("进入事件场景的转场")]
+        [SerializeField] private Material eventExitMaterial;
+        [SerializeField] private Sprite eventCenterSprite;
+        [SerializeField] private Material eventEntranceMaterial;
 
         private readonly List<string> selectedCardIds = new();
         private readonly List<CardSpec> allCards = new();
@@ -164,6 +190,17 @@ namespace KiKs.Combat
 
             item.name = card.Id;
 
+            // 移除 prefab 上可能自带的 Button（Button 拦截 ScrollRect 拖拽和滚轮）
+            // 用轻量交互组件替代 Button+EventTrigger（不拦截 ScrollRect 拖拽和滚轮）
+            var existingBtn = item.GetComponent<Button>();
+            if (existingBtn != null) Destroy(existingBtn);
+            var existingTrigger = item.GetComponent<EventTrigger>();
+            if (existingTrigger != null) Destroy(existingTrigger);
+
+            // 确保 Image raycastTarget=true（接收指针事件）
+            var itemImg = item.GetComponent<Image>();
+            if (itemImg != null) itemImg.raycastTarget = true;
+
             // Add card art if using a prefab that doesn't have it yet
             if (cardItemPrefab != null && !string.IsNullOrEmpty(card.ImagePath))
             {
@@ -172,11 +209,14 @@ namespace KiKs.Combat
                     AddCardArtChild(item, card);
             }
 
-            var btn = item.GetComponent<Button>();
-            if (btn == null) btn = item.AddComponent<Button>();
-
             var cardId = card.Id;
-            btn.onClick.AddListener(() => OnCardClicked(cardId));
+            var hoverCard = card;
+            var interaction = item.GetComponent<CardItemInteraction>();
+            if (interaction == null) interaction = item.AddComponent<CardItemInteraction>();
+            interaction.Init(
+                () => OnCardClicked(cardId),
+                () => ShowCardPreview(hoverCard),
+                () => HideCardPreview());
 
             if (tutorialController != null)
                 tutorialController.RegisterJsonCallout(this, item.GetComponent<RectTransform>(), card.Tutorial);
@@ -229,12 +269,38 @@ namespace KiKs.Combat
             return go;
         }
 
+        private void ShowCardPreview(CardSpec card)
+        {
+            if (cardPreviewPanel == null) return;
+            cardPreviewPanel.SetActive(true);
+
+            if (cardPreviewImage != null)
+            {
+                CardImageLoader.ApplyToImage(cardPreviewImage, card.ImagePath);
+                cardPreviewImage.preserveAspect = true;
+            }
+            if (cardPreviewName != null)
+                cardPreviewName.text = card.DisplayName;
+            if (cardPreviewDesc != null)
+            {
+                var desc = !string.IsNullOrWhiteSpace(card.DescriptionZhCn)
+                    ? CardDescriptionFormatter.Format(card.DescriptionZhCn)
+                    : card.DescriptionEn;
+                cardPreviewDesc.text = desc;
+            }
+        }
+
+        private void HideCardPreview()
+        {
+            if (cardPreviewPanel != null)
+                cardPreviewPanel.SetActive(false);
+        }
+
         private void OnCardClicked(string cardId)
         {
             if (_isStartingBattle) return;
 
-            var card = allCards.Find(candidate => candidate.Id == cardId);
-            if (card == null) return;
+            var card = allCards.Find(candidate => candidate.Id == cardId);            if (card == null) return;
 
             var selectedCopies = 0;
             foreach (var selectedId in selectedCardIds)
@@ -506,7 +572,7 @@ namespace KiKs.Combat
 
             Debug.Log($"[AreaMap] Entering treasure point {pointIndex + 1}.", this);
             if (TransitionEffect.Instance != null)
-                TransitionEffect.Instance.TransitionTo(TREASURE_SCENE_NAME);
+                TransitionToWithOverride(TREASURE_SCENE_NAME, treasureExitMaterial, treasureCenterSprite, treasureEntranceMaterial);
             else
                 StartCoroutine(LoadAreaScene(TREASURE_SCENE_NAME));
         }
@@ -543,7 +609,7 @@ namespace KiKs.Combat
 
             Debug.Log($"[AreaMap] Entering event point {pointIndex + 1}: event '{evt.id}' (npc '{evt.npcId}').", this);
             if (TransitionEffect.Instance != null)
-                TransitionEffect.Instance.TransitionTo("Event");
+                TransitionToWithOverride("Event", eventExitMaterial, eventCenterSprite, eventEntranceMaterial);
             else
                 StartCoroutine(LoadAreaScene("Event"));
         }
@@ -836,7 +902,7 @@ namespace KiKs.Combat
 
             if (TransitionEffect.Instance != null)
             {
-                TransitionEffect.Instance.TransitionTo(BATTLE_SCENE_NAME);
+                TransitionToWithOverride(BATTLE_SCENE_NAME, battleExitMaterial, battleCenterSprite, battleEntranceMaterial);
             }
             else
             {
@@ -856,6 +922,33 @@ namespace KiKs.Combat
 
             while (!operation.isDone)
                 yield return null;
+        }
+
+        /// <summary>带 override 的转场：若配了任一字段则用 TransitionToWithOverride，否则用默认 TransitionTo。</summary>
+        private static void TransitionToWithOverride(
+            string sceneName, Material exitMat, Sprite centerSprite, Material entranceMat)
+        {
+            if (TransitionEffect.Instance == null)
+            {
+                SceneManager.LoadScene(sceneName);
+                return;
+            }
+
+            var hasOverride = exitMat != null || centerSprite != null || entranceMat != null;
+            if (hasOverride)
+            {
+                var ov = new KiKs.UI.TransitionOverride
+                {
+                    exitMaterial = exitMat,
+                    centerSprite = centerSprite,
+                    entranceMaterial = entranceMat
+                };
+                TransitionEffect.Instance.TransitionToWithOverride(sceneName, ov);
+            }
+            else
+            {
+                TransitionEffect.Instance.TransitionTo(sceneName);
+            }
         }
 
         private IEnumerator LoadAreaScene(string sceneName)
@@ -945,6 +1038,48 @@ namespace KiKs.Combat
                 parts.Add(desc);
             }
             return string.Join(", ", parts);
+        }
+    }
+
+    /// <summary>
+    /// 轻量卡牌交互：处理点击+悬停预览+悬停缩放，不拦截 ScrollRect 拖拽和滚轮。
+    /// Button 和 EventTrigger 都会消费 drag/scroll 事件导致 ScrollRect 失效，
+    /// 这个组件只实现 IPointerClickHandler + IPointerEnterHandler + IPointerExitHandler，
+    /// 不实现 IDragHandler/IScrollHandler，事件会自然冒泡到父级 ScrollRect。
+    /// </summary>
+    public class CardItemInteraction : MonoBehaviour,
+        IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
+    {
+        [SerializeField] private float hoverScale = 1.08f;
+        [SerializeField] private float scaleDuration = 0.12f;
+
+        private System.Action _onClick;
+        private System.Action _onEnter;
+        private System.Action _onExit;
+        private Vector3 _originScale;
+
+        public void Init(System.Action onClick, System.Action onEnter, System.Action onExit)
+        {
+            _onClick = onClick;
+            _onEnter = onEnter;
+            _onExit = onExit;
+            _originScale = transform.localScale;
+        }
+
+        public void OnPointerClick(PointerEventData eventData) => _onClick?.Invoke();
+
+        public void OnPointerEnter(PointerEventData eventData)
+        {
+            transform.DOKill();
+            transform.DOScale(hoverScale, scaleDuration).SetEase(Ease.OutQuad);
+            _onEnter?.Invoke();
+        }
+
+        public void OnPointerExit(PointerEventData eventData)
+        {
+            transform.DOKill();
+            transform.DOScale(_originScale, scaleDuration).SetEase(Ease.OutQuad);
+            _onExit?.Invoke();
         }
     }
 }

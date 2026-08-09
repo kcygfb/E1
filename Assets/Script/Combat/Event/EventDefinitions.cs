@@ -16,6 +16,10 @@ namespace KiKs.Combat
         public string npcId;
         public string npcDisplayName;
         public int order = 1;
+
+        /// <summary>该事件在第几天出现。0=任意天。多个事件可共用同一天。</summary>
+        public int day = 0;
+
         public string introDialogueId;
         public EventCardDefinition[] cards = Array.Empty<EventCardDefinition>();
     }

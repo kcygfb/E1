@@ -475,8 +475,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -295.26675, y: -9}
-  m_SizeDelta: {x: -590.5435, y: 57.0533}
+  m_AnchoredPosition: {x: -283.31317, y: -9}
+  m_SizeDelta: {x: -566.6364, y: 71.1163}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &382697583
 MonoBehaviour:
@@ -500,11 +500,11 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 40
-    m_FontStyle: 0
+    m_FontSize: 50
+    m_FontStyle: 1
     m_BestFit: 0
     m_MinSize: 4
-    m_MaxSize: 40
+    m_MaxSize: 50
     m_Alignment: 0
     m_AlignByGeometry: 0
     m_RichText: 1
@@ -1096,8 +1096,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: 150, y: -4.522583}
-  m_SizeDelta: {x: 975.94, y: 264.76}
+  m_AnchoredPosition: {x: 39.51294, y: -4.522583}
+  m_SizeDelta: {x: 1200.6594, y: 264.76}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!114 &1214171518
 MonoBehaviour:
@@ -1112,7 +1112,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 0.47}
+  m_Color: {r: 0, g: 0, b: 0, a: 0.9411765}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -1949,8 +1949,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 1, y: 0.5}
-  m_AnchoredPosition: {x: -104.1, y: -25.526}
-  m_SizeDelta: {x: -208.2, y: 183.71}
+  m_AnchoredPosition: {x: -0.000022888, y: -25.526}
+  m_SizeDelta: {x: -0.00012207, y: 183.71}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1920781874
 MonoBehaviour:
@@ -1974,12 +1974,12 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 24
-    m_FontStyle: 0
+    m_FontSize: 40
+    m_FontStyle: 1
     m_BestFit: 0
-    m_MinSize: 10
+    m_MinSize: 4
     m_MaxSize: 40
-    m_Alignment: 6
+    m_Alignment: 0
     m_AlignByGeometry: 0
     m_RichText: 1
     m_HorizontalOverflow: 0
