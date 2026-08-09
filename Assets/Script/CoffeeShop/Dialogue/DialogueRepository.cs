@@ -10,6 +10,7 @@ public class DialogueLineJson
 {
     public string speaker;
     public string text;
+    public string expression;
 }
 
 [Serializable]

@@ -58,6 +58,8 @@ public static class MaterialDefinition
         new MatInfo { id = "snakeBall",    displayName = "蛇干手冲球",   color = new Color(0.65f, 0.50f, 0.25f), isRaw = false },
         new MatInfo { id = "tentacleBall", displayName = "触手手冲球",   color = new Color(0.45f, 0.40f, 0.60f), isRaw = false },
         new MatInfo { id = "wolffurBall",  displayName = "狼毫手冲球",   color = new Color(0.55f, 0.55f, 0.60f), isRaw = false },
+        // 特殊配方产物
+        new MatInfo { id = "mystry1",   displayName = "神秘产物", color = new Color(0.50f, 0.45f, 0.70f), isRaw = false },
         // 未知产物
         new MatInfo { id = "Unknown",      displayName = "未知产物", color = new Color(0.5f, 0.5f, 0.5f), isRaw = false },
     };

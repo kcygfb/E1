@@ -153,6 +153,7 @@ public class DialoguePlayer : MonoBehaviour
             if (nextWordIcon != null) nextWordIcon.SetActive(false);
             typingRoutine = StartCoroutine(TypeText(text));
             AnimateSpeaker(speaker);
+            SetExpression(speaker, line.expression);
         }
     }
 
@@ -214,6 +215,42 @@ public class DialoguePlayer : MonoBehaviour
         }
     }
 
+    private void SetExpression(string speaker, string expression)
+    {
+        if (string.IsNullOrEmpty(speaker)) return;
+        var cache = PortraitExpressionCache.Instance;
+        if (cache == null) return;
+
+        Image portraitImage = null;
+        string cacheKey = speaker;
+
+        if (speaker == playerName)
+        {
+            var player = GameObject.Find("Canvas/PlayerArea/PlayerP");
+            if (player != null) portraitImage = player.GetComponent<Image>();
+        }
+        else
+        {
+            foreach (var kvp in CustomerController.ActiveCustomers)
+            {
+                if (kvp.Value == null) continue;
+                var npcName = kvp.Key;
+                if (npcName == speaker || npcName.Contains(speaker) || speaker.Contains(npcName))
+                {
+                    portraitImage = kvp.Value.GetComponent<Image>();
+                    cacheKey = npcName;
+                    break;
+                }
+            }
+        }
+
+        if (portraitImage == null) return;
+
+        var sprite = cache.GetSprite(cacheKey, expression);
+        if (sprite != null)
+            portraitImage.sprite = sprite;
+    }
+
     private void AnimateSpeaker(string speaker)
     {
         if (string.IsNullOrEmpty(speaker)) return;
@@ -231,9 +268,7 @@ public class DialoguePlayer : MonoBehaviour
             {
                 if (kvp.Value == null) continue;
                 var npcName = kvp.Key;
-                if (npcName == speaker ||
-                    npcName.Contains(speaker) ||
-                    speaker.Contains(npcName))
+                if (npcName == speaker || npcName.Contains(speaker) || speaker.Contains(npcName))
                 {
                     target = kvp.Value.GetComponent<RectTransform>();
                     break;

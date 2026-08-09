@@ -66,6 +66,7 @@ public class MaterialSpriteCache : MonoBehaviour
     [SerializeField] private Sprite snakeBall;
     [SerializeField] private Sprite tentacleBall;
     [SerializeField] private Sprite wolffurBall;
+    [SerializeField] private Sprite mystry1;
 
     private void Awake()
     {
@@ -113,6 +114,7 @@ public class MaterialSpriteCache : MonoBehaviour
             { "snakeBall", snakeBall },
             { "tentacleBall", tentacleBall },
             { "wolffurBall", wolffurBall },
+            { "mystry1", mystry1 },
         };
 
         // 产出材料没有 ALL 版本，复用 icon
@@ -160,6 +162,7 @@ public class MaterialSpriteCache : MonoBehaviour
             { "snakeBall", snakeBall },
             { "tentacleBall", tentacleBall },
             { "wolffurBall", wolffurBall },
+            { "mystry1", mystry1 },
         };
 
         MaterialDefinition.SetSpriteCache(icons);

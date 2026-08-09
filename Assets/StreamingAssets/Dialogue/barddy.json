@@ -3,57 +3,70 @@
     {
       "dialogueId": "barddy_arrival",
       "lines": [
-        { "speaker": "Avril", "text": "(Today's third customer... Judging by the outfit, is a courier?)" },
-        { "speaker": "Mysterious Courier", "text": "Is this the café run by Demon Slayer?" },
-        { "speaker": "Avril", "text": "Yes, it is. And you are...?" },
-        { "speaker": "Mysterious Courier", "text": "I'm a courier sent from headquarters. One regular Americano, please." },
-        { "speaker": "Avril", "text": "Certainly... But it's probably best not to mention Demon Slayer in front of other customers. Headquarters should've informed you about that policy." },
-        { "speaker": "Mysterious Courier", "text": "Sorry. I'll be more careful." },
-        { "speaker": "Avril", "text": "(I'd bet he asked the exact same question at two or three other cafés before finding ours.)" }
+        { "speaker": "Avril", "expression": "Thinking", "text": "(Today's third customer... Judging by the outfit, is a courier?)" },
+        { "speaker": "Mysterious Courier", "expression": "", "text": "Is this the café run by Demon Slayer?" },
+        { "speaker": "Avril", "expression": "Professional Smile", "text": "Yes, it is. And you are...?" },
+        { "speaker": "Mysterious Courier", "expression": "", "text": "I'm a courier sent from headquarters." },
+        { "speaker": "Mysterious Courier", "expression": "", "text": "One regular Americano, please." },
+        { "speaker": "Avril", "expression": "Thinking", "text": "Certainly…" },
+        { "speaker": "Avril", "expression": "Thinking", "text": "But it's probably best not to mention Demon Slayer in front of other customers." },
+        { "speaker": "Avril", "expression": "Thinking", "text": "Headquarters should've informed you about that policy." },
+        { "speaker": "Mysterious Courier", "expression": "", "text": "Sorry. I'll be more careful." },
+        { "speaker": "Avril", "expression": "Irritated", "text": "(I'd bet he asked the exact same question at two or three other cafés before finding ours.)" }
       ]
     },
     {
       "dialogueId": "barddy_departure",
       "lines": [
-        { "speaker": "Avril", "text": "So... did headquarters send us something?" },
-        { "speaker": "Mysterious Courier", "text": "Your boss requested funding and supplies from headquarters for both the café and Demon Slayer operations. I'll move everything into your storage room." },
-        { "speaker": "Avril", "text": "(So that's why the boss went to headquarters—to apply for funding and supplies. That was surprisingly fast.)" },
-        { "speaker": "Mysterious Courier", "text": "Wow... this is really bitter. I've only ever had sweet coffee before." },
-        { "speaker": "Avril", "text": "Then next time you should try one of the other drinks on the menu. I'd be happy to recommend something." },
-        { "speaker": "Mysterious Courier", "text": "Thanks. Another shipment is arriving tomorrow, so I'll be back. By the way... is kopi luwak really made from cat poop?" },
-        { "speaker": "Avril", "text": "Uh... not exactly. More accurately, the coffee beans come from civet droppings after they've passed through the animal's digestive system, but the coffee isn't made directly from poop. Besides, we don't even serve kopi luwak here. Though the coffee at that café across the street—\"Whatever\"—smells as awful as cat poop." },
-        { "speaker": "Mysterious Courier", "text": "Their desserts are really good, though." },
-        { "speaker": "Avril", "text": "True. But they don't care about making proper coffee at all. Honestly, I hope they go out of business sooner rather than later." },
-        { "speaker": "Mysterious Courier", "text": "I'd better get going. I still have more deliveries to make. See you tomorrow." },
-        { "speaker": "Avril", "text": "We'll be looking forward to your next visit." }
+        { "speaker": "Avril", "expression": "Thinking", "text": "So... did headquarters send us something?" },
+        { "speaker": "Mysterious Courier", "expression": "", "text": "Your boss requested funding and supplies from headquarters for both the café and Demon Slayer operations." },
+        { "speaker": "Mysterious Courier", "expression": "", "text": "I'll move everything into your storage room." },
+        { "speaker": "Avril", "expression": "Happy", "text": "(So that's why the boss went to headquarters—to apply for funding and supplies. That was surprisingly fast.)" },
+        { "speaker": "Mysterious Courier", "expression": "", "text": "Wow... this is really bitter. I've only ever had sweet coffee before." },
+        { "speaker": "Avril", "expression": "", "text": "Then next time you should try one of the other drinks on the menu." },
+        { "speaker": "Avril", "expression": "", "text": "I'd be happy to recommend something." },
+        { "speaker": "Mysterious Courier", "expression": "", "text": "Thanks." },
+        { "speaker": "Mysterious Courier", "expression": "", "text": "Another shipment is arriving tomorrow, so I'll be back." },
+        { "speaker": "Mysterious Courier", "expression": "", "text": "By the way... is kopi luwak really made from cat poop?" },
+        { "speaker": "Avril", "expression": "Happy", "text": "Uh... not exactly." },
+        { "speaker": "Avril", "expression": "Happy", "text": "More accurately, the coffee beans come from civet droppings after they've passed through the animal's digestive system, but the coffee isn't made directly from poop." },
+        { "speaker": "Avril", "expression": "Happy", "text": "Besides, we don't even serve kopi luwak here." },
+        { "speaker": "Avril", "expression": "Happy", "text": "Though the coffee at that café across the street—\"Whatever\"—smells as awful as cat poop." },
+        { "speaker": "Mysterious Courier", "expression": "", "text": "Their desserts are really good, though." },
+        { "speaker": "Avril", "expression": "Irritated", "text": "True." },
+        { "speaker": "Avril", "expression": "Irritated", "text": "But they don't care about making proper coffee at all." },
+        { "speaker": "Avril", "expression": "Irritated", "text": "Honestly, I hope they go out of business sooner rather than later." },
+        { "speaker": "Mysterious Courier", "expression": "", "text": "I'd better get going. I still have more deliveries to make." },
+        { "speaker": "Mysterious Courier", "expression": "", "text": "See you tomorrow." },
+        { "speaker": "Avril", "expression": "Professional Smile", "text": "We'll be looking forward to your next visit." }
       ]
     },
     {
       "dialogueId": "barddy_locked",
       "lines": [
-        { "speaker": "Mysterious Courier", "text": "I heard you can make Mocha Latte here?" },
-        { "speaker": "Mysterious Courier", "text": "Not unlocked yet, huh... Well, get everything ready and I'll come back next time." }
+        { "speaker": "Mysterious Courier", "expression": "", "text": "I heard you can make Mocha Latte here?" },
+        { "speaker": "Mysterious Courier", "expression": "", "text": "Not unlocked yet, huh... Well, get everything ready and I'll come back next time." }
       ]
     },
     {
       "dialogueId": "barddy_lockeddeparture",
       "lines": [
-        { "speaker": "Mysterious Courier", "text": "I'll be heading off then. Don't forget to prepare the ingredients for Mocha Latte!" },
-        { "speaker": "Mysterious Courier", "text": "I hope to finally try it next time I visit." }
+        { "speaker": "Mysterious Courier", "expression": "", "text": "I'll be heading off then. Don't forget to prepare the ingredients for Mocha Latte!" },
+        { "speaker": "Mysterious Courier", "expression": "", "text": "I hope to finally try it next time I visit." }
       ]
     },
     {
       "dialogueId": "barddy_returnfound",
       "lines": [
-        { "speaker": "Mysterious Courier", "text": "Did you manage to get that Mocha Latte I asked about last time?" },
-        { "speaker": "Mysterious Courier", "text": "Excellent! Finally! Here, this is your reward!" }
+        { "speaker": "Mysterious Courier", "expression": "", "text": "Did you manage to get that Mocha Latte I asked about last time?" },
+        { "speaker": "Mysterious Courier", "expression": "", "text": "Excellent! Finally! Here, this is your reward!" }
       ]
     },
     {
       "dialogueId": "barddy_returnnotfound",
       "lines": [
-        { "speaker": "Mysterious Courier", "text": "Did you manage to get that Mocha Latte I asked about last time?" },
-        { "speaker": "Mysterious Courier", "text": "Still not ready, huh... Well, keep working on it. I'll check back next time." }
+        { "speaker": "Mysterious Courier", "expression": "", "text": "Did you manage to get that Mocha Latte I asked about last time?" },
+        { "speaker": "Mysterious Courier", "expression": "", "text": "Still not ready, huh... Well, keep working on it. I'll check back next time." }
       ]
     }
   ]

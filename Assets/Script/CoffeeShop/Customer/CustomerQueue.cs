@@ -40,6 +40,10 @@ public class CustomerQueue : MonoBehaviour
     [Tooltip("NPC移动速度，数值越大出场越快")]
     public float npcMoveSpeed = 500f;
 
+    [Header("End of Day")]
+    [Tooltip("当天所有顾客离开后，按顺序出场的收尾NPC。它们的 endOfDayDialogueId 会以 'endofday' context 播放。")]
+    public List<NPCData> endOfDayNpcs = new();
+
     [Header("End Day Button")]
     public GameObject endDayButton;
 
@@ -47,6 +51,7 @@ public class CustomerQueue : MonoBehaviour
     public GameObject morningCheckPanel;
 
     private Queue<NPCRequest> waitingQueue = new();
+    private Queue<NPCRequest> endOfDayQueue = new();
     private CustomerController currentNpc;
     private readonly HashSet<string> pendingReturnVisits = new();
 
@@ -74,6 +79,7 @@ public class CustomerQueue : MonoBehaviour
     public bool CanEndDay =>
         currentNpc == null &&
         waitingQueue.Count == 0 &&
+        endOfDayQueue.Count == 0 &&
         (orderSystem == null || !orderSystem.HasActiveOrder);
 
     private void OnEnable()
@@ -115,6 +121,7 @@ public class CustomerQueue : MonoBehaviour
     private void ClearAllNPCs()
     {
         waitingQueue.Clear();
+        endOfDayQueue.Clear();
         if (currentNpc != null)
         {
             currentNpc.OnLeftStore -= HandleNpcLeft;
@@ -171,11 +178,16 @@ public class CustomerQueue : MonoBehaviour
                 if (npc == null) continue;
                 EnqueueNpc(npc, null);
             }
+            BuildEndOfDayQueue();
             return;
         }
 
         // 3. Random
-        if (npcPool == null || npcPool.Count == 0) return;
+        if (npcPool == null || npcPool.Count == 0)
+        {
+            BuildEndOfDayQueue();
+            return;
+        }
 
         var usedToday = new HashSet<NPCData>();
         var firstNpcs = npcPool.Where(n => n.spawnOrder == SpawnOrder.First).ToList();
@@ -192,6 +204,20 @@ public class CustomerQueue : MonoBehaviour
             if (npc != null) EnqueueNpc(npc, usedToday);
         }
         foreach (var npc in lastNpcs) EnqueueNpc(npc, usedToday);
+
+        BuildEndOfDayQueue();
+    }
+
+    private void BuildEndOfDayQueue()
+    {
+        endOfDayQueue.Clear();
+        if (endOfDayNpcs == null) return;
+        foreach (var npc in endOfDayNpcs)
+        {
+            if (npc == null) continue;
+            var coffeeData = PickCoffeeFor(npc);
+            endOfDayQueue.Enqueue(new NPCRequest { npcData = npc, coffeeData = coffeeData });
+        }
     }
 
     private List<NPCData> returnVisitors = new();
@@ -216,15 +242,36 @@ public class CustomerQueue : MonoBehaviour
     {
         if (currentNpc != null) return;
         if (orderSystem != null && orderSystem.HasActiveOrder) return;
-        if (waitingQueue.Count == 0) return;
 
-        var request = waitingQueue.Dequeue();
+        NPCRequest request;
+        bool isEndOfDay = false;
+
+        if (waitingQueue.Count > 0)
+        {
+            request = waitingQueue.Dequeue();
+        }
+        else if (endOfDayQueue.Count > 0)
+        {
+            request = endOfDayQueue.Dequeue();
+            isEndOfDay = true;
+        }
+        else
+        {
+            return;
+        }
+
         GameObject npcObj = CreateVisibleNpcObject(request);
         currentNpc = npcObj.GetComponent<CustomerController>();
         currentNpc.OnLeftStore += HandleNpcLeft;
         currentNpc.Spawner = this;
         currentNpc.moveSpeed = npcMoveSpeed;
         currentNpc.Initialize(request.npcData, request.coffeeData, GetCounterPosition(), GetExitPosition());
+
+        // End-of-day NPC: 到达柜台后才播放 endOfDayDialogueId，不下单
+        if (isEndOfDay && !string.IsNullOrEmpty(request.npcData.endOfDayDialogueId))
+        {
+            currentNpc.MarkEndOfDayDialogue();
+        }
     }
 
     private GameObject CreateVisibleNpcObject(NPCRequest request)
