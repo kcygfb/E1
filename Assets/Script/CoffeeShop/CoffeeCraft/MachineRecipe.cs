@@ -63,6 +63,10 @@ public static class MachineRecipeLibrary
         RegisterMulti("PourOver", new[] { "snakePowder", "Water" }, "snakeBall");
         RegisterMulti("PourOver", new[] { "tentaclePowder", "Water" }, "tentacleBall");
         RegisterMulti("PourOver", new[] { "wolffurPowder", "Water" }, "wolffurBall");
+
+        // === 特殊配方 ===
+        // 神秘产物：生触手 + 水 + 奶泡 → mystry1（全放手冲机）
+        RegisterMulti("PourOver", new[] { "tentacle", "Water", "SteamedMilk" }, "mystry1");
     }
 
     // === 单输入配方 ===

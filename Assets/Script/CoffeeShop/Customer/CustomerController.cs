@@ -76,9 +76,34 @@ public class CustomerController : MonoBehaviour
     private void Arrived()
     {
         if (State == NPCState.MovingToCounter)
-            StartArrivalDialogue();
+        {
+            if (!string.IsNullOrEmpty(NPCData.endOfDayDialogueId) && _pendingEndOfDayDialogue)
+            {
+                _pendingEndOfDayDialogue = false;
+                StartEndOfDayDialogue(NPCData.endOfDayDialogueId);
+            }
+            else
+            {
+                StartArrivalDialogue();
+            }
+        }
         else if (State == NPCState.Leaving)
             LeaveFinished();
+    }
+
+    private bool _pendingEndOfDayDialogue;
+
+    /// <summary>标记 NPC 到达柜台后播放收尾对话（而非正常到达对话）。由 CustomerQueue.TrySpawnNextNpc 调用。</summary>
+    public void MarkEndOfDayDialogue()
+    {
+        _pendingEndOfDayDialogue = true;
+    }
+
+    /// <summary>收尾对话：到达柜台后直接播放，不下单。对话结束以 'endofday' context 离开。</summary>
+    public void StartEndOfDayDialogue(string dialogueId)
+    {
+        ChangeState(NPCState.ArrivalDialogue);
+        EmitDialogue(dialogueId, "endofday");
     }
 
     private void StartArrivalDialogue()
@@ -146,6 +171,11 @@ public class CustomerController : MonoBehaviour
                 break;
 
             case "departure":
+                ChangeState(NPCState.Leaving);
+                targetPosition = exitPosition;
+                break;
+
+            case "endofday":
                 ChangeState(NPCState.Leaving);
                 targetPosition = exitPosition;
                 break;

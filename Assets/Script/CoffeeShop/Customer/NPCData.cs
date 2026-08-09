@@ -50,4 +50,8 @@ public class NPCData : ScriptableObject
 
     [Tooltip("出场顺序，默认随机")]
     public SpawnOrder spawnOrder = SpawnOrder.Random;
+
+    [Header("End of Day")]
+    [Tooltip("当天所有顾客离开后播放的对话ID。留空则该NPC不参与收尾对话。")]
+    public string endOfDayDialogueId;
 }
