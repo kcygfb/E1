@@ -129,6 +129,7 @@ MonoBehaviour:
     m_LigatureSubstitutionRecords: []
     m_GlyphPairAdjustmentRecords:
     - m_FirstAdjustmentRecord:
+<<<<<<< HEAD
         m_GlyphIndex: 25
         m_GlyphValueRecord:
           m_XPlacement: 0
@@ -399,6 +400,8 @@ MonoBehaviour:
           m_YAdvance: 0
       m_FeatureLookupFlags: 0
     - m_FirstAdjustmentRecord:
+=======
+>>>>>>> bb9cee3a83db8dae73a9920a2607f8a8391c1735
         m_GlyphIndex: 51
         m_GlyphValueRecord:
           m_XPlacement: 0

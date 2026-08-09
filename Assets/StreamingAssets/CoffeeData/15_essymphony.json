@@ -1,0 +1,15 @@
+{
+  "coffeeId": "ESSymphony",
+  "coffeeName": "E&S Symphony",
+  "sellPrice": 240,
+  "locked": false,
+  "unlockItemId": "",
+  "unlockAmount": 1,
+  "recipe": [
+    { "resourceId": "eye", "amount": 1 },
+    { "resourceId": "snake", "amount": 1 },
+    { "resourceId": "Milk", "amount": 1 }
+  ],
+  "steps": [],
+  "requiredMaterials": ["ESMEspresso", "SteamedMilk"]
+}
