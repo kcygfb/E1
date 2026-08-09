@@ -383,4 +383,9 @@ public class CustomerQueue : MonoBehaviour
     private Vector3 GetSpawnPosition() => spawnPoint != null ? spawnPoint.position : new Vector3(-6f, 1f, 0f);
     private Vector3 GetCounterPosition() => counterPoint != null ? counterPoint.position : new Vector3(0f, 1f, 0f);
     private Vector3 GetExitPosition() => exitPoint != null ? exitPoint.position : new Vector3(6f, 1f, 0f);
+
+    // 供 StartOfDayController 调用
+    public Vector3 GetSpawnPositionPublic() => GetSpawnPosition();
+    public Vector3 GetCounterPositionPublic() => GetCounterPosition();
+    public Vector3 GetExitPositionPublic() => GetExitPosition();
 }

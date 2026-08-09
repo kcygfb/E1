@@ -54,4 +54,8 @@ public class NPCData : ScriptableObject
     [Header("End of Day")]
     [Tooltip("当天所有顾客离开后播放的对话ID。留空则该NPC不参与收尾对话。")]
     public string endOfDayDialogueId;
+
+    [Header("Start of Day")]
+    [Tooltip("经营开始前播放的对话ID。留空则该NPC不参与经营前对话。")]
+    public string startOfDayDialogueId;
 }
