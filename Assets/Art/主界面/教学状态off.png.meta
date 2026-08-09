@@ -1,19 +1,19 @@
 fileFormatVersion: 2
-guid: a580ee847b232724b81e2f493b68226e
+guid: dea8a5b8865392a488fd9c55ccdecc3a
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 1754278389354110677
-    second: "\u6559\u5B66\u72B6\u6001off(1)_0"
+      213: -8389015972930122195
+    second: "\u6559\u5B66\u72B6\u6001off_0"
   - first:
-      213: 3818385950533713334
-    second: "\u6559\u5B66\u72B6\u6001off(1)_1"
+      213: -7309418107913797118
+    second: "\u6559\u5B66\u72B6\u6001off_1"
   - first:
-      213: 3464967228891066565
-    second: "\u6559\u5B66\u72B6\u6001off(1)_2"
+      213: 8308281925098587693
+    second: "\u6559\u5B66\u72B6\u6001off_2"
   - first:
-      213: -2458556295155559717
-    second: "\u6559\u5B66\u72B6\u6001off(1)_3"
+      213: 4735017313592137709
+    second: "\u6559\u5B66\u72B6\u6001off_3"
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -112,20 +112,86 @@ TextureImporter:
       name: "\u6559\u5B66\u72B6\u6001off_0"
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 397
-        height: 338
+        x: 64
+        y: 223
+        width: 70
+        height: 81
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: 0
+      tessellationDetail: -1
       bones: []
-      spriteID: e1f5c01ddf718db43945494fa54ba4b3
-      internalID: -307881882
+      spriteID: d2e0c666b6a349b80800000000000000
+      internalID: -8389015972930122195
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "\u6559\u5B66\u72B6\u6001off_1"
+      rect:
+        serializedVersion: 2
+        x: 142
+        y: 199
+        width: 80
+        height: 122
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2028df235fabf8a90800000000000000
+      internalID: -7309418107913797118
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "\u6559\u5B66\u72B6\u6001off_2"
+      rect:
+        serializedVersion: 2
+        x: 217
+        y: 195
+        width: 73
+        height: 121
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d26cc474462fc4370800000000000000
+      internalID: 8308281925098587693
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "\u6559\u5B66\u72B6\u6001off_3"
+      rect:
+        serializedVersion: 2
+        x: 35
+        y: 18
+        width: 337
+        height: 170
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: de7dbf5d82926b140800000000000000
+      internalID: 4735017313592137709
       vertices: []
       indices: 
       edges: []
@@ -134,7 +200,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: c189fb6b4524155459f64dbe418ad1cc
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
@@ -142,11 +208,12 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     spriteCustomMetadata:
-      entries:
-      - key: SpriteEditor.SliceSettings
-        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":397.0,"y":338.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":2,"keepEmptyRects":false,"isAlternate":false}'
+      entries: []
     nameFileIdTable:
-      "\u6559\u5B66\u72B6\u6001off_0": -307881882
+      "\u6559\u5B66\u72B6\u6001off_0": -8389015972930122195
+      "\u6559\u5B66\u72B6\u6001off_1": -7309418107913797118
+      "\u6559\u5B66\u72B6\u6001off_2": 8308281925098587693
+      "\u6559\u5B66\u72B6\u6001off_3": 4735017313592137709
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
