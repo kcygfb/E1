@@ -52,6 +52,8 @@ public static class MachineRecipeLibrary
         Register("Extractor", "tentaclePowder", "tentacleEspresso");
         // wolffur 用多输入：wolffurPowder + GroundCoffee → wolffurEspresso
         RegisterMulti("Extractor", new[] { "wolffurPowder", "GroundCoffee" }, "wolffurEspresso");
+        // ESM：eyePowder + snakePowder → ESMEspresso
+        RegisterMulti("Extractor", new[] { "eyePowder", "snakePowder" }, "ESMEspresso");
 
         // === 7种特殊材料手冲配方（PourOver: 粉 + 水 → 手冲球） ===
         RegisterMulti("PourOver", new[] { "clawPowder", "Water" }, "clawBall");

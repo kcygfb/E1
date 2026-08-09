@@ -17,6 +17,6 @@
   ],
   "requiredMaterials": ["eyeEspresso", "SteamedMilk", "eye", "Sugar"],
   "halfProducts": [
-    { "materials": ["eyeEspresso", "SteamedMilk"], "displayName": "The Fifth Flavor Half" }
+    { "materials": ["eyeEspresso", "SteamedMilk"], "displayName": "Eye Milk Half" }
   ]
 }

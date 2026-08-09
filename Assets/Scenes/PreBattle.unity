@@ -3748,7 +3748,7 @@ MonoBehaviour:
   coffeeSlotContent: {fileID: 1528141815}
   coffeeCountLabel: {fileID: 113169133}
   openPopupButton: {fileID: 525559387}
-  beginButton: {fileID: 1862050044}
+  openPopupButton2: {fileID: 1295101335}
   tutorialController: {fileID: 0}
   coffeeTutorialDirectory: CoffeeData
 --- !u!114 &821530957

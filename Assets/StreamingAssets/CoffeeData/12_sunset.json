@@ -17,6 +17,6 @@
   ],
   "requiredMaterials": ["eyeEspresso", "SteamedMilk", "Sugar"],
   "halfProducts": [
-    { "materials": ["eyeEspresso", "SteamedMilk"], "displayName": "Sunset Half" }
+    { "materials": ["eyeEspresso", "SteamedMilk"], "displayName": "Eye Milk Half" }
   ]
 }

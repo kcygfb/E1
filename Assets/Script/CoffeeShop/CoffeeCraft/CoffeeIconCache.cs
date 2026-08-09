@@ -25,6 +25,7 @@ public class CoffeeIconCache : MonoBehaviour
     [SerializeField] private Sprite sunset;
     [SerializeField] private Sprite flameLatte;
     [SerializeField] private Sprite theFifthFlavor;
+    [SerializeField] private Sprite essymphony;
 
     [Header("半成品图标")]
     [SerializeField] private Sprite viscousDreamHalf;
@@ -32,6 +33,7 @@ public class CoffeeIconCache : MonoBehaviour
     [SerializeField] private Sprite sunsetHalf;
     [SerializeField] private Sprite tentacleLabyrinthHalf;
     [SerializeField] private Sprite theFifthFlavorHalf;
+    [SerializeField] private Sprite eyeMilkHalf;
 
     private readonly Dictionary<string, Sprite> _sprites = new();
     private readonly Dictionary<string, Sprite> _halfSprites = new();
@@ -56,12 +58,13 @@ public class CoffeeIconCache : MonoBehaviour
         _sprites["Sunset"] = sunset;
         _sprites["FlameLatte"] = flameLatte;
         _sprites["TheFifthFlavor"] = theFifthFlavor;
+        _sprites["ESSymphony"] = essymphony;
 
         _halfSprites["ViscousDream"] = viscousDreamHalf;
         _halfSprites["AfterTaste"] = afterTasteHalf;
-        _halfSprites["Sunset"] = sunsetHalf;
+        _halfSprites["Sunset"] = eyeMilkHalf;
         _halfSprites["TentacleLabyrinth"] = tentacleLabyrinthHalf;
-        _halfSprites["TheFifthFlavor"] = theFifthFlavorHalf;
+        _halfSprites["TheFifthFlavor"] = eyeMilkHalf;
     }
 
     public Sprite GetCoffeeSprite(string coffeeId)

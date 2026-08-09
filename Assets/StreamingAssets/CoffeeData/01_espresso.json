@@ -31,5 +31,6 @@
       "qteType": "DropStop"
     }
   ],
-  "requiredMaterials": ["Espresso"]
+  "requiredMaterials": ["Espresso"],
+  "battleEffect": { "type": "Damage", "amount": 15, "target": "Enemy" }
 }

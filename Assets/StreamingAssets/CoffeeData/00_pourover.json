@@ -31,5 +31,6 @@
       "qteType": "HoldRelease"
     }
   ],
-  "requiredMaterials": ["PourOverCoffee"]
+  "requiredMaterials": ["PourOverCoffee"],
+  "battleEffect": { "type": "Heal", "amount": 25, "target": "Self" }
 }

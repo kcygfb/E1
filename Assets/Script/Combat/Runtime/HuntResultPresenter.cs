@@ -204,7 +204,7 @@ namespace KiKs.Combat
                 builder.Append("<color=#82949A>No material drops</color>");
 
             lootText.text = builder.ToString();
-            goldText.text = $"GOLD    <color=#FFD75A>+{battleController.HuntGoldReward} G</color>";
+            goldText.text = $"GOLD    <color=#FFD75A>+{battleController.HuntGoldReward} C</color>";
             BuildCardRewards();
         }
 

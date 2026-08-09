@@ -132,7 +132,7 @@ public sealed class DailyRevenueSummary : MonoBehaviour
                     .Append(string.IsNullOrWhiteSpace(item.CoffeeName) ? "Coffee" : item.CoffeeName)
                     .Append("    <color=#E8B35A>")
                     .Append(item.CoffeeRevenue)
-                    .Append(" G</color>");
+                    .Append(" C</color>");
 
                 if (item.IsPerfect)
                 {
@@ -150,8 +150,8 @@ public sealed class DailyRevenueSummary : MonoBehaviour
         revenueListText.text = builder.ToString();
         perfectText.text =
             $"PERFECT CUPS    {perfectCount}    " +
-            $"<color=#E8B35A>+{perfectBonusTotal} G</color>";
-        totalText.text = $"TOTAL    <color=#FFD36A>{grandTotal} G</color>";
+            $"<color=#E8B35A>+{perfectBonusTotal} C</color>";
+        totalText.text = $"TOTAL    <color=#FFD36A>{grandTotal} C</color>";
     }
 
     private IEnumerator ShowRoutine()

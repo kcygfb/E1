@@ -28,6 +28,14 @@ public class HalfProductJson
 }
 
 [Serializable]
+public class BattleEffectJson
+{
+    public string type;   // "Heal" | "Bleed" | "Block" | "Damage"
+    public int amount;
+    public string target; // "Self" | "Enemy"
+}
+
+[Serializable]
 public class CoffeeDataJson
 {
     public string coffeeId;
@@ -41,6 +49,7 @@ public class CoffeeDataJson
     public List<CraftStepJson> steps = new();
     public List<string> requiredMaterials = new();
     public List<HalfProductJson> halfProducts = new();
+    public BattleEffectJson battleEffect;
 }
 
 [DisallowMultipleComponent]
