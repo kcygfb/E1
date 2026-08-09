@@ -978,8 +978,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 98df2b8e6a13aee498a2e8a9d8f2b74c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: KiKs.UI::KiKs.UI.ButtonPlayAnimationOnEnable
-  triggerName: Play
-  boolParameterName: 
 --- !u!95 &266310379
 Animator:
   serializedVersion: 7
@@ -1869,7 +1867,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
-  m_Color: {r: 0.3, g: 0.25, b: 0.15, a: 0}
+  m_Color: {r: 0, g: 0, b: 0, a: 0}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -3742,8 +3740,6 @@ MonoBehaviour:
   coffeePopup: {fileID: 1770022156}
   coffeeListContent: {fileID: 1040842457}
   coffeeItemPrefab: {fileID: 2240157857254018484, guid: 3c0435655c6436b479dfefacc9e22a70, type: 3}
-  pourOverIcon: {fileID: 21300000, guid: da3f3f6ddfe426e4d9835d21baa5640a, type: 3}
-  bloodGarmentIcon: {fileID: 21300000, guid: 97c5880d64c98ca489a9a2012c5f2246, type: 3}
   iconSize: {x: 120, y: 120}
   coffeeSlotContent: {fileID: 1528141815}
   coffeeCountLabel: {fileID: 113169133}

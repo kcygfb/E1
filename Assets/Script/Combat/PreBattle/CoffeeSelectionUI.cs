@@ -376,6 +376,7 @@ namespace KiKs.Combat
 
                 var img = slot.GetComponent<Image>();
                 var label = slot.GetComponentInChildren<Text>(true);
+                var slotIcon = GetOrCreateSlotIcon(slot);
 
                 if (i < selectedCoffeeIds.Count)
                 {
@@ -388,6 +389,21 @@ namespace KiKs.Combat
                     }
                     if (img != null)
                         img.color = new Color(0.2f, 0.18f, 0.14f, 1);
+
+                    // 显示咖啡图标
+                    if (slotIcon != null)
+                    {
+                        var sprite = GetIconForCoffee(coffeeId);
+                        if (sprite != null)
+                        {
+                            slotIcon.sprite = sprite;
+                            slotIcon.enabled = true;
+                        }
+                        else
+                        {
+                            slotIcon.enabled = false;
+                        }
+                    }
                 }
                 else
                 {
@@ -399,8 +415,37 @@ namespace KiKs.Combat
                     }
                     if (img != null)
                         img.color = new Color(0.12f, 0.12f, 0.15f, 1);
+
+                    if (slotIcon != null)
+                        slotIcon.enabled = false;
                 }
             }
+        }
+
+        /// <summary>获取或创建 slot 下的 Icon Image（用于显示咖啡图标）。</summary>
+        private Image GetOrCreateSlotIcon(Transform slot)
+        {
+            var existing = slot.Find("SlotIcon");
+            if (existing != null)
+                return existing.GetComponent<Image>();
+
+            var go = new GameObject("SlotIcon", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            go.transform.SetParent(slot, false);
+            go.transform.SetAsFirstSibling(); // 图标在背景之上、文字之下
+
+            var rt = go.GetComponent<RectTransform>();
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.offsetMin = new Vector2(4, 20);   // 底部留空给文字
+            rt.offsetMax = new Vector2(-4, -4);
+            rt.pivot = new Vector2(0.5f, 0.5f);
+
+            var img = go.GetComponent<Image>();
+            img.preserveAspect = true;
+            img.raycastTarget = false;
+            img.enabled = false;
+
+            return img;
         }
 
         private void UpdateListHighlights()

@@ -1,10 +1,13 @@
 fileFormatVersion: 2
-guid: 1f1d8a4234e3d1c4db71a634e1903645
+guid: 297d596f3d86db244b2d0e6c00b07962
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 1872732258777413398
-    second: dagger_0
+      213: 5463998796154476360
+    second: "\u751F\u6C14(1)_0"
+  - first:
+      213: -4431876125229714535
+    second: "\u751F\u6C14(1)_1"
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -100,13 +103,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: dagger_0
+      name: "\u751F\u6C14(1)_0"
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 754
-        height: 1056
+        x: 56
+        y: 1235
+        width: 149
+        height: 237
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,8 +118,30 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 617b7d331184df910800000000000000
-      internalID: 1872732258777413398
+      spriteID: 84713f1a4f504db40800000000000000
+      internalID: 5463998796154476360
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "\u751F\u6C14(1)_1"
+      rect:
+        serializedVersion: 2
+        x: 145
+        y: 0
+        width: 755
+        height: 2361
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 993f52b2520de72c0800000000000000
+      internalID: -4431876125229714535
       vertices: []
       indices: 
       edges: []
@@ -135,7 +160,8 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      dagger_0: 1872732258777413398
+      "\u751F\u6C14(1)_0": 5463998796154476360
+      "\u751F\u6C14(1)_1": -4431876125229714535
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

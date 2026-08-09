@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::NPCData
   npcId: 2
   npcName: Xiaoti
-  speakerColor: {r: 0.75294125, g: 0.41960788, b: 0.41960788, a: 1}
-  portrait: {fileID: -4748894624273762065, guid: 633afb7b9f283734e8a04fe0d0fc8afa, type: 3}
-  portraitSize: {x: 736.3125, y: 803.3025}
+  speakerColor: {r: 0.76470596, g: 0.3921569, b: 0.38823533, a: 1}
+  portrait: {fileID: 21300000, guid: 633afb7b9f283734e8a04fe0d0fc8afa, type: 3}
+  portraitSize: {x: 370.14963, y: 851.76}
   willOrder: 1
   arrivalDialogueId: timi_arrival
   departureDialogueId: timi_departure
@@ -27,3 +27,4 @@ MonoBehaviour:
   returnNotFoundDialogueId: 
   returnReward: 0
   spawnOrder: 1
+  endOfDayDialogueId: timi_endofday
