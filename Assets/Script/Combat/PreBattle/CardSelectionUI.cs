@@ -299,6 +299,13 @@ namespace KiKs.Combat
             RefreshSelectionUI();
         }
 
+        private void OnDeckSlotClicked(int slotIndex)
+        {
+            if (_isStartingBattle || slotIndex >= selectedCardIds.Count) return;
+            selectedCardIds.RemoveAt(slotIndex);
+            RefreshSelectionUI();
+        }
+
         public void RefreshSelectionUI()
         {
             UpdateDeckSlots();
@@ -430,7 +437,7 @@ namespace KiKs.Combat
 
             if (point.Type == AreaPointType.Event)
             {
-                WarningToast.Show("Event areas are not available yet.");
+                StartEventArea(pointIndex);
                 return;
             }
 
@@ -502,6 +509,43 @@ namespace KiKs.Combat
                 TransitionEffect.Instance.TransitionTo(TREASURE_SCENE_NAME);
             else
                 StartCoroutine(LoadAreaScene(TREASURE_SCENE_NAME));
+        }
+
+        private void StartEventArea(int pointIndex)
+        {
+            if (!Application.CanStreamedLevelBeLoaded("Event"))
+            {
+                Debug.LogError("[AreaMap] Scene 'Event' is not included in the active build profile.", this);
+                WarningToast.Show("The event scene is unavailable.");
+                return;
+            }
+
+            var evt = EventSelectionState.PickRandomEvent();
+            if (evt == null)
+            {
+                WarningToast.Show("暂无可用事件");
+                return;
+            }
+
+            if (!DailyAreaMapState.TrySelectPoint(pointIndex, out var failureReason))
+            {
+                WarningToast.Show(failureReason);
+                RefreshMapPoints();
+                return;
+            }
+
+            EventSelectionState.SetCurrentEvent(evt);
+            RuntimeGameRepository.ClearSelectedDemoStage();
+            RuntimeGameRepository.ClearSelectedEncounterIndex();
+            _isStartingBattle = true;
+            RefreshMapPoints();
+            RefreshSelectionUI();
+
+            Debug.Log($"[AreaMap] Entering event point {pointIndex + 1}: event '{evt.id}' (npc '{evt.npcId}').", this);
+            if (TransitionEffect.Instance != null)
+                TransitionEffect.Instance.TransitionTo("Event");
+            else
+                StartCoroutine(LoadAreaScene("Event"));
         }
 
         /// <summary>
@@ -673,6 +717,15 @@ namespace KiKs.Combat
                     var img = slot.GetComponent<Image>();
                     if (img != null)
                         img.color = new Color(0.2f, 0.18f, 0.14f, 1);
+
+                    // 已选卡牌的 slot 可点击移除
+                    var btn = slot.GetComponent<Button>();
+                    if (btn == null)
+                        btn = slot.gameObject.AddComponent<Button>();
+                    var slotIndex = i;
+                    btn.interactable = !_isStartingBattle;
+                    btn.onClick.RemoveAllListeners();
+                    btn.onClick.AddListener(() => OnDeckSlotClicked(slotIndex));
                 }
                 else
                 {
@@ -689,6 +742,10 @@ namespace KiKs.Combat
                     var img = slot.GetComponent<Image>();
                     if (img != null)
                         img.color = new Color(0.12f, 0.12f, 0.15f, 1);
+
+                    var btn = slot.GetComponent<Button>();
+                    if (btn != null)
+                        btn.interactable = false;
                 }
             }
         }

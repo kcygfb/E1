@@ -4,7 +4,8 @@
   "references": [
     "Unity.TextMeshPro",
     "KiKs.UI",
-    "DOTween.Modules"
+    "DOTween.Modules",
+    "Unity.InputSystem"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

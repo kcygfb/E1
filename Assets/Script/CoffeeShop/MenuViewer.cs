@@ -47,7 +47,7 @@ public class MenuViewer : MonoBehaviour
     private bool _menuOpenedThisOrder;
     private Sequence _hintSeq;
 
-    private static readonly Regex PriceRegex = new Regex(@"_(\d+)$", RegexOptions.Compiled);
+    private static readonly Regex PriceRegex = new Regex(@"_(\d+)\D*$", RegexOptions.Compiled);
 
     private void OnEnable()
     {

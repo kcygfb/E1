@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 2,
+  "events": [
+    {
+      "id": "evt_light",
+      "npcId": "light",
+      "npcDisplayName": "提灯人",
+      "order": 1,
+      "introDialogueId": "evt_light_intro",
+      "cards": [
+        {
+          "type": "effect",
+          "imagePath": "Art/Cards/50C.png",
+          "dialogueId": "evt_light_opt1",
+          "hpCost": 10,
+          "goldRewardMin": 20,
+          "goldRewardMax": 100,
+          "cardRewardMode": "random_normal"
+        },
+        {
+          "type": "effect",
+          "imagePath": "Art/Cards/100C.png",
+          "dialogueId": "evt_light_opt2",
+          "goldCost": 50,
+          "materialRewardId": "random_raw",
+          "materialRewardAmount": 2,
+          "cardRewardMode": "random_normal"
+        },
+        {
+          "type": "attack",
+          "imagePath": "Art/Cards/200C.png",
+          "cardRewardMode": "random_special"
+        },
+        {
+          "type": "end",
+          "imagePath": "Art/Cards/400C.png",
+          "dialogueId": "evt_light_end"
+        }
+      ]
+    }
+  ]
+}
