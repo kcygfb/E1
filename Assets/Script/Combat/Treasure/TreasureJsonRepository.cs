@@ -65,6 +65,12 @@ namespace KiKs.Combat
                     return false;
                 }
 
+                if (string.IsNullOrWhiteSpace(offer.imagePath))
+                {
+                    error = $"Offer '{offer.id}' needs a card imagePath.";
+                    return false;
+                }
+
                 if (offer.productPool == null || offer.productPool.Length == 0)
                 {
                     error = $"Offer '{offer.id}' needs at least one product.";
@@ -91,13 +97,13 @@ namespace KiKs.Combat
         {
             return new TreasureSceneDefinition
             {
-                testStartingGold = 400,
+                testStartingGold = 1000,
                 offers = new[]
                 {
-                    CreateOffer("claw_offer", 50, "Art/Cards/treasure_50.png", "resource", "claw", "爪子", 2),
-                    CreateOffer("card_offer", 80, "Art/Cards/treasure_80.png", "card", "flexible_chain", "绊脚锁", 1),
-                    CreateOffer("eye_offer", 100, "Art/Cards/treasure_100.png", "resource", "eye", "眼珠", 2),
-                    CreateOffer("fire_offer", 150, "Art/Cards/treasure_150.png", "resource", "fire", "紫色火焰", 1)
+                    CreateOffer("claw_offer", 50, "Art/Cards/50C.png", "resource", "claw", "爪子", 2),
+                    CreateOffer("card_offer", 100, "Art/Cards/100C.png", "card", "flexible_chain", "绊脚锁", 1),
+                    CreateOffer("eye_offer", 200, "Art/Cards/200C.png", "resource", "eye", "眼珠", 2),
+                    CreateOffer("fire_offer", 400, "Art/Cards/400C.png", "resource", "fire", "紫色火焰", 1)
                 }
             };
         }

@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
-  "testStartingGold": 400,
+  "testStartingGold": 1000,
   "offers": [
     {
       "id": "claw_offer",
       "price": 50,
-      "imagePath": "Art/Cards/treasure_50.png",
+      "imagePath": "Art/Cards/50C.png",
       "productPool": [
         {
           "weight": 1,
@@ -15,8 +15,8 @@
     },
     {
       "id": "card_offer",
-      "price": 80,
-      "imagePath": "Art/Cards/treasure_80.png",
+      "price": 100,
+      "imagePath": "Art/Cards/100C.png",
       "productPool": [
         {
           "weight": 1,
@@ -26,8 +26,8 @@
     },
     {
       "id": "eye_offer",
-      "price": 100,
-      "imagePath": "Art/Cards/treasure_100.png",
+      "price": 200,
+      "imagePath": "Art/Cards/200C.png",
       "productPool": [
         {
           "weight": 1,
@@ -37,8 +37,8 @@
     },
     {
       "id": "fire_offer",
-      "price": 150,
-      "imagePath": "Art/Cards/treasure_150.png",
+      "price": 400,
+      "imagePath": "Art/Cards/400C.png",
       "productPool": [
         {
           "weight": 1,

@@ -1268,7 +1268,7 @@ MonoBehaviour:
   deckArea: {fileID: 1755753980}
   handArea: {fileID: 547004008}
   discardArea: {fileID: 1755753980}
-  playArea: {fileID: 0}
+  playArea: {fileID: 2007843797}
   cardPrefab: {fileID: 3607185994323948659, guid: ea658d957d9b555449247467be68dfe8, type: 3}
   cardSpacing: 250
   drawDuration: 0.35
