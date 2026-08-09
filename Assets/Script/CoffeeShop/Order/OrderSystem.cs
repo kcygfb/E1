@@ -77,6 +77,7 @@ public class OrderSystem : MonoBehaviour
         var completed = activeOrder;
         activeOrder = null;
         Debug.Log($"[OrderSystem] Completed: {completed.CoffeeName}");
+        KiKs.Combat.RuntimeGameRepository.AddCraftedCoffee(coffee.coffeeId);
         GameEvent.Emit("OrderCompleted", completed);
         return true;
     }

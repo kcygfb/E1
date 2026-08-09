@@ -20,6 +20,7 @@ namespace KiKs.Combat
         private static readonly Dictionary<string, int> OwnedCardCopies = new(StringComparer.Ordinal);
         private static readonly Dictionary<string, int> FallbackResources = new(StringComparer.Ordinal);
         private static readonly List<string> LastBattleRewardCardIds = new();
+        private static readonly HashSet<string> _craftedCoffeeIds = new(StringComparer.Ordinal);
         private static DemoStage? _selectedDemoStage;
         private static int? _selectedEncounterIndex;
 
@@ -33,6 +34,8 @@ namespace KiKs.Combat
         public static int SelectedEncounterIndex => _selectedEncounterIndex ?? 0;
         public static IReadOnlyList<string> SelectedCoffeeIds => _selectedCoffeeIds;
         public static bool HasSelectedCoffees => _selectedCoffeeIds.Count > 0;
+        public static IReadOnlyCollection<string> CraftedCoffeeIds => _craftedCoffeeIds;
+        public static bool HasCraftedCoffees => _craftedCoffeeIds.Count > 0;
         public static int Gold => GetResourceAmount(GoldResourceId);
 
         public static IReadOnlyList<string> LastBattleRewardCards =>
@@ -102,6 +105,18 @@ namespace KiKs.Combat
         public static void ClearSelectedCoffees()
         {
             _selectedCoffeeIds = new ReadOnlyCollection<string>(new List<string>());
+        }
+
+        /// <summary>记录当天制作过的咖啡种类（去重）。跨场景传递到 PreBattle 供选择。</summary>
+        public static void AddCraftedCoffee(string coffeeId)
+        {
+            if (string.IsNullOrWhiteSpace(coffeeId)) return;
+            _craftedCoffeeIds.Add(coffeeId);
+        }
+
+        public static void ClearCraftedCoffees()
+        {
+            _craftedCoffeeIds.Clear();
         }
 
         public static void AddOwnedCard(string cardId, int amount = 1)
@@ -181,6 +196,7 @@ namespace KiKs.Combat
             ClearSelectedDeck();
             ClearSelectedDemoStage();
             ClearSelectedCoffees();
+            ClearCraftedCoffees();
             OwnedCardCopies.Clear();
             LastBattleRewardCardIds.Clear();
             FallbackResources.Clear();

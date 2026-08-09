@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
 using KiKs.UI;
@@ -7,12 +9,14 @@ using KiKs.UI;
 namespace KiKs.Combat
 {
     /// <summary>
-    /// PreBattle 咖啡选择 UI：弹窗横向列�?+ 底部栏位，类�?CardSelectionUI 的选牌模式�?
-    /// 点击咖啡弹窗里的�?�?加入底部栏位（最�?2 杯）�?
+    /// PreBattle 咖啡选择 UI：弹窗横向列表 + 底部栏位。
+    /// 列表来源：当天在咖啡店实际制作并成功交付过的咖啡种类（RuntimeGameRepository.CraftedCoffeeIds）。
+    /// 仅显示有战斗效果的咖啡（CoffeeEffectRegistry.HasEffect）。
+    /// 如果当天没有做过任何有战斗效果的咖啡，回退到 PourOver/BloodGarment 防止卡流程。
     /// </summary>
     public class CoffeeSelectionUI : MonoBehaviour
     {
-        private static readonly string[] AvailableCoffeeIds = { "PourOver", "BloodGarment" };
+        private static readonly string[] FallbackCoffeeIds = { "PourOver", "BloodGarment" };
 
         [System.Serializable]
         private sealed class CoffeeTutorialJson
@@ -47,9 +51,7 @@ namespace KiKs.Combat
         [SerializeField] private Transform coffeeListContent;
         [SerializeField] private GameObject coffeeItemPrefab;
 
-        [Header("咖啡图标（手动指定）")]
-        [SerializeField] private Sprite pourOverIcon;
-        [SerializeField] private Sprite bloodGarmentIcon;
+        [Header("咖啡图标尺寸")]
         [SerializeField] private Vector2 iconSize = new(120, 120);
 
         [Header("栏位")]
@@ -67,21 +69,28 @@ namespace KiKs.Combat
         private const int MaxCoffees = 2;
         private readonly List<string> selectedCoffeeIds = new();
         private readonly Dictionary<string, TutorialHintJson> coffeeTutorials = new();
+        private List<string> availableCoffeeIds = new();
 
-        private Sprite GetIconForCoffee(string coffeeId)
+        /// <summary>CoffeeIconCache 在 Assembly-CSharp，KiKs.Combat 不能直接引用，用反射调 GetCoffeeSprite。</summary>
+        private static Sprite GetCachedCoffeeSprite(string coffeeId)
         {
-            return coffeeId switch
-            {
-                "PourOver" => pourOverIcon,
-                "BloodGarment" => bloodGarmentIcon,
-                _ => null,
-            };
+            var cacheType = Type.GetType("CoffeeIconCache, Assembly-CSharp");
+            if (cacheType == null) return null;
+            var instanceProp = cacheType.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static);
+            var instance = instanceProp?.GetValue(null);
+            if (instance == null) return null;
+            var method = cacheType.GetMethod("GetCoffeeSprite", BindingFlags.Public | BindingFlags.Instance);
+            return method?.Invoke(instance, new object[] { coffeeId }) as Sprite;
         }
+
+        private Sprite GetIconForCoffee(string coffeeId) => GetCachedCoffeeSprite(coffeeId);
 
         public bool IsSelectionComplete => selectedCoffeeIds.Count == MaxCoffees;
 
         private void Start()
         {
+            CoffeeEffectRegistry.Load();
+
             if (tutorialController == null)
                 tutorialController = FindFirstObjectByType<TutorialController>();
 
@@ -92,10 +101,32 @@ namespace KiKs.Combat
 
             BindCloseButton();
 
+            BuildAvailableCoffeeIds();
             EnsureDefaultPreselection();
 
             PopulateCoffeeList();
             RefreshUI();
+        }
+
+        /// <summary>
+        /// 从 RuntimeGameRepository.CraftedCoffeeIds 构建可用列表，仅保留有战斗效果的。
+        /// 如果列表为空，回退到 FallbackCoffeeIds。
+        /// </summary>
+        private void BuildAvailableCoffeeIds()
+        {
+            availableCoffeeIds.Clear();
+
+            if (RuntimeGameRepository.HasCraftedCoffees)
+            {
+                foreach (var coffeeId in RuntimeGameRepository.CraftedCoffeeIds)
+                {
+                    if (CoffeeEffectRegistry.HasEffect(coffeeId))
+                        availableCoffeeIds.Add(coffeeId);
+                }
+            }
+
+            if (availableCoffeeIds.Count == 0)
+                availableCoffeeIds.AddRange(FallbackCoffeeIds);
         }
 
         /// <summary>
@@ -105,8 +136,8 @@ namespace KiKs.Combat
         {
             if (selectedCoffeeIds.Count > 0) return;
 
-            for (int i = 0; i < AvailableCoffeeIds.Length && selectedCoffeeIds.Count < MaxCoffees; i++)
-                selectedCoffeeIds.Add(AvailableCoffeeIds[i]);
+            for (int i = 0; i < availableCoffeeIds.Count && selectedCoffeeIds.Count < MaxCoffees; i++)
+                selectedCoffeeIds.Add(availableCoffeeIds[i]);
         }
 
         private void OnDestroy()
@@ -147,7 +178,7 @@ namespace KiKs.Combat
             for (int i = coffeeListContent.childCount - 1; i >= 0; i--)
                 Destroy(coffeeListContent.GetChild(i).gameObject);
 
-            foreach (var coffeeId in AvailableCoffeeIds)
+            foreach (var coffeeId in availableCoffeeIds)
             {
                 GameObject go;
                 if (coffeeItemPrefab != null)
@@ -176,8 +207,6 @@ namespace KiKs.Combat
             }
         }
 
-        /// <summary>预制体实例化后，�?coffeeId 设置图标/名字/描述�?/summary>
-        // Combat cannot reference CoffeeShop's loader assembly, so this reads the same coffee JSON files.
         private void LoadCoffeeTutorials()
         {
             coffeeTutorials.Clear();
@@ -234,7 +263,6 @@ namespace KiKs.Combat
 
         private GameObject CreateDefaultItem(string coffeeId)
         {
-            // 根容�?
             var go = new GameObject(coffeeId, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
             go.transform.SetParent(coffeeListContent, false);
             var rt = go.GetComponent<RectTransform>();
@@ -293,7 +321,7 @@ namespace KiKs.Combat
             return effect.Type switch
             {
                 CoffeeEffectType.Heal => $"回复 {effect.Amount} HP ({target})",
-                CoffeeEffectType.Bleed => $"流血 {effect.Amount} �?({target})",
+                CoffeeEffectType.Bleed => $"流血 {effect.Amount} 回合 ({target})",
                 CoffeeEffectType.Block => $"护盾 {effect.Amount} ({target})",
                 CoffeeEffectType.Damage => $"伤害 {effect.Amount} ({target})",
                 _ => effect.Type.ToString(),
@@ -394,13 +422,13 @@ namespace KiKs.Combat
                 : new Color(0.18f, 0.16f, 0.14f, 1);
         }
 
-        /// <summary>�?CardSelectionUI.OnBeginClicked 调用�?/summary>
+        /// <summary>由 CardSelectionUI.OnBeginClicked 调用。</summary>
         public void ConfirmSelection()
         {
             // 进游戏前兜底补满默认咖啡，保证无论玩家如何更改，出战前始终带满 2 杯
             if (selectedCoffeeIds.Count < MaxCoffees)
             {
-                foreach (var coffeeId in AvailableCoffeeIds)
+                foreach (var coffeeId in availableCoffeeIds)
                 {
                     if (selectedCoffeeIds.Count >= MaxCoffees) break;
                     if (!selectedCoffeeIds.Contains(coffeeId))

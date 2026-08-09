@@ -1,3 +1,5 @@
+using System;
+using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
@@ -8,6 +10,7 @@ namespace KiKs.Combat
     /// <summary>
     /// 咖啡道具槽：挂在 Card 场景的 CoffeeButton1 / CoffeeButton2 上。
     /// 拖拽到玩家/敌人立绘上释放，使用对应咖啡效果。每场战斗每杯只能用一次。
+    /// 图标从 CoffeeIconCache（Assembly-CSharp）通过反射获取。
     /// </summary>
     [RequireComponent(typeof(RectTransform))]
     public class CoffeeSlotController : MonoBehaviour, IEndDragHandler
@@ -18,10 +21,6 @@ namespace KiKs.Combat
         [SerializeField] private Text label;
 
         private static readonly Color UsedColor = new(0.3f, 0.3f, 0.3f, 0.4f);
-
-        [Header("咖啡图标（手动指定）")]
-        [SerializeField] private Sprite pourOverIcon;
-        [SerializeField] private Sprite bloodGarmentIcon;
 
         private void Start()
         {
@@ -107,14 +106,17 @@ namespace KiKs.Combat
                 WarningToast.Show(CombatWarningText.FromResult(result));
             }
         }
-        private Sprite GetIconForCoffee(string coffeeId)
+
+        /// <summary>CoffeeIconCache 在 Assembly-CSharp，用反射调 GetCoffeeSprite。</summary>
+        private static Sprite GetIconForCoffee(string coffeeId)
         {
-            return coffeeId switch
-            {
-                "PourOver" => pourOverIcon,
-                "BloodGarment" => bloodGarmentIcon,
-                _ => null,
-            };
+            var cacheType = Type.GetType("CoffeeIconCache, Assembly-CSharp");
+            if (cacheType == null) return null;
+            var instanceProp = cacheType.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static);
+            var instance = instanceProp?.GetValue(null);
+            if (instance == null) return null;
+            var method = cacheType.GetMethod("GetCoffeeSprite", BindingFlags.Public | BindingFlags.Instance);
+            return method?.Invoke(instance, new object[] { coffeeId }) as Sprite;
         }
 
         private void RefreshUI()

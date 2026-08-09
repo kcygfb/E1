@@ -9751,7 +9751,8 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: [{fileID: 183166992}]
+  m_Children:
+  - {fileID: 183166992}
   m_Father: {fileID: 1769967500}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -10700,7 +10701,8 @@ RectTransform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: [{fileID: 65221890}]
+  m_Children:
+  - {fileID: 65221890}
   m_Father: {fileID: 1290630250}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -12732,7 +12734,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -2080756948, guid: b610bb0f1ba00214c9737e6ec000f38e, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 105d9def0f28f864fb994e7c69b6bc11, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -14226,6 +14228,70 @@ MonoBehaviour:
   hoverVolume: 1
   clickSound: {fileID: 8300000, guid: 3bad75ebfe7f4114b97073eeb8d9c521, type: 3}
   clickVolume: 1
+--- !u!1 &4000000001
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4000000002}
+  - component: {fileID: 4000000003}
+  m_Layer: 0
+  m_Name: TutorialController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4000000002
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4000000001}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4000000003
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4000000001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f2c4f70a9d24ca89e66d7b8a765c931, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KiKs.UI::KiKs.UI.TutorialController
+  tooltipPrefab: {fileID: 7524191139530786084, guid: 8dcbd99d61a1f9d4f9d90dcdd9aab524, type: 3}
+  tooltipParent: {fileID: 0}
+  showSceneCalloutsOnStart: 1
+  sceneCallouts: []
+--- !u!114 &4000000010
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1954825195}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: KiKs.UI::KiKs.UI.TutorialToggleButton
+  tutorialController: {fileID: 0}
+  iconImage: {fileID: 1954825198}
+  onSprite: {fileID: 21300000, guid: 105d9def0f28f864fb994e7c69b6bc11, type: 3}
+  offSprite: {fileID: 21300000, guid: dea8a5b8865392a488fd9c55ccdecc3a, type: 3}
 --- !u!1001 &964536765108245639
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -14711,70 +14777,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 40aa33cf2006e11488eb8e6ca359afec, type: 3}
---- !u!1 &4000000001
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 4000000002}
-  - component: {fileID: 4000000003}
-  m_Layer: 0
-  m_Name: TutorialController
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &4000000002
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4000000001}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &4000000003
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4000000001}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3f2c4f70a9d24ca89e66d7b8a765c931, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: KiKs.UI::KiKs.UI.TutorialController
-  tooltipPrefab: {fileID: 7524191139530786084, guid: 8dcbd99d61a1f9d4f9d90dcdd9aab524, type: 3}
-  tooltipParent: {fileID: 0}
-  showSceneCalloutsOnStart: 1
-  sceneCallouts: []
---- !u!114 &4000000010
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1954825195}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: KiKs.UI::KiKs.UI.TutorialToggleButton
-  tutorialController: {fileID: 0}
-  iconImage: {fileID: 1954825198}
-  onSprite: {fileID: 0}
-  offSprite: {fileID: -307881882, guid: a580ee847b232724b81e2f493b68226e, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

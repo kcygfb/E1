@@ -1,4 +1,7 @@
+using System;
 using System.Collections.Generic;
+using System.IO;
+using UnityEngine;
 
 namespace KiKs.Combat
 {
@@ -14,23 +17,117 @@ namespace KiKs.Combat
     }
 
     /// <summary>
-    /// 硬编码咖啡战斗效果注册表。后续可改为从 JSON 加载。
+    /// 咖啡战斗效果注册表。从 StreamingAssets/CoffeeData/*.json 的 battleEffect 字段动态加载。
+    /// KiKs.Combat asmdef 不能引用 Assembly-CSharp 的 CoffeeDataLoader，所以自行读文件解析。
     /// </summary>
     public static class CoffeeEffectRegistry
     {
-        private static readonly Dictionary<string, CoffeeBattleEffect> _effects = new()
+        [Serializable]
+        private struct BattleEffectJson
         {
-            { "PourOver", new CoffeeBattleEffect { Type = CoffeeEffectType.Heal, Amount = 20, Target = CoffeeTarget.Self } },
-            { "BloodGarment", new CoffeeBattleEffect { Type = CoffeeEffectType.Bleed, Amount = 3, Target = CoffeeTarget.Enemy } },
-        };
+            public string type;
+            public int amount;
+            public string target;
+        }
 
-        public static bool TryGet(string coffeeId, out CoffeeBattleEffect effect) => _effects.TryGetValue(coffeeId, out effect);
-
-        public static string GetDisplayName(string coffeeId) => coffeeId switch
+        [Serializable]
+        private struct CoffeeEffectEntry
         {
-            "PourOver" => "手冲咖啡",
-            "BloodGarment" => "血衣",
-            _ => coffeeId,
-        };
+            public string coffeeId;
+            public string coffeeName;
+            public BattleEffectJson battleEffect;
+        }
+
+        private static readonly Dictionary<string, CoffeeBattleEffect> _effects = new(StringComparer.Ordinal);
+        private static readonly Dictionary<string, string> _displayNames = new(StringComparer.Ordinal);
+        private static bool _loaded;
+
+        private const string CoffeeDataDirectory = "CoffeeData";
+
+        /// <summary>加载所有咖啡 JSON 的 battleEffect。可安全多次调用（只有首次或 Reload 后才真正读文件）。</summary>
+        public static void Load()
+        {
+            if (_loaded) return;
+            Reload();
+        }
+
+        /// <summary>强制重新从磁盘加载。</summary>
+        public static void Reload()
+        {
+            _effects.Clear();
+            _displayNames.Clear();
+
+            var dir = Path.Combine(Application.streamingAssetsPath, CoffeeDataDirectory);
+            if (!Directory.Exists(dir))
+            {
+                Debug.LogWarning($"[CoffeeEffectRegistry] Directory not found: {dir}");
+                _loaded = true;
+                return;
+            }
+
+            foreach (var filePath in Directory.GetFiles(dir, "*.json", SearchOption.TopDirectoryOnly))
+            {
+                string json;
+                try { json = File.ReadAllText(filePath); }
+                catch (Exception e)
+                {
+                    Debug.LogWarning($"[CoffeeEffectRegistry] Cannot read {Path.GetFileName(filePath)}: {e.Message}");
+                    continue;
+                }
+
+                CoffeeEffectEntry entry;
+                try { entry = JsonUtility.FromJson<CoffeeEffectEntry>(json); }
+                catch (Exception e)
+                {
+                    Debug.LogWarning($"[CoffeeEffectRegistry] Cannot parse {Path.GetFileName(filePath)}: {e.Message}");
+                    continue;
+                }
+
+                if (entry.coffeeId == null) continue;
+
+                if (!string.IsNullOrEmpty(entry.coffeeName))
+                    _displayNames[entry.coffeeId] = entry.coffeeName;
+
+                if (entry.battleEffect.type == null) continue;
+
+                if (!Enum.TryParse(entry.battleEffect.type, true, out CoffeeEffectType type))
+                {
+                    Debug.LogWarning($"[CoffeeEffectRegistry] Unknown effect type '{entry.battleEffect.type}' for {entry.coffeeId}");
+                    continue;
+                }
+
+                var target = string.Equals(entry.battleEffect.target, "Self", StringComparison.OrdinalIgnoreCase)
+                    ? CoffeeTarget.Self
+                    : CoffeeTarget.Enemy;
+
+                _effects[entry.coffeeId] = new CoffeeBattleEffect
+                {
+                    Type = type,
+                    Amount = entry.battleEffect.amount,
+                    Target = target
+                };
+            }
+
+            _loaded = true;
+            Debug.Log($"[CoffeeEffectRegistry] Loaded {_effects.Count} battle effects from JSON.");
+        }
+
+        public static bool TryGet(string coffeeId, out CoffeeBattleEffect effect)
+        {
+            Load();
+            return _effects.TryGetValue(coffeeId, out effect);
+        }
+
+        public static string GetDisplayName(string coffeeId)
+        {
+            Load();
+            return _displayNames.TryGetValue(coffeeId, out var name) ? name : coffeeId;
+        }
+
+        public static bool HasEffect(string coffeeId)
+        {
+            Load();
+            return _effects.ContainsKey(coffeeId);
+        }
     }
 }

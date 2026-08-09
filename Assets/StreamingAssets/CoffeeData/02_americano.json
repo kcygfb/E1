@@ -38,5 +38,6 @@
       "qteType": ""
     }
   ],
-  "requiredMaterials": ["Espresso", "Water"]
+  "requiredMaterials": ["Espresso", "Water"],
+  "battleEffect": { "type": "Bleed", "amount": 3, "target": "Enemy" }
 }
