@@ -45,17 +45,12 @@ namespace KiKs.Combat
     {
         Damage,
         ToughnessDamage,
-        Stun,
         Bleed,
         Poison,
-        Vulnerability,
         NullifyAttacks,
         DamageReduction,
-        SkipEnemyTurns,
         DrawCards,
-        Immunity,
         SummonCompanion,
-        LifeStealMaxHealth,
         BleedScaledDamage,
         LifeSteal,
         ReflectDamage,
@@ -64,8 +59,6 @@ namespace KiKs.Combat
         Heal,
         PoisonScaledNextAttack,
         PoisonDamageBonus,
-        GainResource,
-        PlayCardsFromDiscard,
         /// <summary>Parry: deal toughness damage and reflect it per incoming enemy attack count.</summary>
         ParryCounter,
         /// <summary>Ambush: skip the enemy's turn, then deal damage.</summary>
@@ -99,12 +92,12 @@ namespace KiKs.Combat
         CombatantTurnSkipped,
         EnemyActionSkipped,
         StatusTicked,
-        EffectNotImplemented,
         CombatantDied,
         EnemyTurnStarted,
         Victory,
         Defeat,
         ActionRejected,
-        CardActivated
+        CardActivated,
+        CardDestroyed
     }
 }

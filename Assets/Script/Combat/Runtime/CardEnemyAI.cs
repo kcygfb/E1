@@ -5,7 +5,7 @@ namespace KiKs.Combat
 {
     /// <summary>
     /// 卡牌怪物 AI 驱动器：监听 EnemyTurnStarted 事件，调用策略执行回合。
-    /// 替换旧的 SimpleEnemyAI。在 Inspector 里拖入 EnemyAIStrategy ScriptableObject。
+    /// 在 Inspector 里拖入 EnemyAIStrategy ScriptableObject。
     /// </summary>
     [DisallowMultipleComponent]
     [RequireComponent(typeof(BattleController))]

@@ -17,6 +17,7 @@ public class OrderUI : MonoBehaviour
     [SerializeField] private TMP_Text ticketCoffeeLabel;
     [SerializeField] private TMP_Text ticketStepsText;
     [SerializeField] private TMP_Text ticketMaterialsText;
+    [SerializeField] private TMP_Text ticketPriceText;
 
     private void OnEnable()
     {
@@ -103,6 +104,10 @@ public class OrderUI : MonoBehaviour
             }
             ticketStepsText.text = sb.ToString();
         }
+
+        // 价格
+        if (ticketPriceText != null)
+            ticketPriceText.text = $"{coffee.sellPrice} C";
 
         // 消耗材料
         if (ticketMaterialsText != null)

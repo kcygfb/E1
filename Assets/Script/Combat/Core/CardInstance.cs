@@ -2,15 +2,14 @@ using System;
 
 namespace KiKs.Combat
 {
-    /// <summary>One physical card in the battle. Upgrade state never writes back to JSON.</summary>
+    /// <summary>One physical card in the battle. Temporary state never writes back to JSON.</summary>
     public sealed class CardInstance
     {
         public string InstanceId { get; }
         public CardSpec Spec { get; }
         public bool IsUpgraded { get; private set; }
         /// <summary>
-        /// Whether this physical magic card has been activated for the battle.
-        /// Activation belongs to the instance and is deliberately not cleared when the card is discarded.
+        /// Whether this physical magic card has been activated and is ready for its next play.
         /// </summary>
         public bool IsActivated { get; private set; }
 
@@ -40,6 +39,17 @@ namespace KiKs.Combat
             if (IsActivated || Spec.CostResource != CardResourceType.Mana) return false;
             IsActivated = true;
             return true;
+        }
+
+        internal void ConsumeActivation()
+        {
+            IsActivated = false;
+        }
+
+        internal void ResetForBattle()
+        {
+            IsUpgraded = false;
+            IsActivated = false;
         }
     }
 }

@@ -192,12 +192,9 @@ namespace KiKs.Combat
             return effects.Any(effect =>
                 effect.Type == CardEffectType.Damage ||
                 effect.Type == CardEffectType.ToughnessDamage ||
-                effect.Type == CardEffectType.Stun ||
-                effect.Type == CardEffectType.Vulnerability ||
                 effect.Type == CardEffectType.Bleed ||
                 effect.Type == CardEffectType.BleedScaledDamage ||
                 effect.Type == CardEffectType.LifeSteal ||
-                effect.Type == CardEffectType.LifeStealMaxHealth ||
                 effect.Type == CardEffectType.Poison ||
                 effect.Type == CardEffectType.PoisonDamageBonus ||
                 effect.Type == CardEffectType.BlockScaledDamage ||
@@ -215,17 +212,12 @@ namespace KiKs.Combat
             {
                 case "damage": return CardEffectType.Damage;
                 case "toughness_damage": return CardEffectType.ToughnessDamage;
-                case "stun": return CardEffectType.Stun;
                 case "bleed": return CardEffectType.Bleed;
                 case "poison": return CardEffectType.Poison;
-                case "vulnerability": return CardEffectType.Vulnerability;
                 case "nullify_attacks": return CardEffectType.NullifyAttacks;
                 case "damage_reduction": return CardEffectType.DamageReduction;
-                case "skip_enemy_turns": return CardEffectType.SkipEnemyTurns;
                 case "draw_cards": return CardEffectType.DrawCards;
-                case "immunity": return CardEffectType.Immunity;
                 case "summon_companion": return CardEffectType.SummonCompanion;
-                case "life_steal_max_health": return CardEffectType.LifeStealMaxHealth;
                 case "bleed_scaled_damage": return CardEffectType.BleedScaledDamage;
                 case "life_steal": return CardEffectType.LifeSteal;
                 case "reflect_damage": return CardEffectType.ReflectDamage;
@@ -234,8 +226,6 @@ namespace KiKs.Combat
                 case "heal": return CardEffectType.Heal;
                 case "poison_scaled_next_attack": return CardEffectType.PoisonScaledNextAttack;
                 case "poison_damage_bonus": return CardEffectType.PoisonDamageBonus;
-                case "gain_resource": return CardEffectType.GainResource;
-                case "play_cards_from_discard": return CardEffectType.PlayCardsFromDiscard;
                 case "parry_counter": return CardEffectType.ParryCounter;
                 case "invisible_attack": return CardEffectType.InvisibleAttack;
                 case "mana_card_burst": return CardEffectType.ManaCardBurst;

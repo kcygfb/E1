@@ -56,6 +56,7 @@ public class MaterialSpriteCache : MonoBehaviour
     [SerializeField] private Sprite snakeEspresso;
     [SerializeField] private Sprite tentacleEspresso;
     [SerializeField] private Sprite wolffurEspresso;
+    [SerializeField] private Sprite ESMEspresso;
 
     [Header("Icons - 手冲球产物 (PourOver)")]
     [SerializeField] private Sprite clawBall;
@@ -103,6 +104,7 @@ public class MaterialSpriteCache : MonoBehaviour
             { "snakeEspresso", snakeEspresso },
             { "tentacleEspresso", tentacleEspresso },
             { "wolffurEspresso", wolffurEspresso },
+            { "ESMEspresso", ESMEspresso },
             // 手冲球产物
             { "clawBall", clawBall },
             { "eyeBall", eyeBall },
@@ -149,6 +151,7 @@ public class MaterialSpriteCache : MonoBehaviour
             { "snakeEspresso", snakeEspresso },
             { "tentacleEspresso", tentacleEspresso },
             { "wolffurEspresso", wolffurEspresso },
+            { "ESMEspresso", ESMEspresso },
             // 手冲球产物
             { "clawBall", clawBall },
             { "eyeBall", eyeBall },

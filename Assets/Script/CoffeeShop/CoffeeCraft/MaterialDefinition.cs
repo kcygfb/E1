@@ -48,6 +48,8 @@ public static class MaterialDefinition
         new MatInfo { id = "snakeEspresso",    displayName = "蛇干浓缩", color = new Color(0.60f, 0.45f, 0.20f), isRaw = false },
         new MatInfo { id = "tentacleEspresso", displayName = "触手浓缩", color = new Color(0.40f, 0.35f, 0.55f), isRaw = false },
         new MatInfo { id = "wolffurEspresso",  displayName = "狼毫浓缩", color = new Color(0.50f, 0.50f, 0.55f), isRaw = false },
+        // ESM 萃取液（eye+snake 双粉萃取）
+        new MatInfo { id = "ESMEspresso",  displayName = "ESM浓缩", color = new Color(0.48f, 0.55f, 0.35f), isRaw = false },
         // 手冲球产物
         new MatInfo { id = "clawBall",     displayName = "爪子手冲球",   color = new Color(0.70f, 0.60f, 0.40f), isRaw = false },
         new MatInfo { id = "eyeBall",      displayName = "眼珠手冲球",   color = new Color(0.40f, 0.65f, 0.40f), isRaw = false },

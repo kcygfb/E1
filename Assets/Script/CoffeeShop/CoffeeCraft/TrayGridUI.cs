@@ -12,6 +12,12 @@ public class TrayGridUI : MonoBehaviour
     [SerializeField] private GameObject materialPalette;
     [SerializeField] private RectTransform[] cells = new RectTransform[9];
 
+    [Header("仓库开关")]
+    [Tooltip("打开/关闭材料仓库的按钮")]
+    [SerializeField] private Button togglePaletteBtn;
+    [Tooltip("制作阶段打开仓库时要隐藏的制作组")]
+    [SerializeField] private GameObject coffeeMakeGroup;
+
     private RectTransform _panel;
     private Vector2 _inspectorPos;
     private bool _isDragMode;
@@ -26,6 +32,9 @@ public class TrayGridUI : MonoBehaviour
         Instance = this;
         _panel = GetComponent<RectTransform>();
         _inspectorPos = _panel.anchoredPosition;
+
+        if (togglePaletteBtn != null)
+            togglePaletteBtn.onClick.AddListener(TogglePalette);
     }
 
     private void OnDestroy()
@@ -73,6 +82,8 @@ public class TrayGridUI : MonoBehaviour
         gameObject.SetActive(true);
         if (materialPalette != null)
             materialPalette.SetActive(true);
+        if (togglePaletteBtn != null)
+            togglePaletteBtn.gameObject.SetActive(true);
 
         for (int i = 0; i < 9; i++)
         {
@@ -95,12 +106,31 @@ public class TrayGridUI : MonoBehaviour
         UpdateStartShopButton();
     }
 
-    /// <summary>对话/空闲阶段：隐藏两个面板。</summary>
+    /// <summary>对话/空闲阶段：隐藏所有面板和按钮。</summary>
     public void HideAll()
     {
         gameObject.SetActive(false);
         if (materialPalette != null)
             materialPalette.SetActive(false);
+        if (togglePaletteBtn != null)
+            togglePaletteBtn.gameObject.SetActive(false);
+    }
+
+    /// <summary>开关材料仓库。MorningCheck 直接开关；Shop 阶段开时隐藏 Coffeemake，关时恢复。</summary>
+    public void TogglePalette()
+    {
+        if (materialPalette == null) return;
+
+        bool willOpen = !materialPalette.activeSelf;
+
+        if (_isDragMode)
+        {
+            // 制作阶段：开仓库 → 隐藏 Coffeemake；关仓库 → 显示 Coffeemake
+            if (coffeeMakeGroup != null)
+                coffeeMakeGroup.SetActive(!willOpen);
+        }
+
+        materialPalette.SetActive(willOpen);
     }
 
     /// <summary>制作阶段：只显示 TrayGrid，隐藏 MaterialPalette，格子可拖出材料到步骤按钮。</summary>
@@ -122,6 +152,8 @@ public class TrayGridUI : MonoBehaviour
         gameObject.SetActive(true);
         if (materialPalette != null)
             materialPalette.SetActive(false);
+        if (togglePaletteBtn != null)
+            togglePaletteBtn.gameObject.SetActive(true);
 
         for (int i = 0; i < 9; i++)
         {

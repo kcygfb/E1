@@ -470,65 +470,82 @@ namespace KiKs.Combat.Tests
         }
 
         [Test]
-        public void VulnerabilityAndImmunity_ModifySharedDamageFlow()
+        public void NullifyAttacks_AddsConfiguredCharges()
         {
-            var vulnerable = CreateCard("vulnerable", 0, CardResourceType.ActionPoint,
-                CreateEffect(CardEffectType.Vulnerability, amount: 50));
-            var attack = CreateDamageCard("attack", 0, 10);
-            var immune = CreateCard("immune", 0, CardResourceType.ActionPoint,
-                CreateEffect(CardEffectType.Immunity, amount: 1));
-            var engine = CreateEngine(new[] { vulnerable, attack, immune, attack });
+            var nullify = CreateCard("nullify", 0, CardResourceType.ActionPoint,
+                CreateEffect(CardEffectType.NullifyAttacks, amount: 2));
+            var engine = CreateEngine(nullify, 4);
             engine.StartBattle();
 
-            Assert.That(engine.PlayCard(
-                engine.State.Deck.Hand.First(card => card.Spec.Id == "vulnerable").InstanceId,
-                "enemy").Success, Is.True);
-            Assert.That(engine.PlayCard(
-                engine.State.Deck.Hand.First(card => card.Spec.Id == "attack").InstanceId,
-                "enemy").Success, Is.True);
-            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(85));
-
-            Assert.That(engine.PlayCard(
-                engine.State.Deck.Hand.First(card => card.Spec.Id == "immune").InstanceId,
-                null).Success, Is.True);
-            engine.EndPlayerTurn();
-            Assert.That(engine.ResolveEnemyAttack("enemy", 20).Success, Is.True);
-            Assert.That(engine.State.Player.CurrentHealth, Is.EqualTo(30));
-        }
-
-        [Test]
-        public void PlayCardsFromDiscard_ReplaysTopDiscardCardForFree()
-        {
-            var attack = CreateDamageCard("attack", 0, 5);
-            var replay = CreateCard("replay", 0, CardResourceType.ActionPoint,
-                CreateEffect(CardEffectType.PlayCardsFromDiscard, amount: 1));
-            var engine = CreateEngine(new[] { attack, replay, attack, replay });
-            engine.StartBattle();
-
-            var attackCard = engine.State.Deck.Hand.First(card => card.Spec.Id == "attack");
-            Assert.That(engine.PlayCard(attackCard.InstanceId, "enemy").Success, Is.True);
-            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(95));
-
-            var replayCard = engine.State.Deck.Hand.First(card => card.Spec.Id == "replay");
-            var result = engine.PlayCard(replayCard.InstanceId, null);
+            var result = engine.PlayCard(engine.State.Deck.Hand.Single().InstanceId, null);
 
             Assert.That(result.Success, Is.True);
-            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(90));
-            Assert.That(result.Events.Count(e => e.Type == CombatEventType.CardPlayed), Is.EqualTo(2));
+            Assert.That(engine.State.Player.NullifyAttackCharges, Is.EqualTo(2));
         }
 
         [Test]
-        public void LifeSteal_DoublesDamageAgainstBleedingTargets()
+        public void DrawCards_DrawsFromTheRemainingPileBeforeSourceCardIsDiscarded()
+        {
+            var filler = CreateDamageCard("filler", 0, 0);
+            var draw = CreateCard("draw", 0, CardResourceType.ActionPoint,
+                CreateEffect(CardEffectType.DrawCards, amount: 1));
+            var engine = CreateEngine(new[] { filler, filler, filler, filler, draw });
+            engine.StartBattle();
+            var drawCard = engine.State.Deck.Hand.Single(card => card.Spec.Id == "draw");
+
+            var result = engine.PlayCard(drawCard.InstanceId, null);
+
+            Assert.That(result.Success, Is.True);
+            Assert.That(engine.State.Deck.DrawPile, Is.Empty);
+            Assert.That(engine.State.Deck.Hand.Any(card => card.InstanceId == "filler#0"), Is.True);
+            Assert.That(result.Events.Any(e =>
+                e.Type == CombatEventType.CardDrawn && e.CardInstanceId == "filler#0"), Is.True);
+        }
+
+        [Test]
+        public void Heal_RestoresHealthWithoutExceedingMaximum()
+        {
+            var heal = CreateCard("heal", 0, CardResourceType.ActionPoint,
+                CreateEffect(CardEffectType.Heal, amount: 6));
+            var engine = CreateEngine(heal, 4);
+            engine.State.Player.ApplyDamage(10);
+            engine.StartBattle();
+
+            var result = engine.PlayCard(engine.State.Deck.Hand.Single().InstanceId, null);
+
+            Assert.That(result.Success, Is.True);
+            Assert.That(engine.State.Player.CurrentHealth, Is.EqualTo(26));
+        }
+
+        [Test]
+        public void LifeSteal_DoublesDamageAndHealingAgainstBleedingTargets()
         {
             var lifesteal = CreateCard("lifesteal", 0, CardResourceType.ActionPoint,
                 CreateEffect(CardEffectType.LifeSteal, amount: 9));
             var engine = CreateEngine(lifesteal, 4);
             engine.StartBattle();
+            engine.State.Player.ApplyDamage(20);
             engine.State.Enemies[0].AddBleedStacks(1);
 
             Assert.That(engine.PlayCard(engine.State.Deck.Hand.First().InstanceId, "enemy").Success, Is.True);
 
             Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(82));
+            Assert.That(engine.State.Player.CurrentHealth, Is.EqualTo(28));
+        }
+
+        [Test]
+        public void LifeSteal_UsesBaseDamageAndHealingAgainstTargetsWithoutBleed()
+        {
+            var lifesteal = CreateCard("lifesteal", 0, CardResourceType.ActionPoint,
+                CreateEffect(CardEffectType.LifeSteal, amount: 9));
+            var engine = CreateEngine(lifesteal, 4);
+            engine.StartBattle();
+            engine.State.Player.ApplyDamage(20);
+
+            Assert.That(engine.PlayCard(engine.State.Deck.Hand.First().InstanceId, "enemy").Success, Is.True);
+
+            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(91));
+            Assert.That(engine.State.Player.CurrentHealth, Is.EqualTo(19));
         }
 
         [Test]
@@ -565,7 +582,7 @@ namespace KiKs.Combat.Tests
         }
 
         [Test]
-        public void ActivateCard_SpendsMana_ThenPlayCostsNoActionPointsOrMana()
+        public void ActivateCard_SpendsMana_ThenPlayDestroysMagicCard()
         {
             var magic = CreateDamageCard("magic", 1, 5, null, CardResourceType.Mana);
             var engine = CreateEngine(magic);
@@ -586,10 +603,29 @@ namespace KiKs.Combat.Tests
             Assert.That(play.Success, Is.True);
             Assert.That(engine.State.Mana.Current, Is.EqualTo(0));
             Assert.That(engine.State.Player.CurrentActionPoints, Is.EqualTo(actionPointsBefore));
-            Assert.That(card.IsActivated, Is.True);
-            Assert.That(engine.State.Deck.DiscardPile.Single(), Is.SameAs(card));
+            Assert.That(card.IsActivated, Is.False);
+            Assert.That(engine.State.Deck.FindInHand(card.InstanceId), Is.Null);
+            Assert.That(engine.State.Deck.DiscardPile, Is.Empty);
+            Assert.That(play.Events.Any(e => e.Type == CombatEventType.CardDestroyed), Is.True);
+            Assert.That(play.Events.Any(e => e.Type == CombatEventType.CardDiscarded), Is.False);
             Assert.That(play.Events.Any(e => e.Type == CombatEventType.ActionPointsChanged), Is.False);
             Assert.That(play.Events.Any(e => e.Type == CombatEventType.ManaChanged), Is.False);
+        }
+
+        [Test]
+        public void NewBattleDeck_ClearsActivationEvenWhenCardInstanceIsReused()
+        {
+            var magic = CreateDamageCard("magic", 1, 5, null, CardResourceType.Mana);
+            var firstBattle = CreateEngine(magic);
+            firstBattle.StartBattle();
+            var card = firstBattle.State.Deck.Hand[0];
+            Assert.That(firstBattle.ActivateCard(card.InstanceId).Success, Is.True);
+            Assert.That(card.IsActivated, Is.True);
+
+            var nextBattleDeck = new DeckState(new[] { card }, 456, true);
+
+            Assert.That(card.IsActivated, Is.False);
+            Assert.That(nextBattleDeck.Draw(1, 1).DrawnCards.Single(), Is.SameAs(card));
         }
 
         [Test]
@@ -688,6 +724,45 @@ namespace KiKs.Combat.Tests
             Assert.That(engine.State.Enemies[0].CurrentToughness, Is.EqualTo(5));
             Assert.That(engine.State.Enemies[0].StunTurns, Is.EqualTo(1));
             Assert.That(engine.State.Phase, Is.EqualTo(CombatPhase.PlayerInput));
+        }
+
+        [Test]
+        public void EnemyDeck_ShufflesBeforeFirstDraw_AndReshufflesAfterExhaustion()
+        {
+            var enemySpecs = new[]
+            {
+                CreateDamageCard("enemy_a", 0, 0),
+                CreateDamageCard("enemy_b", 0, 0),
+                CreateDamageCard("enemy_c", 0, 0)
+            };
+            var enemyCards = enemySpecs
+                .Select((spec, index) => new CardInstance("enemy:" + spec.Id + "#" + index, spec))
+                .ToList();
+            var engine = CreateEngine(CreateDamageCard("player_wait", 0, 0), 12);
+            engine.State.RegisterCombatantDeck("enemy", new DeckState(enemyCards, 1, true));
+
+            var start = engine.StartBattle();
+
+            Assert.That(start.Success, Is.True);
+            Assert.That(engine.State.GetDeck("enemy").Hand.Single().Spec.Id, Is.EqualTo("enemy_a"),
+                "Seed 1 proves the enemy deck was shuffled before its first draw.");
+
+            CombatResult thirdCycle = null;
+            for (var i = 0; i < enemyCards.Count; i++)
+            {
+                Assert.That(engine.EndPlayerTurn().Success, Is.True);
+                var enemyCard = engine.State.GetDeck("enemy").Hand.Single();
+                Assert.That(engine.PlayEnemyCard("enemy", enemyCard.InstanceId).Success, Is.True);
+                thirdCycle = engine.CompleteEnemyTurn();
+                Assert.That(thirdCycle.Success, Is.True);
+            }
+
+            Assert.That(thirdCycle, Is.Not.Null);
+            Assert.That(thirdCycle.Events.Any(e =>
+                e.Type == CombatEventType.DeckReshuffled && e.SourceId == "enemy"), Is.True);
+            Assert.That(engine.State.GetDeck("enemy").Hand.Count, Is.EqualTo(1));
+            Assert.That(engine.State.GetDeck("enemy").DrawPile.Count, Is.EqualTo(2));
+            Assert.That(engine.State.GetDeck("enemy").DiscardPile, Is.Empty);
         }
 
         [Test]
@@ -844,40 +919,6 @@ namespace KiKs.Combat.Tests
             Assert.That(firstAttempt.Events.Any(e =>
                 e.Type == CombatEventType.CombatantTurnSkipped &&
                 e.SourceId == "enemy"), Is.True);
-        }
-
-        [Test]
-        public void EnemyStunCard_SkipsThePlayersNextTurnThroughTheSameGate()
-        {
-            var enemyStun = new CardSpec(
-                "enemy_stun",
-                "enemy_stun",
-                "enemy_stun",
-                "enemy_test",
-                CardResourceType.ActionPoint,
-                0,
-                false,
-                CardTargetType.SingleEnemy,
-                new[] { CreateEffect(CardEffectType.Stun, amount: 1) });
-            var engine = CreateEngine(CreateDamageCard("player_attack", 0, 1), 8);
-            RegisterEnemyDeck(engine, enemyStun);
-
-            engine.StartBattle();
-            engine.EndPlayerTurn();
-            var enemyCard = engine.State.GetDeck("enemy").Hand.Single();
-            Assert.That(engine.PlayEnemyCard("enemy", enemyCard.InstanceId).Success, Is.True);
-            Assert.That(engine.State.Player.StunTurns, Is.EqualTo(1));
-
-            var nextTurn = engine.CompleteEnemyTurn();
-
-            Assert.That(nextTurn.Success, Is.True);
-            Assert.That(engine.State.Player.StunTurns, Is.EqualTo(0));
-            Assert.That(engine.State.TurnNumber, Is.EqualTo(2));
-            Assert.That(engine.State.Phase, Is.EqualTo(CombatPhase.EnemyTurn));
-            Assert.That(engine.State.Deck.Hand.Count, Is.EqualTo(0));
-            Assert.That(nextTurn.Events.Any(e =>
-                e.Type == CombatEventType.CombatantTurnSkipped &&
-                e.TargetId == "player"), Is.True);
         }
 
         [Test]
@@ -1178,12 +1219,9 @@ namespace KiKs.Combat.Tests
                 id, id, id, "test", resource, cost, false,
                 effect.Type == CardEffectType.Damage ||
                 effect.Type == CardEffectType.ToughnessDamage ||
-                effect.Type == CardEffectType.Stun ||
-                effect.Type == CardEffectType.Vulnerability ||
                 effect.Type == CardEffectType.Bleed ||
                 effect.Type == CardEffectType.BleedScaledDamage ||
                 effect.Type == CardEffectType.LifeSteal ||
-                effect.Type == CardEffectType.LifeStealMaxHealth ||
                 effect.Type == CardEffectType.Poison ||
                 effect.Type == CardEffectType.PoisonDamageBonus ||
                 effect.Type == CardEffectType.BlockScaledDamage ||

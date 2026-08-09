@@ -10,7 +10,8 @@
         "en": "tentacle attack"
       },
       "description": {
-        "en": "Strike with three tentacle attacks."
+        "en": "Strike with three tentacle attacks.",
+        "zhCN": "连续攻击3次，每次造成3点伤害，削减2点韧性"
       },
       "category": "enemy_little_girl",
       "copies": 1,
@@ -45,7 +46,8 @@
         "en": "screaming"
       },
       "description": {
-        "en": "Scream to inflict bleed and reduce incoming damage."
+        "en": "Scream to inflict bleed and reduce incoming damage.",
+        "zhCN": "造成1点伤害，施加3层流血，获得减伤，持续3回合"
       },
       "category": "enemy_little_girl",
       "copies": 1,
@@ -84,7 +86,8 @@
         "en": "drag to abyss"
       },
       "description": {
-        "en": "Drag the target into the abyss."
+        "en": "Drag the target into the abyss.",
+        "zhCN": "造成20点伤害"
       },
       "category": "enemy_little_girl",
       "copies": 1,
@@ -115,7 +118,8 @@
         "en": "feel my pain"
       },
       "description": {
-        "en": "Deal damage and a large toughness hit."
+        "en": "Deal damage and a large toughness hit.",
+        "zhCN": "造成5点伤害，削减30点韧性"
       },
       "category": "enemy_little_girl",
       "copies": 1,

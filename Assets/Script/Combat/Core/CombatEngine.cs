@@ -66,8 +66,8 @@ namespace KiKs.Combat
         }
 
         /// <summary>
-        /// Spends this turn's mana to permanently activate one physical magic-card instance.
-        /// The activated state survives discarding, reshuffling and later plays.
+        /// Spends this turn's mana to activate one physical magic-card instance for its next play.
+        /// Unplayed activation can survive discarding and reshuffling, but never a completed play or battle reset.
         /// </summary>
         public CombatResult ActivateCard(string cardInstanceId)
         {
@@ -227,13 +227,25 @@ namespace KiKs.Combat
 
             if (intent.CardSource == CombatCardSource.Hand)
             {
-                card.ConsumeUpgrade();
-                sourceDeck.DiscardFromHand(card.InstanceId, out _);
-                events.Add(new CombatEvent(
-                    CombatEventType.CardDiscarded,
-                    source.Id,
-                    cardInstanceId: card.InstanceId,
-                    message: "Used card moved to " + source.DisplayName + "'s discard pile."));
+                if (card.Spec.CostResource == CardResourceType.Mana)
+                {
+                    sourceDeck.DestroyFromHand(card.InstanceId, out _);
+                    events.Add(new CombatEvent(
+                        CombatEventType.CardDestroyed,
+                        source.Id,
+                        cardInstanceId: card.InstanceId,
+                        message: "Used magic card was destroyed for the rest of this battle."));
+                }
+                else
+                {
+                    card.ConsumeUpgrade();
+                    sourceDeck.DiscardFromHand(card.InstanceId, out _);
+                    events.Add(new CombatEvent(
+                        CombatEventType.CardDiscarded,
+                        source.Id,
+                        cardInstanceId: card.InstanceId,
+                        message: "Used card moved to " + source.DisplayName + "'s discard pile."));
+                }
             }
             else
             {

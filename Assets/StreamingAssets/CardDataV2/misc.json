@@ -10,7 +10,8 @@
         "en": "zigzag"
       },
       "description": {
-        "en": "Attack 2 times (4 upgraded) for 1 damage and 1 toughness damage each."
+        "en": "Attack 2 times (4 upgraded) for 1 damage and 1 toughness damage each.",
+        "zhCN": "连续攻击2次，每次造成{剑}1点伤害，削减{盾}1点韧性"
       },
       "category": "misc",
       "copies": 1,
@@ -54,7 +55,8 @@
         "en": "parry"
       },
       "description": {
-        "en": "Deal 4 toughness damage (8 upgraded) and counter the enemy's attacks with toughness damage."
+        "en": "Deal 4 toughness damage (8 upgraded) and counter the enemy's attacks with toughness damage.",
+        "zhCN": "削减{盾}4点韧性，并反击敌人的攻击"
       },
       "category": "misc",
       "copies": 1,
@@ -89,7 +91,8 @@
         "en": "ambush"
       },
       "description": {
-        "en": "Hide (skip the enemy's next turn), then deal 10 damage (30 upgraded)."
+        "en": "Hide (skip the enemy's next turn), then deal 10 damage (30 upgraded).",
+        "zhCN": "隐身跳过敌方回合，造成{剑}10点伤害"
       },
       "category": "misc",
       "copies": 1,
@@ -124,7 +127,8 @@
         "en": "muscle boost"
       },
       "description": {
-        "en": "Deal 8 damage (15 upgraded) and 8 toughness damage (15 upgraded)."
+        "en": "Deal 8 damage (15 upgraded) and 8 toughness damage (15 upgraded).",
+        "zhCN": "造成{剑}8点伤害，削减{盾}8点韧性"
       },
       "category": "misc",
       "copies": 1,
@@ -164,7 +168,8 @@
         "en": "reflect"
       },
       "description": {
-        "en": "Reflect 6 damage (13 upgraded) back to the attacker."
+        "en": "Reflect 6 damage (13 upgraded) back to the attacker.",
+        "zhCN": "受到攻击时反射{剑}6点伤害"
       },
       "category": "misc",
       "copies": 1,
@@ -197,7 +202,8 @@
         "en": "magic burst"
       },
       "description": {
-        "en": "Deal 5 damage (8 upgraded) for each mana card spent this turn."
+        "en": "Deal 5 damage (8 upgraded) for each mana card spent this turn.",
+        "zhCN": "本回合每消耗1张魔法牌，造成{剑}5点伤害"
       },
       "category": "misc",
       "copies": 1,

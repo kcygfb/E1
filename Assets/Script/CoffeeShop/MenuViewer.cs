@@ -44,8 +44,68 @@ public class MenuViewer : MonoBehaviour
     private int _currentPage;
     private readonly List<Sprite> _filtered = new();
     private Vector2 _buttonOriginPos;
+    private bool _menuOpenedThisOrder;
+    private Sequence _hintSeq;
 
     private static readonly Regex PriceRegex = new Regex(@"_(\d+)$", RegexOptions.Compiled);
+
+    private void OnEnable()
+    {
+        GameEvent.On("OrderCreated", OnOrderCreated);
+        GameEvent.On("OrderCompleted", OnOrderCompleted);
+    }
+
+    private void OnDisable()
+    {
+        GameEvent.Off("OrderCreated", OnOrderCreated);
+        GameEvent.Off("OrderCompleted", OnOrderCompleted);
+        StopHintBounce();
+    }
+
+    private void OnOrderCreated(object _)
+    {
+        _menuOpenedThisOrder = false;
+        // 进入制作阶段后，菜单按钮可见且未打开过 → 开始提示抖动
+        if (openButton != null && openButton.gameObject.activeInHierarchy)
+            StartHintBounce();
+    }
+
+    private void OnOrderCompleted(object _)
+    {
+        StopHintBounce();
+    }
+
+    private void StartHintBounce()
+    {
+        StopHintBounce();
+        if (openButton == null) return;
+        var rt = openButton.GetComponent<RectTransform>();
+        if (rt == null) return;
+
+        // 上下大幅抖动两遍，再停顿更久，循环提示
+        _hintSeq = DOTween.Sequence();
+        _hintSeq.Append(rt.DOAnchorPosY(_buttonOriginPos.y + 22f, 0.35f).SetEase(Ease.OutQuad));
+        _hintSeq.Append(rt.DOAnchorPosY(_buttonOriginPos.y - 8f, 0.35f).SetEase(Ease.InQuad));
+        _hintSeq.Append(rt.DOAnchorPosY(_buttonOriginPos.y, 0.3f).SetEase(Ease.OutQuad));
+        _hintSeq.Append(rt.DOAnchorPosY(_buttonOriginPos.y + 14f, 0.3f).SetEase(Ease.OutQuad));
+        _hintSeq.Append(rt.DOAnchorPosY(_buttonOriginPos.y, 0.3f).SetEase(Ease.InQuad));
+        _hintSeq.AppendInterval(2.5f);
+        _hintSeq.SetLoops(-1, LoopType.Restart);
+    }
+
+    private void StopHintBounce()
+    {
+        if (_hintSeq != null)
+        {
+            _hintSeq.Kill();
+            _hintSeq = null;
+        }
+        if (openButton != null)
+        {
+            var rt = openButton.GetComponent<RectTransform>();
+            if (rt != null) rt.anchoredPosition = _buttonOriginPos;
+        }
+    }
 
     private void Awake()
     {
@@ -94,6 +154,8 @@ public class MenuViewer : MonoBehaviour
     private void Open()
     {
         if (viewerPanel == null || menuPages == null || menuPages.Length == 0) return;
+        _menuOpenedThisOrder = true;
+        StopHintBounce();
         SelectTier(0);
         viewerPanel.SetActive(true);
         if (openButton != null)

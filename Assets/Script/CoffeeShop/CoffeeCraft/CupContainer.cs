@@ -147,36 +147,34 @@ public class CupContainer : MonoBehaviour, IBeginDragHandler, IDragHandler, IEnd
         var results = new System.Collections.Generic.List<RaycastResult>();
         EventSystem.current.RaycastAll(eventData, results);
 
-        // 1. CupStack → 放回销毁
+        // 遍历所有命中，按优先级匹配第一个有效目标
         foreach (var r in results)
         {
-            if (r.gameObject.GetComponent<CupStack>() != null)
+            var go = r.gameObject;
+
+            // CupStack → 放回销毁
+            if (go.GetComponent<CupStack>() != null)
             {
                 _craftController?.OnCupReturned(this);
                 return;
             }
-        }
 
-        // 2. Btn_Deliver → 提交
-        foreach (var r in results)
-        {
-            if (r.gameObject.name == "Btn_Deliver")
+            // Btn_Deliver → 提交
+            if (go.name == "Btn_Deliver")
             {
                 _craftController?.OnCupDelivered(this);
                 return;
             }
-        }
 
-        // 3. NPCArea / CustomerController → 给顾客
-        foreach (var r in results)
-        {
-            var customer = r.gameObject.GetComponent<CustomerController>();
-            if (customer != null)
+            // CustomerController → 给顾客
+            if (go.GetComponent<CustomerController>() != null)
             {
                 _craftController?.OnCupDelivered(this);
                 return;
             }
-            if (r.gameObject.name == "NPCArea" || r.gameObject.transform.root.name == "NPCArea")
+
+            // NPCArea → 给顾客
+            if (go.name == "NPCArea" || go.transform.root.name == "NPCArea")
             {
                 _craftController?.OnCupDelivered(this);
                 return;

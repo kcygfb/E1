@@ -18,6 +18,9 @@ namespace KiKs.Combat
         private void Start()
         {
             if (animator == null) animator = GetComponent<CardDealAnimator>();
+            if (animator != null && !animator.HasPlayArea)
+                Debug.LogError("[BattleCardBridge] CardDealAnimator PlayArea is not assigned.", this);
+
             if (battleController == null) battleController = FindFirstObjectByType<BattleController>();
 
             ConfigureMagicHandCardBridge();

@@ -10,6 +10,8 @@ namespace KiKs.Combat
         [SerializeField] private RectTransform deckArea;
         [SerializeField] private RectTransform handArea;
         [SerializeField] private RectTransform discardArea;
+        [Tooltip("Optional invisible drop rectangle. Drag-to-play is disabled when omitted.")]
+        [SerializeField] private RectTransform playArea;
 
         [Header("卡牌")]
         [SerializeField] private GameObject cardPrefab;
@@ -22,10 +24,11 @@ namespace KiKs.Combat
         private readonly List<CardView> _handCards = new();
 
         public IReadOnlyList<CardView> HandCards => _handCards;
+        public bool HasPlayArea => playArea != null;
         public System.Func<CardView, bool> OnCardPlayed;
         public System.Func<CardView, bool> OnCardShot;
 
-        public CardView DrawCard(CardSpec spec, string instanceId = null, bool isUpgraded = false, bool isActivated = false)
+        public CardView DrawCard(CardSpec spec, string instanceId, bool isUpgraded = false, bool isActivated = false)
         {
             if (cardPrefab == null)
             {
@@ -39,6 +42,7 @@ namespace KiKs.Combat
                 cardView = cardObj.AddComponent<CardView>();
 
             cardView.Setup(spec, instanceId);
+            cardView.SetPlayArea(playArea);
             cardView.SetEmpowermentState(isUpgraded, isActivated);
             cardView.OnPlayRequested += HandleCardPlayed;
             cardView.OnShootRequested += HandleCardShot;
@@ -63,6 +67,20 @@ namespace KiKs.Combat
 
             Vector3 discardWorld = discardArea != null ? discardArea.position : Vector3.zero;
             cardView.PlayDiscardAnimation(discardWorld, () => Destroy(cardView.gameObject));
+            ArrangeHand();
+        }
+
+        public void DestroyCard(CardView cardView)
+        {
+            if (cardView == null || !_handCards.Contains(cardView)) return;
+            cardView.OnPlayRequested -= HandleCardPlayed;
+            cardView.OnShootRequested -= HandleCardShot;
+            cardView.OnDragCanceled -= HandleCardDragCanceled;
+            _handCards.Remove(cardView);
+
+            // Destroyed magic cards do not travel to, or visually enter, the discard pile.
+            cardView.gameObject.SetActive(false);
+            Destroy(cardView.gameObject);
             ArrangeHand();
         }
 
@@ -142,7 +160,10 @@ namespace KiKs.Combat
             bool success = OnCardPlayed?.Invoke(cardView) ?? true;
             if (success)
             {
-                DiscardCard(cardView);
+                if (cardView.Spec != null && cardView.Spec.CostResource == CardResourceType.Mana)
+                    DestroyCard(cardView);
+                else
+                    DiscardCard(cardView);
             }
             else
             {

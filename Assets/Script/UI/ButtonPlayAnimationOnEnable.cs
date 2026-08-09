@@ -3,17 +3,11 @@ using UnityEngine.UI;
 
 namespace KiKs.UI
 {
-    /// <summary>当 Button 从不 interactable 变为 interactable 时，触发一次播放动画。
-    /// 挂载在显示用子物体上：自身持有 Image + Animator，Button 在父物体（无碰撞遮挡）。
-    /// 配套 AnimatorController：Idle(默认空) + Play(触发)。动画不循环，播一次停最后一帧。</summary>
+    /// <summary>当 Button 从不 interactable 变为 interactable 时，启用 Animator 播放循环动画。
+    /// 禁用时关闭 Animator。Animator 持续播放 loop clip，无状态切换 = 无卡顿。</summary>
     [RequireComponent(typeof(Animator))]
     public class ButtonPlayAnimationOnEnable : MonoBehaviour
     {
-        [Tooltip("触发参数名，默认 Play")]
-        [SerializeField] private string triggerName = "Play";
-        [Tooltip("布尔参数名（可选）。传入则用 bool 驱动而非 trigger，动画停在 Play 态")]
-        [SerializeField] private string boolParameterName = "";
-
         private Button _button;
         private Animator _animator;
         private bool _wasInteractable;
@@ -23,11 +17,21 @@ namespace KiKs.UI
         {
             _button = GetComponentInParent<Button>();
             _animator = GetComponent<Animator>();
+            // 默认关闭，等按钮激活才开
+            if (_animator != null) _animator.enabled = false;
         }
 
         private void Start()
         {
-            if (_button != null) _wasInteractable = _button.interactable;
+            if (_button != null)
+            {
+                _wasInteractable = _button.interactable;
+                if (_wasInteractable && _animator != null)
+                {
+                    _animator.enabled = true;
+                    _animator.Play("Play", 0, 0f);
+                }
+            }
             _initialized = true;
         }
 
@@ -36,24 +40,15 @@ namespace KiKs.UI
             if (!_initialized || _button == null || _animator == null) return;
 
             bool interactable = _button.interactable;
-            if (interactable && !_wasInteractable)
+            if (interactable != _wasInteractable)
             {
-                _animator.Play("Idle", 0, 0f);
-                if (!string.IsNullOrEmpty(boolParameterName))
-                    _animator.SetBool(boolParameterName, true);
-                else
+                _animator.enabled = interactable;
+                if (interactable)
                 {
-                    _animator.ResetTrigger(triggerName);
-                    _animator.SetTrigger(triggerName);
+                    _animator.Play("Play", 0, 0f);
                 }
+                _wasInteractable = interactable;
             }
-            else if (!interactable && _wasInteractable)
-            {
-                if (!string.IsNullOrEmpty(boolParameterName))
-                    _animator.SetBool(boolParameterName, false);
-                _animator.Play("Idle", 0, 0f);
-            }
-            _wasInteractable = interactable;
         }
     }
 }

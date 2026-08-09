@@ -10,7 +10,8 @@
         "en": "dagger"
       },
       "description": {
-        "en": "Stab and inflict bleed."
+        "en": "Stab and inflict bleed.",
+        "zhCN": "造成{剑}6点伤害，施加{血}1层流血"
       },
       "category": "bleed",
       "copies": 1,
@@ -50,7 +51,8 @@
         "en": "chainsaw"
       },
       "description": {
-        "en": "Saw twice and stack heavy bleed."
+        "en": "Saw twice and stack heavy bleed.",
+        "zhCN": "连续攻击2次，每次造成{剑}2点伤害，施加{血}5层流血"
       },
       "category": "bleed",
       "copies": 1,
@@ -94,7 +96,8 @@
         "en": "scalpel"
       },
       "description": {
-        "en": "Make a precise bleeding cut."
+        "en": "Make a precise bleeding cut.",
+        "zhCN": "造成{剑}5点伤害，施加{血}2层流血"
       },
       "category": "bleed",
       "copies": 1,
@@ -134,7 +137,8 @@
         "en": "scourge"
       },
       "description": {
-        "en": "Whip the target with chained strikes."
+        "en": "Whip the target with chained strikes.",
+        "zhCN": "连续攻击2次，每次造成{剑}2点伤害，削减{盾}2点韧性，施加{血}2层流血"
       },
       "category": "bleed",
       "copies": 1,
@@ -185,7 +189,8 @@
         "en": "shuriken"
       },
       "description": {
-        "en": "Throw a special shuriken that tears through guard."
+        "en": "Throw a special shuriken that tears through guard.",
+        "zhCN": "造成{剑}8点伤害，削减{盾}6点韧性，施加{血}8层流血"
       },
       "category": "bleed",
       "copies": 1,
@@ -232,7 +237,8 @@
         "en": "reaper"
       },
       "description": {
-        "en": "Reap a large amount of health and bleed."
+        "en": "Reap a large amount of health and bleed.",
+        "zhCN": "造成{剑}17点伤害，施加{血}5层流血"
       },
       "category": "bleed",
       "copies": 1,
