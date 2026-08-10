@@ -7,6 +7,7 @@ public class InventorySystem : MonoBehaviour
     public static InventorySystem Instance { get; private set; }
 
     private readonly Dictionary<string, int> _amounts = new();
+    private readonly HashSet<string> _infinite = new();
 
     public event Action<string, int> OnResourceChanged;
 
@@ -25,8 +26,10 @@ public class InventorySystem : MonoBehaviour
             {
                 if (!string.IsNullOrEmpty(res.id) && !_amounts.ContainsKey(res.id))
                     _amounts[res.id] = res.startingAmount;
+                if (res.infinite)
+                    _infinite.Add(res.id);
             }
-            Debug.Log($"[InventorySystem] Initialized {_amounts.Count} resources.");
+            Debug.Log($"[InventorySystem] Initialized {_amounts.Count} resources ({_infinite.Count} infinite).");
         }
         else
         {
@@ -40,11 +43,13 @@ public class InventorySystem : MonoBehaviour
     }
 
     public int GetAmount(string resourceId) =>
+        _infinite.Contains(resourceId) ? 999 :
         _amounts.TryGetValue(resourceId, out var amount) ? amount : 0;
 
     public void Add(string resourceId, int amount)
     {
         if (string.IsNullOrEmpty(resourceId) || amount == 0) return;
+        if (_infinite.Contains(resourceId)) return;
         _amounts.TryGetValue(resourceId, out var current);
         _amounts[resourceId] = current + amount;
         OnResourceChanged?.Invoke(resourceId, _amounts[resourceId]);
@@ -53,6 +58,7 @@ public class InventorySystem : MonoBehaviour
     public bool Spend(string resourceId, int amount)
     {
         if (string.IsNullOrEmpty(resourceId) || amount <= 0) return false;
+        if (_infinite.Contains(resourceId)) return true;
         if (!_amounts.TryGetValue(resourceId, out var current) || current < amount) return false;
         _amounts[resourceId] = current - amount;
         OnResourceChanged?.Invoke(resourceId, _amounts[resourceId]);

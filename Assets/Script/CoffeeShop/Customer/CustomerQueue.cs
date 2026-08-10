@@ -273,6 +273,7 @@ public class CustomerQueue : MonoBehaviour
             var entry = new NPCEntry
             {
                 npc = genericCustomer,
+                dialogueKey = "generic",
                 orderMode = OrderMode.RandomUnlocked
             };
             EnqueueNpc(entry);

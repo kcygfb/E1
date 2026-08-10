@@ -9,6 +9,7 @@ public class ResourceJson
     public string id;
     public string displayName;
     public int startingAmount;
+    public bool infinite;
     public TutorialHintJson tutorial;
 }
 

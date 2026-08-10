@@ -215,7 +215,18 @@ namespace KiKs.Combat
 
         private void ResolveSceneReferences()
         {
+            // 优先取当前场景的 Canvas，避免绑到 DontDestroyOnLoad 的其他场景 Canvas
             var canvasObject = GameObject.Find("Canvas");
+            var activeScene = SceneManager.GetActiveScene();
+            if (canvasObject != null && canvasObject.scene != activeScene)
+            {
+                Canvas found = null;
+                foreach (var c in FindObjectsByType<Canvas>(FindObjectsSortMode.None))
+                {
+                    if (c.gameObject.scene == activeScene) { found = c; break; }
+                }
+                if (found != null) canvasObject = found.gameObject;
+            }
             canvasRect = canvasObject != null ? canvasObject.GetComponent<RectTransform>() : null;
             cardDealer = FindFirstObjectByType<CardDealAnimator>();
             npcPortrait = GameObject.Find("MerchantPortrait")?.GetComponent<Image>();

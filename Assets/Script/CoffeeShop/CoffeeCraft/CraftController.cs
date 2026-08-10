@@ -142,6 +142,12 @@ public class CraftController : MonoBehaviour
     // === 判定 ===
     private void Deliver(CupContainer cup)
     {
+        if (!cup.IsFilled)
+        {
+            KiKs.UI.WarningToast.Show("杯子里还没有放任何材料");
+            return;
+        }
+
         string coffeeId = cup.MergedCoffeeId;
         CoffeeDataJson matched = null;
 
