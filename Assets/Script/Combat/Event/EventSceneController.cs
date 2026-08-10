@@ -187,10 +187,20 @@ namespace KiKs.Combat
             EventDialogueLoader.EnsureLoaded();
             Debug.Log($"[EventScene] DialogueLoader loaded. EventDialogueLoader has {EventDialogueLoader.Get("evt_001_intro")?.lines?.Count ?? -1} lines for evt_001_intro.");
 
+            // 在过场动画期间就把 NPC 立绘加载好，避免入场后露出空白帧。
+            // 图片就绪前先隐藏立绘节点，防止显示未赋值的白色占位图。
+            var evt = EventSelectionState.CurrentEvent;
+            bool portraitReady = false;
+            if (evt != null)
+            {
+                if (npcPortrait != null)
+                    npcPortrait.enabled = false;
+                portraitReady = SetNpcDefaultPortrait(evt.npcId);
+            }
+
             yield return KiKs.UI.TransitionEffect.WaitEntrance();
             Debug.Log("[EventScene] Entrance complete.");
 
-            var evt = EventSelectionState.CurrentEvent;
             if (evt == null)
             {
                 Debug.LogWarning("[EventScene] No current event set; leaving.");
@@ -200,8 +210,9 @@ namespace KiKs.Combat
 
             Debug.Log($"[EventScene] Current event: id={evt.id}, npcId={evt.npcId}, introDialogueId={evt.introDialogueId}, cards={evt.cards?.Length}");
 
-            // 设置 NPC 立绘默认表情
-            SetNpcDefaultPortrait(evt.npcId);
+            // 立绘已提前加载完成，恢复显示
+            if (npcPortrait != null && portraitReady)
+                npcPortrait.enabled = true;
 
             // 阶段 3: 播放初始对话
             yield return PlayDialogue(evt.introDialogueId);
@@ -528,9 +539,10 @@ namespace KiKs.Combat
                 portrait.sprite = sprite;
         }
 
-        private void SetNpcDefaultPortrait(string npcId)
+        /// <summary>设置 NPC 默认立绘。返回是否成功赋图。</summary>
+        private bool SetNpcDefaultPortrait(string npcId)
         {
-            if (npcPortrait == null) return;
+            if (npcPortrait == null) return false;
 
             // 先尝试从 PortraitExpressionCache 取
             var cache = KiKs.UI.PortraitExpressionCache.Instance;
@@ -540,7 +552,7 @@ namespace KiKs.Combat
                 if (sprite != null)
                 {
                     npcPortrait.sprite = sprite;
-                    return;
+                    return true;
                 }
             }
 
@@ -558,11 +570,11 @@ namespace KiKs.Combat
             {
                 npcPortrait.sprite = loaded;
                 Debug.Log($"[EventScene] Loaded NPC portrait from Resources/{path}");
+                return true;
             }
-            else
-            {
-                Debug.LogWarning($"[EventScene] NPC portrait not found at Resources/{path} or PortraitExpressionCache.");
-            }
+
+            Debug.LogWarning($"[EventScene] NPC portrait not found at Resources/{path} or PortraitExpressionCache.");
+            return false;
         }
 
         // ==================== 阶段 4: 发卡 ====================
