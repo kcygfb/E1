@@ -64,6 +64,7 @@
         {
           "type": "attack",
           "imagePath": "Art/EventCards/day2/executeEvil.png",
+          "dialogueId": "evt_day2_execute",
           "cardRewardIds": ["bleed_reaper", "misc_magic_burst"]
         }
       ]

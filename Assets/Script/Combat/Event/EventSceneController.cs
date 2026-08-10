@@ -898,6 +898,9 @@ namespace KiKs.Combat
             }
 
             yield return new WaitForSeconds(0.5f);
+
+            // 播放分支对话
+            yield return PlayDialogue(cardDef.dialogueId);
         }
 
         /// <summary>简单攻击特效：玩家立绘前冲 → 刀光 → 弹回</summary>

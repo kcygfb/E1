@@ -70,6 +70,15 @@
       ]
     },
     {
+      "dialogueId": "evt_day2_execute",
+      "lines": [
+        { "speaker": "艾薇儿", "expression": "Irritated", "text": "既然你不像好人，那就别怪我了！" },
+        { "speaker": "电线杆人", "expression": "", "text": "等等——你——" },
+        { "speaker": "艾薇儿", "expression": "", "text": "（一刀下去，电线杆人倒地不动了。）" },
+        { "speaker": "艾薇儿", "expression": "Thinking", "text": "身上掉落了死神和魔力爆发的卡牌……虽然手段不太光彩，但收获倒是不错。" }
+      ]
+    },
+    {
       "dialogueId": "evt_day3_intro",
       "lines": [
         { "speaker": "艾薇儿", "expression": "Thinking", "text": "前面的路边站着一个灰色斗篷的小女孩？" },
