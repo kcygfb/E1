@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
@@ -7,6 +8,7 @@ namespace KiKs.Combat
     public static class EventJsonRepository
     {
         public const string RelativePath = "Event/events.json";
+        public const int ExpectedSchemaVersion = 3;
         public const int MinimumCardCount = 1;
 
         public static EventSceneDefinition Load()
@@ -38,18 +40,37 @@ namespace KiKs.Combat
                 return false;
             }
 
+            if (definition.schemaVersion != ExpectedSchemaVersion)
+            {
+                error = $"Event schemaVersion must be {ExpectedSchemaVersion}, got {definition.schemaVersion}.";
+                return false;
+            }
+
             if (definition.events == null || definition.events.Length == 0)
             {
                 error = "At least one event is required.";
                 return false;
             }
 
+            var eventIds = new HashSet<string>(StringComparer.Ordinal);
             for (var eventIndex = 0; eventIndex < definition.events.Length; eventIndex++)
             {
                 var evt = definition.events[eventIndex];
                 if (evt == null || string.IsNullOrWhiteSpace(evt.id))
                 {
                     error = $"Event {eventIndex + 1} needs a non-empty id.";
+                    return false;
+                }
+
+                if (!eventIds.Add(evt.id))
+                {
+                    error = $"Duplicate event id '{evt.id}'.";
+                    return false;
+                }
+
+                if (evt.day < 0 || evt.day >= LoopProgressionRepository.FinalDay)
+                {
+                    error = $"Event '{evt.id}' has invalid loop day {evt.day}.";
                     return false;
                 }
 
@@ -108,59 +129,75 @@ namespace KiKs.Combat
                 }
             }
 
+            for (var day = 1; day < LoopProgressionRepository.FinalDay; day++)
+            {
+                if (!Array.Exists(definition.events, evt => evt != null && evt.day == day))
+                {
+                    error = $"Event configuration has no event for loop day {day}.";
+                    return false;
+                }
+            }
+
             error = string.Empty;
             return true;
         }
 
         public static EventSceneDefinition CreateFallback()
         {
+            var events = new EventDefinition[LoopProgressionRepository.FinalDay - 1];
+            for (var day = 1; day < LoopProgressionRepository.FinalDay; day++)
+                events[day - 1] = CreateFallbackEvent(day);
+
             return new EventSceneDefinition
             {
-                schemaVersion = 2,
-                events = new[]
+                schemaVersion = ExpectedSchemaVersion,
+                events = events
+            };
+        }
+
+        private static EventDefinition CreateFallbackEvent(int day)
+        {
+            return new EventDefinition
+            {
+                id = $"evt_fallback_day{day}",
+                npcId = "namelessking",
+                npcDisplayName = "Fallback Wanderer",
+                order = 1,
+                day = day,
+                introDialogueId = "evt_light_intro",
+                cards = new[]
                 {
-                    new EventDefinition
+                    new EventCardDefinition
                     {
-                        id = "evt_fallback",
-                        npcId = "namelessking",
-                        npcDisplayName = "无名之王",
-                        order = 1,
-                        introDialogueId = "evt_light_intro",
-                        cards = new[]
-                        {
-                            new EventCardDefinition
-                            {
-                                type = "effect",
-                                imagePath = "Art/Cards/50C.png",
-                                dialogueId = "evt_light_opt1",
-                                hpCost = 10,
-                                goldRewardMin = 20,
-                                goldRewardMax = 100,
-                                cardRewardMode = "random_normal"
-                            },
-                            new EventCardDefinition
-                            {
-                                type = "effect",
-                                imagePath = "Art/Cards/100C.png",
-                                dialogueId = "evt_light_opt2",
-                                goldCost = 50,
-                                materialRewardId = "random_raw",
-                                materialRewardAmount = 2,
-                                cardRewardMode = "random_normal"
-                            },
-                            new EventCardDefinition
-                            {
-                                type = "attack",
-                                imagePath = "Art/Cards/200C.png",
-                                cardRewardMode = "random_special"
-                            },
-                            new EventCardDefinition
-                            {
-                                type = "end",
-                                imagePath = "Art/Cards/400C.png",
-                                dialogueId = "evt_light_end"
-                            }
-                        }
+                        type = "effect",
+                        imagePath = "Art/Cards/50C.png",
+                        dialogueId = "evt_light_opt1",
+                        hpCost = 10,
+                        goldRewardMin = 20,
+                        goldRewardMax = 100,
+                        cardRewardMode = "random_normal"
+                    },
+                    new EventCardDefinition
+                    {
+                        type = "effect",
+                        imagePath = "Art/Cards/100C.png",
+                        dialogueId = "evt_light_opt2",
+                        goldCost = 50,
+                        materialRewardId = "random_raw",
+                        materialRewardAmount = 2,
+                        cardRewardMode = "random_normal"
+                    },
+                    new EventCardDefinition
+                    {
+                        type = "attack",
+                        imagePath = "Art/Cards/200C.png",
+                        cardRewardMode = "random_special"
+                    },
+                    new EventCardDefinition
+                    {
+                        type = "end",
+                        imagePath = "Art/Cards/400C.png",
+                        dialogueId = "evt_light_end"
                     }
                 }
             };

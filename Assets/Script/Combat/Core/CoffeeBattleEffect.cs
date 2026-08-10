@@ -22,6 +22,27 @@ namespace KiKs.Combat
     /// </summary>
     public static class CoffeeEffectRegistry
     {
+        private static readonly Dictionary<string, string> ChineseDisplayNames = new(StringComparer.Ordinal)
+        {
+            ["PourOver"] = "手冲咖啡",
+            ["Espresso"] = "浓缩咖啡",
+            ["Americano"] = "美式咖啡",
+            ["Latte"] = "拿铁",
+            ["MochaLatte"] = "摩卡拿铁",
+            ["BudgetBrew"] = "平价特调",
+            ["ViscousDream"] = "黏稠之梦",
+            ["FinalGaze"] = "最终凝视",
+            ["AfterTaste"] = "回味",
+            ["OneSnakeTwoWays"] = "一蛇两吃",
+            ["TentacleLabyrinth"] = "触手迷宫",
+            ["FreeWom"] = "自由狼毫",
+            ["Sunset"] = "日落",
+            ["FlameLatte"] = "烈焰拿铁",
+            ["TheFifthFlavor"] = "第五味",
+            ["ESSymphony"] = "眼蛇交响曲",
+            ["BloodGarment"] = "血衣咖啡"
+        };
+
         [Serializable]
         private struct BattleEffectJson
         {
@@ -122,6 +143,40 @@ namespace KiKs.Combat
         {
             Load();
             return _displayNames.TryGetValue(coffeeId, out var name) ? name : coffeeId;
+        }
+
+        /// <summary>提示框使用的中文咖啡名。未知的新配方仍回退到数据文件中的名称。</summary>
+        public static string GetChineseDisplayName(string coffeeId)
+        {
+            if (string.IsNullOrWhiteSpace(coffeeId))
+                return "咖啡";
+
+            return ChineseDisplayNames.TryGetValue(coffeeId, out var name)
+                ? name
+                : GetDisplayName(coffeeId);
+        }
+
+        /// <summary>根据实际战斗效果生成选择界面与战斗界面共用的中文悬停说明。</summary>
+        public static string BuildChineseTooltip(string coffeeId)
+        {
+            var displayName = GetChineseDisplayName(coffeeId);
+            if (!TryGet(coffeeId, out var effect))
+                return $"{displayName}\n该咖啡暂未配置可用的战斗效果。";
+
+            var target = effect.Target == CoffeeTarget.Self ? "自身" : "敌人";
+            var effectDescription = effect.Type switch
+            {
+                CoffeeEffectType.Heal => $"为{target}回复 {effect.Amount} 点生命",
+                CoffeeEffectType.Bleed => $"使{target}获得 {effect.Amount} 层流血",
+                CoffeeEffectType.Block => $"使{target}获得 {effect.Amount} 点格挡",
+                CoffeeEffectType.Damage => $"对{target}造成 {effect.Amount} 点伤害",
+                _ => "产生特殊效果"
+            };
+            var usage = effect.Target == CoffeeTarget.Self
+                ? "将咖啡拖到己方角色头像上使用。"
+                : "将咖啡拖到敌方角色头像上使用。";
+
+            return $"{displayName}\n战斗效果：{effectDescription}。\n使用方法：{usage}";
         }
 
         public static bool HasEffect(string coffeeId)

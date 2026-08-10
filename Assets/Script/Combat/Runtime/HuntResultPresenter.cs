@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Reflection;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -171,18 +170,6 @@ namespace KiKs.Combat
             else
             {
                 SceneManager.LoadScene("PreBattle");
-            }
-        }
-
-        /// <summary>只推进 savedDayCount，不加载场景（避免和 TransitionTo 重复加载）。</summary>
-        private static void AdvanceDayCount()
-        {
-            Type timeSystemType = Type.GetType("TimeSystem, Assembly-CSharp");
-            FieldInfo dayField = timeSystemType?.GetField("savedDayCount", BindingFlags.Public | BindingFlags.Static);
-            if (dayField != null && dayField.FieldType == typeof(int))
-            {
-                dayField.SetValue(null, (int)dayField.GetValue(null) + 1);
-                Debug.Log($"[HuntResult] Defeat — advanced day to {(int)dayField.GetValue(null)}.");
             }
         }
 
@@ -580,22 +567,6 @@ namespace KiKs.Combat
                     return candidate;
             }
             return FindFirstObjectByType<Canvas>();
-        }
-
-        private static void EndNightAndReturnToCafe()
-        {
-            Type timeSystemType = Type.GetType("TimeSystem, Assembly-CSharp");
-            MethodInfo endNightMethod = timeSystemType?.GetMethod(
-                "EndNightPhaseStatic",
-                BindingFlags.Public | BindingFlags.Static);
-            if (endNightMethod != null)
-            {
-                endNightMethod.Invoke(null, null);
-                return;
-            }
-
-            Debug.LogWarning("[HuntResult] TimeSystem was not found; loading Cafe without advancing day.");
-            SceneManager.LoadScene("Cafe");
         }
 
         private static GameObject CreateUIObject(

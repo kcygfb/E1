@@ -283,9 +283,7 @@ namespace KiKs.Combat
                 cardPreviewName.text = card.DisplayName;
             if (cardPreviewDesc != null)
             {
-                var desc = !string.IsNullOrWhiteSpace(card.DescriptionZhCn)
-                    ? CardDescriptionFormatter.Format(card.DescriptionZhCn)
-                    : card.DescriptionEn;
+                var desc = CardDescriptionFormatter.FormatDescription(card, false);
                 cardPreviewDesc.text = desc;
             }
         }
@@ -332,6 +330,7 @@ namespace KiKs.Combat
             }
 
             selectedCardIds.Add(cardId);
+            PersistSelectedDeckToSession();
             RefreshSelectionUI();
         }
 
@@ -359,6 +358,7 @@ namespace KiKs.Combat
                 return;
 
             selectedCardIds.RemoveAt(selectedCardIds.Count - 1);
+            PersistSelectedDeckToSession();
             RuntimeGameRepository.ClearSelectedDemoStage();
             DailyAreaMapState.CancelSelectedPoint();
             RefreshMapPoints();
@@ -369,6 +369,7 @@ namespace KiKs.Combat
         {
             if (_isStartingBattle || slotIndex >= selectedCardIds.Count) return;
             selectedCardIds.RemoveAt(slotIndex);
+            PersistSelectedDeckToSession();
             RefreshSelectionUI();
         }
 
@@ -561,7 +562,9 @@ namespace KiKs.Combat
                 return;
             }
 
-            // Treasure does not need a combat deck or encounter slot.
+            // Treasure does not need a combat deck or encounter slot, but the current
+            // day deck still belongs in the shared runtime repository.
+            PersistSelectedDeckToSession();
             RuntimeGameRepository.ClearSelectedDemoStage();
             RuntimeGameRepository.ClearSelectedEncounterIndex();
             _isStartingBattle = true;
@@ -584,7 +587,7 @@ namespace KiKs.Combat
                 return;
             }
 
-            var evt = EventSelectionState.PickRandomEvent();
+            var evt = EventSelectionState.PickEventForCurrentDay();
             if (evt == null)
             {
                 WarningToast.Show("暂无可用事件");
@@ -599,6 +602,7 @@ namespace KiKs.Combat
             }
 
             EventSelectionState.SetCurrentEvent(evt);
+            PersistSelectedDeckToSession();
             RuntimeGameRepository.ClearSelectedDemoStage();
             RuntimeGameRepository.ClearSelectedEncounterIndex();
             _isStartingBattle = true;
@@ -873,7 +877,7 @@ namespace KiKs.Combat
 
             _isStartingBattle = true;
             RefreshSelectionUI();
-            RuntimeGameRepository.SetSelectedDeck(selectedCardIds);
+            PersistSelectedDeckToSession();
             Debug.Log(
                 $"[CardSelectionUI] Starting encounter {RuntimeGameRepository.SelectedEncounterIndex} with " +
                 $"{selectedCardIds.Count} cards.");
@@ -958,6 +962,17 @@ namespace KiKs.Combat
 
             selectedCardIds.Clear();
             selectedCardIds.AddRange(RuntimeGameRepository.SelectedCardIds);
+        }
+
+        private void PersistSelectedDeckToSession()
+        {
+            if (selectedCardIds.Count == 0)
+            {
+                RuntimeGameRepository.ClearSelectedDeck();
+                return;
+            }
+
+            RuntimeGameRepository.SetSelectedDeck(selectedCardIds);
         }
 
         private void BindCloseButton(GameObject popup)

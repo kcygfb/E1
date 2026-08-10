@@ -11,7 +11,7 @@
       },
       "description": {
         "en": "Stab and inflict bleed.",
-        "zhCN": "造成{剑}6点伤害，施加{血}1层流血"
+        "zhCN": "造成{剑}{amount:0}点伤害，施加{血}{amount:1}层流血"
       },
       "category": "bleed",
       "copies": 1,
@@ -52,7 +52,7 @@
       },
       "description": {
         "en": "Saw twice and stack heavy bleed.",
-        "zhCN": "连续攻击2次，每次造成{剑}2点伤害，施加{血}5层流血"
+        "zhCN": "连续攻击2次，每次造成{剑}{amount:0}点伤害，施加{血}{amount:1}层流血"
       },
       "category": "bleed",
       "copies": 1,
@@ -97,7 +97,7 @@
       },
       "description": {
         "en": "Make a precise bleeding cut.",
-        "zhCN": "造成{剑}5点伤害，施加{血}2层流血"
+        "zhCN": "造成{剑}{amount:0}点伤害，施加{血}{amount:1}层流血"
       },
       "category": "bleed",
       "copies": 1,
@@ -138,7 +138,7 @@
       },
       "description": {
         "en": "Whip the target with chained strikes.",
-        "zhCN": "连续攻击2次，每次造成{剑}2点伤害，削减{盾}2点韧性，施加{血}2层流血"
+        "zhCN": "连续攻击{hits:0}次，每次造成{剑}{amount:0}点伤害，削减{盾}{amount:1}点韧性，施加{血}{amount:2}层流血"
       },
       "category": "bleed",
       "copies": 1,
@@ -190,7 +190,7 @@
       },
       "description": {
         "en": "Throw a special shuriken that tears through guard.",
-        "zhCN": "造成{剑}8点伤害，削减{盾}6点韧性，施加{血}8层流血"
+        "zhCN": "造成{剑}{amount:0}点伤害，削减{盾}{amount:1}点韧性，施加{血}{amount:2}层流血"
       },
       "category": "bleed",
       "copies": 1,
@@ -238,7 +238,7 @@
       },
       "description": {
         "en": "Reap a large amount of health and bleed.",
-        "zhCN": "造成{剑}17点伤害，施加{血}5层流血"
+        "zhCN": "造成{剑}{amount:0}点伤害，施加{血}{amount:1}层流血"
       },
       "category": "bleed",
       "copies": 1,

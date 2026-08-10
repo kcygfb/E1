@@ -57,6 +57,7 @@ namespace KiKs.Combat
         public int TotalDamage { get; internal set; }
         public bool SourceDied { get; internal set; }
         public bool TargetDied { get; internal set; }
+        internal int ExecutionDamageMultiplier { get; set; } = 1;
     }
 
     /// <summary>
@@ -496,11 +497,12 @@ namespace KiKs.Combat
                     break;
 
                 case CardEffectType.ExecutionDouble:
-                    // Deal damage and double the next execution damage.
-                    result.TotalDamage += ResolveDamageEffect(source, target, card, effect, events);
-                    source.AddExecutionMultiplier(2);
-                    AddStatusEvent(source, source, card, source.ExecutionMultiplier,
-                        "Next execution damage doubled.", events);
+                    var executionMultiplier = effect.Amount.Resolve(card.IsUpgraded);
+                    if (executionMultiplier < 1)
+                        throw new InvalidOperationException("Execution damage multiplier must be at least one.");
+
+                    // Card-scoped modifier: it is discarded when this card does not trigger an execution.
+                    result.ExecutionDamageMultiplier *= executionMultiplier;
                     break;
             }
         }
@@ -649,7 +651,7 @@ namespace KiKs.Combat
             CombatFlowResult result,
             List<CombatEvent> events)
         {
-            var multiplier = source != null ? source.ConsumeExecutionMultiplier() : 1;
+            var multiplier = result.ExecutionDamageMultiplier;
             var executionDamage = _state.Rules.ExecutionDamage * multiplier;
             var actualDamage = ApplyDamage(
                 source,
@@ -669,7 +671,9 @@ namespace KiKs.Combat
                 target.Id,
                 sourceActionId,
                 actualDamage,
-                "Execution resolved automatically."));
+                multiplier > 1
+                    ? "Execution resolved automatically (x" + multiplier + ")."
+                    : "Execution resolved automatically."));
 
             if (target.IsDead) return;
 

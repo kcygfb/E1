@@ -7,7 +7,7 @@
   "unlockAmount": 1,
   "tutorial": {
     "targetId": "Grinder",
-    "description": "Start with the grinder — fine powder releases more flavor from every ingredient."
+    "description": "研磨机：把咖啡豆或怪物素材磨成粉末，为后续萃取、手冲和配方制作做准备。"
   },
   "recipe": [
     {

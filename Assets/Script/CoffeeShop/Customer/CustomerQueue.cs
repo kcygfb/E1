@@ -58,10 +58,50 @@ public class CustomerQueue : MonoBehaviour
         (orderSystem == null || !orderSystem.HasActiveOrder);
 
     /// <summary>供 StartOfDayController 调用</summary>
+    private void Awake()
+    {
+        ValidateDayConfigs();
+    }
+
     public DayConfig GetDayConfig(int day)
     {
         if (dayConfigs == null) return null;
         return dayConfigs.FirstOrDefault(d => d != null && d.day == day);
+    }
+
+    public DayConfig GetCurrentDayConfig()
+    {
+        return GetDayConfig(KiKs.Combat.RuntimeGameRepository.CurrentDay);
+    }
+
+    private static int ResolveLoopDay(int phaseDay)
+    {
+        var loopDay = KiKs.Combat.RuntimeGameRepository.CurrentDay;
+        if (phaseDay != loopDay)
+            Debug.LogWarning($"[CafeDayRouting] Ignoring stale phase day {phaseDay}; loop day is {loopDay}.");
+        return loopDay;
+    }
+
+    private void ValidateDayConfigs()
+    {
+        var configuredDays = new HashSet<int>();
+        foreach (var config in dayConfigs ?? new List<DayConfig>())
+        {
+            if (config == null) continue;
+            if (config.day <= 0)
+            {
+                Debug.LogError($"[CafeDayRouting] DayConfig {config.name} has invalid day {config.day}.", config);
+                continue;
+            }
+            if (!configuredDays.Add(config.day))
+                Debug.LogError($"[CafeDayRouting] Multiple DayConfigs are assigned for day {config.day}.", this);
+        }
+
+        for (var day = 1; day < KiKs.Combat.LoopProgressionRepository.FinalDay; day++)
+        {
+            if (!configuredDays.Contains(day))
+                Debug.LogWarning($"[CafeDayRouting] No DayConfig is assigned for loop day {day}; generic customer fallback will be used.", this);
+        }
     }
 
     private void OnEnable()
@@ -82,12 +122,14 @@ public class CustomerQueue : MonoBehaviour
     {
         if (payload is not PhaseChangedPayload p) return;
 
+        var loopDay = ResolveLoopDay(p.Day);
+
         if (p.Phase == DayPhase.Shop)
         {
             _shopPhaseActive = true;
             _endOfDayPhaseActive = false;
             if (endDayButton != null) endDayButton.SetActive(false);
-            BuildQueueForDay(p.Day);
+            BuildQueueForDay(loopDay);
             TrySpawnNextNpc();
             NotifyIfShopComplete();
         }
@@ -96,7 +138,7 @@ public class CustomerQueue : MonoBehaviour
             _shopPhaseActive = false;
             _endOfDayPhaseActive = true;
             if (endDayButton != null) endDayButton.SetActive(false);
-            BuildEndOfDayQueue(p.Day);
+            BuildEndOfDayQueue(loopDay);
             TrySpawnNextNpc();
         }
         else if (p.Phase == DayPhase.MorningCheck)

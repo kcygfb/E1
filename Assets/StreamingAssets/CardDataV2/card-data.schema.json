@@ -128,10 +128,12 @@
           ],
           "properties": {
             "en": {
+              "description": "Card text template. Dynamic values use {amount:N} or {hits:N}, where N is the zero-based effects index.",
               "type": "string",
               "minLength": 1
             },
             "zhCN": {
+              "description": "卡牌文本模板。动态数值使用 {amount:N} 或 {hits:N}，N 为 effects 的零基序号。",
               "type": [
                 "string",
                 "null"

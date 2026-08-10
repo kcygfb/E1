@@ -39,7 +39,7 @@ public class StartOfDayController : MonoBehaviour
 
         _queue = FindFirstObjectByType<CustomerQueue>();
 
-        var entries = ResolveEntriesForDay(p.Day);
+        var entries = ResolveEntriesForCurrentDay();
         if (entries == null || entries.Count == 0)
         {
             CompleteStartOfDay();
@@ -49,10 +49,10 @@ public class StartOfDayController : MonoBehaviour
         StartCoroutine(PlayStartOfDayDialogues(entries));
     }
 
-    private List<NPCEntry> ResolveEntriesForDay(int day)
+    private List<NPCEntry> ResolveEntriesForCurrentDay()
     {
         if (_queue == null) return null;
-        var config = _queue.GetDayConfig(day);
+        var config = _queue.GetCurrentDayConfig();
         if (config == null || config.startOfDay == null || config.startOfDay.Count == 0)
             return null;
         return config.startOfDay;
@@ -115,9 +115,7 @@ public class StartOfDayController : MonoBehaviour
 
         if (_queue != null)
         {
-            var prefabField = typeof(CustomerQueue).GetField("npcVisualPrefab",
-                System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
-            var prefab = prefabField?.GetValue(_queue) as GameObject;
+            var prefab = _queue.npcVisualPrefab;
             if (prefab != null)
             {
                 obj = Instantiate(prefab);
@@ -137,9 +135,7 @@ public class StartOfDayController : MonoBehaviour
         Transform parent = null;
         if (_queue != null)
         {
-            var parentField = typeof(CustomerQueue).GetField("npcParent",
-                System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
-            parent = parentField?.GetValue(_queue) as Transform;
+            parent = _queue.npcParent;
         }
         if (parent == null)
         {

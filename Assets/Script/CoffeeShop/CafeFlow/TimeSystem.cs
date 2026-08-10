@@ -82,7 +82,7 @@ public class TimeSystem : MonoBehaviour
 
     private IEnumerator Start()
     {
-        dayCount = KiKs.Combat.RuntimeGameRepository.CurrentDay;
+        SynchronizeDayFromLoop();
         Debug.Log($"[TimeSystem] Start() -> Day {dayCount}");
         yield return KiKs.UI.TransitionEffect.WaitEntrance();
 
@@ -192,7 +192,7 @@ public class TimeSystem : MonoBehaviour
     {
         if (isEndingShop) return;
         isEndingShop = true;
-        dayCount = KiKs.Combat.RuntimeGameRepository.CurrentDay;
+        SynchronizeDayFromLoop();
         CurrentPhase = DayPhase.Night;
         EmitPhaseChanged();
         GameEvent.Emit("DayEnded", dayCount);
@@ -253,8 +253,19 @@ public class TimeSystem : MonoBehaviour
         StartShopPhase();
     }
 
+    private void SynchronizeDayFromLoop()
+    {
+        var loopDay = KiKs.Combat.RuntimeGameRepository.CurrentDay;
+        if (dayCount != loopDay)
+        {
+            Debug.Log($"[TimeSystem] Synchronizing Cafe day {dayCount} -> loop day {loopDay}.");
+            dayCount = loopDay;
+        }
+    }
+
     private void EmitPhaseChanged()
     {
+        SynchronizeDayFromLoop();
         GameEvent.Emit("PhaseChanged", new PhaseChangedPayload { Phase = CurrentPhase, Day = dayCount });
     }
 }

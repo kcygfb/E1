@@ -41,6 +41,23 @@ namespace KiKs.Combat.Tests
             var bleedEffect = scalpel.Effects.Single(effect => effect.Type == CardEffectType.Bleed);
             Assert.That(scalpel.DisplayNameEn, Is.EqualTo("scalpel"));
             Assert.That(bleedEffect.Amount.BaseValue, Is.GreaterThan(0));
+
+            var breaker = repository.GetRequiredCard("heavy_hydraulic_breaker");
+            Assert.That(breaker.DescriptionEn, Is.EqualTo(
+                "Deal {amount:0} damage and {amount:1} toughness damage. If this card triggers an execution, double that execution's damage."));
+            Assert.That(breaker.DescriptionZhCn, Is.EqualTo(
+                "造成{剑}{amount:0}点伤害并削减{盾}{amount:1}点韧性。若该牌触发处决，使此次处决伤害翻倍"));
+            Assert.That(breaker.Effects.Select(effect => effect.Type), Is.EqualTo(new[]
+            {
+                CardEffectType.Damage,
+                CardEffectType.ToughnessDamage,
+                CardEffectType.ExecutionDouble
+            }));
+            Assert.That(breaker.Effects[0].Amount.BaseValue, Is.EqualTo(6));
+            Assert.That(breaker.Effects[0].Amount.UpgradedValue, Is.EqualTo(11));
+            Assert.That(breaker.Effects[1].Amount.BaseValue, Is.EqualTo(6));
+            Assert.That(breaker.Effects[1].Amount.UpgradedValue, Is.EqualTo(11));
+            Assert.That(breaker.Effects[2].Amount.BaseValue, Is.EqualTo(2));
         }
 
         [Test]
@@ -58,9 +75,9 @@ namespace KiKs.Combat.Tests
 
             // 抽样验证文案语义
             Assert.That(repository.GetRequiredCard("heavy_labrys").DescriptionZhCn,
-                Is.EqualTo("造成{剑}4点伤害，削减{盾}8点韧性"));
+                Is.EqualTo("造成{剑}{amount:0}点伤害，削减{盾}{amount:1}点韧性"));
             Assert.That(repository.GetRequiredCard("ranged_sniper_rifle").DescriptionZhCn,
-                Is.EqualTo("造成{剑}12点伤害"));
+                Is.EqualTo("造成{剑}{amount:0}点伤害"));
             Assert.That(repository.GetRequiredCard("magic_lifesteal").DescriptionZhCn,
                 Is.EqualTo("造成{剑}9点伤害并回复等量生命"));
             Assert.That(repository.GetRequiredCard("magic_shield_bash").DescriptionZhCn,
@@ -71,6 +88,31 @@ namespace KiKs.Combat.Tests
                 Is.EqualTo("恢复20点生命"));
             Assert.That(repository.Cards.Where(card => card.IsEnemyCard)
                 .All(card => !card.DescriptionZhCn.Contains("{")), Is.True);
+        }
+
+        [Test]
+        public void UpgradeablePlayerDescriptions_ResolveBaseAndUpgradedValues()
+        {
+            var manifest = File.ReadAllText(Path.Combine(CardDataRoot, "manifest.json"));
+            var repository = CardJsonRepository.Load(
+                manifest,
+                fileName => File.ReadAllText(Path.Combine(CardDataRoot, fileName)));
+            var upgradeableCards = repository.Cards
+                .Where(card => !card.IsEnemyCard && card.CanUpgrade)
+                .ToList();
+
+            Assert.That(upgradeableCards, Is.Not.Empty);
+            foreach (var card in upgradeableCards)
+            {
+                var baseDescription = CardDescriptionFormatter.FormatDescription(card, false);
+                var upgradedDescription = CardDescriptionFormatter.FormatDescription(card, true);
+
+                Assert.That(baseDescription, Does.Not.Contain("{amount:"), card.Id);
+                Assert.That(baseDescription, Does.Not.Contain("{hits:"), card.Id);
+                Assert.That(upgradedDescription, Does.Not.Contain("{amount:"), card.Id);
+                Assert.That(upgradedDescription, Does.Not.Contain("{hits:"), card.Id);
+                Assert.That(upgradedDescription, Is.Not.EqualTo(baseDescription), card.Id);
+            }
         }
 
         [Test]
