@@ -112,8 +112,8 @@
         "en": "smoke bomb"
       },
       "description": {
-        "en": "Negate incoming attacks and draw cards.",
-        "zhCN": "获得{闪}1次攻击无效，抽3张牌"
+        "en": "Draw 3 cards.",
+        "zhCN": "抽3张牌"
       },
       "category": "hidden",
       "copies": 1,
@@ -124,17 +124,10 @@
       "special": false,
       "effects": [
         {
-          "type": "nullify_attacks",
-          "amount": {
-            "base": 1,
-            "upgraded": 1
-          }
-        },
-        {
           "type": "draw_cards",
           "amount": {
             "base": 3,
-            "upgraded": 5
+            "upgraded": 3
           }
         }
       ],

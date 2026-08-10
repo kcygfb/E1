@@ -96,6 +96,7 @@ namespace KiKs.Combat
             {
                 Repository = CardJsonRepository.Load(manifestText, fileName => texts[fileName]);
                 StaticGameRepository.SetCardRepository(Repository);
+                LoopProgressionRepository.ValidateLoadedCardReferences();
             }
             catch (Exception exception)
             {

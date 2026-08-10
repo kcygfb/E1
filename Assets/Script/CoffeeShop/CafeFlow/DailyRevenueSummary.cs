@@ -40,6 +40,12 @@ public sealed class DailyRevenueSummary : MonoBehaviour
     private void Awake()
     {
         timeSystem = GetComponent<TimeSystem>();
+        // Do NOT build placeholder UI in Cafe scene — the summary is meant for the
+        // night/map transition, not for the cafe itself.  If we are in the Cafe
+        // scene, skip building entirely so the panel never appears.
+        if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "Cafe")
+            return;
+
         if (popupRoot == null) BuildPlaceholderUI();
         if (confirmButton != null)
             confirmButton.onClick.AddListener(OnConfirmClicked);
@@ -86,6 +92,13 @@ public sealed class DailyRevenueSummary : MonoBehaviour
 
     private void OnShopReadyToClose(object payload)
     {
+        // In Cafe scene, skip the summary popup entirely.
+        if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "Cafe")
+        {
+            if (timeSystem != null)
+                timeSystem.CompleteEndShopPhase();
+            return;
+        }
         ShowSummary();
     }
 
@@ -96,6 +109,9 @@ public sealed class DailyRevenueSummary : MonoBehaviour
     public bool ShowSummary()
     {
         if (isTransitioning) return true;
+        // In Cafe scene, never show the summary — skip straight to end-of-day flow.
+        if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "Cafe")
+            return false;
         if (popupRoot == null) BuildPlaceholderUI();
         if (popupRoot == null) return false;
         if (isShowing) return true;

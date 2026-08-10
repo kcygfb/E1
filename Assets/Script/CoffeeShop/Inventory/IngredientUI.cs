@@ -118,6 +118,7 @@ public class IngredientUI : MonoBehaviour
         foreach (var kvp in InventorySystem.Instance.GetSnapshot())
         {
             if (IsExcluded(kvp.Key)) continue;
+            if (kvp.Value <= 0) continue;
             _amounts[kvp.Key] = kvp.Value;
         }
 
@@ -126,6 +127,7 @@ public class IngredientUI : MonoBehaviour
             foreach (var res in ResourceDataLoader.Instance.GetAllResources())
             {
                 if (IsExcluded(res.id)) continue;
+                if (InventorySystem.Instance.GetAmount(res.id) <= 0) continue;
                 if (!_resources.Exists(r => r.id == res.id))
                     _resources.Add((res.id, res.displayName));
             }
@@ -196,6 +198,17 @@ public class IngredientUI : MonoBehaviour
     private void HandleResourceChanged(string resourceId, int newAmount)
     {
         if (IsExcluded(resourceId)) return;
+
+        bool wasVisible = _resources.Exists(resource => resource.id == resourceId);
+        bool shouldBeVisible = newAmount > 0;
+        if (wasVisible != shouldBeVisible)
+        {
+            RefreshData();
+            Populate();
+            return;
+        }
+
+        if (!shouldBeVisible) return;
         _amounts[resourceId] = newAmount;
 
         for (int i = 0; i < _resources.Count; i++)

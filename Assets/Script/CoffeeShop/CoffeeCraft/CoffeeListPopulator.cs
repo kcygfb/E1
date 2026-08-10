@@ -76,7 +76,10 @@ public class CoffeeListPopulator : MonoBehaviour
             Destroy(content.GetChild(i).gameObject);
 
         foreach (var coffeeJson in loader.GetAllCoffees())
+        {
+            if (!KiKs.Combat.RuntimeGameRepository.IsRecipeUnlocked(coffeeJson.coffeeId)) continue;
             CreateCoffeeItem(coffeeJson);
+        }
     }
 
     private void CreateCoffeeItem(CoffeeDataJson coffeeJson)
@@ -117,17 +120,7 @@ public class CoffeeListPopulator : MonoBehaviour
             tmp.raycastTarget = false;
         }
 
-        bool locked = coffeeJson.locked;
-        if (locked && UnlockManager.Instance != null)
-        {
-            var tempData = ScriptableObject.CreateInstance<CoffeeData>();
-            tempData.coffeeId = coffeeJson.coffeeId;
-            tempData.locked = coffeeJson.locked;
-            tempData.unlockItemId = coffeeJson.unlockItemId;
-            tempData.unlockAmount = coffeeJson.unlockAmount;
-            locked = !UnlockManager.Instance.IsUnlocked(tempData);
-            Destroy(tempData);
-        }
+        bool locked = !KiKs.Combat.RuntimeGameRepository.IsRecipeUnlocked(coffeeJson.coffeeId);
 
         var image = go.GetComponent<Image>();
         if (coffeeIconSprite != null) image.sprite = coffeeIconSprite;

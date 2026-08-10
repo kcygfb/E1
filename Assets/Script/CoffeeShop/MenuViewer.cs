@@ -47,7 +47,7 @@ public class MenuViewer : MonoBehaviour
     private bool _menuOpenedThisOrder;
     private Sequence _hintSeq;
 
-    private static readonly Regex PriceRegex = new Regex(@"_(\d+)$", RegexOptions.Compiled);
+    private static readonly Regex PriceRegex = new Regex(@"_(\d+)c?$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
     private void OnEnable()
     {
@@ -156,7 +156,8 @@ public class MenuViewer : MonoBehaviour
         if (viewerPanel == null || menuPages == null || menuPages.Length == 0) return;
         _menuOpenedThisOrder = true;
         StopHintBounce();
-        SelectTier(0);
+        RefreshTierButtons();
+        SelectTier(FindFirstAvailableTier());
         viewerPanel.SetActive(true);
         if (openButton != null)
             openButton.gameObject.SetActive(false);
@@ -165,6 +166,7 @@ public class MenuViewer : MonoBehaviour
     public void SelectTier(int tierIndex)
     {
         if (tierIndex < 0 || tierIndex >= TierRanges.Length) return;
+        if (!HasUnlockedPageForTier(tierIndex)) return;
 
         _currentTier = tierIndex;
 
@@ -180,7 +182,7 @@ public class MenuViewer : MonoBehaviour
             }
         }
 
-        // filter pages by price range; MachineMenu (no price) always included at end
+        // filter pages by price range AND unlock status; MachineMenu (no price) always included at end
         _filtered.Clear();
         var range = TierRanges[tierIndex];
         var noPricePages = new List<Sprite>();
@@ -190,6 +192,7 @@ public class MenuViewer : MonoBehaviour
             foreach (var page in menuPages)
             {
                 if (page == null) continue;
+                if (!IsPageUnlocked(page)) continue;
                 int price = ParsePriceFromName(page);
                 if (price < 0)
                 {
@@ -219,14 +222,68 @@ public class MenuViewer : MonoBehaviour
 
     private void ShowPage()
     {
-        if (_filtered.Count == 0)
-        {
-            if (menuImage != null)
-                menuImage.sprite = null;
-            return;
-        }
+        if (_filtered.Count == 0) return;
         if (menuImage != null && _currentPage >= 0 && _currentPage < _filtered.Count)
             menuImage.sprite = _filtered[_currentPage];
+    }
+
+    private void RefreshTierButtons()
+    {
+        if (tierButtons == null) return;
+        for (int i = 0; i < tierButtons.Length; i++)
+        {
+            if (tierButtons[i] != null)
+                tierButtons[i].interactable = i < TierRanges.Length && HasUnlockedPageForTier(i);
+        }
+    }
+
+    private int FindFirstAvailableTier()
+    {
+        for (int i = 0; i < TierRanges.Length; i++)
+            if (HasUnlockedPageForTier(i)) return i;
+        return 0;
+    }
+
+    private bool HasUnlockedPageForTier(int tierIndex)
+    {
+        if (tierIndex < 0 || tierIndex >= TierRanges.Length || menuPages == null) return false;
+        var range = TierRanges[tierIndex];
+        foreach (var page in menuPages)
+        {
+            if (page == null || !IsPageUnlocked(page)) continue;
+            int price = ParsePriceFromName(page);
+            if ((tierIndex == 0 && price < 0) || (price >= range.min && price <= range.max))
+                return true;
+        }
+        return false;
+    }
+    /// <summary>根据配方解锁状态过滤：隐藏尚未解锁的配方页。</summary>
+    private bool IsPageUnlocked(Sprite page)
+    {
+        if (page == null) return false;
+        int price = ParsePriceFromName(page);
+        // 无价格页（如 MachineMenu）始终可见
+        if (price < 0) return true;
+        // 从 sprite 名提取 coffeeId 并检查解锁状态
+        string coffeeId = ExtractCoffeeIdFromName(page);
+        if (string.IsNullOrEmpty(coffeeId)) return false;
+        return KiKs.Combat.RuntimeGameRepository.IsRecipeUnlocked(coffeeId);
+    }
+
+    /// <summary>从菜单图文件名提取 coffeeId，例如 "PourOverMenu_20" -> "PourOver"。</summary>
+    private static string ExtractCoffeeIdFromName(Sprite sprite)
+    {
+        if (sprite == null || sprite.texture == null) return null;
+        var name = sprite.texture.name;
+        if (string.IsNullOrEmpty(name)) return null;
+        var priceMatch = PriceRegex.Match(name);
+        if (!priceMatch.Success) return null;
+
+        name = name.Substring(0, priceMatch.Index);
+        const string menuSuffix = "Menu";
+        if (name.EndsWith(menuSuffix, System.StringComparison.OrdinalIgnoreCase))
+            name = name.Substring(0, name.Length - menuSuffix.Length);
+        return name;
     }
 
     public void Close()

@@ -47,12 +47,15 @@ namespace KiKs.Combat
         [SerializeField] private Image dimmer;
         [SerializeField] private RectTransform panel;
         [SerializeField] private RectTransform cardArea;
+        [SerializeField] private TMP_Text titleText;
         [SerializeField] private TMP_Text lootText;
         [SerializeField] private TMP_Text goldText;
         [SerializeField] private TMP_Text extraCardsText;
         [SerializeField] private Button confirmButton;
 
-        private bool victoryQueued;
+        private bool resultQueued;
+        private bool isDefeat;
+        private RewardGrantResult rewardResult;
         private bool rewardsGranted;
         private bool isTransitioning;
 
@@ -88,12 +91,16 @@ namespace KiKs.Combat
 
         private void OnCombatEvent(CombatEvent combatEvent)
         {
-            if (combatEvent.Type != CombatEventType.Victory || victoryQueued) return;
-            victoryQueued = true;
-            StartCoroutine(ShowAfterVictoryRoutine());
+            if (resultQueued ||
+                (combatEvent.Type != CombatEventType.Victory && combatEvent.Type != CombatEventType.Defeat))
+                return;
+
+            isDefeat = combatEvent.Type == CombatEventType.Defeat;
+            resultQueued = true;
+            StartCoroutine(ShowAfterBattleRoutine());
         }
 
-        private IEnumerator ShowAfterVictoryRoutine()
+        private IEnumerator ShowAfterBattleRoutine()
         {
             float delay = battleController != null ? battleController.HuntResultDelay : 0.75f;
             if (delay > 0f)
@@ -116,25 +123,23 @@ namespace KiKs.Combat
         {
             if (rewardsGranted || battleController == null) return;
             rewardsGranted = true;
+            rewardCards.Clear();
             RuntimeGameRepository.BeginBattleRewards();
+            if (isDefeat) return;
 
-            if (battleController.HuntGoldReward > 0)
-                RuntimeGameRepository.AddGold(battleController.HuntGoldReward);
+            var enemyId = battleController.PrimaryEnemyId;
+            if (string.IsNullOrWhiteSpace(enemyId))
+                throw new InvalidOperationException("Battle reward settlement needs a primary enemy id.");
 
-            IReadOnlyList<HuntLootReward> loot = battleController.HuntLootRewards;
-            if (loot != null)
-            {
-                foreach (HuntLootReward item in loot)
-                {
-                    if (item == null || string.IsNullOrWhiteSpace(item.ResourceId) || item.Amount <= 0)
-                        continue;
-                    RuntimeGameRepository.AddResource(item.ResourceId, item.Amount);
-                }
-            }
+            var pointIndex = DailyAreaMapState.HasSelectedPoint
+                ? DailyAreaMapState.SelectedPointIndex
+                : -1;
+            var settlementId = $"battle:d{RuntimeGameRepository.CurrentDay}:p{pointIndex}:{enemyId}";
+            rewardResult = RuntimeGameRepository.ApplyEnemyVictoryReward(enemyId, settlementId);
 
-            SelectRewardCards();
-            foreach (CardSpec card in rewardCards)
-                RuntimeGameRepository.AddBattleRewardCard(card.Id);
+            foreach (var cardId in rewardResult.NewCardIds)
+                if (StaticGameRepository.TryGetCard(cardId, out var card) && !card.IsEnemyCard)
+                    rewardCards.Add(card);
         }
 
         private void SelectRewardCards()
@@ -185,26 +190,50 @@ namespace KiKs.Combat
         private void RefreshRewardUI()
         {
             if (lootText == null) return;
+            if (titleText != null)
+                titleText.text = isDefeat ? "HUNT FAILED" : "HUNT COMPLETE";
+
+            if (isDefeat)
+            {
+                lootText.text = "<color=#FF6F7D>战斗失败</color>  本次无掉落，返回时生命恢复至 50%";
+                if (goldText != null) goldText.text = "GOLD    <color=#82949A>+0 C</color>";
+                BuildCardRewards();
+                return;
+            }
 
             var builder = new System.Text.StringBuilder();
-            IReadOnlyList<HuntLootReward> loot = battleController.HuntLootRewards;
-            if (loot != null)
+            if (rewardResult != null)
             {
-                foreach (HuntLootReward item in loot)
+                foreach (var resource in rewardResult.ResourcesGranted)
                 {
-                    if (item == null || item.Amount <= 0) continue;
                     if (builder.Length > 0) builder.Append("    ");
-                    builder.Append(item.DisplayName)
+                    builder.Append(resource.ResourceId)
                         .Append("  <color=#28D8CC>x")
-                        .Append(item.Amount)
+                        .Append(resource.Amount)
                         .Append("</color>");
+                }
+                foreach (var recipeId in rewardResult.NewRecipeIds)
+                {
+                    if (builder.Length > 0) builder.Append("    ");
+                    builder.Append("菜谱：").Append(recipeId);
+                }
+                foreach (var cardId in rewardResult.ExistingCardIds)
+                {
+                    if (builder.Length > 0) builder.Append("    ");
+                    builder.Append("卡牌：").Append(cardId).Append("（已拥有）");
+                }
+                foreach (var recipeId in rewardResult.ExistingRecipeIds)
+                {
+                    if (builder.Length > 0) builder.Append("    ");
+                    builder.Append("菜谱：").Append(recipeId).Append("（已拥有）");
                 }
             }
             if (builder.Length == 0)
-                builder.Append("<color=#82949A>No material drops</color>");
+                builder.Append("<color=#82949A>无素材或菜谱掉落</color>");
 
             lootText.text = builder.ToString();
-            goldText.text = $"GOLD    <color=#FFD75A>+{battleController.HuntGoldReward} C</color>";
+            if (goldText != null)
+                goldText.text = $"GOLD    <color=#FFD75A>+{rewardResult?.GoldGranted ?? 0} C</color>";
             BuildCardRewards();
         }
 
@@ -303,10 +332,10 @@ namespace KiKs.Combat
             if (isTransitioning) return;
             isTransitioning = true;
             confirmButton.interactable = false;
-            StartCoroutine(TransitionAfterVictoryRoutine());
+            StartCoroutine(TransitionAfterBattleRoutine());
         }
 
-        private IEnumerator TransitionAfterVictoryRoutine()
+        private IEnumerator TransitionAfterBattleRoutine()
         {
             const float duration = 0.4f;
             float elapsed = 0f;
@@ -325,38 +354,21 @@ namespace KiKs.Combat
                 yield return null;
             }
 
-            if (!RuntimeGameRepository.HasSelectedDemoStage)
-            {
-                Debug.LogWarning(
-                    "[DemoFlow] Victory came from a direct/debug battle. Keeping the existing Cafe return flow.",
-                    this);
-                EndNightAndReturnToCafe();
-                yield break;
-            }
+            var completion = RuntimeGameRepository.CompleteSelectedArea(isDefeat);
+            if (!completion.Completed)
+                Debug.LogWarning("[HuntResult] No selected daily map point was available to complete.", this);
 
-            var completedStage = RuntimeGameRepository.SelectedDemoStage;
-            var advanced = DemoFlowState.CompleteCurrentBattle(completedStage);
-            RuntimeGameRepository.ClearSelectedDemoStage();
-
-            if (advanced)
-                DailyAreaMapState.CompleteSelectedPoint();
-            else
-                DailyAreaMapState.CancelSelectedPoint();
-
-
-            if (!advanced)
-                Debug.LogError(
-                    "[DemoFlow] Battle result did not advance progress; returning to PreBattle safely.", this);
-
-            ReturnToPreBattle();
+            var sceneName = string.IsNullOrWhiteSpace(completion.NextSceneName)
+                ? "PreBattle"
+                : completion.NextSceneName;
+            LoadResultScene(sceneName);
         }
 
-        private static void ReturnToPreBattle()
+        private static void LoadResultScene(string sceneName)
         {
-            const string sceneName = "PreBattle";
             if (!Application.CanStreamedLevelBeLoaded(sceneName))
             {
-                Debug.LogError($"[DemoFlow] Scene '{sceneName}' is not included in the active build profile.");
+                Debug.LogError($"[HuntResult] Scene '{sceneName}' is not included in the active build profile.");
                 return;
             }
 
@@ -365,7 +377,6 @@ namespace KiKs.Combat
             else
                 SceneManager.LoadScene(sceneName);
         }
-
 
         private void BuildPlaceholderUI()
         {
@@ -406,7 +417,7 @@ namespace KiKs.Combat
             panelOutline.effectDistance = new Vector2(4f, -4f);
 
             CreateBar(panel, "TopAccent", new Vector2(0f, 402f), new Vector2(1110f, 7f), HotColor);
-            CreateText(
+            titleText = CreateText(
                 panel, "Title", "HUNT COMPLETE", 60f, FontStyles.Bold,
                 AccentColor, TextAlignmentOptions.Center,
                 new Vector2(0.08f, 0.84f), new Vector2(0.92f, 0.97f));

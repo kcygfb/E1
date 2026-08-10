@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using KiKs.UI;
+using System.Collections.Generic;
 
 /// <summary>材料列表面板。MorningCheck 阶段显示 7 种可选材料，可拖拽到九宫格。
 /// 面板尺寸/位置由 Inspector 决定，物品用 GridLayoutGroup 自动排版成网格。</summary>
@@ -15,6 +16,8 @@ public class MaterialPalette : MonoBehaviour
     [SerializeField] private float labelHeight = 24f;
     [SerializeField] private int constraintCount = 5;
 
+    private readonly List<GameObject> generatedItems = new();
+
     private void Awake()
     {
         if (tutorialController == null)
@@ -24,20 +27,46 @@ public class MaterialPalette : MonoBehaviour
     private void Start()
     {
         BuildItems();
+
+        if (InventorySystem.Instance != null)
+            InventorySystem.Instance.OnResourceChanged += HandleResourceChanged;
     }
 
     private void OnDestroy()
     {
+        if (InventorySystem.Instance != null)
+            InventorySystem.Instance.OnResourceChanged -= HandleResourceChanged;
+
         if (tutorialController != null)
             tutorialController.UnregisterJsonCallouts(this);
     }
 
+    private void HandleResourceChanged(string resourceId, int newAmount)
+    {
+        var material = MaterialDefinition.Get(resourceId);
+        if (material == null || !material.isRaw) return;
+        BuildItems();
+    }
+
     private void BuildItems()
     {
+        if (tutorialController != null)
+            tutorialController.UnregisterJsonCallouts(this);
+
+        foreach (var item in generatedItems)
+        {
+            if (item == null) continue;
+            item.SetActive(false);
+            Destroy(item);
+        }
+        generatedItems.Clear();
+
         // 只显示原始材料（isRaw=true），不显示机器产出
-        var materials = new System.Collections.Generic.List<MaterialDefinition.MatInfo>();
+        // Definitions describe what can exist; the palette itself is a live view
+        // of the dynamic warehouse and must hide zero-owned monster materials.
+        var materials = new List<MaterialDefinition.MatInfo>();
         foreach (var m in MaterialDefinition.All)
-            if (m.isRaw)
+            if (m.isRaw && InventorySystem.Instance != null && InventorySystem.Instance.GetAmount(m.id) > 0)
                 materials.Add(m);
         if (materials.Count == 0) return;
 
@@ -81,6 +110,7 @@ public class MaterialPalette : MonoBehaviour
 
             var itemGO = new GameObject($"Mat_{mat.id}", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
             itemGO.transform.SetParent(transform, false);
+            generatedItems.Add(itemGO);
 
             var img = itemGO.GetComponent<Image>();
             var sprite = MaterialDefinition.GetSprite(mat.id);

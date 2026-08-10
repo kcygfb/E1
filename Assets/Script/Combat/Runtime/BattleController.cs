@@ -22,12 +22,12 @@ namespace KiKs.Combat
         [SerializeField] private List<CombatantDefinition> enemyDefinitions = new List<CombatantDefinition>();
 
         [Header("Linear Demo Encounters")]
-        [Tooltip("Order must be: Dog (Minion), Little Girl (Elite), Big Eye (Boss).")]
+        [Tooltip("Order must be: Ghost (Minion), Little Girl (Elite), Big Eye (Boss).")]
         [SerializeField] private List<CombatantDefinition> demoEnemyDefinitions = new List<CombatantDefinition>();
 
         [Header("Enemy Presentation")]
         [SerializeField] private Image enemyPortraitImage;
-        [Tooltip("Optional Big Eye-only overlay. It is hidden automatically for the Dog and Little Girl.")]
+        [Tooltip("Optional Big Eye-only overlay. It is hidden automatically for the Ghost and Little Girl.")]
         [SerializeField] private GameObject bigEyePortraitOverlay;
 
         [Header("Tutorial")]
@@ -46,10 +46,8 @@ namespace KiKs.Combat
 
         [Header("Hunt rewards")]
         [Min(0)] [SerializeField] private int huntGoldReward = 100;
-        [SerializeField] private List<HuntLootReward> huntLootRewards = new List<HuntLootReward>
-        {
-            new HuntLootReward("CocoaPowder", "Cocoa Powder", 1)
-        };
+        [SerializeField] private List<HuntLootReward> huntLootRewards = new List<HuntLootReward>();
+
         [Min(0)] [SerializeField] private int huntRewardCardCount = 3;
         [Tooltip("Empty means draw from every card in CardDataV2.")]
         [SerializeField] private List<string> huntRewardCardPool = new List<string>();
@@ -61,6 +59,9 @@ namespace KiKs.Combat
         public BattleState State => _engine?.State;
         public bool IsInitialized => _engine != null;
         public int HuntGoldReward => huntGoldReward;
+        public string PrimaryEnemyId => enemyDefinitions != null && enemyDefinitions.Count > 0
+            ? enemyDefinitions[0]?.CombatantId ?? string.Empty
+            : string.Empty;
         public IReadOnlyList<HuntLootReward> HuntLootRewards => huntLootRewards;
         public int HuntRewardCardCount => huntRewardCardCount;
         public IReadOnlyList<string> HuntRewardCardPool => huntRewardCardPool;
@@ -465,10 +466,15 @@ namespace KiKs.Combat
 
             if (definition.Portrait == null)
             {
+                // Never leave the scene-authored Big Eye placeholder visible for another encounter.
+                enemyPortraitImage.overrideSprite = null;
+                enemyPortraitImage.sprite = null;
+                enemyPortraitImage.enabled = false;
                 Debug.LogWarning(definition.name + " has no enemy portrait configured.", definition);
                 return;
             }
 
+            enemyPortraitImage.enabled = true;
             enemyPortraitImage.overrideSprite = null;
             enemyPortraitImage.sprite = definition.Portrait;
             enemyPortraitImage.preserveAspect = true;

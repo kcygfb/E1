@@ -60,11 +60,13 @@ namespace KiKs.Combat
 
         private static readonly List<DailyAreaMapPoint> Points = new();
         private static int selectedPointIndex = -1;
+        private static int generatedDay;
 
         public static IReadOnlyList<DailyAreaMapPoint> MapPoints => Points;
         public static bool HasSelectedPoint => selectedPointIndex >= 0;
         public static int SelectedPointIndex => selectedPointIndex;
         public static int CompletedExplorationCount { get; private set; }
+        public static int GeneratedDay => generatedDay;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void ResetOnPlaySessionStart()
@@ -74,12 +76,14 @@ namespace KiKs.Combat
 
         public static void EnsureGenerated()
         {
-            if (Points.Count == PointCount)
+            var day = RuntimeGameRepository.CurrentDay;
+            if (Points.Count == PointCount && generatedDay == day)
                 return;
 
             Points.Clear();
             selectedPointIndex = -1;
             CompletedExplorationCount = 0;
+            generatedDay = day;
 
             var typeBag = new List<AreaPointType>
             {
@@ -183,13 +187,11 @@ namespace KiKs.Combat
         }
 
         /// <summary>
-        /// Completes and hides the selected point without advancing the current three-battle
-        /// playtest counter. Treasure uses this temporary path until the unified daily
-        /// exploration/save flow replaces the battle-only demo progression.
+        /// Legacy compatibility alias. Every completed area now consumes one daily exploration.
         /// </summary>
         public static void CompleteSelectedPointWithoutCountingExploration()
         {
-            CompleteSelectedPoint(countExploration: false);
+            CompleteSelectedPoint(countExploration: true);
         }
 
         private static void CompleteSelectedPoint(bool countExploration)
@@ -217,6 +219,7 @@ namespace KiKs.Combat
             Points.Clear();
             selectedPointIndex = -1;
             CompletedExplorationCount = 0;
+            generatedDay = 0;
         }
     }
 }

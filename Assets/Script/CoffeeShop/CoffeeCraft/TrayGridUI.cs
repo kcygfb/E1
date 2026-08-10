@@ -77,7 +77,7 @@ public class TrayGridUI : MonoBehaviour
     private void ShowSelectionInternal()
     {
         _isDragMode = false;
-        IngredientTray.SetDefaults();
+        IngredientTray.SetDefaultsIfEmpty();
 
         gameObject.SetActive(true);
         if (materialPalette != null)

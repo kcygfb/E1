@@ -1521,6 +1521,7 @@ MonoBehaviour:
   dimmer: {fileID: 402255828}
   panel: {fileID: 1045497165}
   cardArea: {fileID: 1968615469}
+  titleText: {fileID: 0}
   lootText: {fileID: 1646615060}
   goldText: {fileID: 1997413818}
   extraCardsText: {fileID: 946558172}
@@ -2843,7 +2844,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 83e0d896a3114ab8af4e2bdfc5c292f1, type: 2}
   - {fileID: 11400000, guid: 924b6a0ddef5498bb73b7618c4e31d0a, type: 2}
   demoEnemyDefinitions:
-  - {fileID: 11400000, guid: d318f1d79cda4e4f9d82a1087c2b4071, type: 2}
+  - {fileID: 11400000, guid: b744dae21588459abbe0af32e77dd939, type: 2}
   - {fileID: 11400000, guid: 83e0d896a3114ab8af4e2bdfc5c292f1, type: 2}
   - {fileID: 11400000, guid: 924b6a0ddef5498bb73b7618c4e31d0a, type: 2}
   enemyPortraitImage: {fileID: 970831849}

@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "finalDay": 4,
+  "initiallyHiddenCardIds": [
+    "ranged_rocket_launcher",
+    "ranged_flamethrower",
+    "ranged_grenade_launcher",
+    "heavy_maul",
+    "heavy_greatsword",
+    "bleed_shuriken",
+    "bleed_reaper",
+    "misc_magic_burst"
+  ],
+  "initiallyHiddenRecipeIds": [
+    "BudgetBrew",
+    "ViscousDream",
+    "FinalGaze",
+    "AfterTaste",
+    "OneSnakeTwoWays",
+    "TentacleLabyrinth",
+    "FreeWom",
+    "Sunset",
+    "FlameLatte",
+    "TheFifthFlavor",
+    "ESSymphony"
+  ],
+  "treasureOffers": [
+    {"id":"treasure_50","price":50,"imagePath":"Art/Cards/50C.png","rewards":{"cardIds":["ranged_rocket_launcher"]}},
+    {"id":"treasure_100","price":100,"imagePath":"Art/Cards/100C.png","rewards":{"cardIds":["ranged_flamethrower","heavy_greatsword"]}},
+    {"id":"treasure_200","price":200,"imagePath":"Art/Cards/200C.png","rewards":{"cardIds":["ranged_grenade_launcher","bleed_reaper","misc_magic_burst"]}},
+    {"id":"treasure_400","price":400,"imagePath":"Art/Cards/400C.png","rewards":{"cardIds":["bleed_shuriken","ranged_rocket_launcher","ranged_flamethrower"],"recipeIds":["TheFifthFlavor"]}}
+  ],
+  "enemyRewards": [
+    {
+      "enemyId":"demo_ghost",
+      "stages":[
+        {"victoryNumber":1,"rewards":{"gold":100,"resources":[{"resourceId":"snake","amount":10}],"cardIds":["bleed_reaper"],"recipeIds":["BudgetBrew"]}},
+        {"victoryNumber":2,"rewards":{"gold":100,"resources":[{"resourceId":"claw","amount":10}],"cardIds":["ranged_flamethrower"],"recipeIds":["OneSnakeTwoWays"]}},
+        {"victoryNumber":3,"rewards":{"gold":100,"resources":[{"resourceId":"claw","amount":10}],"recipeIds":["FlameLatte","ViscousDream"]}}
+      ]
+    },
+    {
+      "enemyId":"demo_little_girl",
+      "stages":[
+        {"victoryNumber":1,"rewards":{"gold":100,"resources":[{"resourceId":"tentacle","amount":10}],"cardIds":["bleed_reaper"],"recipeIds":["TentacleLabyrinth"]}},
+        {"victoryNumber":2,"rewards":{"gold":100,"resources":[{"resourceId":"oil","amount":10}],"cardIds":["heavy_maul"],"recipeIds":["AfterTaste"]}},
+        {"victoryNumber":3,"rewards":{"gold":100,"resources":[{"resourceId":"wolffur","amount":10},{"resourceId":"oil","amount":10}],"recipeIds":["FreeWom"]}}
+      ]
+    },
+    {
+      "enemyId":"demo_big_eye",
+      "stages":[
+        {"victoryNumber":1,"rewards":{"gold":100,"resources":[{"resourceId":"eye","amount":10}],"cardIds":["ranged_grenade_launcher"],"recipeIds":["FinalGaze"]}},
+        {"victoryNumber":2,"rewards":{"gold":100,"resources":[{"resourceId":"eye","amount":10}],"cardIds":["heavy_maul"],"recipeIds":["Sunset"]}},
+        {"victoryNumber":3,"rewards":{"gold":100,"resources":[{"resourceId":"fire","amount":10}],"cardIds":["bleed_shuriken"],"recipeIds":["ESSymphony"]}}
+      ]
+    }
+  ]
+}

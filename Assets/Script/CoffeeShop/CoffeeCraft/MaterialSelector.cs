@@ -105,6 +105,7 @@ public class MaterialSelector : MonoBehaviour
         foreach (var res in ResourceDataLoader.Instance.GetAllResources())
         {
             if (res.id == "gold") continue;
+            if (InventorySystem.Instance == null || InventorySystem.Instance.GetAmount(res.id) <= 0) continue;
             _materials.Add(res);
         }
 

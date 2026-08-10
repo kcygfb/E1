@@ -47,7 +47,7 @@ namespace KiKs.Combat
         [SerializeField] private TutorialController tutorialController;
 
         [Header("Demo Encounters")]
-        [Tooltip("三个敌人定义，槽位 0=Dog, 1=Little Girl, 2=Big Eye（与 BattleController.demoEnemyDefinitions 一致）。战斗点教学框按此生成 Boss 描述。")]
+        [Tooltip("三个敌人定义，槽位 0=Ghost, 1=Little Girl, 2=Big Eye（与 BattleController.demoEnemyDefinitions 一致）。战斗点教学框按此生成 Boss 描述。")]
         [SerializeField] private List<CombatantDefinition> demoEnemyDefinitions = new();
 
         [Header("Deck Slots")]
@@ -132,7 +132,7 @@ namespace KiKs.Combat
             foreach (var card in StaticGameRepository.PlayerCards)
             {
                 // 当前版本只使用有卡面的卡牌；无卡面（ImagePath 为空）的卡不进入选牌界面
-                if (!string.IsNullOrEmpty(card.ImagePath))
+                if (!string.IsNullOrEmpty(card.ImagePath) && RuntimeGameRepository.IsCardUnlocked(card.Id))
                     allCards.Add(card);
             }
 
@@ -313,13 +313,12 @@ namespace KiKs.Combat
                 beginButton.interactable =
                     !_isStartingBattle &&
                     DailyAreaMapState.HasSelectedPoint &&
-                    RuntimeGameRepository.HasSelectedDemoStage &&
-                    RuntimeGameRepository.SelectedDemoStage == DemoFlowState.CurrentStage &&
                     IsDeckComplete &&
                     coffeeReady;
             }
             if (cardButton != null)
-                cardButton.interactable = !_isStartingBattle && !DemoFlowState.IsCompleted;
+                cardButton.interactable = !_isStartingBattle &&
+                                          DailyAreaMapState.CompletedExplorationCount < DailyAreaMapState.MaxExplorations;
         }
 
         private void DisableDecorativeOverlayRaycasts()
@@ -358,7 +357,7 @@ namespace KiKs.Combat
             if (demoMapPoints.Count < DailyAreaMapState.PointCount)
             {
                 Debug.LogError(
-                    $"[DemoFlow] CardSelectionUI needs {DemoFlowState.BattleCount} map points in Dog/Girl/Eye order; " +
+                    $"[AreaMap] CardSelectionUI needs {DailyAreaMapState.PointCount} map points; " +
                     $"only {demoMapPoints.Count} are configured.", this);
             }
 
@@ -457,12 +456,11 @@ namespace KiKs.Combat
                 return;
             }
 
-            RuntimeGameRepository.SetSelectedDemoStage(DemoFlowState.CurrentStage);
             RuntimeGameRepository.SetSelectedEncounterIndex(point.EncounterIndex);
             Debug.Log(
                 $"[AreaMap] Selected map point {pointIndex + 1}: {point.Type}; " +
                 $"encounter slot {point.EncounterIndex}; " +
-                $"battle stage is {DemoFlowState.CurrentStage}.",
+                $"day {RuntimeGameRepository.CurrentDay}.",
                 this);
 
             if (cardPopup != null)
@@ -552,7 +550,7 @@ namespace KiKs.Combat
         {
             var enemyName = definition.EnemyArchetype switch
             {
-                EnemyArchetype.Dog => "Dog",
+                EnemyArchetype.Dog => "Ghost",
                 EnemyArchetype.LittleGirl => "Little Girl",
                 EnemyArchetype.BigEye => "Big Eye",
                 _ => definition.DisplayName
@@ -584,30 +582,18 @@ namespace KiKs.Combat
                 if (image != null)
                     image.sprite = GetMapPointSprite(point.Type);
 
-                var isVisible = !DemoFlowState.IsCompleted && !point.IsCompleted;
+                var isVisible =
+                    DailyAreaMapState.CompletedExplorationCount < DailyAreaMapState.MaxExplorations &&
+                    !point.IsCompleted;
                 mapPoint.SetActive(isVisible);
 
                 var button = mapPoint.GetComponent<Button>();
                 if (button != null)
-                    button.interactable = isVisible && !point.IsSelected;
+                    button.interactable = isVisible && !point.IsSelected && point.Type != AreaPointType.Event;
             }
 
             if (demoCompletePanel != null)
-            {
-                demoCompletePanel.SetActive(DemoFlowState.IsCompleted);
-                if (DemoFlowState.IsCompleted)
-                {
-                    if (demoCompleteLabel != null)
-                        demoCompleteLabel.text = demoCompleteText;
-
-                    var closeButton = demoCompletePanel.transform.Find("CloseBtn");
-                    if (closeButton != null) closeButton.gameObject.SetActive(false);
-                }
-            }
-            else if (DemoFlowState.IsCompleted)
-            {
-                Debug.Log("[DemoFlow] Demo Complete. No completion panel is configured.", this);
-            }
+                demoCompletePanel.SetActive(false);
 
             RegisterMapPointCallouts();
             RefreshSelectionUI();
@@ -627,8 +613,8 @@ namespace KiKs.Combat
         [ContextMenu("Reset Demo Progress")]
         public void ResetDemoProgress()
         {
-            DemoFlowState.ResetDemoProgress();
-            RuntimeGameRepository.ClearSelectedDemoStage();
+            RuntimeGameRepository.ResetRunState();
+            DailyAreaMapState.Reset();
             RuntimeGameRepository.ClearSelectedDeck();
             selectedCardIds.Clear();
 
@@ -737,9 +723,7 @@ namespace KiKs.Combat
             if (_isStartingBattle)
                 return;
 
-            if (!RuntimeGameRepository.HasSelectedDemoStage ||
-                RuntimeGameRepository.SelectedDemoStage != DemoFlowState.CurrentStage ||
-                !DailyAreaMapState.HasSelectedPoint)
+            if (!DailyAreaMapState.HasSelectedPoint)
             {
                 Debug.LogWarning(
                     "[AreaMap] Click an available battle point before starting battle.", this);
@@ -768,7 +752,7 @@ namespace KiKs.Combat
             RefreshSelectionUI();
             RuntimeGameRepository.SetSelectedDeck(selectedCardIds);
             Debug.Log(
-                $"[CardSelectionUI] Starting {RuntimeGameRepository.SelectedDemoStage} with " +
+                $"[CardSelectionUI] Starting encounter {RuntimeGameRepository.SelectedEncounterIndex} with " +
                 $"{selectedCardIds.Count} cards.");
 
             var coffeeUI = UnityEngine.Object.FindFirstObjectByType<CoffeeSelectionUI>();

@@ -21,6 +21,14 @@ namespace KiKs.Combat
         private static readonly Dictionary<string, int> FallbackResources = new(StringComparer.Ordinal);
         private static readonly List<string> LastBattleRewardCardIds = new();
         private static readonly HashSet<string> _craftedCoffeeIds = new(StringComparer.Ordinal);
+        private static readonly HashSet<string> UnlockedCardIds = new(StringComparer.Ordinal);
+        private static readonly HashSet<string> UnlockedRecipeIds = new(StringComparer.Ordinal);
+        private static readonly Dictionary<string, int> EnemyVictoryCounts = new(StringComparer.Ordinal);
+        private static readonly HashSet<string> ProcessedSettlementIds = new(StringComparer.Ordinal);
+        private static int currentDay = 1;
+
+        public static event Action<int> DayChanged;
+        public static event Action<int> FinalCafeCompleted;
         private static DemoStage? _selectedDemoStage;
         private static int? _selectedEncounterIndex;
 
@@ -37,7 +45,16 @@ namespace KiKs.Combat
         public static IReadOnlyCollection<string> CraftedCoffeeIds => _craftedCoffeeIds;
         public static bool HasCraftedCoffees => _craftedCoffeeIds.Count > 0;
         public static int Gold => GetResourceAmount(GoldResourceId);
+        public static int CurrentDay => currentDay;
+        public static int CurrentDayExplorationCount => DailyAreaMapState.CompletedExplorationCount;
+        public static bool IsFinalCafeDay => currentDay >= LoopProgressionRepository.FinalDay;
+        public static IReadOnlyCollection<string> UnlockedRecipes => UnlockedRecipeIds;
 
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetOnPlaySessionStart()
+        {
+            ResetRunState();
+        }
         public static IReadOnlyList<string> LastBattleRewardCards =>
             new ReadOnlyCollection<string>(LastBattleRewardCardIds);
 
@@ -119,9 +136,56 @@ namespace KiKs.Combat
             _craftedCoffeeIds.Clear();
         }
 
+        public static bool IsCardUnlocked(string cardId)
+        {
+            if (string.IsNullOrWhiteSpace(cardId)) return false;
+            return !LoopProgressionRepository.IsInitiallyHiddenCard(cardId) ||
+                   UnlockedCardIds.Contains(cardId);
+        }
+
+        public static bool UnlockCard(string cardId)
+        {
+            if (string.IsNullOrWhiteSpace(cardId)) return false;
+            return UnlockedCardIds.Add(cardId);
+        }
+
+        public static bool IsRecipeUnlocked(string recipeId)
+        {
+            if (string.IsNullOrWhiteSpace(recipeId)) return false;
+            return !LoopProgressionRepository.IsInitiallyHiddenRecipe(recipeId) ||
+                   UnlockedRecipeIds.Contains(recipeId);
+        }
+
+        public static bool UnlockRecipe(string recipeId)
+        {
+            if (string.IsNullOrWhiteSpace(recipeId)) return false;
+            return UnlockedRecipeIds.Add(recipeId);
+        }
+
+        public static bool LockRecipe(string recipeId)
+        {
+            return !string.IsNullOrWhiteSpace(recipeId) && UnlockedRecipeIds.Remove(recipeId);
+        }
+
+        public static int GetEnemyVictoryCount(string enemyId)
+        {
+            return !string.IsNullOrWhiteSpace(enemyId) &&
+                   EnemyVictoryCounts.TryGetValue(enemyId, out var count)
+                ? count
+                : 0;
+        }
+
+        public static bool RecordEnemyVictory(string enemyId)
+        {
+            if (string.IsNullOrWhiteSpace(enemyId)) return false;
+            EnemyVictoryCounts[enemyId] = GetEnemyVictoryCount(enemyId) + 1;
+            return true;
+        }
+
         public static void AddOwnedCard(string cardId, int amount = 1)
         {
             if (string.IsNullOrWhiteSpace(cardId) || amount <= 0) return;
+            UnlockCard(cardId);
             OwnedCardCopies.TryGetValue(cardId, out var current);
             OwnedCardCopies[cardId] = current + amount;
         }
@@ -148,6 +212,7 @@ namespace KiKs.Combat
         public static void AddBattleRewardCard(string cardId, int amount = 1)
         {
             if (string.IsNullOrWhiteSpace(cardId) || amount <= 0) return;
+            UnlockCard(cardId);
             for (var i = 0; i < amount; i++)
                 LastBattleRewardCardIds.Add(cardId);
             AddOwnedCard(cardId, amount);
@@ -191,6 +256,180 @@ namespace KiKs.Combat
             return FallbackResources.TryGetValue(resourceId, out amount) ? amount : 0;
         }
 
+        public static bool WouldGrantAnyNewUnlock(LoopRewardBundleDefinition rewards)
+        {
+            if (rewards == null) return false;
+            if (rewards.gold > 0 || (rewards.resources != null && rewards.resources.Length > 0))
+                return true;
+            if (rewards.cardIds != null)
+                foreach (var cardId in rewards.cardIds)
+                    if (!IsCardUnlocked(cardId)) return true;
+            if (rewards.recipeIds != null)
+                foreach (var recipeId in rewards.recipeIds)
+                    if (!IsRecipeUnlocked(recipeId)) return true;
+            return false;
+        }
+
+        public static bool HasProcessedSettlement(string settlementId)
+        {
+            return !string.IsNullOrWhiteSpace(settlementId) && ProcessedSettlementIds.Contains(settlementId);
+        }
+
+        public static RewardGrantResult ApplyRewardBundle(
+            string settlementId,
+            LoopRewardBundleDefinition rewards)
+        {
+            if (string.IsNullOrWhiteSpace(settlementId))
+                throw new ArgumentException("Settlement id is required.", nameof(settlementId));
+            if (rewards == null) throw new ArgumentNullException(nameof(rewards));
+            if (ProcessedSettlementIds.Contains(settlementId))
+                return RewardGrantResult.Duplicate();
+
+            ValidateRewardBundle(rewards);
+            var resourceResults = new List<ResourceGrantResult>();
+            var newCards = new List<string>();
+            var existingCards = new List<string>();
+            var newRecipes = new List<string>();
+            var existingRecipes = new List<string>();
+
+            if (rewards.gold > 0) AddGold(rewards.gold);
+            foreach (var resource in rewards.resources ?? Array.Empty<LoopResourceRewardDefinition>())
+            {
+                AddResource(resource.resourceId, resource.amount);
+                resourceResults.Add(new ResourceGrantResult(resource.resourceId, resource.amount));
+            }
+
+            foreach (var cardId in rewards.cardIds ?? Array.Empty<string>())
+            {
+                if (IsCardUnlocked(cardId))
+                {
+                    existingCards.Add(cardId);
+                    continue;
+                }
+
+                UnlockCard(cardId);
+                AddOwnedCard(cardId);
+                LastBattleRewardCardIds.Add(cardId);
+                newCards.Add(cardId);
+            }
+
+            foreach (var recipeId in rewards.recipeIds ?? Array.Empty<string>())
+            {
+                if (IsRecipeUnlocked(recipeId)) existingRecipes.Add(recipeId);
+                else
+                {
+                    UnlockRecipe(recipeId);
+                    newRecipes.Add(recipeId);
+                }
+            }
+
+            ProcessedSettlementIds.Add(settlementId);
+            return new RewardGrantResult(
+                true,
+                false,
+                rewards.gold,
+                new ReadOnlyCollection<ResourceGrantResult>(resourceResults),
+                new ReadOnlyCollection<string>(newCards),
+                new ReadOnlyCollection<string>(existingCards),
+                new ReadOnlyCollection<string>(newRecipes),
+                new ReadOnlyCollection<string>(existingRecipes));
+        }
+
+        public static RewardGrantResult ApplyEnemyVictoryReward(string enemyId, string settlementId)
+        {
+            if (HasProcessedSettlement(settlementId)) return RewardGrantResult.Duplicate();
+            var victoryNumber = GetEnemyVictoryCount(enemyId) + 1;
+            if (!LoopProgressionRepository.TryGetEnemyReward(enemyId, victoryNumber, out var rewards))
+                throw new InvalidOperationException(
+                    $"No loop reward is configured for enemy '{enemyId}' victory {victoryNumber}.");
+
+            BeginBattleRewards();
+            var result = ApplyRewardBundle(settlementId, rewards);
+            if (result.Applied) RecordEnemyVictory(enemyId);
+            return result;
+        }
+
+        public static bool TryPurchaseReward(
+            string settlementId,
+            int price,
+            LoopRewardBundleDefinition rewards,
+            out RewardGrantResult result)
+        {
+            result = null;
+            if (price <= 0 || rewards == null || Gold < price ||
+                ProcessedSettlementIds.Contains(settlementId))
+                return false;
+            if (!WouldGrantAnyNewUnlock(rewards)) return false;
+            if (!SpendGold(price)) return false;
+
+            try
+            {
+                result = ApplyRewardBundle(settlementId, rewards);
+                return result.Applied;
+            }
+            catch
+            {
+                AddGold(price);
+                throw;
+            }
+        }
+
+        public static bool AdvanceDay()
+        {
+            if (currentDay >= LoopProgressionRepository.FinalDay) return false;
+            currentDay++;
+            ClearSelectedDemoStage();
+            ClearSelectedEncounterIndex();
+            ClearSelectedCoffees();
+            DailyAreaMapState.Reset();
+            // Do NOT reset player health here — HP carries across days within a run.
+            // Defeat already halves HP in CompleteSelectedArea; full heal only on new run.
+            DayChanged?.Invoke(currentDay);
+            return true;
+        }
+
+        public static void NotifyFinalCafeCompleted()
+        {
+            if (!IsFinalCafeDay) return;
+            FinalCafeCompleted?.Invoke(currentDay);
+        }
+
+        public static AreaCompletionResult CompleteSelectedArea(bool defeated)
+        {
+            if (!DailyAreaMapState.HasSelectedPoint)
+                return new AreaCompletionResult(false, false, currentDay, "PreBattle");
+
+            if (defeated)
+            {
+                var halfHealth = Math.Max(1, (PlayerGlobalStats.MaxHealth + 1) / 2);
+                PlayerGlobalStats.SetHealth(halfHealth, PlayerGlobalStats.MaxHealth);
+            }
+
+            DailyAreaMapState.CompleteSelectedPoint();
+            ClearSelectedDemoStage();
+            ClearSelectedEncounterIndex();
+            if (DailyAreaMapState.CompletedExplorationCount < DailyAreaMapState.MaxExplorations)
+                return new AreaCompletionResult(true, false, currentDay, "PreBattle");
+
+            var advanced = AdvanceDay();
+            return new AreaCompletionResult(true, advanced, currentDay, "Cafe");
+        }
+
+        private static void ValidateRewardBundle(LoopRewardBundleDefinition rewards)
+        {
+            if (rewards.gold < 0) throw new InvalidOperationException("Reward gold cannot be negative.");
+            foreach (var resource in rewards.resources ?? Array.Empty<LoopResourceRewardDefinition>())
+                if (resource == null || string.IsNullOrWhiteSpace(resource.resourceId) || resource.amount <= 0)
+                    throw new InvalidOperationException("Reward bundle contains an invalid resource.");
+            foreach (var cardId in rewards.cardIds ?? Array.Empty<string>())
+                if (string.IsNullOrWhiteSpace(cardId) ||
+                    (StaticGameRepository.HasCards && !StaticGameRepository.TryGetCard(cardId, out _)))
+                    throw new InvalidOperationException($"Reward bundle contains unknown card '{cardId}'.");
+            foreach (var recipeId in rewards.recipeIds ?? Array.Empty<string>())
+                if (string.IsNullOrWhiteSpace(recipeId))
+                    throw new InvalidOperationException("Reward bundle contains an empty recipe id.");
+        }
+
         public static void ResetRunState()
         {
             ClearSelectedDeck();
@@ -200,6 +439,13 @@ namespace KiKs.Combat
             OwnedCardCopies.Clear();
             LastBattleRewardCardIds.Clear();
             FallbackResources.Clear();
+            UnlockedCardIds.Clear();
+            UnlockedRecipeIds.Clear();
+            EnemyVictoryCounts.Clear();
+            ProcessedSettlementIds.Clear();
+            currentDay = 1;
+            DailyAreaMapState.Reset();
+            PlayerGlobalStats.ResetToFull();
         }
 
         private static class InventoryBridge

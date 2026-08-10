@@ -8,58 +8,77 @@ namespace KiKs.Combat.Tests
         [SetUp]
         public void SetUp()
         {
-            DailyAreaMapState.Reset();
+            RuntimeGameRepository.ResetRunState();
+            SetGold(0);
         }
 
         [TearDown]
         public void TearDown()
         {
-            DailyAreaMapState.Reset();
+            SetGold(0);
+            RuntimeGameRepository.ResetRunState();
         }
 
         [Test]
-        public void SuccessfulPurchaseSpendsGoldAndReturnsHiddenReward()
+        public void SuccessfulPurchaseUsesRepositoryGoldAndUnlocksDeterministicBundle()
         {
-            var offer = TreasureJsonRepository.CreateFallback().offers[0];
-            var session = new TreasurePurchaseSession(120);
+            var offer = LoopProgressionRepository.Definition.treasureOffers.Single(item => item.price == 50);
+            RuntimeGameRepository.AddGold(120);
+            var session = new TreasurePurchaseSession();
 
             var result = session.TryPurchase(offer);
 
             Assert.That(result.Status, Is.EqualTo(TreasurePurchaseStatus.Success));
-            Assert.That(session.Gold, Is.EqualTo(70));
-            Assert.That(result.Reward.id, Is.EqualTo("claw"));
-            Assert.That(result.Reward.amount, Is.EqualTo(2));
+            Assert.That(RuntimeGameRepository.Gold, Is.EqualTo(70));
+            Assert.That(result.Reward.NewCardIds, Is.EquivalentTo(new[] { "ranged_rocket_launcher" }));
+            Assert.That(RuntimeGameRepository.IsCardUnlocked("ranged_rocket_launcher"), Is.True);
         }
 
         [Test]
-        public void PurchasedOfferCannotBeBoughtTwice()
+        public void PurchasedTierCannotBeBoughtTwiceDuringOneVisit()
         {
-            var offer = TreasureJsonRepository.CreateFallback().offers[0];
-            var session = new TreasurePurchaseSession(200);
+            var offer = LoopProgressionRepository.Definition.treasureOffers.Single(item => item.price == 50);
+            RuntimeGameRepository.AddGold(200);
+            var session = new TreasurePurchaseSession();
 
             Assert.That(session.TryPurchase(offer).IsSuccess, Is.True);
             var secondResult = session.TryPurchase(offer);
 
             Assert.That(secondResult.Status, Is.EqualTo(TreasurePurchaseStatus.AlreadyPurchased));
-            Assert.That(session.Gold, Is.EqualTo(150));
-            Assert.That(session.Rewards.Count, Is.EqualTo(1));
+            Assert.That(RuntimeGameRepository.Gold, Is.EqualTo(150));
         }
 
         [Test]
-        public void InsufficientGoldDoesNotSpendOrGrantReward()
+        public void InsufficientRepositoryGoldDoesNotGrantAnything()
         {
-            var offer = TreasureJsonRepository.CreateFallback().offers[3];
-            var session = new TreasurePurchaseSession(149);
+            var offer = LoopProgressionRepository.Definition.treasureOffers.Single(item => item.price == 400);
+            RuntimeGameRepository.AddGold(399);
+            var session = new TreasurePurchaseSession();
 
             var result = session.TryPurchase(offer);
 
             Assert.That(result.Status, Is.EqualTo(TreasurePurchaseStatus.InsufficientGold));
-            Assert.That(session.Gold, Is.EqualTo(149));
-            Assert.That(session.Rewards, Is.Empty);
+            Assert.That(RuntimeGameRepository.Gold, Is.EqualTo(399));
+            Assert.That(RuntimeGameRepository.IsRecipeUnlocked("TheFifthFlavor"), Is.False);
         }
 
         [Test]
-        public void TreasurePointCanDisappearWithoutAdvancingBattleOnlyPlaytestCounter()
+        public void FullyOwnedTierIsDisabledWithoutSpendingGold()
+        {
+            var offer = LoopProgressionRepository.Definition.treasureOffers.Single(item => item.price == 100);
+            foreach (var cardId in offer.rewards.cardIds)
+                RuntimeGameRepository.UnlockCard(cardId);
+            RuntimeGameRepository.AddGold(200);
+            var session = new TreasurePurchaseSession();
+
+            var result = session.TryPurchase(offer);
+
+            Assert.That(result.Status, Is.EqualTo(TreasurePurchaseStatus.AllRewardsOwned));
+            Assert.That(RuntimeGameRepository.Gold, Is.EqualTo(200));
+        }
+
+        [Test]
+        public void LeavingTreasureConsumesOneDailyExploration()
         {
             DailyAreaMapState.EnsureGenerated();
             var treasureIndex = DailyAreaMapState.MapPoints
@@ -68,21 +87,29 @@ namespace KiKs.Combat.Tests
                 .index;
 
             Assert.That(DailyAreaMapState.TrySelectPoint(treasureIndex, out _), Is.True);
-            DailyAreaMapState.CompleteSelectedPointWithoutCountingExploration();
+            var completion = RuntimeGameRepository.CompleteSelectedArea(defeated: false);
 
+            Assert.That(completion.Completed, Is.True);
             Assert.That(DailyAreaMapState.MapPoints[treasureIndex].IsCompleted, Is.True);
-            Assert.That(DailyAreaMapState.CompletedExplorationCount, Is.Zero);
-            Assert.That(DailyAreaMapState.HasSelectedPoint, Is.False);
+            Assert.That(DailyAreaMapState.CompletedExplorationCount, Is.EqualTo(1));
         }
 
         [Test]
-        public void FirstVersionFallbackContainsExactlyFourValidOffers()
+        public void LoopConfigContainsExactlyFourDeterministicPriceTiers()
         {
-            var definition = TreasureJsonRepository.CreateFallback();
+            var definition = LoopProgressionRepository.Definition;
 
-            Assert.That(TreasureJsonRepository.TryValidate(definition, out var error), Is.True, error);
-            Assert.That(definition.offers, Has.Length.EqualTo(4));
-            Assert.That(definition.offers.All(offer => offer.productPool.Length == 1), Is.True);
+            Assert.That(definition.treasureOffers, Has.Length.EqualTo(4));
+            Assert.That(definition.treasureOffers.Select(item => item.price),
+                Is.EquivalentTo(new[] { 50, 100, 200, 400 }));
+            Assert.That(definition.treasureOffers.All(item => item.rewards.HasAnyReward), Is.True);
+        }
+
+        private static void SetGold(int target)
+        {
+            var current = RuntimeGameRepository.Gold;
+            if (current < target) RuntimeGameRepository.AddGold(target - current);
+            else if (current > target) Assert.That(RuntimeGameRepository.SpendGold(current - target), Is.True);
         }
     }
 }

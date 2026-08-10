@@ -13,6 +13,7 @@ namespace KiKs.Combat
 
         private bool _initialHandDrawn;
         private bool _engineReady;
+        private bool _rebuildingHand;
         private PlayerAttackFeedback _playerAttackFeedback;
 
         private void Start()
@@ -22,6 +23,8 @@ namespace KiKs.Combat
                 Debug.LogError("[BattleCardBridge] CardDealAnimator PlayArea is not assigned.", this);
 
             if (battleController == null) battleController = FindFirstObjectByType<BattleController>();
+            if (battleController != null)
+                battleController.CombatEventRaised += OnCombatEvent;
 
             ConfigureMagicHandCardBridge();
 
@@ -36,11 +39,60 @@ namespace KiKs.Combat
 
         private void OnDestroy()
         {
+            if (battleController != null)
+                battleController.CombatEventRaised -= OnCombatEvent;
             if (animator != null)
             {
                 animator.OnCardPlayed -= OnCardPlayed;
                 animator.OnCardShot -= OnCardShot;
             }
+        }
+
+        /// <summary>
+        /// 战斗中玩家抽牌（如烟雾弹的 draw_cards 效果）时，动态把新牌加入手牌区。
+        /// 初始手牌与回合开始的重建仍由 DrawInitialHand / DrawNewHandNextTurn 全量刷新，
+        /// 这里只负责中途增量抽牌，并通过 _initialHandDrawn 避免与开局抽牌重复。
+        /// </summary>
+        private void OnCombatEvent(CombatEvent evt)
+        {
+            if (evt == null || evt.Type != CombatEventType.CardDrawn) return;
+            if (!_initialHandDrawn || _rebuildingHand) return; // 开局与回合重建由全量刷新统一处理
+            if (battleController == null || !battleController.IsInitialized) return;
+            if (battleController.State?.Player == null) return;
+            if (evt.SourceId != battleController.State.Player.Id) return; // 只看玩家抽牌
+
+            // 规则层抽牌发生在手牌区动画之后，直接用引擎手牌状态增量绘制
+            var hand = battleController.State.Deck.Hand;
+            CardInstance drawn = null;
+            foreach (var card in hand)
+            {
+                if (card.InstanceId == evt.CardInstanceId)
+                {
+                    drawn = card;
+                    break;
+                }
+            }
+            if (drawn == null) return;
+
+            DrawCardIfAbsent(drawn);
+        }
+
+        /// <summary>
+        /// 按 InstanceId 去重后绘制一张手牌。开局的 DrawInitialHand、回合开始的全量重建
+        /// 以及战斗中 CardDrawn 增量绘制都走这里，保证同一张牌不会在 UI 上重复出现。
+        /// </summary>
+        private void DrawCardIfAbsent(CardInstance card)
+        {
+            if (card == null || animator == null) return;
+            foreach (var existing in animator.HandCards)
+            {
+                if (existing != null && existing.InstanceId == card.InstanceId)
+                    return;
+            }
+
+            var cardView = animator.DrawCard(card.Spec, card.InstanceId, card.IsUpgraded, card.IsActivated);
+            if (cardView != null)
+                HookCardHover(cardView);
         }
 
         /// <summary>检查是否有任意 Draggable 正在拖拽（魔手拖拽时保持魔法姿态）</summary>
@@ -74,11 +126,7 @@ namespace KiKs.Combat
             Debug.Log($"[BattleCardBridge] Drawing initial hand: {hand.Count} cards");
 
             foreach (var cardInstance in hand)
-            {
-                var cardView = animator.DrawCard(cardInstance.Spec, cardInstance.InstanceId, cardInstance.IsUpgraded, cardInstance.IsActivated);
-                if (cardView != null)
-                    HookCardHover(cardView);
-            }
+                DrawCardIfAbsent(cardInstance);
 
             // 卡牌生成后播放 BGM（避免 playOnAwake 阻塞卡牌生成）
             var bgmObj = GameObject.Find("BattleBGM");
@@ -235,6 +283,7 @@ namespace KiKs.Combat
 
             animator.DiscardAllCards();
             Debug.Log("[BattleCardBridge] EndPlayerTurn: success");
+            _rebuildingHand = true;
             StartCoroutine(DrawNewHandNextTurn());
         }
 
@@ -249,11 +298,9 @@ namespace KiKs.Combat
             Debug.Log($"[BattleCardBridge] New turn, drawing {hand.Count} cards");
 
             foreach (var cardInstance in hand)
-            {
-                var cardView = animator.DrawCard(cardInstance.Spec, cardInstance.InstanceId, cardInstance.IsUpgraded, cardInstance.IsActivated);
-                if (cardView != null)
-                    HookCardHover(cardView);
-            }
+                DrawCardIfAbsent(cardInstance);
+
+            _rebuildingHand = false;
         }
 
         private void ConfigureMagicHandCardBridge()

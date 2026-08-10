@@ -8,17 +8,17 @@ namespace KiKs.Combat
         Success,
         InvalidOffer,
         AlreadyPurchased,
-        InsufficientGold
+        InsufficientGold,
+        AllRewardsOwned
     }
 
     public sealed class TreasurePurchaseResult
     {
         public TreasurePurchaseStatus Status { get; }
-        public TreasureRewardDefinition Reward { get; }
-
+        public RewardGrantResult Reward { get; }
         public bool IsSuccess => Status == TreasurePurchaseStatus.Success;
 
-        public TreasurePurchaseResult(TreasurePurchaseStatus status, TreasureRewardDefinition reward = null)
+        public TreasurePurchaseResult(TreasurePurchaseStatus status, RewardGrantResult reward = null)
         {
             Status = status;
             Reward = reward;
@@ -26,72 +26,49 @@ namespace KiKs.Combat
     }
 
     /// <summary>
-    /// Temporary treasure-only wallet and reward history. It deliberately does not write
-    /// to RuntimeGameRepository or InventorySystem; the shared save/inventory integration
-    /// will replace this session boundary later.
+    /// Per-treasure-visit purchase guard. Currency, rewards and unlocks always come from
+    /// RuntimeGameRepository; this object stores only which tiers were bought in this visit.
     /// </summary>
     public sealed class TreasurePurchaseSession
     {
         private readonly HashSet<string> purchasedOfferIds = new(StringComparer.Ordinal);
-        private readonly List<TreasureRewardDefinition> rewards = new();
 
-        public int Gold { get; private set; }
-        public IReadOnlyList<TreasureRewardDefinition> Rewards => rewards;
+        public int Gold => RuntimeGameRepository.Gold;
 
-        public TreasurePurchaseSession(int startingGold)
-        {
-            Gold = Math.Max(0, startingGold);
-        }
+        public bool IsPurchased(string offerId) =>
+            !string.IsNullOrWhiteSpace(offerId) && purchasedOfferIds.Contains(offerId);
 
-        public TreasurePurchaseResult TryPurchase(
-            TreasureOfferDefinition offer,
-            Func<float> randomValue = null)
+        public bool IsFullyOwned(TreasureOfferDefinition offer) =>
+            offer?.rewards != null && !RuntimeGameRepository.WouldGrantAnyNewUnlock(offer.rewards);
+
+        public TreasurePurchaseResult TryPurchase(TreasureOfferDefinition offer)
         {
             if (offer == null || string.IsNullOrWhiteSpace(offer.id) || offer.price <= 0 ||
-                offer.productPool == null || offer.productPool.Length == 0)
+                offer.rewards == null || !offer.rewards.HasAnyReward)
                 return new TreasurePurchaseResult(TreasurePurchaseStatus.InvalidOffer);
 
             if (purchasedOfferIds.Contains(offer.id))
                 return new TreasurePurchaseResult(TreasurePurchaseStatus.AlreadyPurchased);
 
+            if (IsFullyOwned(offer))
+                return new TreasurePurchaseResult(TreasurePurchaseStatus.AllRewardsOwned);
+
             if (Gold < offer.price)
                 return new TreasurePurchaseResult(TreasurePurchaseStatus.InsufficientGold);
 
-            var reward = ChooseReward(offer.productPool, randomValue?.Invoke() ?? 0f);
-            if (reward == null)
+            var pointIndex = DailyAreaMapState.HasSelectedPoint
+                ? DailyAreaMapState.SelectedPointIndex
+                : -1;
+            var settlementId = $"treasure:d{RuntimeGameRepository.CurrentDay}:p{pointIndex}:{offer.id}";
+            if (!RuntimeGameRepository.TryPurchaseReward(
+                    settlementId,
+                    offer.price,
+                    offer.rewards,
+                    out var reward))
                 return new TreasurePurchaseResult(TreasurePurchaseStatus.InvalidOffer);
 
-            Gold -= offer.price;
             purchasedOfferIds.Add(offer.id);
-            rewards.Add(reward);
             return new TreasurePurchaseResult(TreasurePurchaseStatus.Success, reward);
-        }
-
-        private static TreasureRewardDefinition ChooseReward(
-            IReadOnlyList<TreasureProductDefinition> products,
-            float randomValue)
-        {
-            var totalWeight = 0;
-            foreach (var product in products)
-                if (product != null && product.reward != null && product.weight > 0)
-                    totalWeight += product.weight;
-
-            if (totalWeight <= 0)
-                return null;
-
-            var roll = Math.Clamp(randomValue, 0f, 0.999999f) * totalWeight;
-            var cumulative = 0;
-            foreach (var product in products)
-            {
-                if (product == null || product.reward == null || product.weight <= 0)
-                    continue;
-
-                cumulative += product.weight;
-                if (roll < cumulative)
-                    return product.reward;
-            }
-
-            return null;
         }
     }
 }

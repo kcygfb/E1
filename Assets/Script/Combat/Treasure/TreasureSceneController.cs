@@ -19,6 +19,35 @@ namespace KiKs.Combat
         private const string ChineseFontResourcePath = "Fonts & Materials/站酷文艺体 SDF";
 
         private static TMP_FontAsset chineseFont;
+        private static readonly Dictionary<string, string> RewardDisplayNames = new(System.StringComparer.Ordinal)
+        {
+            ["ranged_rocket_launcher"] = "火箭筒",
+            ["ranged_flamethrower"] = "火焰喷射器",
+            ["ranged_grenade_launcher"] = "榴弹发射器",
+            ["heavy_maul"] = "大锤",
+            ["heavy_greatsword"] = "巨剑",
+            ["bleed_shuriken"] = "手里剑",
+            ["bleed_reaper"] = "镰刀",
+            ["misc_magic_burst"] = "魔法爆破",
+            ["BudgetBrew"] = "Budget Brew",
+            ["ViscousDream"] = "Viscous Dream",
+            ["FinalGaze"] = "Final Gaze",
+            ["AfterTaste"] = "AfterTaste",
+            ["OneSnakeTwoWays"] = "One Snake, Two Ways",
+            ["TentacleLabyrinth"] = "Tentacle Labyrinth",
+            ["FreeWom"] = "FreeWom",
+            ["Sunset"] = "Sunset",
+            ["FlameLatte"] = "Flame Latte",
+            ["TheFifthFlavor"] = "The Fifth Flavor",
+            ["ESSymphony"] = "E&S Symphony",
+            ["snake"] = "蛇干",
+            ["claw"] = "爪子",
+            ["tentacle"] = "触手",
+            ["oil"] = "油脂",
+            ["wolffur"] = "狼毫",
+            ["eye"] = "眼睛",
+            ["fire"] = "紫色火焰"
+        };
 
         private readonly Dictionary<CardView, TreasureOfferDefinition> offersByCard = new();
         private TreasurePurchaseSession session;
@@ -26,15 +55,19 @@ namespace KiKs.Combat
         private RectTransform canvasRect;
         private RectTransform merchantPortrait;
         private RectTransform rewardTray;
+        private RectTransform rewardContent;
+        private TMP_Text rewardEmptyText;
         private TMP_Text coinText;
         private Button leaveButton;
         private bool isLeaving;
+        private bool createdRewardTray;
         private int revealedRewardCount;
+        private readonly List<GameObject> rewardTokens = new();
 
         private IEnumerator Start()
         {
-            var definition = TreasureJsonRepository.Load();
-            session = new TreasurePurchaseSession(definition.testStartingGold);
+            var definition = LoopProgressionRepository.Definition;
+            session = new TreasurePurchaseSession();
 
             ResolveSceneReferences();
             ConfigureExistingSceneUI();
@@ -42,7 +75,7 @@ namespace KiKs.Combat
             RefreshGold();
 
             yield return KiKs.UI.TransitionEffect.WaitEntrance();
-            DealOffers(definition.offers);
+            DealOffers(definition.treasureOffers);
         }
 
         private void OnDestroy()
@@ -51,17 +84,28 @@ namespace KiKs.Combat
                 leaveButton.onClick.RemoveListener(LeaveTreasure);
             if (cardDealer != null && cardDealer.OnCardPlayed == HandleOfferPlayed)
                 cardDealer.OnCardPlayed = null;
+
+            foreach (var token in rewardTokens)
+            {
+                if (token == null) continue;
+                DOTween.Kill(token.transform);
+                Destroy(token);
+            }
+            rewardTokens.Clear();
+
+            if (createdRewardTray && rewardTray != null)
+                Destroy(rewardTray.gameObject);
         }
 
         private void ResolveSceneReferences()
         {
-            var canvasObject = GameObject.Find("Canvas");
-            canvasRect = canvasObject != null ? canvasObject.GetComponent<RectTransform>() : null;
-            cardDealer = FindFirstObjectByType<CardDealAnimator>();
-            merchantPortrait = GameObject.Find("MerchantPortrait")?.GetComponent<RectTransform>();
-            coinText = GameObject.Find("CoinText")?.GetComponent<TMP_Text>();
-            leaveButton = GameObject.Find("Btn_EndTurn")?.GetComponent<Button>() ??
-                          GameObject.Find("Btn_LeaveTreasure")?.GetComponent<Button>();
+            var sceneCanvas = FindSceneCanvas();
+            canvasRect = sceneCanvas != null ? sceneCanvas.GetComponent<RectTransform>() : null;
+            cardDealer = FindSceneComponent<CardDealAnimator>();
+            merchantPortrait = FindSceneObject("MerchantPortrait")?.GetComponent<RectTransform>();
+            coinText = FindSceneObject("CoinText")?.GetComponent<TMP_Text>();
+            leaveButton = FindSceneObject("Btn_EndTurn")?.GetComponent<Button>() ??
+                          FindSceneObject("Btn_LeaveTreasure")?.GetComponent<Button>();
 
             if (canvasRect == null)
                 Debug.LogError("[Treasure] The scene needs the existing Canvas.", this);
@@ -101,10 +145,10 @@ namespace KiKs.Combat
                 Debug.LogError("[Treasure] The scene needs its existing Btn_EndTurn/Btn_LeaveTreasure button.", this);
             }
 
-            var hpText = GameObject.Find("HpText");
+            var hpText = FindSceneObject("HpText");
             if (hpText != null)
                 hpText.SetActive(false);
-            var hpIcon = GameObject.Find("HpIcon");
+            var hpIcon = FindSceneObject("HpIcon");
             if (hpIcon != null)
                 hpIcon.SetActive(false);
         }
@@ -115,7 +159,7 @@ namespace KiKs.Combat
                 return;
 
             cardDealer.OnCardPlayed = HandleOfferPlayed;
-            var count = Mathf.Min(TreasureJsonRepository.RequiredOfferCount, offers.Count);
+            var count = offers.Count;
             for (var index = 0; index < count; index++)
             {
                 var offer = offers[index];
@@ -125,6 +169,8 @@ namespace KiKs.Combat
 
                 offersByCard[card] = offer;
                 HideCombatOnlyCardText(card);
+                if (session.IsFullyOwned(offer))
+                    MarkOfferFullyOwned(card);
             }
         }
 
@@ -133,16 +179,16 @@ namespace KiKs.Combat
             if (card == null || session == null || isLeaving || !offersByCard.TryGetValue(card, out var offer))
                 return false;
 
-            var result = session.TryPurchase(offer, () => Random.value);
+            var result = session.TryPurchase(offer);
             switch (result.Status)
             {
                 case TreasurePurchaseStatus.Success:
                     offersByCard.Remove(card);
                     RefreshGold();
-                    RevealReward(result.Reward);
+                    RevealReward(offer, result.Reward);
                     Debug.Log(
                         $"[Treasure] Purchased '{offer.id}' for {offer.price}C; " +
-                        $"revealed {result.Reward.GetDisplayText()}. Test gold: {session.Gold}.",
+                        $"applied its configured reward bundle. Gold: {session.Gold}.",
                         this);
                     // CardDealAnimator receives true and runs its normal DiscardCard path,
                     // including CardView.PlayDiscardAnimation.
@@ -153,7 +199,12 @@ namespace KiKs.Combat
                     return false;
 
                 case TreasurePurchaseStatus.AlreadyPurchased:
-                    KiKs.UI.WarningToast.Show("这张购买牌已经使用过了。");
+                    KiKs.UI.WarningToast.Show("这个档位本次已经购买过了。");
+                    return false;
+
+                case TreasurePurchaseStatus.AllRewardsOwned:
+                    KiKs.UI.WarningToast.Show("该档奖励已全部拥有。");
+                    MarkOfferFullyOwned(card);
                     return false;
 
                 default:
@@ -196,75 +247,207 @@ namespace KiKs.Combat
 
         private void ResolveRewardTray()
         {
-            rewardTray = GameObject.Find("TreasureRewardTray")?.GetComponent<RectTransform>();
-            if (rewardTray != null || canvasRect == null)
-                return;
+            rewardTray = FindSceneObject("TreasureRewardTray")?.GetComponent<RectTransform>();
+            if (rewardTray == null)
+            {
+                if (canvasRect == null) return;
+                rewardTray = CreateRuntimeArea(
+                    "TreasureRewardTray",
+                    canvasRect,
+                    new Vector2(0f, -170f),
+                    new Vector2(960f, 150f));
+                createdRewardTray = true;
+            }
 
-            // Temporary reward readout until the authored acquisition UI is ready.
-            rewardTray = CreateRuntimeArea(
-                "TreasureRewardTray",
-                canvasRect,
-                new Vector2(0f, -155f),
-                new Vector2(760f, 110f));
-            var background = rewardTray.gameObject.AddComponent<Image>();
-            background.color = new Color32(32, 28, 39, 185);
+            rewardTray.SetAsLastSibling();
+            rewardTray.localScale = Vector3.one;
+            rewardTray.anchorMin = new Vector2(0.5f, 0.5f);
+            rewardTray.anchorMax = new Vector2(0.5f, 0.5f);
+            rewardTray.pivot = new Vector2(0.5f, 0.5f);
+            rewardTray.anchoredPosition = new Vector2(0f, -170f);
+            rewardTray.sizeDelta = new Vector2(960f, 150f);
+
+            var background = rewardTray.GetComponent<Image>() ?? rewardTray.gameObject.AddComponent<Image>();
+            background.color = new Color32(24, 22, 31, 224);
             background.raycastTarget = false;
+            var outline = rewardTray.GetComponent<Outline>() ?? rewardTray.gameObject.AddComponent<Outline>();
+            outline.effectColor = new Color32(198, 157, 88, 170);
+            outline.effectDistance = new Vector2(2f, -2f);
+            outline.useGraphicAlpha = true;
 
-            var title = CreateText(
-                "RewardTrayTitle",
-                rewardTray,
-                "已获得",
-                19f,
-                new Color32(210, 188, 142, 255));
+            var title = rewardTray.Find("RewardTrayTitle")?.GetComponent<TextMeshProUGUI>();
+            if (title == null)
+                title = CreateText("RewardTrayTitle", rewardTray, "本次收获", 22f, new Color32(244, 211, 145, 255));
+            ApplyChineseFont(title);
+            title.text = "本次收获";
+            title.fontStyle = FontStyles.Bold;
             title.rectTransform.anchorMin = new Vector2(0f, 1f);
-            title.rectTransform.anchorMax = new Vector2(0f, 1f);
-            title.rectTransform.pivot = new Vector2(0f, 1f);
-            title.rectTransform.anchoredPosition = new Vector2(12f, -6f);
-            title.rectTransform.sizeDelta = new Vector2(120f, 30f);
-            title.alignment = TextAlignmentOptions.Left;
+            title.rectTransform.anchorMax = new Vector2(1f, 1f);
+            title.rectTransform.pivot = new Vector2(0.5f, 1f);
+            title.rectTransform.anchoredPosition = new Vector2(0f, -8f);
+            title.rectTransform.sizeDelta = new Vector2(-28f, 30f);
+            title.alignment = TextAlignmentOptions.Center;
+
+            rewardContent = rewardTray.Find("RewardContent")?.GetComponent<RectTransform>();
+            if (rewardContent == null)
+            {
+                var contentObject = new GameObject("RewardContent", typeof(RectTransform), typeof(HorizontalLayoutGroup));
+                contentObject.layer = 5;
+                contentObject.transform.SetParent(rewardTray, false);
+                rewardContent = contentObject.GetComponent<RectTransform>();
+            }
+            rewardContent.anchorMin = Vector2.zero;
+            rewardContent.anchorMax = Vector2.one;
+            rewardContent.offsetMin = new Vector2(14f, 12f);
+            rewardContent.offsetMax = new Vector2(-14f, -44f);
+            rewardContent.localScale = Vector3.one;
+
+            var layout = rewardContent.GetComponent<HorizontalLayoutGroup>();
+            layout.padding = new RectOffset(4, 4, 3, 3);
+            layout.spacing = 10f;
+            layout.childAlignment = TextAnchor.MiddleCenter;
+            layout.childControlWidth = true;
+            layout.childControlHeight = true;
+            layout.childForceExpandWidth = true;
+            layout.childForceExpandHeight = true;
+
+            rewardEmptyText = rewardTray.Find("RewardEmptyText")?.GetComponent<TextMeshProUGUI>();
+            if (rewardEmptyText == null)
+                rewardEmptyText = CreateText(
+                    "RewardEmptyText",
+                    rewardTray,
+                    "购买后会在这里显示本次获得的内容",
+                    17f,
+                    new Color32(184, 178, 190, 255));
+            rewardEmptyText.rectTransform.anchorMin = new Vector2(0f, 0f);
+            rewardEmptyText.rectTransform.anchorMax = new Vector2(1f, 1f);
+            rewardEmptyText.rectTransform.offsetMin = new Vector2(20f, 10f);
+            rewardEmptyText.rectTransform.offsetMax = new Vector2(-20f, -42f);
+            rewardEmptyText.alignment = TextAlignmentOptions.Center;
+            rewardEmptyText.raycastTarget = false;
         }
 
-        private void RevealReward(TreasureRewardDefinition reward)
+        private void RevealReward(TreasureOfferDefinition offer, RewardGrantResult reward)
         {
-            if (reward == null || canvasRect == null || rewardTray == null)
+            if (offer == null || reward == null || rewardContent == null || rewardTray == null)
                 return;
 
+            if (rewardEmptyText != null)
+                rewardEmptyText.gameObject.SetActive(false);
+
             var token = new GameObject(
-                $"Reward_{reward.id}_{revealedRewardCount + 1}",
+                $"Reward_{offer.price}C_{revealedRewardCount + 1}",
                 typeof(RectTransform),
                 typeof(CanvasRenderer),
                 typeof(Image),
-                typeof(CanvasGroup));
+                typeof(CanvasGroup),
+                typeof(LayoutElement),
+                typeof(Outline));
             token.layer = 5;
-            token.transform.SetParent(canvasRect, false);
+            token.transform.SetParent(rewardContent, false);
+            rewardTokens.Add(token);
+
             var tokenRect = token.GetComponent<RectTransform>();
-            tokenRect.anchorMin = new Vector2(0.5f, 0.5f);
-            tokenRect.anchorMax = new Vector2(0.5f, 0.5f);
-            tokenRect.sizeDelta = new Vector2(165f, 58f);
-            tokenRect.anchoredPosition = merchantPortrait != null
-                ? GetCanvasPosition(merchantPortrait)
-                : new Vector2(300f, 165f);
+            tokenRect.localScale = Vector3.one;
+            var layoutElement = token.GetComponent<LayoutElement>();
+            layoutElement.minWidth = 150f;
+            layoutElement.preferredWidth = 215f;
+            layoutElement.flexibleWidth = 1f;
+            layoutElement.minHeight = 76f;
+            layoutElement.preferredHeight = 90f;
+            layoutElement.flexibleHeight = 1f;
 
             var tokenImage = token.GetComponent<Image>();
-            tokenImage.color = string.Equals(reward.type, "card", System.StringComparison.OrdinalIgnoreCase)
-                ? new Color32(87, 102, 142, 255)
-                : new Color32(116, 82, 54, 255);
+            tokenImage.color = new Color32(69, 73, 94, 245);
             tokenImage.raycastTarget = false;
-            CreateText("RewardName", tokenRect, reward.GetDisplayText(), 22f, Color.white);
+            var tokenOutline = token.GetComponent<Outline>();
+            tokenOutline.effectColor = new Color32(222, 184, 111, 145);
+            tokenOutline.effectDistance = new Vector2(1f, -1f);
+            tokenOutline.useGraphicAlpha = true;
 
-            var targetX = -270f + revealedRewardCount * 180f;
-            var targetCanvasPosition = GetCanvasPosition(rewardTray) + new Vector2(targetX, -12f);
+            var header = CreateText(
+                "RewardHeader",
+                tokenRect,
+                $"{offer.price}C 收获",
+                17f,
+                new Color32(255, 221, 151, 255));
+            header.rectTransform.anchorMin = new Vector2(0f, 1f);
+            header.rectTransform.anchorMax = new Vector2(1f, 1f);
+            header.rectTransform.pivot = new Vector2(0.5f, 1f);
+            header.rectTransform.anchoredPosition = new Vector2(0f, -5f);
+            header.rectTransform.sizeDelta = new Vector2(-12f, 24f);
+            header.alignment = TextAlignmentOptions.Center;
+
+            var body = CreateText("RewardBody", tokenRect, FormatReward(reward), 15f, Color.white);
+            body.rectTransform.anchorMin = Vector2.zero;
+            body.rectTransform.anchorMax = Vector2.one;
+            body.rectTransform.offsetMin = new Vector2(7f, 5f);
+            body.rectTransform.offsetMax = new Vector2(-7f, -28f);
+            body.enableAutoSizing = true;
+            body.fontSizeMin = 10f;
+            body.fontSizeMax = 15f;
+            body.textWrappingMode = TextWrappingModes.Normal;
+            body.overflowMode = TextOverflowModes.Ellipsis;
+            body.alignment = TextAlignmentOptions.Center;
+
             revealedRewardCount++;
+            LayoutRebuilder.ForceRebuildLayoutImmediate(rewardContent);
+            LayoutRebuilder.ForceRebuildLayoutImmediate(rewardTray);
 
             var canvasGroup = token.GetComponent<CanvasGroup>();
             canvasGroup.alpha = 0f;
-            tokenRect.localScale = Vector3.one * 0.45f;
+            tokenRect.localScale = Vector3.one * 0.82f;
             var sequence = DOTween.Sequence();
-            sequence.Join(canvasGroup.DOFade(1f, 0.14f));
-            sequence.Join(tokenRect.DOScale(1f, 0.35f).SetEase(Ease.OutBack));
-            sequence.Join(tokenRect.DOAnchorPos(targetCanvasPosition, 0.52f).SetEase(Ease.OutBounce));
+            sequence.Join(canvasGroup.DOFade(1f, 0.18f));
+            sequence.Join(tokenRect.DOScale(1f, 0.32f).SetEase(Ease.OutBack));
+            sequence.SetLink(token, LinkBehaviour.KillOnDestroy);
         }
 
+        private static string FormatReward(RewardGrantResult reward)
+        {
+            if (reward == null) return "无奖励";
+            var lines = new List<string>();
+            if (reward.GoldGranted > 0) lines.Add($"金币 +{reward.GoldGranted}");
+            foreach (var resource in reward.ResourcesGranted)
+                lines.Add($"{GetRewardDisplayName(resource.ResourceId)} ×{resource.Amount}");
+            foreach (var cardId in reward.NewCardIds)
+                lines.Add($"卡牌：{GetRewardDisplayName(cardId)}");
+            foreach (var recipeId in reward.NewRecipeIds)
+                lines.Add($"菜谱：{GetRewardDisplayName(recipeId)}");
+            foreach (var cardId in reward.ExistingCardIds)
+                lines.Add($"已拥有：{GetRewardDisplayName(cardId)}");
+            foreach (var recipeId in reward.ExistingRecipeIds)
+                lines.Add($"已拥有：{GetRewardDisplayName(recipeId)}");
+            return lines.Count > 0 ? string.Join("\n", lines) : "无新增内容";
+        }
+
+        private static string GetRewardDisplayName(string id)
+        {
+            return !string.IsNullOrWhiteSpace(id) && RewardDisplayNames.TryGetValue(id, out var displayName)
+                ? displayName
+                : id ?? string.Empty;
+        }
+        private static void MarkOfferFullyOwned(CardView card)
+        {
+            if (card == null) return;
+            card.enabled = false;
+            var draggable = card.GetComponent<KiKs.UI.Draggable>();
+            if (draggable != null) draggable.enabled = false;
+            var interaction = card.GetComponent<KiKs.UI.CardInteraction>();
+            if (interaction != null) interaction.enabled = false;
+            var group = card.GetComponent<CanvasGroup>() ?? card.gameObject.AddComponent<CanvasGroup>();
+            group.alpha = 0.55f;
+            group.interactable = false;
+            group.blocksRaycasts = false;
+
+            var label = CreateText(
+                "FullyOwnedLabel",
+                card.GetComponent<RectTransform>(),
+                "已全部拥有",
+                20f,
+                new Color32(255, 220, 145, 255));
+            label.fontStyle = FontStyles.Bold;
+        }
         private void RefreshGold()
         {
             if (coinText != null && session != null)
@@ -273,33 +456,65 @@ namespace KiKs.Combat
 
         private void LeaveTreasure()
         {
-            if (isLeaving)
-                return;
+            if (isLeaving) return;
 
-            isLeaving = true;
-            if (leaveButton != null)
-                leaveButton.interactable = false;
+            var completion = RuntimeGameRepository.CompleteSelectedArea(defeated: false);
+            var nextSceneName = string.IsNullOrWhiteSpace(completion.NextSceneName)
+                ? "PreBattle"
+                : completion.NextSceneName;
 
-            if (DailyAreaMapState.HasSelectedPoint &&
-                DailyAreaMapState.TryGetPoint(DailyAreaMapState.SelectedPointIndex, out var point) &&
-                point.Type == AreaPointType.Treasure)
-                DailyAreaMapState.CompleteSelectedPointWithoutCountingExploration();
-
-            if (!Application.CanStreamedLevelBeLoaded(ReturnSceneName))
+            if (!Application.CanStreamedLevelBeLoaded(nextSceneName))
             {
-                Debug.LogError($"[Treasure] Scene '{ReturnSceneName}' is not included in the active build profile.", this);
-                isLeaving = false;
-                if (leaveButton != null)
-                    leaveButton.interactable = true;
+                Debug.LogError($"[Treasure] Scene '{nextSceneName}' is not included in the active build profile.", this);
                 return;
             }
 
+            isLeaving = true;
+            if (leaveButton != null) leaveButton.interactable = false;
             if (KiKs.UI.TransitionEffect.Instance != null)
-                KiKs.UI.TransitionEffect.Instance.TransitionTo(ReturnSceneName);
+                KiKs.UI.TransitionEffect.Instance.TransitionTo(nextSceneName);
             else
-                SceneManager.LoadScene(ReturnSceneName);
+                SceneManager.LoadScene(nextSceneName);
         }
 
+        private Canvas FindSceneCanvas()
+        {
+            var targetScene = gameObject.scene;
+            foreach (var canvas in FindObjectsByType<Canvas>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            {
+                if (canvas != null && canvas.gameObject.scene == targetScene && canvas.isRootCanvas)
+                    return canvas;
+            }
+            return null;
+        }
+
+        private T FindSceneComponent<T>() where T : Component
+        {
+            var targetScene = gameObject.scene;
+            foreach (var component in FindObjectsByType<T>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            {
+                if (component != null && component.gameObject.scene == targetScene)
+                    return component;
+            }
+            return null;
+        }
+
+        private GameObject FindSceneObject(string objectName)
+        {
+            if (string.IsNullOrWhiteSpace(objectName)) return null;
+            var targetScene = gameObject.scene;
+            if (!targetScene.IsValid()) return null;
+
+            foreach (var root in targetScene.GetRootGameObjects())
+            {
+                foreach (var child in root.GetComponentsInChildren<Transform>(true))
+                {
+                    if (child.name == objectName)
+                        return child.gameObject;
+                }
+            }
+            return null;
+        }
         private static RectTransform CreateRuntimeArea(
             string name,
             RectTransform parent,

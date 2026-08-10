@@ -20,6 +20,9 @@ namespace KiKs.Combat
         // Example: "Art/Cards/treasure_50.png".
         public string imagePath;
 
+        public LoopRewardBundleDefinition rewards = new();
+
+        [Obsolete("Legacy random pool; the big loop uses deterministic rewards.")]
         public TreasureProductDefinition[] productPool = Array.Empty<TreasureProductDefinition>();
     }
 
