@@ -389,8 +389,9 @@ namespace KiKs.Combat
             // loadout (deck + coffee) is a persistent configuration for the run.
             EventSelectionState.ClearCurrent();
             DailyAreaMapState.Reset();
-            // Do NOT reset player health here — HP carries across days within a run.
-            // Defeat already halves HP via RestoreAfterDefeat; full heal only on new run.
+            // A successful day transition starts the next day at full health.
+            // Do this before notification so every day-change subscriber observes the healed state.
+            PlayerGlobalStats.ResetToFull();
             DayChanged?.Invoke(currentDay);
             return true;
         }

@@ -85,7 +85,16 @@ namespace KiKs.Combat
                 battleController.CombatEventRaised += OnCombatEvent;
 
             if (popupRoot == null) BuildPlaceholderUI();
+            PrepareLocalizedText();
             BindConfirmButton();
+        }
+
+        private void PrepareLocalizedText()
+        {
+            // The reward line is populated dynamically and mixes Chinese with ids/numbers.
+            // Set its font before assigning text so TMP never builds the mesh with one atlas
+            // and then swaps to another atlas from the global TEXT_CHANGED callback.
+            ChineseFontProvider.Apply(lootText);
         }
 
         private void OnDestroy()

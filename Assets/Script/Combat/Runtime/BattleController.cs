@@ -689,11 +689,9 @@ namespace KiKs.Combat
 
             if (_engine != null)
             {
-                // Defeat recovery is resolved after the terminal zero-health event.
-                // Do not overwrite that recovered value during scene teardown.
-                var player = _engine.State?.Player;
-                if (player != null && _engine.State.Outcome != BattleOutcome.Defeat)
-                    PlayerGlobalStats.SetHealth(player.CurrentHealth, player.MaxHealth);
+                // ForwardEvent already synchronizes every health change to PlayerGlobalStats.
+                // Never write the stale battle snapshot during teardown: defeat recovery or a
+                // successful day transition may already have replaced the global health value.
                 _engine.EventRaised -= ForwardEvent;
             }
             _engine = null;

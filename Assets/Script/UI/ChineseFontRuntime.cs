@@ -17,6 +17,7 @@ namespace KiKs.UI
         private TMP_FontAsset _tmpFont;
         private Font _legacyFont;
         private float _nextRescanTime;
+        private readonly HashSet<TMP_Text> _pendingTmpTexts = new();
 
         private void Awake()
         {
@@ -53,6 +54,17 @@ namespace KiKs.UI
             ApplyToLoadedText();
         }
 
+        private void LateUpdate()
+        {
+            if (_pendingTmpTexts.Count == 0)
+                return;
+
+            foreach (var text in _pendingTmpTexts)
+                Apply(text);
+
+            _pendingTmpTexts.Clear();
+        }
+
         private void OnDestroy()
         {
             TMPro_EventManager.TEXT_CHANGED_EVENT.Remove(HandleTextChanged);
@@ -66,8 +78,16 @@ namespace KiKs.UI
 
         private void HandleTextChanged(Object changedObject)
         {
-            if (changedObject is TMP_Text text)
-                Apply(text);
+            // Changing a TMP font from inside TEXT_CHANGED can leave the current mesh using
+            // UVs from the old atlas with the new font material. Apply after TMP has finished
+            // its update instead, which is especially important for dynamic Chinese glyphs.
+            if (changedObject is TMP_Text text &&
+                _tmpFont != null &&
+                text.font != _tmpFont &&
+                ContainsChinese(text.text))
+            {
+                _pendingTmpTexts.Add(text);
+            }
         }
 
         private void ApplyToLoadedText()
