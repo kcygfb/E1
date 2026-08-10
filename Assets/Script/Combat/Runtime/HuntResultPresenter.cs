@@ -63,8 +63,6 @@ namespace KiKs.Combat
         [SerializeField] private Sprite defeatCenterSprite;
         [Tooltip("战败时转场用的 EntrancePanel 材质（不配则用默认）")]
         [SerializeField] private Material defeatEntranceMaterial;
-        private bool victoryQueued;
-        private bool defeatQueued;
         private bool rewardsGranted;
         private bool isTransitioning;
 
@@ -106,20 +104,9 @@ namespace KiKs.Combat
 
             isDefeat = combatEvent.Type == CombatEventType.Defeat;
             resultQueued = true;
-            StartCoroutine(ShowAfterBattleRoutine());
-            if (combatEvent.Type == CombatEventType.Victory && !victoryQueued)
-            {
-                victoryQueued = true;
-                StartCoroutine(ShowAfterVictoryRoutine());
-                return;
-            }
-
-            if (combatEvent.Type == CombatEventType.Defeat && !defeatQueued)
-            {
-                defeatQueued = true;
-                StartCoroutine(ShowAfterDefeatRoutine());
-                return;
-            }
+            StartCoroutine(isDefeat
+                ? ShowAfterDefeatRoutine()
+                : ShowAfterBattleRoutine());
         }
 
         private IEnumerator ShowAfterBattleRoutine()
@@ -146,10 +133,16 @@ namespace KiKs.Combat
             // 等战败立绘动画播放一会
             yield return new WaitForSecondsRealtime(2f);
 
+            // Defeat does not advance the day or complete the selected point; restore half health.
+            var halfHealth = Mathf.Max(1, (PlayerGlobalStats.MaxHealth + 1) / 2);
+            PlayerGlobalStats.SetHealth(halfHealth, PlayerGlobalStats.MaxHealth);
+
+
             // 取消选点，不完成战斗点
             DailyAreaMapState.CancelSelectedPoint();
             RuntimeGameRepository.ClearSelectedDemoStage();
 
+            RuntimeGameRepository.ClearSelectedEncounterIndex();
             Debug.Log("[HuntResult] Defeat — transitioning to PreBattle.");
 
             // 战败回 PreBattle，不碰天数系统
