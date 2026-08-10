@@ -125,7 +125,9 @@ namespace KiKs.UI
                 centerImage.transform.localScale = Vector3.zero;
             }
 
-            _sequence = DOTween.Sequence();
+            // Scene transitions must keep running even if the final combat hit is
+            // still inside a hit-stop frame (Time.timeScale == 0).
+            _sequence = DOTween.Sequence().SetUpdate(true);
 
             // Phase 1: Trans_After_Alpha 0→1
             var alpha = 0f;

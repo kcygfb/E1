@@ -85,6 +85,14 @@ public class TimeSystem : MonoBehaviour
         dayCount = KiKs.Combat.RuntimeGameRepository.CurrentDay;
         Debug.Log($"[TimeSystem] Start() -> Day {dayCount}");
         yield return KiKs.UI.TransitionEffect.WaitEntrance();
+
+        // Final cafe day: still load Cafe scene but skip normal flow
+        if (KiKs.Combat.RuntimeGameRepository.IsFinalCafeDay)
+        {
+            EnterFinalCafeEnding();
+            yield break;
+        }
+
         EnterStartOfDay();
     }
 
@@ -96,9 +104,6 @@ public class TimeSystem : MonoBehaviour
         CurrentPhase = DayPhase.StartOfDay;
         Debug.Log($"[TimeSystem] EnterStartOfDay -> Day {dayCount}");
         EmitPhaseChanged();
-        // StartOfDayController 会监听 PhaseChanged(StartOfDay) 并处理
-        // 如果没有 StartOfDayController，或当天无 startOfDay 配置，它会直接回调 NotifyStartOfDayComplete
-        // 兜底：检查没有 StartOfDayController 时才自动推进
         var sodc = FindFirstObjectByType<StartOfDayController>();
         if (sodc == null)
         {
@@ -108,7 +113,7 @@ public class TimeSystem : MonoBehaviour
     }
 
     /// <summary>StartOfDayController 回调：开场对话完成（或无配置），进入选材阶段。</summary>
-        public void NotifyStartOfDayComplete()
+    public void NotifyStartOfDayComplete()
     {
         if (CurrentPhase != DayPhase.StartOfDay) return;
         EnterMorningCheck();
@@ -158,8 +163,6 @@ public class TimeSystem : MonoBehaviour
         CurrentPhase = DayPhase.EndOfDay;
         Debug.Log($"[TimeSystem] EnterEndOfDay -> Day {dayCount}");
         EmitPhaseChanged();
-        // CustomerQueue 监听 PhaseChanged(EndOfDay) 并处理
-        // 如果无 endOfDay NPC 配置，CustomerQueue 回调 NotifyEndOfDayComplete
     }
 
     /// <summary>CustomerQueue 回调：收尾NPC全部离场（或无配置），进入结算。</summary>
@@ -175,7 +178,6 @@ public class TimeSystem : MonoBehaviour
         CurrentPhase = DayPhase.Settlement;
         Debug.Log($"[TimeSystem] EnterSettlement -> Day {dayCount}");
         EmitPhaseChanged();
-        // DailyRevenueSummary 监听 PhaseChanged(Settlement) 并处理
     }
 
     /// <summary>DailyRevenueSummary 回调：结算完成，进入夜晚转场。</summary>
@@ -195,18 +197,29 @@ public class TimeSystem : MonoBehaviour
         EmitPhaseChanged();
         GameEvent.Emit("DayEnded", dayCount);
 
-        if (KiKs.Combat.RuntimeGameRepository.IsFinalCafeDay)
-        {
-            KiKs.Combat.RuntimeGameRepository.NotifyFinalCafeCompleted();
-            GameEvent.Emit("FinalCafeCompleted", dayCount);
-            StoryEndingPresenter.Show();
-            return;
-        }
-
         if (KiKs.UI.TransitionEffect.Instance != null)
             KiKs.UI.TransitionEffect.Instance.TransitionTo(preBattleSceneName);
         else
             SceneManager.LoadScene(preBattleSceneName);
+    }
+
+    // ==================== Final Cafe Ending (队友新增) ====================
+
+    private void EnterFinalCafeEnding()
+    {
+        isEndingShop = true;
+
+        if (startShopBtn != null)
+            startShopBtn.interactable = false;
+        if (morningCheckPanel != null)
+            morningCheckPanel.SetActive(false);
+        if (TrayGridUI.Instance != null)
+            TrayGridUI.Instance.HideAll();
+
+        KiKs.Combat.RuntimeGameRepository.NotifyFinalCafeCompleted();
+        GameEvent.Emit("FinalCafeCompleted", dayCount);
+        StoryEndingPresenter.Show();
+        Debug.Log($"[TimeSystem] Entered final Cafe on Day {dayCount}; story ending shown.");
     }
 
     // ==================== 兼容旧接口 ====================
