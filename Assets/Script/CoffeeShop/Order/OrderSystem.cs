@@ -81,6 +81,9 @@ public class OrderSystem : MonoBehaviour
         activeOrder = null;
         Debug.Log($"[OrderSystem] Completed: {completed.CoffeeName}");
         KiKs.Combat.RuntimeGameRepository.AddCraftedCoffee(coffee.coffeeId);
+        // 玩家摸索做出的咖啡自动解锁菜谱（解锁后可在菜单/战备界面看到）
+        if (KiKs.Combat.RuntimeGameRepository.UnlockRecipe(coffee.coffeeId))
+            Debug.Log($"[OrderSystem] 解锁新菜谱: {completed.CoffeeName}");
         GameEvent.Emit("OrderCompleted", completed);
         return true;
     }

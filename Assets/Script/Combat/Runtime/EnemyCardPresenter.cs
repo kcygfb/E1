@@ -127,6 +127,13 @@ namespace KiKs.Combat
             var seq = DOTween.Sequence();
             seq.Join(rt.DOAnchorPos(targetPos, drawDuration).SetEase(Ease.OutCubic));
             seq.Join(rt.DOScale(cardScale, drawDuration).SetEase(Ease.OutBack));
+            // 入场动画结束后再记录基准值，避免与飞入缩放冲突
+            seq.OnComplete(() =>
+            {
+                var hover = cardObj.GetComponent<EnemyCardHover>();
+                if (hover == null) hover = cardObj.AddComponent<EnemyCardHover>();
+                hover.Initialize();
+            });
         }
 
         private void OnEnemyCardPlayed(CombatEvent evt)
@@ -218,6 +225,9 @@ namespace KiKs.Combat
                 if (card == null) continue;
                 var pos = GetEnemyCardPosition(i);
                 card.GetComponent<RectTransform>().DOAnchorPos(pos, 0.2f).SetEase(Ease.OutCubic);
+                // 手牌位置变动后，同步悬停组件的基准位置
+                var hover = card.GetComponent<EnemyCardHover>();
+                if (hover != null) hover.SetBasePosition(pos);
             }
         }
 

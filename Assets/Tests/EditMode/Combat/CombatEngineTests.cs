@@ -1034,9 +1034,116 @@ namespace KiKs.Combat.Tests
         }
 
         [Test]
-        public void Zigzag_DealsMultiHitDamageAndToughness()
+        public void Chainsaw_ResolvesTwoSeparateDamageHits()
         {
-            var zigzag = new CardSpec(
+            var engine = CreateEngine(CreateChainsawCard(), 4);
+            engine.StartBattle();
+            var card = engine.State.Deck.Hand.First();
+
+            var result = engine.PlayCard(card.InstanceId, "enemy");
+
+            Assert.That(result.Success, Is.True);
+            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(96));
+            Assert.That(engine.State.Enemies[0].BleedStacks, Is.EqualTo(5));
+            Assert.That(result.Events.Count(e =>
+                e.Type == CombatEventType.DamageApplied && e.Amount == 2), Is.EqualTo(2));
+        }
+
+        [Test]
+        public void Chainsaw_ConsumesOneNullifyChargePerHit()
+        {
+            var engine = CreateEngine(CreateChainsawCard(), 4);
+            engine.State.Enemies[0].AddNullifyAttackCharges(2);
+            engine.StartBattle();
+            var card = engine.State.Deck.Hand.First();
+
+            var result = engine.PlayCard(card.InstanceId, "enemy");
+
+            Assert.That(result.Success, Is.True);
+            Assert.That(engine.State.Enemies[0].NullifyAttackCharges, Is.EqualTo(0));
+            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(100));
+            Assert.That(engine.State.Enemies[0].BleedStacks, Is.EqualTo(0));
+            Assert.That(result.Events.Count(e =>
+                e.Type == CombatEventType.ActionNullified), Is.EqualTo(2));
+            Assert.That(result.Events.Any(e => e.Type == CombatEventType.DamageApplied), Is.False);
+        }
+
+        [Test]
+        public void Chainsaw_WithOneNullifyCharge_StillResolvesSecondHit()
+        {
+            var engine = CreateEngine(CreateChainsawCard(), 4);
+            engine.State.Enemies[0].AddNullifyAttackCharges(1);
+            engine.StartBattle();
+            var card = engine.State.Deck.Hand.First();
+
+            var result = engine.PlayCard(card.InstanceId, "enemy");
+
+            Assert.That(result.Success, Is.True);
+            Assert.That(engine.State.Enemies[0].NullifyAttackCharges, Is.EqualTo(0));
+            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(98));
+            Assert.That(engine.State.Enemies[0].BleedStacks, Is.EqualTo(5));
+            Assert.That(result.Events.Count(e =>
+                e.Type == CombatEventType.ActionNullified), Is.EqualTo(1));
+            Assert.That(result.Events.Count(e =>
+                e.Type == CombatEventType.DamageApplied && e.Amount == 2), Is.EqualTo(1));
+        }
+
+        [Test]
+        public void Zigzag_DealsTwoDamageAndToughnessHits()
+        {
+            var engine = CreateEngine(CreateZigzagCard(), 4);
+            engine.StartBattle();
+            var card = engine.State.Deck.Hand.First();
+
+            var result = engine.PlayCard(card.InstanceId, "enemy");
+
+            Assert.That(result.Success, Is.True);
+            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(98));
+            Assert.That(engine.State.Enemies[0].CurrentToughness, Is.EqualTo(3));
+            Assert.That(result.Events.Count(e =>
+                e.Type == CombatEventType.DamageApplied && e.Amount == 1), Is.EqualTo(2));
+            Assert.That(result.Events.Count(e =>
+                e.Type == CombatEventType.ToughnessChanged), Is.EqualTo(2));
+        }
+
+        [Test]
+        public void UpgradedZigzag_DealsFourDamageAndToughnessHits()
+        {
+            var engine = CreateEngine(CreateZigzagCard(), 4);
+            engine.StartBattle();
+            var card = engine.State.Deck.Hand.First();
+            Assert.That(engine.UpgradeCard(card.InstanceId).Success, Is.True);
+
+            var result = engine.PlayCard(card.InstanceId, "enemy");
+
+            Assert.That(result.Success, Is.True);
+            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(96));
+            Assert.That(engine.State.Enemies[0].CurrentToughness, Is.EqualTo(1));
+            Assert.That(result.Events.Count(e =>
+                e.Type == CombatEventType.DamageApplied && e.Amount == 1), Is.EqualTo(4));
+            Assert.That(result.Events.Count(e =>
+                e.Type == CombatEventType.ToughnessChanged), Is.EqualTo(4));
+        }
+
+        private static CardSpec CreateChainsawCard()
+        {
+            return new CardSpec(
+                "chainsaw", "chainsaw", "chainsaw", "test",
+                CardResourceType.ActionPoint, 1, false, CardTargetType.SingleEnemy,
+                new[]
+                {
+                    new CardEffectSpec(CardEffectType.Damage,
+                        new UpgradeableNumber(2, 4), new UpgradeableNumber(2, 2),
+                        ValueUnit.Points, 1),
+                    new CardEffectSpec(CardEffectType.Bleed,
+                        new UpgradeableNumber(5, 8), UpgradeableNumber.One,
+                        ValueUnit.Points, 1)
+                });
+        }
+
+        private static CardSpec CreateZigzagCard()
+        {
+            return new CardSpec(
                 "zigzag", "zigzag", "zigzag", "test",
                 CardResourceType.ActionPoint, 0, false, CardTargetType.SingleEnemy,
                 new[]
@@ -1045,19 +1152,9 @@ namespace KiKs.Combat.Tests
                         new UpgradeableNumber(1, 1), new UpgradeableNumber(2, 4),
                         ValueUnit.Points, 1),
                     new CardEffectSpec(CardEffectType.ToughnessDamage,
-                        new UpgradeableNumber(1, 1), UpgradeableNumber.One,
+                        new UpgradeableNumber(1, 1), new UpgradeableNumber(2, 4),
                         ValueUnit.Points, 1)
                 });
-            var engine = CreateEngine(zigzag, 4);
-            engine.StartBattle();
-            var card = engine.State.Deck.Hand.First();
-
-            var result = engine.PlayCard(card.InstanceId, "enemy");
-
-            Assert.That(result.Success, Is.True);
-            // 2 hits x 1 damage, toughness 25-1 = 24
-            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(28));
-            Assert.That(engine.State.Enemies[0].CurrentToughness, Is.EqualTo(4));
         }
 
         [Test]

@@ -184,5 +184,12 @@ namespace KiKs.Combat
             Load();
             return _effects.ContainsKey(coffeeId);
         }
+
+        /// <summary>所有配置了战斗效果的咖啡 Id（用于战备界面枚举可选咖啡）。</summary>
+        public static IEnumerable<string> GetAllEffectCoffeeIds()
+        {
+            Load();
+            return _effects.Keys;
+        }
     }
 }

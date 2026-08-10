@@ -9,9 +9,9 @@ namespace KiKs.Combat
 {
     /// <summary>
     /// PreBattle 咖啡选择 UI：弹窗横向列表 + 底部栏位。
-    /// 列表来源：当天在咖啡店实际制作并成功交付过的咖啡种类（RuntimeGameRepository.CraftedCoffeeIds）。
+    /// 列表来源：所有已解锁菜谱的咖啡（RuntimeGameRepository.IsRecipeUnlocked），
     /// 仅显示有战斗效果的咖啡（CoffeeEffectRegistry.HasEffect）。
-    /// 如果当天没有做过任何有战斗效果的咖啡，回退到手冲咖啡/浓缩咖啡防止卡流程。
+    /// 如果没有任何可用的已解锁咖啡，回退到手冲咖啡/浓缩咖啡防止卡流程。
     /// </summary>
     public class CoffeeSelectionUI : MonoBehaviour
     {
@@ -100,21 +100,21 @@ namespace KiKs.Combat
         }
 
         /// <summary>
-        /// 从 RuntimeGameRepository.CraftedCoffeeIds 构建可用列表，仅保留有战斗效果的。
+        /// 从"已解锁菜谱"构建可用列表：遍历所有带战斗效果的咖啡，保留玩家已解锁菜谱的。
         /// 如果列表为空，回退到 FallbackCoffeeIds。
         /// </summary>
         private void BuildAvailableCoffeeIds()
         {
             availableCoffeeIds.Clear();
 
-            if (RuntimeGameRepository.HasCraftedCoffees)
+            foreach (var coffeeId in CoffeeEffectRegistry.GetAllEffectCoffeeIds())
             {
-                foreach (var coffeeId in RuntimeGameRepository.CraftedCoffeeIds)
-                {
-                    if (CoffeeEffectRegistry.HasEffect(coffeeId))
-                        availableCoffeeIds.Add(coffeeId);
-                }
+                if (RuntimeGameRepository.IsRecipeUnlocked(coffeeId))
+                    availableCoffeeIds.Add(coffeeId);
             }
+
+            // 按咖啡 Id 排序，保证列表顺序稳定（HashSet 枚举顺序不确定）
+            availableCoffeeIds.Sort(StringComparer.Ordinal);
 
             if (availableCoffeeIds.Count == 0)
                 availableCoffeeIds.AddRange(FallbackCoffeeIds);

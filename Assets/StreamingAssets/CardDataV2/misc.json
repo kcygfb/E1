@@ -37,6 +37,10 @@
           "amount": {
             "base": 1,
             "upgraded": 1
+          },
+          "hits": {
+            "base": 2,
+            "upgraded": 4
           }
         }
       ],

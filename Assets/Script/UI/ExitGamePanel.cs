@@ -1,5 +1,6 @@
 using DG.Tweening;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 namespace KiKs.UI
@@ -7,8 +8,9 @@ namespace KiKs.UI
     /// <summary>
     /// 退出游戏确认弹窗。
     /// <para>
-    /// 用法：场景中任意名为 "Settings" 的按钮会自动绑定为打开弹窗（场景加载后自动绑定，
-    /// 也支持手动调用 <see cref="BindSettingsButtons"/> 或 <see cref="Show"/>）。
+    /// 三种方式呼出：场景中名为 "Settings" 或 "🍎" 的 Button 点击、按 ESC 键。
+    /// 按钮绑定在场景加载后自动完成，也可手动调用 <see cref="BindSettingsButtons"/>；
+    /// ESC 由 <see cref="ExitGamePanelInput"/> 组件监听（存在即生效，且始终只会有一个实例）。
     /// 弹窗来自 Resources/UI/退出界面.prefab，其中：
     /// "退出按钮" → 退出游戏；"X" → 关闭弹窗。
     /// </para>
@@ -16,10 +18,12 @@ namespace KiKs.UI
     public sealed class ExitGamePanel : MonoBehaviour
     {
         private const string PrefabResourceName = "UI/\u9000\u51fa\u754c\u9762"; // UI/退出界面
-        private const string SettingsButtonName = "Settings";
         private const string QuitButtonName = "\u9000\u51fa\u6309\u94ae"; // 退出按钮
         private const string CloseButtonName = "X";
         private const float PopInDuration = 0.2f;
+
+        /// <summary>点击可呼出退出弹窗的场景按钮名集合（设置按钮与主界面苹果按钮）。</summary>
+        private static readonly string[] TriggerButtonNames = { "Settings", "\U0001F34E" }; // 🍎
 
         private static ExitGamePanel _instance;
 
@@ -30,15 +34,16 @@ namespace KiKs.UI
         private bool _initialized;
 
         /// <summary>
-        /// 每次场景加载后自动把场景中所有名为 "Settings" 的按钮绑定为打开弹窗。
+        /// 每次场景加载后自动绑定场景中的触发按钮（"Settings"/"🍎"），并启用 ESC 键监听。
         /// </summary>
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void AutoBindSettingsButtons()
         {
             BindSettingsButtons();
+            ExitGamePanelInput.EnsureExists();
         }
 
-        /// <summary>把当前场景中所有名为 "Settings" 的 Button 绑定为打开弹窗。可重复调用，不会重复绑定。</summary>
+        /// <summary>把当前场景中所有可触发的 Button（"Settings"/"🍎"）绑定为打开弹窗。可重复调用，不会重复绑定。</summary>
         public static void BindSettingsButtons()
         {
             var buttons = Object.FindObjectsByType<Button>(
@@ -47,7 +52,7 @@ namespace KiKs.UI
 
             foreach (var button in buttons)
             {
-                if (button == null || button.name != SettingsButtonName)
+                if (button == null || !IsTriggerButton(button.name))
                     continue;
 
                 button.onClick.RemoveListener(Show);
@@ -55,9 +60,22 @@ namespace KiKs.UI
             }
         }
 
-        /// <summary>打开退出弹窗。任何场景的 Settings 按钮都会调用这里。</summary>
+        /// <summary>判断场景物体名是否为退出弹窗的触发按钮。</summary>
+        private static bool IsTriggerButton(string objectName)
+        {
+            for (var i = 0; i < TriggerButtonNames.Length; i++)
+            {
+                if (objectName == TriggerButtonNames[i])
+                    return true;
+            }
+            return false;
+        }
+
+        /// <summary>打开退出弹窗。任何场景的触发按钮或 ESC 都会调用这里。</summary>
         public static void Show()
         {
+            ExitGamePanelInput.EnsureExists();
+
             var panel = EnsureInstance();
             if (panel != null)
                 panel.Present();
@@ -68,6 +86,19 @@ namespace KiKs.UI
         {
             if (_instance != null)
                 _instance.Dismiss();
+        }
+
+        /// <summary>退出弹窗当前是否处于打开状态。</summary>
+        public static bool IsVisible =>
+            _instance != null && _instance.gameObject.activeSelf;
+
+        /// <summary>切换退出弹窗的显示状态（ESC 键使用）。</summary>
+        public static void Toggle()
+        {
+            if (IsVisible)
+                Hide();
+            else
+                Show();
         }
 
         private static ExitGamePanel EnsureInstance()
@@ -102,6 +133,7 @@ namespace KiKs.UI
 
             // 补一次绑定，避免场景加载时序导致个别按钮漏绑
             BindSettingsButtons();
+            ExitGamePanelInput.EnsureExists();
             return _instance;
         }
 
@@ -136,6 +168,13 @@ namespace KiKs.UI
         private void Awake()
         {
             Initialize();
+            ExitGamePanelInput.EnsureExists();
+        }
+
+        private void Start()
+        {
+            // Awake 可能发生在场景切换的销毁阶段，Start 时（新场景正常运行）再保底一次
+            ExitGamePanelInput.EnsureExists();
         }
 
         private void OnDestroy()
@@ -148,6 +187,10 @@ namespace KiKs.UI
 
             if (_instance == this)
                 _instance = null;
+
+            // 注意：不能在这里调用 ExitGamePanelInput.EnsureExists()。
+            // OnDestroy 处于场景销毁阶段，此时 new GameObject 会残留并报
+            // "Some objects were not cleaned up when closing the scene"。
         }
 
         private void Initialize()
@@ -183,6 +226,7 @@ namespace KiKs.UI
         private void Present()
         {
             Initialize();
+            ExitGamePanelInput.EnsureExists();
 
             if (_canvasGroup == null)
                 _canvasGroup = gameObject.GetComponent<CanvasGroup>();
@@ -244,6 +288,58 @@ namespace KiKs.UI
 #else
             Application.Quit();
 #endif
+        }
+
+        /// <summary>
+        /// 全局监听 ESC 键呼出/关闭退出弹窗的组件。
+        /// 任何场景中存在一个该组件（或直接调用 <see cref="EnsureExists"/>）即可生效，
+        /// 重复实例会自动销毁，保证全局只有一个监听者。不跨场景常驻，随场景切换重新挂载即可。
+        /// </summary>
+        [DisallowMultipleComponent]
+        private sealed class ExitGamePanelInput : MonoBehaviour
+        {
+            private static ExitGamePanelInput _active;
+
+            /// <summary>确保当前场景中存在一个监听者（首次触发自动创建，幂等）。</summary>
+            public static void EnsureExists()
+            {
+                if (_active != null)
+                    return;
+
+                var existing = FindAnyObjectByType<ExitGamePanelInput>();
+                if (existing != null)
+                {
+                    _active = existing;
+                    return;
+                }
+
+                var host = new GameObject(nameof(ExitGamePanelInput));
+                _active = host.AddComponent<ExitGamePanelInput>();
+            }
+
+            private void Awake()
+            {
+                if (_active != null && _active != this)
+                {
+                    Destroy(gameObject);
+                    return;
+                }
+
+                _active = this;
+            }
+
+            private void OnDestroy()
+            {
+                if (_active == this)
+                    _active = null;
+            }
+
+            private void Update()
+            {
+                var keyboard = Keyboard.current;
+                if (keyboard != null && keyboard.escapeKey.wasPressedThisFrame)
+                    Toggle();
+            }
         }
     }
 }

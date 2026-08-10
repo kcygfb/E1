@@ -58,6 +58,7 @@ namespace KiKs.Combat
         public bool SourceDied { get; internal set; }
         public bool TargetDied { get; internal set; }
         internal int ExecutionDamageMultiplier { get; set; } = 1;
+        internal int NullifiedHitCount { get; set; }
     }
 
     /// <summary>
@@ -91,15 +92,13 @@ namespace KiKs.Combat
             var result = new CombatFlowResult();
             var hostile = source.Side != target.Side && IsHostileCard(card);
 
-            if (hostile && target.TryConsumeNullifyAttack())
+            var attackHits = hostile ? GetAttackHitCount(card) : 0;
+            result.NullifiedHitCount = hostile
+                ? ConsumeNullifiedHits(source, target, card.InstanceId, attackHits, events)
+                : 0;
+            if (hostile && attackHits > 0 && result.NullifiedHitCount == attackHits)
             {
                 result.WasNullified = true;
-                events.Add(new CombatEvent(
-                    CombatEventType.ActionNullified,
-                    source.Id,
-                    target.Id,
-                    card.InstanceId,
-                    message: source.DisplayName + "'s card was nullified."));
                 return result;
             }
 
@@ -311,7 +310,7 @@ namespace KiKs.Combat
             switch (effect.Type)
             {
                 case CardEffectType.Damage:
-                    result.TotalDamage += ResolveDamageEffect(source, target, card, effect, events);
+                    result.TotalDamage += ResolveDamageEffect(source, target, card, effect, result, events);
                     break;
 
                 case CardEffectType.ToughnessDamage:
@@ -319,7 +318,7 @@ namespace KiKs.Combat
                         source,
                         target,
                         effect.Amount.Resolve(card.IsUpgraded),
-                        effect.Hits.Resolve(card.IsUpgraded),
+                        GetRemainingHits(effect.Hits.Resolve(card.IsUpgraded), result.NullifiedHitCount),
                         effect.Unit,
                         card.InstanceId,
                         events);
@@ -448,7 +447,7 @@ namespace KiKs.Combat
                         source,
                         target,
                         effect.Amount.Resolve(card.IsUpgraded),
-                        effect.Hits.Resolve(card.IsUpgraded),
+                        GetRemainingHits(effect.Hits.Resolve(card.IsUpgraded), result.NullifiedHitCount),
                         effect.Unit,
                         card.InstanceId,
                         events);
@@ -512,13 +511,15 @@ namespace KiKs.Combat
             CombatantState target,
             CardInstance card,
             CardEffectSpec effect,
+            CombatFlowResult result,
             List<CombatEvent> events)
         {
             var totalDamage = 0;
             var amount = effect.Amount.Resolve(card.IsUpgraded);
             var hits = effect.Hits.Resolve(card.IsUpgraded);
+            var firstResolvedHit = Math.Min(result.NullifiedHitCount, hits);
 
-            for (var hit = 0; hit < hits && !target.IsDead; hit++)
+            for (var hit = firstResolvedHit; hit < hits && !target.IsDead; hit++)
             {
                 totalDamage += ApplyDamage(
                     source,
@@ -531,7 +532,7 @@ namespace KiKs.Combat
                     isUpgraded: card.IsUpgraded);
             }
 
-            if (hits > 0)
+            if (hits > result.NullifiedHitCount)
                 ApplyPendingNextAttackPoison(source, target, card.InstanceId, amount, events);
             return totalDamage;
         }
@@ -829,21 +830,61 @@ namespace KiKs.Combat
             return actualDamage;
         }
 
+        private static int GetAttackHitCount(CardInstance card)
+        {
+            var attackHits = 1;
+            foreach (var effect in card.Spec.Effects.Where(IsHostileEffect))
+                attackHits = Math.Max(attackHits, effect.Hits.Resolve(card.IsUpgraded));
+            return attackHits;
+        }
+
+        private static int ConsumeNullifiedHits(
+            CombatantState source,
+            CombatantState target,
+            string sourceActionId,
+            int attackHits,
+            List<CombatEvent> events)
+        {
+            var nullifiedHits = 0;
+            while (nullifiedHits < attackHits && target.TryConsumeNullifyAttack())
+            {
+                nullifiedHits++;
+                events.Add(new CombatEvent(
+                    CombatEventType.ActionNullified,
+                    source.Id,
+                    target.Id,
+                    sourceActionId,
+                    nullifiedHits,
+                    source.DisplayName + "'s attack hit " + nullifiedHits + " was nullified."));
+            }
+
+            return nullifiedHits;
+        }
+
+        private static int GetRemainingHits(int hits, int nullifiedHits)
+        {
+            return Math.Max(0, hits - nullifiedHits);
+        }
+
         private static bool IsHostileCard(CardInstance card)
         {
-            return card.Spec.Effects.Any(effect =>
-                effect.Type == CardEffectType.Damage ||
-                effect.Type == CardEffectType.ToughnessDamage ||
-                effect.Type == CardEffectType.Bleed ||
-                effect.Type == CardEffectType.Poison ||
-                effect.Type == CardEffectType.PoisonDamageBonus ||
-                effect.Type == CardEffectType.BleedScaledDamage ||
-                effect.Type == CardEffectType.LifeSteal ||
-                effect.Type == CardEffectType.BlockScaledDamage ||
-                effect.Type == CardEffectType.InvisibleAttack ||
-                effect.Type == CardEffectType.ManaCardBurst ||
-                effect.Type == CardEffectType.ExecutionDouble ||
-                effect.Type == CardEffectType.ParryCounter);
+            return card.Spec.Effects.Any(IsHostileEffect);
+        }
+
+        private static bool IsHostileEffect(CardEffectSpec effect)
+        {
+            return effect.Type == CardEffectType.Damage ||
+                   effect.Type == CardEffectType.ToughnessDamage ||
+                   effect.Type == CardEffectType.Bleed ||
+                   effect.Type == CardEffectType.Poison ||
+                   effect.Type == CardEffectType.PoisonDamageBonus ||
+                   effect.Type == CardEffectType.BleedScaledDamage ||
+                   effect.Type == CardEffectType.LifeSteal ||
+                   effect.Type == CardEffectType.BlockScaledDamage ||
+                   effect.Type == CardEffectType.InvisibleAttack ||
+                   effect.Type == CardEffectType.ManaCardBurst ||
+                   effect.Type == CardEffectType.ExecutionDouble ||
+                   effect.Type == CardEffectType.ParryCounter;
         }
 
         private static void AddStatusEvent(
