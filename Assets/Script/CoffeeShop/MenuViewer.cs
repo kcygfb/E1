@@ -157,7 +157,21 @@ public class MenuViewer : MonoBehaviour
         _menuOpenedThisOrder = true;
         StopHintBounce();
         RefreshTierButtons();
-        SelectTier(FindFirstAvailableTier());
+
+        // 记住上次停留的档位/页，但确保该档位仍可解锁则沿用，否则回退到可用档位
+        int lastTier = _currentTier;
+        int lastPage = _currentPage;
+        if (!HasUnlockedPageForTier(lastTier))
+            lastTier = FindFirstAvailableTier();
+
+        // SelectTier 会重建 _filtered 并把 _currentPage 归零，之后恢复上次页面
+        SelectTier(lastTier);
+        if (lastPage >= 0 && lastPage < _filtered.Count)
+        {
+            _currentPage = lastPage;
+            ShowPage();
+        }
+
         viewerPanel.SetActive(true);
         if (openButton != null)
             openButton.gameObject.SetActive(false);

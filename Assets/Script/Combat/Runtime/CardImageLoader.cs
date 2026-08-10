@@ -24,7 +24,17 @@ namespace KiKs.Combat
             if (dotIndex > 0)
                 resourcePath = resourcePath.Substring(0, dotIndex);
 
-            return Resources.Load<Sprite>(resourcePath);
+            var sprite = Resources.Load<Sprite>(resourcePath);
+
+            // spriteMode=2 (Multiple) 时 Load<Sprite> 返回 null，fallback 到 LoadAll
+            if (sprite == null)
+            {
+                var all = Resources.LoadAll<Sprite>(resourcePath);
+                if (all != null && all.Length > 0)
+                    sprite = all[0];
+            }
+
+            return sprite;
         }
 
         /// <summary>

@@ -238,9 +238,20 @@ public class CraftController : MonoBehaviour
             kettle.Icons.Clear();
         }
 
-        // 清空 KettleSlot 引用
+        // 重新绑定仍在槽位上的水壶（内容已清空，但壶-槽关联不应丢失）
         foreach (var slot in FindObjectsByType<KettleSlot>(FindObjectsSortMode.None))
-            slot.Clear();
+        {
+            var kettleInSlot = slot.GetComponentInChildren<Kettle>();
+            if (kettleInSlot != null)
+            {
+                slot.Clear();
+                slot.Accept(kettleInSlot);
+            }
+            else
+            {
+                slot.Clear();
+            }
+        }
 
         // 销毁所有游离的 MaterialIcon（不在 Slot/Cup/Kettle 里的）
         var canvas = GameObject.Find("Canvas");

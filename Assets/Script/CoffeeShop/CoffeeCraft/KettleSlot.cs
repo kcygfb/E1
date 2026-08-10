@@ -49,6 +49,7 @@ public class KettleSlot : MonoBehaviour
     {
         if (IsFilled) return false;
         Current = kettle;
+        kettle.SetSlot(this);
         kettle.transform.SetParent(transform, false);
         kettle.transform.localPosition = Vector3.zero;
         if (_hintLabel != null) _hintLabel.gameObject.SetActive(false);
