@@ -56,6 +56,15 @@ namespace KiKs.Combat
         private bool resultQueued;
         private bool isDefeat;
         private RewardGrantResult rewardResult;
+        [Header("战败转场")]
+        [Tooltip("战败时转场用的 ExitPanel 材质（不配则用默认）")]
+        [SerializeField] private Material defeatExitMaterial;
+        [Tooltip("战败时转场用的 CenterImage 图片（不配则用默认）")]
+        [SerializeField] private Sprite defeatCenterSprite;
+        [Tooltip("战败时转场用的 EntrancePanel 材质（不配则用默认）")]
+        [SerializeField] private Material defeatEntranceMaterial;
+        private bool victoryQueued;
+        private bool defeatQueued;
         private bool rewardsGranted;
         private bool isTransitioning;
 
@@ -98,6 +107,19 @@ namespace KiKs.Combat
             isDefeat = combatEvent.Type == CombatEventType.Defeat;
             resultQueued = true;
             StartCoroutine(ShowAfterBattleRoutine());
+            if (combatEvent.Type == CombatEventType.Victory && !victoryQueued)
+            {
+                victoryQueued = true;
+                StartCoroutine(ShowAfterVictoryRoutine());
+                return;
+            }
+
+            if (combatEvent.Type == CombatEventType.Defeat && !defeatQueued)
+            {
+                defeatQueued = true;
+                StartCoroutine(ShowAfterDefeatRoutine());
+                return;
+            }
         }
 
         private IEnumerator ShowAfterBattleRoutine()
@@ -117,6 +139,54 @@ namespace KiKs.Combat
                 yield return ShowRoutine();
             else if (confirmButton != null)
                 confirmButton.interactable = true;
+        }
+
+        private IEnumerator ShowAfterDefeatRoutine()
+        {
+            // 等战败立绘动画播放一会
+            yield return new WaitForSecondsRealtime(2f);
+
+            // 取消选点，不完成战斗点
+            DailyAreaMapState.CancelSelectedPoint();
+            RuntimeGameRepository.ClearSelectedDemoStage();
+
+            Debug.Log("[HuntResult] Defeat — transitioning to PreBattle.");
+
+            // 战败回 PreBattle，不碰天数系统
+            if (TransitionEffect.Instance != null)
+            {
+                var hasOverride = defeatExitMaterial != null || defeatCenterSprite != null || defeatEntranceMaterial != null;
+                if (hasOverride)
+                {
+                    var ov = new KiKs.UI.TransitionOverride
+                    {
+                        exitMaterial = defeatExitMaterial,
+                        centerSprite = defeatCenterSprite,
+                        entranceMaterial = defeatEntranceMaterial
+                    };
+                    TransitionEffect.Instance.TransitionToWithOverride("PreBattle", ov);
+                }
+                else
+                {
+                    TransitionEffect.Instance.TransitionTo("PreBattle");
+                }
+            }
+            else
+            {
+                SceneManager.LoadScene("PreBattle");
+            }
+        }
+
+        /// <summary>只推进 savedDayCount，不加载场景（避免和 TransitionTo 重复加载）。</summary>
+        private static void AdvanceDayCount()
+        {
+            Type timeSystemType = Type.GetType("TimeSystem, Assembly-CSharp");
+            FieldInfo dayField = timeSystemType?.GetField("savedDayCount", BindingFlags.Public | BindingFlags.Static);
+            if (dayField != null && dayField.FieldType == typeof(int))
+            {
+                dayField.SetValue(null, (int)dayField.GetValue(null) + 1);
+                Debug.Log($"[HuntResult] Defeat — advanced day to {(int)dayField.GetValue(null)}.");
+            }
         }
 
         private void GrantRewardsOnce()

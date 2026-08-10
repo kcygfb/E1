@@ -25,6 +25,14 @@ namespace KiKs.UI
         public Ease? alphaEase;
     }
 
+    [Serializable]
+    public class TransitionOverride
+    {
+        public Material exitMaterial;
+        public Sprite centerSprite;
+        public Material entranceMaterial;
+    }
+
     /// <summary>
     /// 全局转场效果控制器（DontDestroyOnLoad 单例）。
     /// 单例持有自己的面板，场景加载时从新场景的 Teans2 提取材质资产引用。
@@ -112,6 +120,47 @@ namespace KiKs.UI
         public void TransitionTo(string sceneName, Action onComplete = null)
         {
             TransitionTo(sceneName, null, onComplete);
+        }
+
+        /// <summary>
+        /// 用指定的临时 override 做出场转场。
+        /// override 控制：ExitPanel 材质、CenterImage 图片、EntrancePanel 材质。
+        /// 传入的 override 只影响本次转场，加载场景后恢复场景默认材质。
+        /// </summary>
+        public void TransitionToWithOverride(string sceneName, TransitionOverride overrideData, Action onComplete = null)
+        {
+            if (exitPanel == null)
+            {
+                Debug.LogError("[TransitionEffect] exitPanel not assigned");
+                return;
+            }
+
+            // 临时换 ExitPanel 材质
+            if (overrideData?.exitMaterial != null)
+                exitPanel.CopyMaterialFrom(overrideData.exitMaterial);
+
+            // 临时换 CenterImage 图片
+            if (overrideData?.centerSprite != null && exitPanel.CenterImage != null)
+                exitPanel.CenterImage.sprite = overrideData.centerSprite;
+
+            // 临时换 EntrancePanel 材质（入场动画用）
+            if (overrideData?.entranceMaterial != null && entrancePanel != null)
+                entrancePanel.CopyMaterialFrom(overrideData.entranceMaterial);
+
+            exitPanel.PlayExit(null, () =>
+            {
+                onComplete?.Invoke();
+                if (playEntranceAfterLoad)
+                {
+                    _pendingEntranceComplete = null;
+                    SceneManager.sceneLoaded += OnSceneLoadedEntrance;
+                    SceneManager.LoadScene(sceneName);
+                }
+                else
+                {
+                    SceneManager.LoadScene(sceneName);
+                }
+            });
         }
 
         public void TransitionTo(string sceneName, TransitionConfig config, Action onComplete = null)

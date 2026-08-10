@@ -295,10 +295,10 @@ namespace KiKs.Combat
                 BleedStacks--;
             }
 
-            // --- Poison: damage = stacks, stacks-- ---
+            // --- Poison: 固定扣5血，层数只决定停留回合数 ---
             if (PoisonStacks > 0)
             {
-                var poisonDamage = PoisonStacks + PoisonDamageBonus;
+                var poisonDamage = 5 + PoisonDamageBonus;
                 results.Add(new StatusTickResult(StatusEffectType.Poison, poisonDamage, PoisonStacks - 1));
                 PoisonStacks--;
                 if (PoisonStacks == 0) PoisonDamageBonus = 0;

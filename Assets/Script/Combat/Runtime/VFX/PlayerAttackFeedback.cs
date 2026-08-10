@@ -127,6 +127,10 @@ namespace KiKs.Combat
         [SerializeField] private float attackScale = 1.1f;
         [SerializeField] private float scaleDuration = 0.12f;
 
+        [Header("战败")]
+        [Tooltip("战败 Trigger 参数名")]
+        [SerializeField] private string defeatTrigger = "Defeat";
+
         [Header("引擎引用")]
         [SerializeField] private BattleController battleController;
 
@@ -227,6 +231,12 @@ namespace KiKs.Combat
 
         private void OnCombatEvent(CombatEvent evt)
         {
+            if (evt.Type == CombatEventType.Defeat)
+            {
+                OnDefeat();
+                return;
+            }
+
             if (evt.Type != CombatEventType.DamageApplied) return;
             if (string.IsNullOrEmpty(evt.SourceId)) return;
             if (battleController == null || !battleController.IsInitialized) return;
@@ -234,6 +244,21 @@ namespace KiKs.Combat
 
             int attackType = ResolveAttackType(evt.CardInstanceId);
             PlayAttack(attackType, evt.IsUpgraded);
+        }
+
+        /// <summary>战败：禁用姿态 flag，触发 Animator Defeat 过渡</summary>
+        private void OnDefeat()
+        {
+            StopAttack();
+            _isRangedPose = false;
+            _isMagicPose = false;
+            _state = AttackState.Idle;
+            if (_useAnimator && !string.IsNullOrEmpty(defeatTrigger))
+            {
+                animator.ResetTrigger(defeatTrigger);
+                animator.SetTrigger(defeatTrigger);
+                Debug.Log("[PlayerAttackFeedback] Defeat — Animator trigger fired.");
+            }
         }
 
         private int ResolveAttackType(string cardInstanceId)

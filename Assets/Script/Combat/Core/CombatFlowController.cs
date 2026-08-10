@@ -186,6 +186,18 @@ namespace KiKs.Combat
             bool applyMitigation,
             List<CombatEvent> events)
         {
+            // 枪击也消耗 NullifyAttack 层数
+            if (source.Side != target.Side && target.TryConsumeNullifyAttack())
+            {
+                events.Add(new CombatEvent(
+                    CombatEventType.ActionNullified,
+                    source.Id,
+                    target.Id,
+                    sourceActionId,
+                    message: source.DisplayName + "'s shot was nullified."));
+                return 0;
+            }
+
             return ResolveAttackDamage(
                 source,
                 target,

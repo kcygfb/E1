@@ -45,8 +45,10 @@ namespace KiKs.Combat
             }
 
             var cardView = FindCardAt(eventData.position, eventData.pressEventCamera);
+
             if (cardView == null || cardView.Spec == null)
             {
+                ReevaluatePose(eventData.position, eventData.pressEventCamera);
                 WarningToast.Show("Drag the magic hand onto a card to upgrade or activate it.");
                 return;
             }
@@ -54,17 +56,20 @@ namespace KiKs.Combat
             if (cardView.Spec.CostResource == CardResourceType.Mana)
             {
                 ActivateMagicCard(cardView);
+                ReevaluatePose(eventData.position, eventData.pressEventCamera);
                 return;
             }
 
             if (!cardView.Spec.CanUpgrade)
             {
+                ReevaluatePose(eventData.position, eventData.pressEventCamera);
                 WarningToast.Show("This card cannot be upgraded.");
                 return;
             }
 
             if (cardView.IsUpgraded)
             {
+                ReevaluatePose(eventData.position, eventData.pressEventCamera);
                 WarningToast.Show("This card is already upgraded.");
                 return;
             }
@@ -80,7 +85,31 @@ namespace KiKs.Combat
             if (_playerAttackFeedback != null)
                 _playerAttackFeedback.SpawnMagicFire();
             cardView.PlayUpgradeFlip();
+            ReevaluatePose(eventData.position, eventData.pressEventCamera);
             Debug.Log("[MagicHandCardBridge] Upgraded " + cardView.Spec.DisplayName + ".", this);
+        }
+
+        /// <summary>拖拽结束后重新检测鼠标下的卡牌并切换姿态</summary>
+        private void ReevaluatePose(Vector2 screenPosition, Camera eventCamera)
+        {
+            if (_playerAttackFeedback == null)
+                _playerAttackFeedback = UnityEngine.Object.FindFirstObjectByType<PlayerAttackFeedback>();
+            if (_playerAttackFeedback == null || _playerAttackFeedback.IsBusy) return;
+
+            var cardView = FindCardAt(screenPosition, eventCamera);
+            if (cardView == null || cardView.Spec == null)
+            {
+                _playerAttackFeedback.SwitchToMeleePose();
+                return;
+            }
+
+            var category = cardView.Spec.Category;
+            if (category == "ranged" || category == "guns")
+                _playerAttackFeedback.SwitchToRangedPose();
+            else if (category == "magic")
+                _playerAttackFeedback.SwitchToMagicPose();
+            else
+                _playerAttackFeedback.SwitchToMeleePose();
         }
 
         private void ActivateMagicCard(CardView cardView)
