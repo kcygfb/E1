@@ -1,11 +1,12 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
 
 namespace KiKs.Combat
 {
     /// <summary>
-    /// 玩家攻击动效：监听引擎 DamageApplied 事件（sourceId=player）。
+    /// 玩家攻击动效：监听玩家造成或被护盾拦截的每个攻击命中。
     /// 近战走状态机（冲刺→斩击→返回）；远程走状态机（射击→恢复）；
     /// 魔法走 DOTween 前冲兜底；有 Animator 时走 Animator Trigger。
     /// 挂在玩家立绘上。
@@ -20,6 +21,18 @@ namespace KiKs.Combat
             Dashing,
             Slashing,
             Returning
+        }
+
+        private struct AttackRequest
+        {
+            public int AttackType { get; }
+            public bool IsUpgraded { get; }
+
+            public AttackRequest(int attackType, bool isUpgraded)
+            {
+                AttackType = attackType;
+                IsUpgraded = isUpgraded;
+            }
         }
 
         [Header("Animator（有动画资源时用）")]
@@ -150,6 +163,7 @@ namespace KiKs.Combat
         private bool _isRangedPose;
         private bool _isMagicPose;
         private bool _currentAttackUpgraded;
+        private readonly Queue<AttackRequest> _pendingAttacks = new Queue<AttackRequest>();
 
         /// <summary>攻击流程进行中时为 true，防止重复触发</summary>
         public bool IsBusy => _state != AttackState.Idle;
@@ -237,12 +251,15 @@ namespace KiKs.Combat
                 return;
             }
 
-            if (evt.Type != CombatEventType.DamageApplied) return;
+            if (evt.Type != CombatEventType.DamageApplied &&
+                evt.Type != CombatEventType.ActionNullified) return;
             if (string.IsNullOrEmpty(evt.SourceId)) return;
             if (battleController == null || !battleController.IsInitialized) return;
             if (evt.SourceId != battleController.State.Player.Id) return;
 
             int attackType = ResolveAttackType(evt.CardInstanceId);
+            // Gun cards have a dedicated per-shot presenter in BattleCardBridge.
+            if (attackType == 1) return;
             PlayAttack(attackType, evt.IsUpgraded);
         }
 
@@ -286,13 +303,20 @@ namespace KiKs.Combat
         /// <param name="isUpgraded">是否强化卡牌（决定是否触发扩散特效）</param>
         public void PlayAttack(int attackType = 0, bool isUpgraded = false)
         {
+            if (IsBusy)
+            {
+                _pendingAttacks.Enqueue(new AttackRequest(attackType, isUpgraded));
+                return;
+            }
+
             _currentAttackUpgraded = isUpgraded;
 
             // === Animator 路径 ===
             if (_useAnimator)
             {
                 // 所有攻击类型：Animator 全权管理，代码只触发
-                StopAttack();
+                StopCurrentAttack();
+                _state = AttackState.Slashing;
                 animator.ResetTrigger(attackTrigger);
                 if (!string.IsNullOrEmpty(attackTypeParam))
                     animator.SetInteger(attackTypeParam, attackType);
@@ -305,7 +329,7 @@ namespace KiKs.Combat
             // 近战路径：状态机
             if (attackType == 0 && meleeDashTarget != null)
             {
-                StopAttack();
+                StopCurrentAttack();
                 _attackRoutine = StartCoroutine(MeleeAttackRoutine());
                 return;
             }
@@ -313,7 +337,7 @@ namespace KiKs.Combat
             // 远程路径：状态机
             if (attackType == 1)
             {
-                StopAttack();
+                StopCurrentAttack();
                 _attackRoutine = StartCoroutine(RangedAttackRoutine());
                 return;
             }
@@ -392,8 +416,7 @@ namespace KiKs.Combat
 
             // --- Idle：恢复 ---
             _rect.anchoredPosition = _originPos;
-            _state = AttackState.Idle;
-            _attackRoutine = null;
+            CompleteCurrentAttack();
         }
 
         /// <summary>远程攻击状态机：Shooting → Idle（立绘由姿态状态管理）</summary>
@@ -423,8 +446,7 @@ namespace KiKs.Combat
             yield return new WaitForSeconds(rangedShootDuration);
 
             // --- Idle：姿态保持，不自动恢复 ---
-            _state = AttackState.Idle;
-            _attackRoutine = null;
+            CompleteCurrentAttack();
         }
 
         private static Material s_additiveMat;
@@ -716,7 +738,8 @@ namespace KiKs.Combat
         /// <summary>魔法兜底：原地前冲 + 回弹 + 魔法火特效</summary>
         private void PlayLungeFallback()
         {
-            StopAttack();
+            StopCurrentAttack();
+            _state = AttackState.Slashing;
             _rect.anchoredPosition = _originPos;
             _rect.localScale = _originScale;
 
@@ -731,6 +754,7 @@ namespace KiKs.Combat
                 .SetEase(Ease.OutQuart));
             _tweenSeq.Join(_rect.DOScale(_originScale, returnDuration)
                 .SetEase(Ease.OutQuart));
+            _tweenSeq.OnComplete(CompleteCurrentAttack);
         }
 
         /// <summary>魔法释放特效：在玩家立绘前方播放魔法火</summary>
@@ -789,6 +813,12 @@ namespace KiKs.Combat
 
         private void StopAttack()
         {
+            _pendingAttacks.Clear();
+            StopCurrentAttack();
+        }
+
+        private void StopCurrentAttack()
+        {
             if (_attackRoutine != null)
             {
                 StopCoroutine(_attackRoutine);
@@ -801,6 +831,17 @@ namespace KiKs.Combat
             if (_canvasRect != null)
                 _canvasRect.DOKill();
             _state = AttackState.Idle;
+        }
+
+        private void CompleteCurrentAttack()
+        {
+            _state = AttackState.Idle;
+            _attackRoutine = null;
+            _tweenSeq = null;
+
+            if (_pendingAttacks.Count == 0) return;
+            var next = _pendingAttacks.Dequeue();
+            PlayAttack(next.AttackType, next.IsUpgraded);
         }
 
         /// <summary>远程动画到达射击帧时调用（Animation Event）</summary>
@@ -824,8 +865,7 @@ namespace KiKs.Combat
         /// <summary>远程/魔法攻击动画结束时调用（Animation Event，放在最后一帧）</summary>
         public void OnAttackAnimationEnd()
         {
-            _state = AttackState.Idle;
-            _attackRoutine = null;
+            CompleteCurrentAttack();
         }
     }
 }

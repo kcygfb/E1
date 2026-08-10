@@ -58,6 +58,19 @@ namespace KiKs.Combat.Tests
             Assert.That(breaker.Effects[1].Amount.BaseValue, Is.EqualTo(6));
             Assert.That(breaker.Effects[1].Amount.UpgradedValue, Is.EqualTo(11));
             Assert.That(breaker.Effects[2].Amount.BaseValue, Is.EqualTo(2));
+
+            var chainsaw = repository.GetRequiredCard("bleed_chainsaw");
+            var chainsawDamage = chainsaw.Effects.Single(effect => effect.Type == CardEffectType.Damage);
+            Assert.That(chainsawDamage.Hits.BaseValue, Is.EqualTo(2));
+            Assert.That(chainsawDamage.Hits.UpgradedValue, Is.EqualTo(2));
+
+            var zigzag = repository.GetRequiredCard("misc_zigzag");
+            var zigzagDamage = zigzag.Effects.Single(effect => effect.Type == CardEffectType.Damage);
+            var zigzagToughness = zigzag.Effects.Single(effect => effect.Type == CardEffectType.ToughnessDamage);
+            Assert.That(zigzagDamage.Hits.BaseValue, Is.EqualTo(2));
+            Assert.That(zigzagDamage.Hits.UpgradedValue, Is.EqualTo(4));
+            Assert.That(zigzagToughness.Hits.BaseValue, Is.EqualTo(2));
+            Assert.That(zigzagToughness.Hits.UpgradedValue, Is.EqualTo(4));
         }
 
         [Test]
