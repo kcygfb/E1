@@ -703,7 +703,7 @@ namespace KiKs.Combat
 
                 var button = mapPoint.GetComponent<Button>();
                 if (button != null)
-                    button.interactable = isVisible && !point.IsSelected && point.Type != AreaPointType.Event;
+                    button.interactable = isVisible && !point.IsSelected;
             }
 
             if (demoCompletePanel != null)

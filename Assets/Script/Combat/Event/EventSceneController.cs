@@ -130,6 +130,8 @@ namespace KiKs.Combat
         private GameObject nextWordIcon;
         private Animator _nextWordAnimator;
 
+        private GameObject _dialogueClickArea;
+
         // --- 对话播放状态 ---
         private bool _dialogueRunning;
         private bool _isTyping;
@@ -294,6 +296,25 @@ namespace KiKs.Combat
             // 对话面板初始隐藏
             if (dialoguePanel != null)
                 dialoguePanel.gameObject.SetActive(false);
+
+            // 全屏点击区域：对话期间点击任意位置推进下一句
+            if (_dialogueClickArea == null && canvasRect != null)
+            {
+                var go = new GameObject("DialogueClickArea", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+                go.layer = 5;
+                go.transform.SetParent(canvasRect, false);
+                var rt = go.GetComponent<RectTransform>();
+                rt.anchorMin = Vector2.zero;
+                rt.anchorMax = Vector2.one;
+                rt.offsetMin = Vector2.zero;
+                rt.offsetMax = Vector2.zero;
+                var img = go.GetComponent<Image>();
+                img.color = new Color(0, 0, 0, 0.01f);
+                var btn = go.AddComponent<Button>();
+                btn.onClick.AddListener(OnNextClicked);
+                go.SetActive(false);
+                _dialogueClickArea = go;
+            }
         }
 
         private void RefreshGoldDisplay()
@@ -360,6 +381,7 @@ namespace KiKs.Combat
 
             _dialogueRunning = true;
             if (dialoguePanel != null) dialoguePanel.gameObject.SetActive(true);
+            if (_dialogueClickArea != null) _dialogueClickArea.SetActive(true);
             if (nextButton != null) nextButton.interactable = true;
             if (nextWordIcon != null) nextWordIcon.SetActive(true);
             if (_nextWordAnimator != null) _nextWordAnimator.enabled = false;
@@ -454,6 +476,7 @@ namespace KiKs.Combat
         {
             _dialogueRunning = false;
             if (dialoguePanel != null) dialoguePanel.gameObject.SetActive(false);
+            if (_dialogueClickArea != null) _dialogueClickArea.SetActive(false);
             if (nextWordIcon != null) nextWordIcon.SetActive(false);
             if (_nextWordAnimator != null) _nextWordAnimator.enabled = false;
         }
@@ -592,6 +615,14 @@ namespace KiKs.Combat
                 return false;
 
             cardsByView.Remove(card);
+
+            // 隐藏所有剩余卡牌
+            foreach (var remaining in cardsByView.Keys)
+            {
+                if (remaining != null)
+                    remaining.gameObject.SetActive(false);
+            }
+
             StartCoroutine(ResolveCard(cardDef));
             return true;
         }

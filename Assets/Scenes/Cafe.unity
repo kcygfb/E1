@@ -7081,8 +7081,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MenuViewer
   menuPages:
   - {fileID: 3359859654605326480, guid: 3eeb382f923e5064686241bdfcf221ab, type: 3}
-  - {fileID: -5174184169972882759, guid: b0327ab2ffb17a241b38b5dcfa418890, type: 3}
-  - {fileID: -3833343294978069187, guid: daf078bbf5f7bdd4fb70410198bb90e5, type: 3}
+  - {fileID: -3833343294978069187, guid: f4536e15474c4924c8dcdeaf9f8fec33, type: 3}
+  - {fileID: -5174184169972882759, guid: 2b6ae11a437d29041be81d4041908085, type: 3}
   - {fileID: 6417198215691780925, guid: 3622eb92d266553479d947a6d704336e, type: 3}
   - {fileID: -8221713593614206579, guid: a5f89b90877a1f946b15a9f15e4bb127, type: 3}
   - {fileID: -1257114467182852374, guid: c2a967fbde7134e4eb3cb4ea3f4ae926, type: 3}
