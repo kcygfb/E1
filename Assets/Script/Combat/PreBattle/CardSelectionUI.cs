@@ -618,7 +618,7 @@ namespace KiKs.Combat
 
         /// <summary>
         /// 为每个战斗点程序化注册教学框：显示"里面的 Boss 名字 / 血量 / 韧性"。
-        /// 使用常驻气泡（固定在标记上方），这样点击任意标记后，其他标记的气泡不会消失。
+        /// 只有鼠标悬停在对应标记上时才显示，并跟随鼠标位置。
         /// 描述按该点随机分配到的敌人槽位生成，每局重开（重新生成地图）后自动更新。
         /// </summary>
         private void RegisterMapPointCallouts()
@@ -646,12 +646,15 @@ namespace KiKs.Combat
                 if (definition == null)
                     continue;
 
-                // 常驻气泡：显示在标记点上方，点击其他标记后依然保留
-                tutorialController.RegisterPinnedCallout(
+                tutorialController.RegisterJsonCallout(
                     owner,
                     owner,
-                    BuildEncounterDescription(definition),
-                    new Vector2(0f, 12f));
+                    new TutorialHintJson
+                    {
+                        description = BuildEncounterDescription(definition),
+                        offsetX = 0f,
+                        offsetY = 12f
+                    });
             }
         }
 
@@ -667,22 +670,22 @@ namespace KiKs.Combat
         {
             var enemyName = definition.EnemyArchetype switch
             {
-                EnemyArchetype.Dog => "Ghost",
-                EnemyArchetype.LittleGirl => "Little Girl",
-                EnemyArchetype.BigEye => "Big Eye",
+                EnemyArchetype.Dog => "幽灵",
+                EnemyArchetype.LittleGirl => "小女孩",
+                EnemyArchetype.BigEye => "大眼",
                 _ => definition.DisplayName
             };
 
             // 敌人等级写在 CombatantDefinition.EnemyRank（Minion/Elite/Boss）。
             var rankLabel = definition.EnemyRank switch
             {
-                EnemyRank.Minion => "Minion",
-                EnemyRank.Elite => "Elite",
-                EnemyRank.Boss => "Boss",
-                _ => "Enemy"
+                EnemyRank.Minion => "普通敌人",
+                EnemyRank.Elite => "精英",
+                EnemyRank.Boss => "首领",
+                _ => "敌人"
             };
 
-            return $"{rankLabel}: {enemyName} | HP {definition.MaxHealth} | Toughness {definition.MaxToughness}";
+            return $"{rankLabel}：{enemyName}｜生命值 {definition.MaxHealth}｜韧性 {definition.MaxToughness}";
         }
         public void RefreshMapPoints()
         {

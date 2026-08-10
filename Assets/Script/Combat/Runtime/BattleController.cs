@@ -492,7 +492,6 @@ namespace KiKs.Combat
             if (hitFeedback != null)
                 hitFeedback.RefreshOrigin();
 
-            RegisterEnemyIntroCallout(definition);
 
             Debug.Log($"[Combat] Applied portrait for {definition.DisplayName} at scale {definition.PortraitScale:0.###}.", this);
         }

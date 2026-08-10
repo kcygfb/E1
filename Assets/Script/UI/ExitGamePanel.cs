@@ -53,14 +53,22 @@ namespace KiKs.UI
         {
             _instance = null;
             ReturnToMainMenuRequested = null;
+            SceneManager.sceneLoaded -= HandleSceneLoaded;
             ExitGamePanelInput.ResetStaticState();
         }
 
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        private static void RegisterSceneLoadHandler()
+        {
+            SceneManager.sceneLoaded -= HandleSceneLoaded;
+            SceneManager.sceneLoaded += HandleSceneLoaded;
+        }
+
         /// <summary>
-        /// 每次场景加载后自动绑定场景中的触发按钮（"Settings"/"🍎"），并启用 ESC 键监听。
+        /// 每个场景都重新绑定触发按钮并创建场景内的 ESC 监听器。
+        /// 监听器随旧场景销毁，避免跨场景残留；此回调负责在新场景补回。
         /// </summary>
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-        private static void AutoBindSettingsButtons()
+        private static void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
         {
             BindSettingsButtons();
             ExitGamePanelInput.EnsureExists();
@@ -70,7 +78,7 @@ namespace KiKs.UI
         public static void BindSettingsButtons()
         {
             var buttons = UnityEngine.Object.FindObjectsByType<Button>(
-                FindObjectsInactive.Exclude,
+                FindObjectsInactive.Include,
                 FindObjectsSortMode.None);
 
             foreach (var button in buttons)
