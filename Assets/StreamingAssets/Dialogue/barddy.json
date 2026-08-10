@@ -3,93 +3,82 @@
     {
       "dialogueId": "barddy_arrival",
       "lines": [
-        { "speaker": "Avril", "expression": "Thinking", "text": "(Today's third customer... Judging by the outfit, is a courier?)" },
-        { "speaker": "Mysterious Courier", "expression": "", "text": "Is this the café run by Demon Slayer?" },
-        { "speaker": "Avril", "expression": "Professional Smile", "text": "Yes, it is. And you are...?" },
-        { "speaker": "Mysterious Courier", "expression": "", "text": "I'm a courier sent from headquarters." },
-        { "speaker": "Mysterious Courier", "expression": "", "text": "One regular Americano, please." },
-        { "speaker": "Avril", "expression": "Thinking", "text": "Certainly…" },
-        { "speaker": "Avril", "expression": "Thinking", "text": "But it's probably best not to mention Demon Slayer in front of other customers." },
-        { "speaker": "Avril", "expression": "Thinking", "text": "Headquarters should've informed you about that policy." },
-        { "speaker": "Mysterious Courier", "expression": "", "text": "Sorry. I'll be more careful." },
-        { "speaker": "Avril", "expression": "Irritated", "text": "(I'd bet he asked the exact same question at two or three other cafés before finding ours.)" }
+        { "speaker": "艾薇儿", "expression": "Thinking", "text": "（今天的第三位顾客，看打扮是一个快递员吗）" },
+        { "speaker": "神秘快递员", "expression": "", "text": "这里是猎魔人的咖啡馆店铺吗。" },
+        { "speaker": "艾薇儿", "expression": "Professional Smile", "text": "是的，请问你是。" },
+        { "speaker": "神秘快递员", "expression": "", "text": "我是总部派来的快递员。请给我来一杯普通的美式。" },
+        { "speaker": "艾薇儿", "expression": "Thinking", "text": "当然可以......" },
+        { "speaker": "艾薇儿", "expression": "Thinking", "text": "但是最好别在其他顾客面前提及猎魔人的事情。总部那边应该有相关的条例说明。" },
+        { "speaker": "神秘快递员", "expression": "", "text": "抱歉，我会注意的。" },
+        { "speaker": "艾薇儿", "expression": "Irritated", "text": "（我敢打赌他在来我们店之前已经问了两三家咖啡店同样的问题了。）" }
       ]
     },
     {
       "dialogueId": "barddy_departure",
       "lines": [
-        { "speaker": "Avril", "expression": "Thinking", "text": "So... did headquarters send us something?" },
-        { "speaker": "Mysterious Courier", "expression": "", "text": "Your boss requested funding and supplies from headquarters for both the café and Demon Slayer operations." },
-        { "speaker": "Mysterious Courier", "expression": "", "text": "I'll move everything into your storage room." },
-        { "speaker": "Avril", "expression": "Happy", "text": "(So that's why the boss went to headquarters—to apply for funding and supplies. That was surprisingly fast.)" },
-        { "speaker": "Mysterious Courier", "expression": "", "text": "Wow... this is really bitter. I've only ever had sweet coffee before." },
-        { "speaker": "Avril", "expression": "", "text": "Then next time you should try one of the other drinks on the menu." },
-        { "speaker": "Avril", "expression": "", "text": "I'd be happy to recommend something." },
-        { "speaker": "Mysterious Courier", "expression": "", "text": "Thanks." },
-        { "speaker": "Mysterious Courier", "expression": "", "text": "Another shipment is arriving tomorrow, so I'll be back." },
-        { "speaker": "Mysterious Courier", "expression": "", "text": "By the way... is kopi luwak really made from cat poop?" },
-        { "speaker": "Avril", "expression": "Happy", "text": "Uh... not exactly." },
-        { "speaker": "Avril", "expression": "Happy", "text": "More accurately, the coffee beans come from civet droppings after they've passed through the animal's digestive system, but the coffee isn't made directly from poop." },
-        { "speaker": "Avril", "expression": "Happy", "text": "Besides, we don't even serve kopi luwak here." },
-        { "speaker": "Avril", "expression": "Happy", "text": "Though the coffee at that café across the street—\"Whatever\"—smells as awful as cat poop." },
-        { "speaker": "Mysterious Courier", "expression": "", "text": "Their desserts are really good, though." },
-        { "speaker": "Avril", "expression": "Irritated", "text": "True." },
-        { "speaker": "Avril", "expression": "Irritated", "text": "But they don't care about making proper coffee at all." },
-        { "speaker": "Avril", "expression": "Irritated", "text": "Honestly, I hope they go out of business sooner rather than later." },
-        { "speaker": "Mysterious Courier", "expression": "", "text": "I'd better get going. I still have more deliveries to make." },
-        { "speaker": "Mysterious Courier", "expression": "", "text": "See you tomorrow." },
-        { "speaker": "Avril", "expression": "Professional Smile", "text": "We'll be looking forward to your next visit." }
+        { "speaker": "艾薇儿", "expression": "Thinking", "text": "所以总部那边是寄来了什么东西吗。" },
+        { "speaker": "神秘快递员", "expression": "", "text": "你们的店的老板向总部申请了一笔用于咖啡经营和猎魔人业务的经费和物资。" },
+        { "speaker": "神秘快递员", "expression": "", "text": "我会把这些东西搬运到库房里。" },
+        { "speaker": "艾薇儿", "expression": "Happy", "text": "（老板原来去总部是去申请经费和物资了，效率这么高吗。）" },
+        { "speaker": "神秘快递员", "expression": "", "text": "好苦，我之前只喝过甜的。" },
+        { "speaker": "艾薇儿", "expression": "", "text": "那你下次可以点菜单上的其他咖啡，我会为你介绍的。" },
+        { "speaker": "神秘快递员", "expression": "", "text": "好的谢谢。明天还有一批要运送的货物。顺便问下，猫屎咖啡真的是猫屎做的吗。" },
+        { "speaker": "艾薇儿", "expression": "Happy", "text": "呃，不是，准确的说猫屎咖啡的咖啡豆来源于椰子狸的粪便中未消化完整的咖啡豆，但不是直接用猫屎做的，还有我们店没有猫屎咖啡。但街对面那家「whatever」的咖啡泡得像猫屎一样臭。" },
+        { "speaker": "神秘快递员", "expression": "", "text": "那家的甜品很好吃。" },
+        { "speaker": "艾薇儿", "expression": "Irritated", "text": "是啊，但他们根本不注重咖啡的制作。我希望他们能趁早倒闭。" },
+        { "speaker": "神秘快递员", "expression": "", "text": "我要继续送单子了，再见。" },
+        { "speaker": "艾薇儿", "expression": "Professional Smile", "text": "欢迎下次光临。" }
       ]
     },
     {
       "dialogueId": "barddy_locked",
       "lines": [
-        { "speaker": "Mysterious Courier", "expression": "", "text": "I heard you can make Mocha Latte here?" },
-        { "speaker": "Mysterious Courier", "expression": "", "text": "Not unlocked yet, huh... Well, get everything ready and I'll come back next time." }
+        { "speaker": "神秘快递员", "expression": "", "text": "我听说你们这里能做摩卡拿铁？" },
+        { "speaker": "神秘快递员", "expression": "", "text": "还没解锁吗……好吧，准备好了我下次再来。" }
       ]
     },
     {
       "dialogueId": "barddy_lockeddeparture",
       "lines": [
-        { "speaker": "Mysterious Courier", "expression": "", "text": "I'll be heading off then. Don't forget to prepare the ingredients for Mocha Latte!" },
-        { "speaker": "Mysterious Courier", "expression": "", "text": "I hope to finally try it next time I visit." }
+        { "speaker": "神秘快递员", "expression": "", "text": "那我先走了。别忘了准备摩卡拿铁的材料！" },
+        { "speaker": "神秘快递员", "expression": "", "text": "希望下次来的时候终于能尝到。" }
       ]
     },
     {
       "dialogueId": "barddy_returnfound",
       "lines": [
-        { "speaker": "Mysterious Courier", "expression": "", "text": "Did you manage to get that Mocha Latte I asked about last time?" },
-        { "speaker": "Mysterious Courier", "expression": "", "text": "Excellent! Finally! Here, this is your reward!" }
+        { "speaker": "神秘快递员", "expression": "", "text": "上次说的摩卡拿铁做了吗？" },
+        { "speaker": "神秘快递员", "expression": "", "text": "太好了！终于！来，这是给你的奖励！" }
       ]
     },
     {
       "dialogueId": "barddy_returnnotfound",
       "lines": [
-        { "speaker": "Mysterious Courier", "expression": "", "text": "Did you manage to get that Mocha Latte I asked about last time?" },
-        { "speaker": "Mysterious Courier", "expression": "", "text": "Still not ready, huh... Well, keep working on it. I'll check back next time." }
+        { "speaker": "神秘快递员", "expression": "", "text": "上次说的摩卡拿铁做了吗？" },
+        { "speaker": "神秘快递员", "expression": "", "text": "还没做好啊……好吧，继续努力，下次再来检查。" }
       ]
     },
     {
       "dialogueId": "barddy_day2_arrival",
       "lines": [
-        { "speaker": "Mysterious Courier", "expression": "", "text": "这是今天的物资。" },
+        { "speaker": "神秘快递员", "expression": "", "text": "这是今天的物资。" },
         { "speaker": "艾薇儿", "expression": "", "text": "哦，谢谢。今天想要一杯什么样的咖啡呢。" },
-        { "speaker": "Mysterious Courier", "expression": "", "text": "请帮我推荐一杯不是泥水口味的。" },
+        { "speaker": "神秘快递员", "expression": "", "text": "请帮我推荐一杯不是泥水口味的。" },
         { "speaker": "艾薇儿", "expression": "Annoyed", "text": "我可以为您提供一杯甜口的咖啡。但我们店的咖啡不是泥水呢。" },
-        { "speaker": "Mysterious Courier", "expression": "", "text": "我想开个玩笑，抱歉冒犯了。" },
+        { "speaker": "神秘快递员", "expression": "", "text": "我想开个玩笑，抱歉冒犯了。" },
         { "speaker": "艾薇儿", "expression": "Professional Smile", "text": "哈哈哈，原来是开玩笑啊，我还以为是开玩笑呢。" },
-        { "speaker": "Mysterious Courier", "expression": "", "text": "总之我现在有点疲惫了，需要补充一些咖啡因。" },
+        { "speaker": "神秘快递员", "expression": "", "text": "总之我现在有点疲惫了，需要补充一些咖啡因。" },
         { "speaker": "艾薇儿", "expression": "Professional Smile", "text": "好的，那么就由我来为您推荐一杯呢。" }
       ]
     },
     {
       "dialogueId": "barddy_day2_departure",
       "lines": [
-        { "speaker": "Mysterious Courier", "expression": "", "text": "嗯，这杯不错，比昨天那杯好喝多了。" },
+        { "speaker": "神秘快递员", "expression": "", "text": "嗯，这杯不错，比昨天那杯好喝多了。" },
         { "speaker": "艾薇儿", "expression": "Professional Smile", "text": "谢谢夸奖，那以后就多来光顾呀。" },
-        { "speaker": "Mysterious Courier", "expression": "", "text": "对了，总部那边说最近可能会派人来视察咖啡店。" },
+        { "speaker": "神秘快递员", "expression": "", "text": "对了，总部那边说最近可能会派人来视察咖啡店。" },
         { "speaker": "艾薇儿", "expression": "Thinking", "text": "视察？我这边没什么问题吧……" },
-        { "speaker": "Mysterious Courier", "expression": "", "text": "放心，就是例行检查。我先走了，还有货要送。" },
+        { "speaker": "神秘快递员", "expression": "", "text": "放心，就是例行检查。我先走了，还有货要送。" },
         { "speaker": "艾薇儿", "expression": "Professional Smile", "text": "慢走，路上小心。" }
       ]
     }

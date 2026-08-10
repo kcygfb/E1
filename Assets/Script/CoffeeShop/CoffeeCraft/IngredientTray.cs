@@ -62,4 +62,23 @@ public static class IngredientTray
         if (HasAny) return;
         SetDefaults();
     }
+
+    /// <summary>自动填充新材料：把玩家拥有但不在格子里的材料排入空格子。</summary>
+    public static void AutoFillNewMaterials()
+    {
+        foreach (var matId in SelectableMaterials)
+        {
+            // 跳过已在格子里的
+            if (Array.IndexOf(Slots, matId) >= 0) continue;
+
+            // 跳过库存为 0 的
+            if (InventorySystem.Instance == null) break;
+            if (InventorySystem.Instance.GetAmount(matId) <= 0) continue;
+
+            // 找第一个空格子放入
+            int emptyIdx = Array.FindIndex(Slots, string.IsNullOrEmpty);
+            if (emptyIdx < 0) break;
+            Slots[emptyIdx] = matId;
+        }
+    }
 }

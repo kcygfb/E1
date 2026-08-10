@@ -3,22 +3,22 @@
     {
       "dialogueId": "generic_arrival",
       "lines": [
-        { "speaker": "Customer", "text": "Hello!" },
-        { "speaker": "Customer", "text": "I'd like a {coffee}, please." },
-        { "speaker": "Customer", "text": "Thanks! I'll wait here." }
+        { "speaker": "顾客", "expression": "", "text": "你好！" },
+        { "speaker": "顾客", "expression": "", "text": "请给我来一杯{coffee}。" },
+        { "speaker": "顾客", "expression": "", "text": "谢谢！我在这里等。" }
       ]
     },
     {
       "dialogueId": "generic_departure",
       "lines": [
-        { "speaker": "Customer", "text": "Thank you! See you next time!" }
+        { "speaker": "顾客", "expression": "", "text": "谢谢！下次再来！" }
       ]
     },
     {
       "dialogueId": "generic_wrongcoffee",
       "lines": [
-        { "speaker": "", "text": "Hmm? This doesn't seem like the {coffee} I ordered..." },
-        { "speaker": "", "text": "Could you make me another one? Thanks!" }
+        { "speaker": "", "expression": "", "text": "嗯？这杯好像不是我点的{coffee}……" },
+        { "speaker": "", "expression": "", "text": "能帮我重新做一杯吗？谢谢！" }
       ]
     }
   ]

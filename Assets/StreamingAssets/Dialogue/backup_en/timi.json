@@ -1,0 +1,59 @@
+{
+  "dialogues": [
+    {
+      "dialogueId": "timi_arrival",
+      "lines": [
+        { "speaker": "Avril", "expression": "Tired", "text": "I'm so sleepy…" },
+        { "speaker": "Avril", "expression": "Tired", "text": "It's only 6:24 a.m. I still have more than an hour before my shift starts." },
+        { "speaker": "Avril", "expression": "Tired", "text": "Did I arrive a little too early?" },
+        { "speaker": "Xiaoti", "expression": "Annoyed", "text": "Morning, Avril. Did you sleep well last night?" },
+        { "speaker": "Avril", "expression": "Tired", "text": "Not really." },
+        { "speaker": "Avril", "expression": "Tired", "text": "The monster I fought last night was a real pain. By the time I got back to my apartment, it was already late, and after taking a shower it was past two in the morning." },
+        { "speaker": "Avril", "expression": "Tired", "text": "Anyway, I'd better get everything ready for the shift handover…" },
+        { "speaker": "Avril", "expression": "Tired", "text": "You don't look so great either. What happened at the café yesterday?" },
+        { "speaker": "Xiaoti", "expression": "", "text": "A drunk guy came in during the early hours of the morning and asked for a hot milk to sober up." },
+        { "speaker": "Xiaoti", "expression": "", "text": "But he had obviously drunk way too much. I'm absolutely sure he never threw up in the restroom at the bar before coming here." },
+        { "speaker": "Xiaoti", "expression": "", "text": "One more glass of hot milk would've made his stomach explode." },
+        { "speaker": "Avril", "expression": "Annoyed", "text": "I think I already know where this is going." },
+        { "speaker": "Xiaoti", "expression": "Annoyed", "text": "He barely took a few sips before he started vomiting. Luckily, I saw it coming the moment I handed him the milk." },
+        { "speaker": "Xiaoti", "expression": "Annoyed", "text": "The instant he lifted his head and looked like he was about to puke, I punched him right in the face." },
+        { "speaker": "Avril", "expression": "Irritated", "text": "...Fair enough." },
+        { "speaker": "Xiaoti", "expression": "Annoyed", "text": "That way, none of the vomit splashed onto the furniture. It all landed neatly on the floor." },
+        { "speaker": "Xiaoti", "expression": "Annoyed", "text": "Cleaning up the mess, and dragging that unconscious drunk out, took a ridiculous amount of effort." },
+        { "speaker": "Xiaoti", "expression": "Annoyed", "text": "Then I still had to calm down the other frightened customers." },
+        { "speaker": "Avril", "expression": "Tired", "text": "Compared to that, I'd rather fight two more monsters like the one from last night than deal with an idiot like him." },
+        { "speaker": "Xiaoti", "expression": "Annoyed", "text": "Honestly, I should ask the boss to hire another server or two…" },
+        { "speaker": "Xiaoti", "expression": "Annoyed", "text": "Or maybe just hand in my resignation." },
+        { "speaker": "Avril", "expression": "", "text": "No, no, senpai—you can't leave yet!" },
+        { "speaker": "Avril", "expression": "", "text": "I'm still not familiar with how the café operates. At least when the boss was around, he could guide me." },
+        { "speaker": "Avril", "expression": "", "text": "The boss had to return to headquarters for a few days, so you're the only one left who can help me." },
+        { "speaker": "Avril", "expression": "", "text": "My paycheck has already been docked so many times because of my mistakes that there's barely anything left." },
+        { "speaker": "Xiaoti", "expression": "", "text": "Well, well... I guess I just can't say no to such an adorable kohai." },
+        { "speaker": "Xiaoti", "expression": "", "text": "Alright then, let's go through the workflow one more time." }
+      ]
+    },
+    {
+      "dialogueId": "timi_departure",
+      "lines": [
+        { "speaker": "Xiaoti", "expression": "", "text": "Well then, I'm heading out. If you run into any problems, just give me a call." },
+        { "speaker": "Avril", "expression": "", "text": "Got it, senpai! Thanks for all your help!" }
+      ]
+    },
+    {
+      "dialogueId": "timi_endofday",
+      "lines": [
+        { "speaker": "Avril", "expression": "", "text": "(It's almost time for the shift handover. Today went pretty smoothly. Hopefully things will keep going this well even without the boss and Senior around to help me.)" },
+        { "speaker": "Xiaoti", "expression": "", "text": "Good work today, Avril." },
+        { "speaker": "Xiaoti", "expression": "", "text": "Looks like you managed to get through the day without any major mistakes." },
+        { "speaker": "Avril", "expression": "", "text": "That's great to hear." },
+        { "speaker": "Xiaoti", "expression": "", "text": "Anyway, you should get ready and head out." },
+        { "speaker": "Xiaoti", "expression": "", "text": "Let's hope both of us have a peaceful night tonight." },
+        { "speaker": "Avril", "expression": "", "text": "That would be wonderful." },
+        { "speaker": "Xiaoti", "expression": "", "text": "That would be wonderful!" },
+        { "speaker": "Avril", "expression": "", "text": "That would be wonderful!!" },
+        { "speaker": "Xiaoti", "expression": "", "text": "Safe travels." },
+        { "speaker": "Avril", "expression": "", "text": "Roger that." }
+      ]
+    }
+  ]
+}

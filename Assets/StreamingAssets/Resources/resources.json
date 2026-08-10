@@ -12,6 +12,7 @@
       "id": "CoffeeBean",
       "displayName": "咖啡豆",
       "startingAmount": 10,
+      "infinite": true,
       "tutorial": {
         "description": "咖啡豆：最基础的咖啡原料。先用研磨机磨成咖啡粉，再进行萃取或手冲。"
       }
@@ -20,6 +21,7 @@
       "id": "Milk",
       "displayName": "牛奶",
       "startingAmount": 10,
+      "infinite": true,
       "tutorial": {
         "description": "牛奶：基础调味原料。可直接加入咖啡，也可先打发成奶泡，用于制作拿铁等饮品。"
       }
@@ -28,6 +30,7 @@
       "id": "Sugar",
       "displayName": "糖",
       "startingAmount": 10,
+      "infinite": true,
       "tutorial": {
         "description": "糖：基础调味原料。加入杯中可以完成需要甜味的咖啡配方。"
       }
@@ -97,6 +100,7 @@
       "id": "Water",
       "displayName": "水",
       "startingAmount": 10,
+      "infinite": true,
       "tutorial": {
         "description": "水：基础咖啡原料。可用于手冲，也可加入浓缩咖啡制成美式咖啡。"
       }

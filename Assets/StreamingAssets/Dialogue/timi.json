@@ -3,56 +3,50 @@
     {
       "dialogueId": "timi_arrival",
       "lines": [
-        { "speaker": "Avril", "expression": "Tired", "text": "I'm so sleepy…" },
-        { "speaker": "Avril", "expression": "Tired", "text": "It's only 6:24 a.m. I still have more than an hour before my shift starts." },
-        { "speaker": "Avril", "expression": "Tired", "text": "Did I arrive a little too early?" },
-        { "speaker": "Xiaoti", "expression": "Annoyed", "text": "Morning, Avril. Did you sleep well last night?" },
-        { "speaker": "Avril", "expression": "Tired", "text": "Not really." },
-        { "speaker": "Avril", "expression": "Tired", "text": "The monster I fought last night was a real pain. By the time I got back to my apartment, it was already late, and after taking a shower it was past two in the morning." },
-        { "speaker": "Avril", "expression": "Tired", "text": "Anyway, I'd better get everything ready for the shift handover…" },
-        { "speaker": "Avril", "expression": "Tired", "text": "You don't look so great either. What happened at the café yesterday?" },
-        { "speaker": "Xiaoti", "expression": "", "text": "A drunk guy came in during the early hours of the morning and asked for a hot milk to sober up." },
-        { "speaker": "Xiaoti", "expression": "", "text": "But he had obviously drunk way too much. I'm absolutely sure he never threw up in the restroom at the bar before coming here." },
-        { "speaker": "Xiaoti", "expression": "", "text": "One more glass of hot milk would've made his stomach explode." },
-        { "speaker": "Avril", "expression": "Annoyed", "text": "I think I already know where this is going." },
-        { "speaker": "Xiaoti", "expression": "Annoyed", "text": "He barely took a few sips before he started vomiting. Luckily, I saw it coming the moment I handed him the milk." },
-        { "speaker": "Xiaoti", "expression": "Annoyed", "text": "The instant he lifted his head and looked like he was about to puke, I punched him right in the face." },
-        { "speaker": "Avril", "expression": "Irritated", "text": "...Fair enough." },
-        { "speaker": "Xiaoti", "expression": "Annoyed", "text": "That way, none of the vomit splashed onto the furniture. It all landed neatly on the floor." },
-        { "speaker": "Xiaoti", "expression": "Annoyed", "text": "Cleaning up the mess, and dragging that unconscious drunk out, took a ridiculous amount of effort." },
-        { "speaker": "Xiaoti", "expression": "Annoyed", "text": "Then I still had to calm down the other frightened customers." },
-        { "speaker": "Avril", "expression": "Tired", "text": "Compared to that, I'd rather fight two more monsters like the one from last night than deal with an idiot like him." },
-        { "speaker": "Xiaoti", "expression": "Annoyed", "text": "Honestly, I should ask the boss to hire another server or two…" },
-        { "speaker": "Xiaoti", "expression": "Annoyed", "text": "Or maybe just hand in my resignation." },
-        { "speaker": "Avril", "expression": "", "text": "No, no, senpai—you can't leave yet!" },
-        { "speaker": "Avril", "expression": "", "text": "I'm still not familiar with how the café operates. At least when the boss was around, he could guide me." },
-        { "speaker": "Avril", "expression": "", "text": "The boss had to return to headquarters for a few days, so you're the only one left who can help me." },
-        { "speaker": "Avril", "expression": "", "text": "My paycheck has already been docked so many times because of my mistakes that there's barely anything left." },
-        { "speaker": "Xiaoti", "expression": "", "text": "Well, well... I guess I just can't say no to such an adorable kohai." },
-        { "speaker": "Xiaoti", "expression": "", "text": "Alright then, let's go through the workflow one more time." }
+        { "speaker": "艾薇儿", "expression": "Tired", "text": "（哈欠~~~）" },
+        { "speaker": "艾薇儿", "expression": "Tired", "text": "好困......" },
+        { "speaker": "艾薇儿", "expression": "Tired", "text": "现在是六点二十四分，距离我上班还有一个多小时。" },
+        { "speaker": "艾薇儿", "expression": "Tired", "text": "来的是不是有点早？" },
+        { "speaker": "前辈小提", "expression": "Annoyed", "text": "早上好，艾薇儿。昨晚过的还好吗。" },
+        { "speaker": "艾薇儿", "expression": "Tired", "text": "有点不太好。" },
+        { "speaker": "艾薇儿", "expression": "Tired", "text": "昨天晚上的怪物有点棘手，导致回公寓太晚了，洗完澡都已经两点多了。" },
+        { "speaker": "艾薇儿", "expression": "Tired", "text": "总之先准备下交接的工作......" },
+        { "speaker": "艾薇儿", "expression": "Tired", "text": "你怎么看起来也有点死了。昨天店里发生了什么事情。" },
+        { "speaker": "前辈小提", "expression": "", "text": "凌晨的时候店里来了一个醉汉，问我要杯热牛奶来解酒。" },
+        { "speaker": "前辈小提", "expression": "", "text": "但那个醉汉实在是喝的太多了，他在来我们店之前绝对没有在他喝酒的酒吧厕所吐过。" },
+        { "speaker": "前辈小提", "expression": "", "text": "再喝一杯热牛奶绝对会把他的胃撑爆的。" },
+        { "speaker": "艾薇儿", "expression": "Annoyed", "text": "我已经猜到会发生什么事情了。" },
+        { "speaker": "前辈小提", "expression": "Annoyed", "text": "他还没喝几口牛奶就开始狂吐。幸好我在他接过那杯牛奶的时候就看出了些苗头。在他抬头酝酿吐意的时候就往他脸上来了一拳。" },
+        { "speaker": "艾薇儿", "expression": "Irritated", "text": "......好揍。" },
+        { "speaker": "前辈小提", "expression": "Annoyed", "text": "这样才确保他的呕吐物没有波及到更多物品，只是全吐在了地板上。然后处理地板上的呕吐物和那个不省人事的醉汉真的花费了我很多精力。" },
+        { "speaker": "前辈小提", "expression": "Annoyed", "text": "我还要去安抚其他受惊的顾客。" },
+        { "speaker": "艾薇儿", "expression": "Tired", "text": "跟你比起来我宁可再打两只昨天那样的怪物，也不想遇到这种蠢人。" },
+        { "speaker": "前辈小提", "expression": "Annoyed", "text": "总之我应该向老板建议扩招一两个打杂的服务员......或者是提交一份辞职信。" },
+        { "speaker": "艾薇儿", "expression": "", "text": "不不不，前辈，你还不能走。" },
+        { "speaker": "艾薇儿", "expression": "", "text": "我还没有完全熟悉咖啡店的经营流程，之前好歹老板在旁边会指导一下我。" },
+        { "speaker": "艾薇儿", "expression": "", "text": "这几天老板回总部有点事情需要处理。能帮助我的人只剩你了，我的工资因为一堆差错已经快被扣完了。" },
+        { "speaker": "前辈小提", "expression": "", "text": "呀嘞呀嘞，真是拿你这个可爱的后辈没有办法啊。那就让我们把流程再过一遍吧。" }
       ]
     },
     {
       "dialogueId": "timi_departure",
       "lines": [
-        { "speaker": "Xiaoti", "expression": "", "text": "Well then, I'm heading out. If you run into any problems, just give me a call." },
-        { "speaker": "Avril", "expression": "", "text": "Got it, senpai! Thanks for all your help!" }
+        { "speaker": "前辈小提", "expression": "", "text": "那么，我先走了。有什么问题随时打电话给我。" },
+        { "speaker": "艾薇儿", "expression": "", "text": "知道了，前辈！谢谢你今天的帮助！" }
       ]
     },
     {
       "dialogueId": "timi_endofday",
       "lines": [
-        { "speaker": "Avril", "expression": "", "text": "(It's almost time for the shift handover. Today went pretty smoothly. Hopefully things will keep going this well even without the boss and Senior around to help me.)" },
-        { "speaker": "Xiaoti", "expression": "", "text": "Good work today, Avril." },
-        { "speaker": "Xiaoti", "expression": "", "text": "Looks like you managed to get through the day without any major mistakes." },
-        { "speaker": "Avril", "expression": "", "text": "That's great to hear." },
-        { "speaker": "Xiaoti", "expression": "", "text": "Anyway, you should get ready and head out." },
-        { "speaker": "Xiaoti", "expression": "", "text": "Let's hope both of us have a peaceful night tonight." },
-        { "speaker": "Avril", "expression": "", "text": "That would be wonderful." },
-        { "speaker": "Xiaoti", "expression": "", "text": "That would be wonderful!" },
-        { "speaker": "Avril", "expression": "", "text": "That would be wonderful!!" },
-        { "speaker": "Xiaoti", "expression": "", "text": "Safe travels." },
-        { "speaker": "Avril", "expression": "", "text": "Roger that." }
+        { "speaker": "艾薇儿", "expression": "", "text": "（差不多到交接班的时间了，今天的工作还是比较顺利的。希望在没有了老板和前辈的帮助下之后也能一直如此。）" },
+        { "speaker": "前辈小提", "expression": "", "text": "辛苦了，艾薇儿。看样子你今天没出什么岔子。" },
+        { "speaker": "艾薇儿", "expression": "", "text": "那真是太好了。" },
+        { "speaker": "前辈小提", "expression": "", "text": "总之你可以收拾收拾出发了，希望今天你我都能度过一个平静的夜晚。" },
+        { "speaker": "艾薇儿", "expression": "", "text": "那真是太好了。" },
+        { "speaker": "前辈小提", "expression": "", "text": "那真是太好了！" },
+        { "speaker": "艾薇儿", "expression": "", "text": "那真是太好了！！" },
+        { "speaker": "前辈小提", "expression": "", "text": "一路顺风。" },
+        { "speaker": "艾薇儿", "expression": "", "text": "收到。" }
       ]
     }
   ]
