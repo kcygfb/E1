@@ -20,6 +20,9 @@ namespace KiKs.Combat
         [SerializeField] private Image icon;
         [SerializeField] private Text label;
 
+        [Header("提示框")]
+        [SerializeField] private TutorialController tutorialController;
+
         private static readonly Color UsedColor = new(0.3f, 0.3f, 0.3f, 0.4f);
 
         private void Start()
@@ -31,7 +34,16 @@ namespace KiKs.Combat
                     battleController = bcGo.GetComponent<BattleController>();
             }
 
+            if (tutorialController == null)
+                tutorialController = FindFirstObjectByType<TutorialController>();
+
             RefreshUI();
+        }
+
+        private void OnDestroy()
+        {
+            if (tutorialController != null)
+                tutorialController.UnregisterJsonCallouts(this);
         }
 
         private bool _uiRefreshed;
@@ -130,7 +142,7 @@ namespace KiKs.Combat
             {
                 if (hasCoffee)
                 {
-                    label.text = CoffeeEffectRegistry.GetDisplayName(coffeeId);
+                    label.text = CoffeeEffectRegistry.GetChineseDisplayName(coffeeId);
                     label.color = Color.white;
                 }
                 else
@@ -153,6 +165,35 @@ namespace KiKs.Combat
                     icon.enabled = false;
                 }
             }
+
+            RefreshTooltip(coffeeId);
+        }
+
+        /// <summary>为战斗中的咖啡槽注册中文效果说明；咖啡用完后立即移除提示。</summary>
+        private void RefreshTooltip(string coffeeId)
+        {
+            if (tutorialController == null)
+                tutorialController = FindFirstObjectByType<TutorialController>();
+            if (tutorialController == null)
+                return;
+
+            tutorialController.UnregisterJsonCallouts(this);
+            if (string.IsNullOrEmpty(coffeeId))
+                return;
+
+            var rectTransform = transform as RectTransform;
+            if (rectTransform == null)
+                return;
+
+            var background = GetComponent<Graphic>();
+            if (background != null)
+                background.raycastTarget = true;
+
+            tutorialController.RegisterJsonCallout(this, rectTransform, new TutorialHintJson
+            {
+                description = CoffeeEffectRegistry.BuildChineseTooltip(coffeeId),
+                offsetY = 48f
+            });
         }
     }
 }

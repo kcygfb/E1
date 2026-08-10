@@ -54,6 +54,61 @@ namespace KiKs.Combat.Tests
         }
 
         [Test]
+        public void TreasureUnlockAndDayAdvancePreserveSelectedDeck()
+        {
+            var selectedDeck = new[] { "base_a", "base_a", "base_b" };
+            RuntimeGameRepository.SetSelectedDeck(selectedDeck);
+            SetGold(50);
+            Assert.That(LoopProgressionRepository.TryGetTreasureOffer(50, out var offer), Is.True);
+
+            var purchase = new TreasurePurchaseSession().TryPurchase(offer);
+
+            Assert.That(purchase.Status, Is.EqualTo(TreasurePurchaseStatus.Success));
+            Assert.That(RuntimeGameRepository.SelectedCardIds, Is.EqualTo(selectedDeck));
+            Assert.That(RuntimeGameRepository.AdvanceDay(), Is.True);
+            Assert.That(RuntimeGameRepository.SelectedCardIds, Is.EqualTo(selectedDeck));
+        }
+
+        [Test]
+        public void EventConfigurationCoversEveryPlayableLoopDay()
+        {
+            var definition = EventJsonRepository.Load();
+            Assert.That(EventJsonRepository.TryValidate(definition, out var error), Is.True, error);
+
+            var expectedIds = new[]
+            {
+                "evt_day1_watchman",
+                "evt_day2_poleman",
+                "evt_day3_namelessking"
+            };
+            for (var day = 1; day < LoopProgressionRepository.FinalDay; day++)
+            {
+                var matchingIds = definition.events
+                    .Where(evt => evt != null && evt.day == day)
+                    .Select(evt => evt.id);
+                Assert.That(matchingIds, Does.Contain(expectedIds[day - 1]));
+            }
+
+            var fallback = EventJsonRepository.CreateFallback();
+            Assert.That(EventJsonRepository.TryValidate(fallback, out error), Is.True, error);
+        }
+
+        [Test]
+        public void CurrentDayEventSelectionReadsRuntimeRepositoryDay()
+        {
+            for (var day = 1; day < LoopProgressionRepository.FinalDay; day++)
+            {
+                EventSelectionState.Reset();
+                var selected = EventSelectionState.PickEventForCurrentDay();
+                Assert.That(selected, Is.Not.Null);
+                Assert.That(selected.day, Is.EqualTo(RuntimeGameRepository.CurrentDay));
+
+                if (day + 1 < LoopProgressionRepository.FinalDay)
+                    Assert.That(RuntimeGameRepository.AdvanceDay(), Is.True);
+            }
+        }
+
+        [Test]
         public void ConfigHasThreeFixedVictoryStagesForEveryEnemy()
         {
             var definition = LoopProgressionRepository.Definition;

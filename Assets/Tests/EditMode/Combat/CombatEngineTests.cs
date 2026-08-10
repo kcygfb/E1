@@ -947,19 +947,29 @@ namespace KiKs.Combat.Tests
             Assert.That(engine.State.Player.CurrentActionPoints, Is.EqualTo(2));
         }
 
-        private static CombatEngine CreateEngine(CardSpec spec, int cardCount = 4, EnemyRank enemyRank = EnemyRank.Minion)
+        private static CombatEngine CreateEngine(
+            CardSpec spec,
+            int cardCount = 4,
+            EnemyRank enemyRank = EnemyRank.Minion,
+            int enemyHealth = 100,
+            int enemyToughness = 5)
         {
             var specs = new List<CardSpec>();
             for (var i = 0; i < cardCount; i++) specs.Add(spec);
-            return CreateEngine(specs, enemyRank);
+            return CreateEngine(specs, enemyRank, enemyHealth, enemyToughness);
         }
 
-        private static CombatEngine CreateEngine(IEnumerable<CardSpec> specs, EnemyRank enemyRank = EnemyRank.Minion)
+        private static CombatEngine CreateEngine(
+            IEnumerable<CardSpec> specs,
+            EnemyRank enemyRank = EnemyRank.Minion,
+            int enemyHealth = 100,
+            int enemyToughness = 5)
         {
             var cards = specs.Select((spec, index) =>
                 new CardInstance(spec.Id + "#" + index, spec)).ToList();
             var player = new CombatantState("player", "Player", CombatantSide.Player, EnemyRank.None, 30, 0);
-            var enemy = new CombatantState("enemy", "Enemy", CombatantSide.Enemy, enemyRank, 100, 5);
+            var enemy = new CombatantState(
+                "enemy", "Enemy", CombatantSide.Enemy, enemyRank, enemyHealth, enemyToughness);
             return new CombatEngine(new BattleState(
                 CombatRules.CreateDefault(),
                 player,
@@ -1186,9 +1196,74 @@ namespace KiKs.Combat.Tests
         }
 
         [Test]
-        public void HydraulicBreaker_DoublesNextExecutionDamage()
+        public void HydraulicBreaker_WhenItBreaksToughness_DoublesThatExecution()
         {
-            var breaker = new CardSpec(
+            var engine = CreateEngine(
+                CreateHydraulicBreakerCard(),
+                enemyHealth: 200,
+                enemyToughness: 6);
+            engine.StartBattle();
+            var card = engine.State.Deck.Hand.First();
+
+            var result = engine.PlayCard(card.InstanceId, "enemy");
+
+            Assert.That(result.Success, Is.True);
+            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(74));
+            Assert.That(engine.State.Enemies[0].CurrentToughness, Is.EqualTo(6));
+            Assert.That(result.Events.Any(e =>
+                e.Type == CombatEventType.ExecutionResolved && e.Amount == 120), Is.True);
+        }
+
+        [Test]
+        public void HydraulicBreaker_WhenUpgraded_DealsElevenDamageAndToughnessDamage()
+        {
+            var engine = CreateEngine(
+                CreateHydraulicBreakerCard(),
+                enemyHealth: 200,
+                enemyToughness: 11);
+            engine.StartBattle();
+            var card = engine.State.Deck.Hand.First();
+
+            Assert.That(engine.UpgradeCard(card.InstanceId).Success, Is.True);
+            var result = engine.PlayCard(card.InstanceId, "enemy");
+
+            Assert.That(result.Success, Is.True);
+            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(69));
+            Assert.That(engine.State.Enemies[0].CurrentToughness, Is.EqualTo(11));
+            Assert.That(result.Events.Any(e =>
+                e.Type == CombatEventType.ExecutionResolved && e.Amount == 120), Is.True);
+        }
+
+        [Test]
+        public void HydraulicBreaker_WhenItDoesNotBreakToughness_DoesNotBuffLaterExecution()
+        {
+            var breaker = CreateHydraulicBreakerCard();
+            var finisher = CreateToughnessCard("finisher", 1, 4);
+            var filler = CreateDamageCard("filler", 0, 0);
+            var engine = CreateEngine(
+                new[] { breaker, finisher, filler, filler },
+                enemyHealth: 200,
+                enemyToughness: 10);
+            engine.StartBattle();
+
+            var breakerCard = engine.State.Deck.Hand.First(card => card.Spec.Id == "breaker");
+            var breakerResult = engine.PlayCard(breakerCard.InstanceId, "enemy");
+            Assert.That(breakerResult.Success, Is.True);
+            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(194));
+            Assert.That(engine.State.Enemies[0].CurrentToughness, Is.EqualTo(4));
+            Assert.That(breakerResult.Events.Any(e => e.Type == CombatEventType.ExecutionResolved), Is.False);
+
+            var finisherCard = engine.State.Deck.Hand.First(card => card.Spec.Id == "finisher");
+            var finisherResult = engine.PlayCard(finisherCard.InstanceId, "enemy");
+            Assert.That(finisherResult.Success, Is.True);
+            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(134));
+            Assert.That(finisherResult.Events.Any(e =>
+                e.Type == CombatEventType.ExecutionResolved && e.Amount == 60), Is.True);
+        }
+
+        private static CardSpec CreateHydraulicBreakerCard()
+        {
+            return new CardSpec(
                 "breaker", "breaker", "breaker", "test",
                 CardResourceType.ActionPoint, 1, false, CardTargetType.SingleEnemy,
                 new[]
@@ -1196,17 +1271,13 @@ namespace KiKs.Combat.Tests
                     new CardEffectSpec(CardEffectType.Damage,
                         new UpgradeableNumber(6, 11), UpgradeableNumber.One,
                         ValueUnit.Points, 1),
+                    new CardEffectSpec(CardEffectType.ToughnessDamage,
+                        new UpgradeableNumber(6, 11), UpgradeableNumber.One,
+                        ValueUnit.Points, 1),
                     new CardEffectSpec(CardEffectType.ExecutionDouble,
                         new UpgradeableNumber(2, null), UpgradeableNumber.One,
                         ValueUnit.Points, 1)
                 });
-            var engine = CreateEngine(breaker, 4);
-            engine.StartBattle();
-            var card = engine.State.Deck.Hand.First();
-
-            Assert.That(engine.PlayCard(card.InstanceId, "enemy").Success, Is.True);
-            Assert.That(engine.State.Player.ExecutionMultiplier, Is.EqualTo(2));
-            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(94));
         }
 
         private static CardSpec CreateCard(

@@ -29,6 +29,8 @@ namespace KiKs.Combat
         /// </summary>
         public static EventDefinition PickEventForDay(int day)
         {
+            if (day <= 0) throw new System.ArgumentOutOfRangeException(nameof(day));
+
             var definition = EventJsonRepository.Load();
             if (definition == null || definition.events == null || definition.events.Length == 0)
                 return null;
@@ -55,7 +57,7 @@ namespace KiKs.Combat
                             !string.IsNullOrWhiteSpace(e.id) &&
                             !DeadNpcs.Contains(e.npcId) &&
                             !CompletedEvents.Contains(e.id) &&
-                            (e.day == 0 || e.day == day))
+                            e.day == 0)
                 .ToList();
 
             if (available.Count == 0)
@@ -74,13 +76,13 @@ namespace KiKs.Combat
         /// <summary>兼容旧调用</summary>
         public static EventDefinition PickRandomEvent()
         {
-            return PickEventForDay(GetCurrentDay());
+            return PickEventForCurrentDay();
         }
 
         /// <summary>直接读 RuntimeGameRepository.CurrentDay</summary>
-        private static int GetCurrentDay()
+        public static EventDefinition PickEventForCurrentDay()
         {
-            return RuntimeGameRepository.CurrentDay;
+            return PickEventForDay(RuntimeGameRepository.CurrentDay);
         }
 
         public static void SetCurrentEvent(EventDefinition evt)

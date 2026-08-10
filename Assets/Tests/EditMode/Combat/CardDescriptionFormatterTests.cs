@@ -78,5 +78,56 @@ namespace KiKs.Combat.Tests
             foreach (var token in new[] { "箭", "火", "抽" })
                 Assert.That(CardDescriptionFormatter.HasToken(token), Is.False, $"token {token} 应已移除");
         }
+
+        [Test]
+        public void Format_DynamicEffectValues_UsesRequestedUpgradeState()
+        {
+            var effects = new[]
+            {
+                new CardEffectSpec(
+                    CardEffectType.Damage,
+                    new UpgradeableNumber(4, 7),
+                    new UpgradeableNumber(2, 3),
+                    ValueUnit.Points,
+                    1),
+                new CardEffectSpec(
+                    CardEffectType.ToughnessDamage,
+                    new UpgradeableNumber(8, 12),
+                    UpgradeableNumber.One,
+                    ValueUnit.Points,
+                    1)
+            };
+            const string template =
+                "连续攻击{hits:0}次，每次造成{剑}{amount:0}点伤害，削减{盾}{amount:1}点韧性";
+
+            Assert.That(
+                CardDescriptionFormatter.Format(template, effects, false),
+                Is.EqualTo(
+                    "连续攻击2次，每次造成<sprite name=\"sword\">4点伤害，" +
+                    "削减<sprite name=\"shield\">8点韧性"));
+            Assert.That(
+                CardDescriptionFormatter.Format(template, effects, true),
+                Is.EqualTo(
+                    "连续攻击3次，每次造成<sprite name=\"sword\">7点伤害，" +
+                    "削减<sprite name=\"shield\">12点韧性"));
+        }
+
+        [Test]
+        public void Format_InvalidEffectIndex_KeepsPlaceholderVisible()
+        {
+            var effects = new[]
+            {
+                new CardEffectSpec(
+                    CardEffectType.Damage,
+                    new UpgradeableNumber(4, 7),
+                    UpgradeableNumber.One,
+                    ValueUnit.Points,
+                    1)
+            };
+
+            Assert.That(
+                CardDescriptionFormatter.Format("造成{amount:2}点伤害", effects, true),
+                Is.EqualTo("造成{amount:2}点伤害"));
+        }
     }
 }

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
@@ -12,18 +11,12 @@ namespace KiKs.Combat
     /// PreBattle 咖啡选择 UI：弹窗横向列表 + 底部栏位。
     /// 列表来源：当天在咖啡店实际制作并成功交付过的咖啡种类（RuntimeGameRepository.CraftedCoffeeIds）。
     /// 仅显示有战斗效果的咖啡（CoffeeEffectRegistry.HasEffect）。
-    /// 如果当天没有做过任何有战斗效果的咖啡，回退到 PourOver/BloodGarment 防止卡流程。
+    /// 如果当天没有做过任何有战斗效果的咖啡，回退到手冲咖啡/浓缩咖啡防止卡流程。
     /// </summary>
     public class CoffeeSelectionUI : MonoBehaviour
     {
-        private static readonly string[] FallbackCoffeeIds = { "PourOver", "BloodGarment" };
+        private static readonly string[] FallbackCoffeeIds = { "PourOver", "Espresso" };
 
-        [System.Serializable]
-        private sealed class CoffeeTutorialJson
-        {
-            public string coffeeId;
-            public TutorialHintJson tutorial;
-        }
 
         private static Font _uiFont;
         private static Font UIFont
@@ -64,11 +57,9 @@ namespace KiKs.Combat
 
         [Header("Tutorial")]
         [SerializeField] private TutorialController tutorialController;
-        [SerializeField] private string coffeeTutorialDirectory = "CoffeeData";
 
         private const int MaxCoffees = 2;
         private readonly List<string> selectedCoffeeIds = new();
-        private readonly Dictionary<string, TutorialHintJson> coffeeTutorials = new();
         private List<string> availableCoffeeIds = new();
 
         /// <summary>CoffeeIconCache 在 Assembly-CSharp，KiKs.Combat 不能直接引用，用反射调 GetCoffeeSprite。</summary>
@@ -173,8 +164,6 @@ namespace KiKs.Combat
             if (tutorialController != null)
                 tutorialController.UnregisterJsonCallouts(this);
 
-            LoadCoffeeTutorials();
-
             for (int i = coffeeListContent.childCount - 1; i >= 0; i--)
                 Destroy(coffeeListContent.GetChild(i).gameObject);
 
@@ -207,32 +196,14 @@ namespace KiKs.Combat
             }
         }
 
-        private void LoadCoffeeTutorials()
-        {
-            coffeeTutorials.Clear();
-            if (string.IsNullOrWhiteSpace(coffeeTutorialDirectory)) return;
-
-            var directory = Path.Combine(Application.streamingAssetsPath, coffeeTutorialDirectory);
-            if (!Directory.Exists(directory)) return;
-
-            foreach (var filePath in Directory.GetFiles(directory, "*.json", SearchOption.TopDirectoryOnly))
-            {
-                try
-                {
-                    var data = JsonUtility.FromJson<CoffeeTutorialJson>(File.ReadAllText(filePath));
-                    if (data != null && !string.IsNullOrWhiteSpace(data.coffeeId))
-                        coffeeTutorials[data.coffeeId] = data.tutorial;
-                }
-                catch (System.Exception exception)
-                {
-                    Debug.LogWarning($"[CoffeeSelectionUI] Cannot read tutorial data from {Path.GetFileName(filePath)}: {exception.Message}", this);
-                }
-            }
-        }
 
         private TutorialHintJson GetCoffeeTutorial(string coffeeId)
         {
-            return coffeeTutorials.TryGetValue(coffeeId, out var tutorial) ? tutorial : null;
+            return new TutorialHintJson
+            {
+                description = CoffeeEffectRegistry.BuildChineseTooltip(coffeeId),
+                offsetY = 48f
+            };
         }
 
         private void ApplyCoffeeDataToItem(GameObject go, string coffeeId)

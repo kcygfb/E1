@@ -102,7 +102,7 @@ namespace KiKs.Combat
             transform.localScale = Vector3.one;
 
             // 检查是否是枪械多段射击卡
-            _totalShots = GetTotalShots(spec);
+            _totalShots = GetTotalShots(spec, false);
             _remainingShots = _totalShots;
 
             ResolveCardTextReferences();
@@ -143,6 +143,7 @@ namespace KiKs.Combat
         {
             IsUpgraded = isUpgraded;
             IsActivated = isActivated;
+            RefreshShotCountsForEmpowerment();
             RefreshCardText();
             RefreshCardArt();
             SyncUpgradeFire();
@@ -166,6 +167,7 @@ namespace KiKs.Combat
                 IsActivated = true;
             else
                 IsUpgraded = true;
+            RefreshShotCountsForEmpowerment();
             RefreshCardText();
             SyncUpgradeFire();
 
@@ -209,10 +211,9 @@ namespace KiKs.Combat
             if (Spec == null)
                 return;
 
-            SetText(descriptionText,
-                !string.IsNullOrWhiteSpace(Spec.DescriptionZhCn)
-                    ? CardDescriptionFormatter.Format(Spec.DescriptionZhCn) // 中文优先，含图标转换
-                    : Spec.DescriptionEn,                                   // 回退英文
+            SetText(
+                descriptionText,
+                CardDescriptionFormatter.FormatDescription(Spec, IsUpgraded),
                 false);
             SetText(damageText, FormatEffectValue("Damage", CardEffectType.Damage), true);
             SetText(toughnessText, FormatEffectValue("Toughness", CardEffectType.ToughnessDamage), true);
@@ -630,13 +631,23 @@ namespace KiKs.Combat
             OnHoverExit?.Invoke(this);
         }
 
-        private static int GetTotalShots(CardSpec spec)
+        private void RefreshShotCountsForEmpowerment()
+        {
+            if (Spec == null)
+                return;
+
+            var shotsConsumed = Mathf.Max(0, _totalShots - _remainingShots);
+            _totalShots = GetTotalShots(Spec, IsUpgraded);
+            _remainingShots = Mathf.Max(0, _totalShots - shotsConsumed);
+        }
+
+        private static int GetTotalShots(CardSpec spec, bool isUpgraded)
         {
             if (spec.Category != "ranged" && spec.Category != "guns") return 0;
             foreach (var effect in spec.Effects)
             {
                 if (effect.Type == CardEffectType.Damage)
-                    return effect.Hits.Resolve(false);
+                    return effect.Hits.Resolve(isUpgraded);
             }
             return 0;
         }

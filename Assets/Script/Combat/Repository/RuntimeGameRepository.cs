@@ -381,6 +381,7 @@ namespace KiKs.Combat
             ClearSelectedDemoStage();
             ClearSelectedEncounterIndex();
             ClearSelectedCoffees();
+            EventSelectionState.ClearCurrent();
             DailyAreaMapState.Reset();
             // Do NOT reset player health here — HP carries across days within a run.
             // Defeat already halves HP in CompleteSelectedArea; full heal only on new run.
@@ -436,6 +437,7 @@ namespace KiKs.Combat
             ClearSelectedDemoStage();
             ClearSelectedCoffees();
             ClearCraftedCoffees();
+            EventSelectionState.Reset();
             OwnedCardCopies.Clear();
             LastBattleRewardCardIds.Clear();
             FallbackResources.Clear();

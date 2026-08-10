@@ -7,7 +7,7 @@
   "unlockAmount": 1,
   "tutorial": {
     "targetId": "Extractor",
-    "description": "Use the espresso machine to force the ingredients' rich oils and flavors out at high pressure."
+    "description": "萃取机：对研磨后的咖啡粉或怪物素材进行高压萃取，得到浓缩咖啡或怪物浓缩液。"
   },
   "recipe": [
     {

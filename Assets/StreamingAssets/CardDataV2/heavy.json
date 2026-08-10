@@ -11,7 +11,7 @@
       },
       "description": {
         "en": "Strike with a heavy axe.",
-        "zhCN": "造成{剑}4点伤害，削减{盾}8点韧性"
+        "zhCN": "造成{剑}{amount:0}点伤害，削减{盾}{amount:1}点韧性"
       },
       "category": "heavy",
       "copies": 1,
@@ -52,7 +52,7 @@
       },
       "description": {
         "en": "Drive a pick into the target's toughness.",
-        "zhCN": "造成{剑}2点伤害，削减{盾}12点韧性"
+        "zhCN": "造成{剑}{amount:0}点伤害，削减{盾}{amount:1}点韧性"
       },
       "category": "heavy",
       "copies": 1,
@@ -93,7 +93,7 @@
       },
       "description": {
         "en": "Crush health and toughness with a massive hammer.",
-        "zhCN": "造成{剑}8点伤害，削减{盾}25点韧性"
+        "zhCN": "造成{剑}{amount:0}点伤害，削减{盾}{amount:1}点韧性"
       },
       "category": "heavy",
       "copies": 1,
@@ -134,7 +134,7 @@
       },
       "description": {
         "en": "Strike three times with a chain flail.",
-        "zhCN": "连续攻击3次，每次造成{剑}1点伤害，削减{盾}3点韧性"
+        "zhCN": "连续攻击3次，每次造成{剑}1点伤害，削减{盾}{amount:1}点韧性"
       },
       "category": "heavy",
       "copies": 1,
@@ -179,7 +179,7 @@
       },
       "description": {
         "en": "Deliver a heavy greatsword blow.",
-        "zhCN": "造成{剑}5点伤害，削减{盾}22点韧性"
+        "zhCN": "造成{剑}5点伤害，削减{盾}{amount:1}点韧性"
       },
       "category": "heavy",
       "copies": 1,
@@ -220,7 +220,7 @@
       },
       "description": {
         "en": "A sharp fire-axe strike.",
-        "zhCN": "造成{剑}3点伤害，削减{盾}10点韧性"
+        "zhCN": "造成{剑}{amount:0}点伤害，削减{盾}{amount:1}点韧性"
       },
       "category": "heavy",
       "copies": 1,
@@ -261,8 +261,8 @@
         "en": "hydraulic breaker"
       },
       "description": {
-        "en": "Deal 6 damage (11 upgraded). The next execution damage is doubled.",
-        "zhCN": "造成{剑}6点伤害，使下次处决伤害翻倍"
+        "en": "Deal {amount:0} damage and {amount:1} toughness damage. If this card triggers an execution, double that execution's damage.",
+        "zhCN": "造成{剑}{amount:0}点伤害并削减{盾}{amount:1}点韧性。若该牌触发处决，使此次处决伤害翻倍"
       },
       "category": "heavy",
       "copies": 1,
@@ -274,6 +274,13 @@
       "effects": [
         {
           "type": "damage",
+          "amount": {
+            "base": 6,
+            "upgraded": 11
+          }
+        },
+        {
+          "type": "toughness_damage",
           "amount": {
             "base": 6,
             "upgraded": 11

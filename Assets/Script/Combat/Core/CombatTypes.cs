@@ -66,7 +66,7 @@ namespace KiKs.Combat
         InvisibleAttack,
         /// <summary>Magic burst: deal damage per mana card spent this turn.</summary>
         ManaCardBurst,
-        /// <summary>Hydraulic breaker: next execution damage is doubled.</summary>
+        /// <summary>Hydraulic breaker: double an execution triggered by the current card.</summary>
         ExecutionDouble
     }
 

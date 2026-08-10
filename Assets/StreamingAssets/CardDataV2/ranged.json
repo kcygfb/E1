@@ -11,7 +11,7 @@
       },
       "description": {
         "en": "Fire a six-shot pistol burst.",
-        "zhCN": "连续攻击6次，每次造成{剑}1点伤害"
+        "zhCN": "连续攻击6次，每次造成{剑}{amount:0}点伤害"
       },
       "category": "ranged",
       "copies": 1,
@@ -50,7 +50,7 @@
       },
       "description": {
         "en": "Deal one precise, high-damage shot.",
-        "zhCN": "造成{剑}12点伤害"
+        "zhCN": "造成{剑}{amount:0}点伤害"
       },
       "category": "ranged",
       "copies": 1,
@@ -85,7 +85,7 @@
       },
       "description": {
         "en": "Fire two blasts and damage the target's toughness.",
-        "zhCN": "连续攻击2次，每次造成{剑}5点伤害，削减{盾}3点韧性"
+        "zhCN": "连续攻击2次，每次造成{剑}{amount:0}点伤害，削减{盾}{amount:1}点韧性"
       },
       "category": "ranged",
       "copies": 1,
@@ -131,7 +131,7 @@
       },
       "description": {
         "en": "Launch a single devastating explosive round.",
-        "zhCN": "造成{剑}18点伤害"
+        "zhCN": "造成{剑}{amount:0}点伤害"
       },
       "category": "ranged",
       "copies": 1,
@@ -166,7 +166,7 @@
       },
       "description": {
         "en": "Fire three rounds and chip the target's toughness.",
-        "zhCN": "连续攻击3次，每次造成{剑}1点伤害，削减{盾}3点韧性"
+        "zhCN": "连续攻击3次，每次造成{剑}{amount:0}点伤害，削减{盾}{amount:1}点韧性"
       },
       "category": "ranged",
       "copies": 1,
@@ -212,7 +212,7 @@
       },
       "description": {
         "en": "Spray eight rapid bullets.",
-        "zhCN": "连续攻击8次，每次造成{剑}1点伤害"
+        "zhCN": "连续攻击8次，每次造成{剑}{amount:0}点伤害"
       },
       "category": "ranged",
       "copies": 1,
@@ -250,7 +250,7 @@
       },
       "description": {
         "en": "Scorch repeatedly and inflict bleed.",
-        "zhCN": "连续攻击8次，每次造成{剑}1点伤害，施加{血}5层流血"
+        "zhCN": "连续攻击{hits:0}次，每次造成{剑}1点伤害，施加{血}{amount:1}层流血"
       },
       "category": "ranged",
       "copies": 1,
@@ -296,7 +296,7 @@
       },
       "description": {
         "en": "Launch two explosive shells.",
-        "zhCN": "连续攻击2次，每次造成{剑}8点伤害"
+        "zhCN": "连续攻击2次，每次造成{剑}{amount:0}点伤害"
       },
       "category": "ranged",
       "copies": 1,

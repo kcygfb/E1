@@ -7,7 +7,7 @@
   "unlockAmount": 1,
   "tutorial": {
     "targetId": "PourOver",
-    "description": "Brew with the pour-over kettle to wash each ingredient's flavor and aroma right into the coffee."
+    "description": "手冲壶：将咖啡粉或怪物素材与水一同手冲，可制作手冲咖啡和对应的手冲产物。"
   },
   "recipe": [
     {

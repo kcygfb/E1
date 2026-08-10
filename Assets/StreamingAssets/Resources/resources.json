@@ -2,23 +2,35 @@
   "resources": [
     {
       "id": "CocoaPowder",
-      "displayName": "Cocoa Powder",
-      "startingAmount": 0
+      "displayName": "可可粉",
+      "startingAmount": 0,
+      "tutorial": {
+        "description": "可可粉：用于解锁和调制摩卡类咖啡，可在探索与收集中获得。"
+      }
     },
     {
       "id": "CoffeeBean",
-      "displayName": "Coffee Bean",
-      "startingAmount": 10
+      "displayName": "咖啡豆",
+      "startingAmount": 10,
+      "tutorial": {
+        "description": "咖啡豆：最基础的咖啡原料。先用研磨机磨成咖啡粉，再进行萃取或手冲。"
+      }
     },
     {
       "id": "Milk",
-      "displayName": "Milk",
-      "startingAmount": 10
+      "displayName": "牛奶",
+      "startingAmount": 10,
+      "tutorial": {
+        "description": "牛奶：基础调味原料。可直接加入咖啡，也可先打发成奶泡，用于制作拿铁等饮品。"
+      }
     },
     {
       "id": "Sugar",
-      "displayName": "Sugar",
-      "startingAmount": 10
+      "displayName": "糖",
+      "startingAmount": 10,
+      "tutorial": {
+        "description": "糖：基础调味原料。加入杯中可以完成需要甜味的咖啡配方。"
+      }
     },
     {
       "id": "gold",
@@ -30,7 +42,7 @@
       "displayName": "爪子",
       "startingAmount": 0,
       "tutorial": {
-        "description": "Claw: A crafting material dropped by Nightmare. Rich in high-quality calcium, it's perfect for those with weak bones."
+        "description": "爪子：击败梦魇后可能获得的怪物素材。可研磨、萃取或手冲，用于制作“黏稠之梦”。"
       }
     },
     {
@@ -38,20 +50,23 @@
       "displayName": "狼毫",
       "startingAmount": 0,
       "tutorial": {
-        "description": "Wolf Fur: A crafting material dropped by Corrupt Merchant. It has a rich, pleasant aroma and is a superior substitute for cat fur."
+        "description": "狼毫：击败腐化商人后可能获得的怪物素材。研磨后可与咖啡粉共同萃取，用于制作“自由狼毫”。"
       }
     },
     {
       "id": "oil",
       "displayName": "肥油",
-      "startingAmount": 0
+      "startingAmount": 0,
+      "tutorial": {
+        "description": "肥油：可加工成肥油手冲球，再搭配牛奶与糖制作“回味”。"
+      }
     },
     {
       "id": "eye",
       "displayName": "眼珠",
       "startingAmount": 0,
       "tutorial": {
-        "description": "Eyes: A crafting material dropped by Big Eye. Soft and chewy, with an indescribable flavor that lingers on the palate."
+        "description": "眼珠：击败大眼后可能获得的怪物素材。可萃取或手冲，是“最终凝视”“日落”等咖啡的核心原料。"
       }
     },
     {
@@ -59,7 +74,7 @@
       "displayName": "紫色火焰",
       "startingAmount": 0,
       "tutorial": {
-        "description": "Flame: A crafting material dropped by Butcher. Sweet, spicy, tingling, and melts in your mouth."
+        "description": "紫色火焰：击败屠夫后可能获得的怪物素材。与浓缩咖啡和奶泡搭配，可制作“烈焰拿铁”。"
       }
     },
     {
@@ -67,7 +82,7 @@
       "displayName": "蛇干",
       "startingAmount": 0,
       "tutorial": {
-        "description": "Snake Jerk: A crafting material dropped by Ghost. Packed with protein and makes an excellent base for monster coffee."
+        "description": "蛇干：击败幽灵后可能获得的怪物素材。可研磨、萃取或直接入杯，用于多种怪物咖啡。"
       }
     },
     {
@@ -75,13 +90,16 @@
       "displayName": "触手",
       "startingAmount": 0,
       "tutorial": {
-        "description": "Tentacle: A crafting material dropped by Little Girl. Surprisingly delicious when fully cooked—everyone who tries it, loves it."
+        "description": "触手：击败小女孩后可能获得的怪物素材。“触手迷宫”需要触手粉、完整触手、咖啡粉与奶泡。"
       }
     },
     {
       "id": "Water",
       "displayName": "水",
-      "startingAmount": 10
+      "startingAmount": 10,
+      "tutorial": {
+        "description": "水：基础咖啡原料。可用于手冲，也可加入浓缩咖啡制成美式咖啡。"
+      }
     }
   ]
 }

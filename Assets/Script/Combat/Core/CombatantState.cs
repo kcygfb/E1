@@ -27,8 +27,6 @@ namespace KiKs.Combat
         public int CompanionTurns { get; private set; }
         public int BlockPoints { get; private set; }
         public int PendingReflectDamage { get; private set; }
-        /// <summary>When &gt; 1, the next execution damage dealt by this combatant is multiplied by this value.</summary>
-        public int ExecutionMultiplier { get; private set; } = 1;
         /// <summary>Parry counter prepared by a parry card: reflects toughness damage when the enemy attacks.</summary>
         public int ParryCounter { get; private set; }
         /// <summary>Enemy this combatant's parry counter is aimed at.</summary>
@@ -188,21 +186,6 @@ namespace KiKs.Combat
         {
             if (turns < 0) throw new ArgumentOutOfRangeException(nameof(turns));
             SkipEnemyTurns += turns;
-        }
-
-        /// <summary>Multiply the next execution damage by <paramref name="multiplier"/> (stacks multiplicatively).</summary>
-        public void AddExecutionMultiplier(int multiplier)
-        {
-            if (multiplier < 1) throw new ArgumentOutOfRangeException(nameof(multiplier));
-            ExecutionMultiplier *= multiplier;
-        }
-
-        /// <summary>Consume the execution multiplier for this attack, resetting it to 1.</summary>
-        public int ConsumeExecutionMultiplier()
-        {
-            var value = ExecutionMultiplier;
-            ExecutionMultiplier = 1;
-            return value;
         }
 
         /// <summary>
