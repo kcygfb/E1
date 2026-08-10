@@ -71,21 +71,10 @@ namespace KiKs.Combat
                     return false;
                 }
 
-                if (offer.productPool == null || offer.productPool.Length == 0)
+                if (offer.rewards == null || !offer.rewards.HasAnyReward)
                 {
-                    error = $"Offer '{offer.id}' needs at least one product.";
+                    error = $"Offer '{offer.id}' needs at least one reward.";
                     return false;
-                }
-
-                foreach (var product in offer.productPool)
-                {
-                    if (product == null || product.weight <= 0 || product.reward == null ||
-                        string.IsNullOrWhiteSpace(product.reward.type) ||
-                        string.IsNullOrWhiteSpace(product.reward.id) || product.reward.amount <= 0)
-                    {
-                        error = $"Offer '{offer.id}' contains an invalid product or reward.";
-                        return false;
-                    }
                 }
             }
 
@@ -122,19 +111,15 @@ namespace KiKs.Combat
                 id = offerId,
                 price = price,
                 imagePath = imagePath,
-                productPool = new[]
+                rewards = new LoopRewardBundleDefinition
                 {
-                    new TreasureProductDefinition
-                    {
-                        weight = 1,
-                        reward = new TreasureRewardDefinition
-                        {
-                            type = rewardType,
-                            id = rewardId,
-                            displayName = displayName,
-                            amount = amount
-                        }
-                    }
+                    gold = rewardType == "resource" && rewardId == "gold" ? amount : 0,
+                    resources = rewardType == "resource" && rewardId != "gold"
+                        ? new[] { new LoopResourceRewardDefinition { resourceId = rewardId, amount = amount } }
+                        : Array.Empty<LoopResourceRewardDefinition>(),
+                    cardIds = rewardType == "card"
+                        ? new[] { rewardId }
+                        : Array.Empty<string>()
                 }
             };
         }

@@ -36,7 +36,7 @@ namespace KiKs.Combat
         [SerializeField] private Transform decorativeOverlay;
         [SerializeField] private GameObject demoCompletePanel;
         [SerializeField] private Text demoCompleteLabel;
-        [SerializeField] private string demoCompleteText = "试玩结束 / Demo Complete";
+
         [SerializeField] private bool openCardSelectionAfterMapClick = true;
 
         [Header("Popups")]

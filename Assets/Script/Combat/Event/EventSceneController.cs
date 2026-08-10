@@ -135,7 +135,6 @@ namespace KiKs.Combat
         // --- 对话播放状态 ---
         private bool _dialogueRunning;
         private bool _isTyping;
-        private bool _typingDone;
         private bool _waitingNext;
         private Coroutine _typingRoutine;
         private string _currentFullText;
@@ -407,7 +406,6 @@ namespace KiKs.Combat
                 // 打字机 — 用 flag 轮询，不用 yield return coroutine
                 // （StopCoroutine + yield return 组合在 Unity 中不可靠，会导致父协程卡住）
                 _currentFullText = line.text ?? string.Empty;
-                _typingDone = false;
                 _isTyping = true;
                 _typingRoutine = StartCoroutine(TypeText(_currentFullText));
 
