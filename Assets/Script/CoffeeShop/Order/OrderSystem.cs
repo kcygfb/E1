@@ -66,6 +66,12 @@ public class OrderSystem : MonoBehaviour
 
     public bool TryServeCoffee(CoffeeData coffee)
     {
+        if (coffee == null)
+        {
+            Debug.LogWarning("[OrderSystem] Cannot serve a null coffee");
+            return false;
+        }
+
         if (activeOrder == null)
         {
             Debug.LogWarning("[OrderSystem] No active order");
@@ -78,7 +84,7 @@ public class OrderSystem : MonoBehaviour
             return false;
         }
 
-        var completed = activeOrder;
+        var completed = activeOrder.CompleteWith(coffee);
         activeOrder = null;
         Debug.Log($"[OrderSystem] Completed: {completed.CoffeeName}");
         KiKs.Combat.RuntimeGameRepository.AddCraftedCoffee(coffee.coffeeId);

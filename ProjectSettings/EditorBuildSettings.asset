@@ -21,11 +21,11 @@ EditorBuildSettings:
     path: Assets/Scenes/Treasure.unity
     guid: 818825cfb23a22448b9656fd74f20096
   - enabled: 1
-    path: Assets/Scenes/Collect.unity
-    guid: cff8b6ef24fa8bc45bf305d79568b29d
-  - enabled: 1
     path: Assets/Scenes/Event.unity
     guid: 54cf34d2a4072cf499555f8ade15593f
+  - enabled: 1
+    path: Assets/Scenes/Collect.unity
+    guid: cff8b6ef24fa8bc45bf305d79568b29d
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   m_UseUCBPForAssetBundles: 0

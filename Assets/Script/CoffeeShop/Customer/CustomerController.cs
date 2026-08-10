@@ -92,7 +92,7 @@ public class CustomerController : MonoBehaviour
 
         if (entry != null)
         {
-            AcceptAny = entry.orderMode == OrderMode.AcceptAny;
+            AcceptAny = entry.AcceptsAnyCoffee;
         }
 
         if (!string.IsNullOrEmpty(npcData.npcName))
@@ -177,7 +177,7 @@ public class CustomerController : MonoBehaviour
         {
             case "arrival":
                 // 有 orderMode 就下单（SpecificCoffee/RandomUnlocked/AcceptAny 都下单）
-                if (Entry != null && Entry.orderMode != OrderMode.AcceptAny || Entry == null)
+                if (Entry != null && !Entry.AcceptsAnyCoffee || Entry == null)
                 {
                     if (CoffeeData != null || AcceptAny)
                     {
@@ -189,7 +189,7 @@ public class CustomerController : MonoBehaviour
                         StartDepartureDialogue();
                     }
                 }
-                else if (Entry != null && Entry.orderMode == OrderMode.AcceptAny)
+                else if (Entry != null && Entry.AcceptsAnyCoffee)
                 {
                     // AcceptAny 也下单
                     MakeOrder();

@@ -26,10 +26,10 @@ MonoBehaviour:
     coffeeId: 
   - npc: {fileID: 11400000, guid: 453617d48a7d1ca47b524d2599f78f09, type: 2}
     dialogueKey: generic
-    orderMode: 1
+    orderMode: 2
     coffeeId: 
   - npc: {fileID: 11400000, guid: 453617d48a7d1ca47b524d2599f78f09, type: 2}
     dialogueKey: generic
-    orderMode: 1
+    orderMode: 2
     coffeeId: 
   endOfDay: []

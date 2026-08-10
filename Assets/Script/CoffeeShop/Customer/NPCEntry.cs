@@ -21,6 +21,8 @@ public enum OrderMode
 [Serializable]
 public class NPCEntry
 {
+    public const string GenericNpcId = "generic";
+
     [Tooltip("NPC 角色身份")]
     public NPCData npc;
 
@@ -32,6 +34,18 @@ public class NPCEntry
 
     [Tooltip("orderMode=SpecificCoffee 时填写咖啡ID")]
     public string coffeeId;
+
+    /// <summary>
+    /// Generic customers always accept any recognized coffee. Keeping this rule
+    /// here prevents configured and procedurally generated customers from drifting
+    /// into different behavior.
+    /// </summary>
+    public OrderMode EffectiveOrderMode =>
+        npc != null && string.Equals(npc.npcId, GenericNpcId, StringComparison.OrdinalIgnoreCase)
+            ? OrderMode.AcceptAny
+            : orderMode;
+
+    public bool AcceptsAnyCoffee => EffectiveOrderMode == OrderMode.AcceptAny;
 
     /// <summary>获取指定阶段的对话ID。找不到时返回空字符串（调用方跳过对话）。</summary>
     public string GetDialogueId(string phase)

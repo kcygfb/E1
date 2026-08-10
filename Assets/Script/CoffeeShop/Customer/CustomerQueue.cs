@@ -274,7 +274,7 @@ public class CustomerQueue : MonoBehaviour
             {
                 npc = genericCustomer,
                 dialogueKey = "generic",
-                orderMode = OrderMode.RandomUnlocked
+                orderMode = OrderMode.AcceptAny
             };
             EnqueueNpc(entry);
         }
@@ -318,7 +318,7 @@ public class CustomerQueue : MonoBehaviour
         Sprite portrait = PickPortrait(entry.npc);
 
         CoffeeData coffeeData = PickCoffeeFor(entry);
-        bool acceptAny = entry.orderMode == OrderMode.AcceptAny;
+        bool acceptAny = entry.AcceptsAnyCoffee;
 
         waitingQueue.Enqueue(new NPCRequest
         {
@@ -481,7 +481,7 @@ public class CustomerQueue : MonoBehaviour
     {
         if (entry == null) return null;
 
-        switch (entry.orderMode)
+        switch (entry.EffectiveOrderMode)
         {
             case OrderMode.AcceptAny:
                 return null;

@@ -38,6 +38,33 @@ public class OrderTicket
         Owner = owner;
         AcceptAnyCoffee = acceptAnyCoffee;
     }
+
+    /// <summary>
+    /// Resolves an accept-any order to the coffee that was actually served so
+    /// downstream systems receive the real sale name and price.
+    /// </summary>
+    public OrderTicket CompleteWith(CoffeeData servedCoffee)
+    {
+        if (servedCoffee == null)
+            throw new ArgumentNullException(nameof(servedCoffee));
+
+        if (!AcceptAnyCoffee)
+            return this;
+
+        return new OrderTicket(
+            OrderId,
+            NpcId,
+            NpcName,
+            servedCoffee.coffeeId,
+            servedCoffee.coffeeName,
+            servedCoffee.sellPrice,
+            servedCoffee.orderTicket,
+            Owner,
+            true)
+        {
+            QTEScore = QTEScore
+        };
+    }
 }
 
 /// <summary>
