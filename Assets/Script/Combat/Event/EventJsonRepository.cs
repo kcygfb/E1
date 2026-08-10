@@ -122,8 +122,8 @@ namespace KiKs.Combat
                     new EventDefinition
                     {
                         id = "evt_fallback",
-                        npcId = "light",
-                        npcDisplayName = "提灯人",
+                        npcId = "namelessking",
+                        npcDisplayName = "无名之王",
                         order = 1,
                         introDialogueId = "evt_light_intro",
                         cards = new[]

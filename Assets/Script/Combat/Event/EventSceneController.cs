@@ -1025,35 +1025,42 @@ namespace KiKs.Combat
                 EventSelectionState.ClearCurrent();
             }
 
-            if (DailyAreaMapState.HasSelectedPoint &&
-                DailyAreaMapState.TryGetPoint(DailyAreaMapState.SelectedPointIndex, out var point) &&
-                point.Type == AreaPointType.Event)
-                DailyAreaMapState.CompleteSelectedPointWithoutCountingExploration();
+            var completion = RuntimeGameRepository.CompleteSelectedArea(defeated: false);
+            var nextScene = string.IsNullOrWhiteSpace(completion.NextSceneName)
+                ? ReturnSceneName
+                : completion.NextSceneName;
 
-            LeaveEvent();
+            LeaveEvent(nextScene);
         }
 
         private void LeaveEvent()
         {
+            LeaveEvent(ReturnSceneName);
+        }
+
+        private void LeaveEvent(string nextSceneName)
+        {
             if (isLeaving)
                 return;
+
+            var sceneName = string.IsNullOrWhiteSpace(nextSceneName) ? ReturnSceneName : nextSceneName;
 
             isLeaving = true;
             if (leaveButton != null)
                 leaveButton.interactable = false;
 
-            if (!Application.CanStreamedLevelBeLoaded(ReturnSceneName))
+            if (!Application.CanStreamedLevelBeLoaded(sceneName))
             {
-                Debug.LogError($"[EventScene] Scene '{ReturnSceneName}' is not in build settings.", this);
+                Debug.LogError($"[EventScene] Scene '{sceneName}' is not in build settings.", this);
                 isLeaving = false;
                 if (leaveButton != null) leaveButton.interactable = true;
                 return;
             }
 
             if (KiKs.UI.TransitionEffect.Instance != null)
-                KiKs.UI.TransitionEffect.Instance.TransitionTo(ReturnSceneName);
+                KiKs.UI.TransitionEffect.Instance.TransitionTo(sceneName);
             else
-                SceneManager.LoadScene(ReturnSceneName);
+                SceneManager.LoadScene(sceneName);
         }
 
         // ==================== 工具方法（从宝藏区复制） ====================

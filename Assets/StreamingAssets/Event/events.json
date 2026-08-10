@@ -22,13 +22,13 @@
           "imagePath": "Art/EventCards/day1/10H.png",
           "dialogueId": "evt_day1_10h",
           "hpCost": 10,
-          "cardRewardIds": ["flamethrower"]
+          "cardRewardIds": ["ranged_flamethrower"]
         },
         {
           "type": "pilfer",
           "imagePath": "Art/EventCards/day1/pilferEvil.png",
           "dialogueId": "evt_day1_pilfer",
-          "cardRewardIds": ["flamethrower", "greatsword"]
+          "cardRewardIds": ["ranged_flamethrower", "heavy_greatsword"]
         },
         {
           "type": "end",
@@ -64,7 +64,7 @@
         {
           "type": "attack",
           "imagePath": "Art/EventCards/day2/executeEvil.png",
-          "cardRewardIds": ["reaper", "magicburst"]
+          "cardRewardIds": ["bleed_reaper", "misc_magic_burst"]
         }
       ]
     },
