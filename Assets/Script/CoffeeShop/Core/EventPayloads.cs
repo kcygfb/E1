@@ -58,6 +58,23 @@ public class OrderRequest
 }
 
 /// <summary>
+/// OrderCancelled event payload. Order can be null when a customer is skipped
+/// before their arrival dialogue has created an order ticket.
+/// </summary>
+public sealed class OrderCancelledPayload
+{
+    public CustomerController Owner { get; }
+    public OrderTicket Order { get; }
+    public bool HadActiveOrder => Order != null;
+
+    public OrderCancelledPayload(CustomerController owner, OrderTicket order)
+    {
+        Owner = owner;
+        Order = order;
+    }
+}
+
+/// <summary>
 /// A completed order's awarded revenue. Rewarder emits this after the gold has
 /// been added so end-of-day UI does not duplicate the reward calculation.
 /// </summary>

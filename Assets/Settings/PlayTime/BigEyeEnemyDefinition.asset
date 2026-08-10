@@ -31,3 +31,4 @@ MonoBehaviour:
   fallbackDamage: 20
   fallbackToughnessDamage: 12
   baseActionPoints: 5
+  berserkSkillDamage: 50

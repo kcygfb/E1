@@ -93,10 +93,42 @@ namespace KiKs.Combat
             BindCloseButton();
 
             BuildAvailableCoffeeIds();
-            EnsureDefaultPreselection();
+            // 和选牌一致：先尝试恢复本局已选的咖啡，没有才预选默认。
+            RestoreSelectedCoffeesFromSession();
+            if (selectedCoffeeIds.Count == 0)
+                EnsureDefaultPreselection();
+            PersistSelectedCoffeesToSession();
 
             PopulateCoffeeList();
             RefreshUI();
+        }
+
+        /// <summary>
+        /// 从仓库恢复本局已选的咖啡（跨战斗/跨场景保留，行为与选牌一致）。
+        /// 仅恢复当前仍可用的咖啡。
+        /// </summary>
+        private void RestoreSelectedCoffeesFromSession()
+        {
+            if (!RuntimeGameRepository.HasSelectedCoffees) return;
+
+            selectedCoffeeIds.Clear();
+            foreach (var id in RuntimeGameRepository.SelectedCoffeeIds)
+            {
+                if (availableCoffeeIds.Contains(id) && selectedCoffeeIds.Count < MaxCoffees)
+                    selectedCoffeeIds.Add(id);
+            }
+        }
+
+        /// <summary>把当前选择写回仓库，供下次进入战备界面恢复。点击/移除咖啡时调用。</summary>
+        private void PersistSelectedCoffeesToSession()
+        {
+            if (selectedCoffeeIds.Count == 0)
+            {
+                RuntimeGameRepository.ClearSelectedCoffees();
+                return;
+            }
+
+            RuntimeGameRepository.SetSelectedCoffees(selectedCoffeeIds);
         }
 
         /// <summary>
@@ -314,7 +346,9 @@ namespace KiKs.Combat
             else
             {
                 WarningToast.Show(string.Format("Coffee limit reached: {0}.", MaxCoffees));
+                return;
             }
+            PersistSelectedCoffeesToSession();
             RefreshUI();
         }
 

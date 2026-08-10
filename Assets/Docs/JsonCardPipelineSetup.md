@@ -145,7 +145,7 @@ Repository 根据效果推断卡牌方向：
 
 1. Manifest 可被 PowerShell 默认读取和严格 UTF-8 读取。
 2. Repository 加载 54 个定义和 76 份 copies。
-3. BigEye 的 `enemy_big_eye_ten_thousand_hands` 被识别为特殊牌。
+3. BigEye 的「万手缠身」不再是卡牌：它从 `enemy_big_eye.json` 移除，改为 `CombatantDefinition.BerserkSkillDamage` 配置的第 12 回合固定伤害技能（大眼配置为 50）。
 4. 赛前必须选择 15 张。
 5. 玩家和敌人的相同效果产生相同防御/状态事件。
 6. 敌人被眩晕时直接调用 `PlayEnemyCard` 仍失败。

@@ -43,5 +43,11 @@ namespace KiKs.Combat
             CurrentHealth = MaxHealth;
             isInitialized = true;
         }
+
+        public static void RestoreAfterDefeat()
+        {
+            var restoredHealth = UnityEngine.Mathf.Max(1, (MaxHealth + 1) / 2);
+            SetHealth(restoredHealth, MaxHealth);
+        }
     }
 }

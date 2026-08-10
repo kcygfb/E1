@@ -34,17 +34,30 @@ namespace KiKs.Combat
 
             var deck = state.GetEnemyDeck(enemyId);
 
-            if (turnRules.BerserkTurn > 0 &&
-                state.TurnNumber == turnRules.BerserkTurn &&
-                state.GetEnemySpecialCard(enemyId) != null)
+            // 狂暴回合：优先释放敌人配置的固定伤害技能（如大眼"万手缠身"50 伤害）；
+            // 未配置技能时回退到旧逻辑——打出敌人的特殊卡。
+            if (turnRules.BerserkTurn > 0 && state.TurnNumber == turnRules.BerserkTurn)
             {
-                yield return new WaitForSeconds(drawDelay);
-                var specialResult = engine.PlayEnemySpecialCard(enemyId);
-                if (specialResult.Success)
+                var definition = FindEnemyDefinition(controller, enemyId);
+                if (definition != null && definition.BerserkSkillDamage > 0)
                 {
+                    yield return new WaitForSeconds(drawDelay);
+                    controller.ResolveEnemyAttack(enemyId, definition.BerserkSkillDamage);
                     yield return new WaitForSeconds(playDelay);
                     engine.DiscardEnemyHand(enemyId);
                     yield break;
+                }
+
+                if (state.GetEnemySpecialCard(enemyId) != null)
+                {
+                    yield return new WaitForSeconds(drawDelay);
+                    var specialResult = engine.PlayEnemySpecialCard(enemyId);
+                    if (specialResult.Success)
+                    {
+                        yield return new WaitForSeconds(playDelay);
+                        engine.DiscardEnemyHand(enemyId);
+                        yield break;
+                    }
                 }
             }
 

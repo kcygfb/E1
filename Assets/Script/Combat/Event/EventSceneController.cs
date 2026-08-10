@@ -120,6 +120,7 @@ namespace KiKs.Combat
         private TMP_Text _hpText;
         private Button leaveButton;
         private bool isLeaving;
+        private bool eventCompletionCommitted;
         private int revealedRewardCount;
 
         // --- 对话 UI ---
@@ -153,7 +154,7 @@ namespace KiKs.Combat
         private void OnDestroy()
         {
             if (leaveButton != null)
-                leaveButton.onClick.RemoveListener(LeaveEvent);
+                leaveButton.onClick.RemoveListener(FinishEvent);
             if (nextButton != null)
                 nextButton.onClick.RemoveListener(OnNextClicked);
             if (cardDealer != null && cardDealer.OnCardPlayed == HandleEventCardPlayed)
@@ -193,7 +194,7 @@ namespace KiKs.Combat
             if (evt == null)
             {
                 Debug.LogWarning("[EventScene] No current event set; leaving.");
-                LeaveEvent();
+                AbortEventAndLeave();
                 yield break;
             }
 
@@ -277,8 +278,8 @@ namespace KiKs.Combat
             // 离开按钮
             if (leaveButton != null)
             {
-                leaveButton.onClick.RemoveListener(LeaveEvent);
-                leaveButton.onClick.AddListener(LeaveEvent);
+                leaveButton.onClick.RemoveListener(FinishEvent);
+                leaveButton.onClick.AddListener(FinishEvent);
                 leaveButton.gameObject.name = "Btn_LeaveEvent";
 
                 var tmpLabel = leaveButton.GetComponentInChildren<TMP_Text>(true);
@@ -1061,14 +1062,17 @@ namespace KiKs.Combat
 
         private void FinishEvent()
         {
-            var evt = EventSelectionState.CurrentEvent;
-            if (evt != null)
+            if (eventCompletionCommitted || isLeaving)
+                return;
+
+            eventCompletionCommitted = true;
+            var completion = EventAreaCompletion.CompleteCurrentEvent();
+            if (!completion.Completed)
             {
-                EventSelectionState.MarkEventCompleted(evt.id);
-                EventSelectionState.ClearCurrent();
+                Debug.LogWarning("[EventScene] Event ended without a selected map point; no action was consumed.", this);
+                EventAreaCompletion.AbortCurrentEvent();
             }
 
-            var completion = RuntimeGameRepository.CompleteSelectedArea(defeated: false);
             var nextScene = string.IsNullOrWhiteSpace(completion.NextSceneName)
                 ? ReturnSceneName
                 : completion.NextSceneName;
@@ -1076,8 +1080,9 @@ namespace KiKs.Combat
             LeaveEvent(nextScene);
         }
 
-        private void LeaveEvent()
+        private void AbortEventAndLeave()
         {
+            EventAreaCompletion.AbortCurrentEvent();
             LeaveEvent(ReturnSceneName);
         }
 

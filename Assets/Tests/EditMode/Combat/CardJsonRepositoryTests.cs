@@ -19,17 +19,18 @@ namespace KiKs.Combat.Tests
                 manifest,
                 fileName => File.ReadAllText(Path.Combine(root, fileName)));
 
-            Assert.That(repository.Cards.Count, Is.EqualTo(85));
-            Assert.That(repository.Cards.Sum(card => card.DeckCopies), Is.EqualTo(85));
-            Assert.That(repository.Cards.Count(card => card.IsEnemyCard), Is.EqualTo(39));
+            Assert.That(repository.Cards.Count, Is.EqualTo(89));
+            Assert.That(repository.Cards.Sum(card => card.DeckCopies), Is.EqualTo(89));
+            Assert.That(repository.Cards.Count(card => card.IsEnemyCard), Is.EqualTo(43));
             Assert.That(repository.Cards.All(card => !string.IsNullOrWhiteSpace(card.DescriptionEn)), Is.True);
             Assert.That(
                 repository.Cards.Count(card =>
                     card.Category == "enemy_big_eye" && !card.IsSpecial),
                 Is.EqualTo(5));
-            Assert.That(
-                repository.Cards.Single(card => card.Id == "enemy_big_eye_ten_thousand_hands").IsSpecial,
-                Is.True);
+            // 万手缠身已从卡库移除（改为第 12 回合固定伤害技能，不再注册为特殊卡）
+            Assert.That(repository.TryGetCard("enemy_big_eye_ten_thousand_hands", out _), Is.False);
+            Assert.That(repository.GetRequiredCard("enemy_big_eye_mind_control_break").ImagePath,
+                Is.EqualTo("Art/Cards/mindcontrol.png"));
 
             var sniper = repository.GetRequiredCard("ranged_sniper_rifle");
             var damage = sniper.Effects.Single(effect => effect.Type == CardEffectType.Damage);

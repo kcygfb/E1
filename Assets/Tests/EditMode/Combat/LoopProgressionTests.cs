@@ -34,6 +34,20 @@ namespace KiKs.Combat.Tests
         }
 
         [Test]
+        public void CraftingHiddenCoffeeDiscoversRecipeWithoutNpcOrder()
+        {
+            const string recipeId = "BudgetBrew";
+            Assert.That(RuntimeGameRepository.IsRecipeUnlocked(recipeId), Is.False);
+
+            var firstDiscovery = RuntimeGameRepository.DiscoverRecipeFromCrafting(recipeId);
+            var repeatedDiscovery = RuntimeGameRepository.DiscoverRecipeFromCrafting(recipeId);
+
+            Assert.That(firstDiscovery, Is.True);
+            Assert.That(repeatedDiscovery, Is.False);
+            Assert.That(RuntimeGameRepository.IsRecipeUnlocked(recipeId), Is.True);
+        }
+
+        [Test]
         public void RewardSettlementIsIdempotentAndReportsDuplicates()
         {
             var bundle = new LoopRewardBundleDefinition
@@ -155,7 +169,43 @@ namespace KiKs.Combat.Tests
         }
 
         [Test]
-        public void DefeatConsumesAreaAndRestoresHalfHealthRoundedUp()
+        public void EventAsThirdAreaConsumesActionAndAdvancesToNextCafeDay()
+        {
+            DailyAreaMapState.EnsureGenerated();
+            var nonEventIndexes = DailyAreaMapState.MapPoints
+                .Select((point, index) => new { point, index })
+                .Where(item => item.point.Type != AreaPointType.Event)
+                .Select(item => item.index)
+                .Take(2)
+                .ToArray();
+
+            foreach (var index in nonEventIndexes)
+            {
+                Assert.That(DailyAreaMapState.TrySelectPoint(index, out _), Is.True);
+                Assert.That(RuntimeGameRepository.CompleteSelectedArea(defeated: false).Completed, Is.True);
+            }
+
+            var eventIndex = DailyAreaMapState.MapPoints
+                .Select((point, index) => new { point, index })
+                .Single(item => item.point.Type == AreaPointType.Event)
+                .index;
+            Assert.That(DailyAreaMapState.TrySelectPoint(eventIndex, out _), Is.True);
+
+            var selectedEvent = EventSelectionState.PickEventForCurrentDay();
+            Assert.That(selectedEvent, Is.Not.Null);
+            EventSelectionState.SetCurrentEvent(selectedEvent);
+            var completion = EventAreaCompletion.CompleteCurrentEvent();
+
+            Assert.That(completion.Completed, Is.True);
+            Assert.That(completion.DayAdvanced, Is.True);
+            Assert.That(completion.NextSceneName, Is.EqualTo("Cafe"));
+            Assert.That(RuntimeGameRepository.CurrentDay, Is.EqualTo(2));
+            Assert.That(EventSelectionState.CompletedEventIds, Does.Contain(selectedEvent.id));
+            Assert.That(EventSelectionState.CurrentEvent, Is.Null);
+        }
+
+        [Test]
+        public void DefeatPreservesAreaAndRestoresHalfHealthRoundedUp()
         {
             PlayerGlobalStats.SetHealth(1, 21);
             DailyAreaMapState.EnsureGenerated();
@@ -165,11 +215,44 @@ namespace KiKs.Combat.Tests
                 .index;
             Assert.That(DailyAreaMapState.TrySelectPoint(battleIndex, out _), Is.True);
 
-            RuntimeGameRepository.CompleteSelectedArea(defeated: true);
+            var completion = RuntimeGameRepository.CompleteSelectedArea(defeated: true);
 
             Assert.That(PlayerGlobalStats.CurrentHealth, Is.EqualTo(11));
-            Assert.That(DailyAreaMapState.CompletedExplorationCount, Is.EqualTo(1));
-            Assert.That(DailyAreaMapState.MapPoints[battleIndex].IsCompleted, Is.True);
+            Assert.That(completion.Completed, Is.False);
+            Assert.That(completion.DayAdvanced, Is.False);
+            Assert.That(completion.NextSceneName, Is.EqualTo("PreBattle"));
+            Assert.That(DailyAreaMapState.CompletedExplorationCount, Is.Zero);
+            Assert.That(DailyAreaMapState.MapPoints[battleIndex].IsCompleted, Is.False);
+            Assert.That(DailyAreaMapState.HasSelectedPoint, Is.False);
+        }
+
+        [Test]
+        public void DefeatOnThirdAttemptDoesNotAdvanceDayOrForfeitAreaReward()
+        {
+            DailyAreaMapState.EnsureGenerated();
+            var areaIndexes = DailyAreaMapState.MapPoints
+                .Select((point, index) => new { point, index })
+                .Where(item => item.point.Type != AreaPointType.Event)
+                .Select(item => item.index)
+                .Take(3)
+                .ToArray();
+
+            foreach (var index in areaIndexes.Take(2))
+            {
+                Assert.That(DailyAreaMapState.TrySelectPoint(index, out _), Is.True);
+                Assert.That(RuntimeGameRepository.CompleteSelectedArea(defeated: false).Completed, Is.True);
+            }
+
+            var thirdAreaIndex = areaIndexes[2];
+            Assert.That(DailyAreaMapState.TrySelectPoint(thirdAreaIndex, out _), Is.True);
+            var completion = RuntimeGameRepository.CompleteSelectedArea(defeated: true);
+
+            Assert.That(completion.Completed, Is.False);
+            Assert.That(completion.DayAdvanced, Is.False);
+            Assert.That(completion.NextSceneName, Is.EqualTo("PreBattle"));
+            Assert.That(RuntimeGameRepository.CurrentDay, Is.EqualTo(1));
+            Assert.That(DailyAreaMapState.CompletedExplorationCount, Is.EqualTo(2));
+            Assert.That(DailyAreaMapState.MapPoints[thirdAreaIndex].IsCompleted, Is.False);
         }
 
         [Test]

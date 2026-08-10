@@ -65,6 +65,11 @@ public class CupContainer : MonoBehaviour, IBeginDragHandler, IDragHandler, IEnd
             // 匹配成功 → 合并
             MergedCoffeeId = coffee.coffeeId;
 
+            // 合法咖啡一旦由玩家实际合成，就立即发现菜谱。
+            // NPC 是否需要这杯咖啡只属于后续交付判定，不应影响菜谱解锁。
+            if (KiKs.Combat.RuntimeGameRepository.DiscoverRecipeFromCrafting(coffee.coffeeId))
+                Debug.Log($"[CupContainer] 解锁新菜谱: {coffee.coffeeName}");
+
             // 销毁所有子 icon
             foreach (var icon in Icons)
                 if (icon != null) Destroy(icon.gameObject);

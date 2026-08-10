@@ -1,6 +1,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum OrderCancellationPolicy
+{
+    Allow = 0,
+    Disallow = 1
+}
+
 /// <summary>
 /// 一天的咖啡店配置。只建剧情天，无 DayConfig 的天=纯随机日。
 /// 三阶段 NPC 列表统一在此配置：startOfDay / customers / endOfDay。
@@ -10,6 +16,12 @@ public class DayConfig : ScriptableObject
 {
     [Tooltip("天数（1-based）")]
     public int day;
+
+    [Header("订单容错")]
+    [Tooltip("是否允许玩家使用取消订单按钮跳过当前经营顾客。")]
+    public OrderCancellationPolicy orderCancellation = OrderCancellationPolicy.Allow;
+
+    public bool AllowsOrderCancellation => orderCancellation == OrderCancellationPolicy.Allow;
 
     [Header("开场（空=跳过开场直接进选材）")]
     [Tooltip("经营前出场的 NPC，依次播对话后离开")]

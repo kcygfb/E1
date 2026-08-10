@@ -77,6 +77,8 @@ public class TrayGridUI : MonoBehaviour
     private void ShowSelectionInternal()
     {
         _isDragMode = false;
+        // 恢复自远端同事的"自动填充小料台"：保留玩家前一天的选择（全空时才填默认值），
+        // 并把玩家拥有但未放入格子的材料自动排入空格。
         IngredientTray.SetDefaultsIfEmpty();
         IngredientTray.AutoFillNewMaterials();
 

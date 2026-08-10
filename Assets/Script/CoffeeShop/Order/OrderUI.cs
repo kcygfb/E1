@@ -21,14 +21,16 @@ public class OrderUI : MonoBehaviour
 
     private void OnEnable()
     {
-        GameEvent.On("OrderCreated", HandleOrderCreated);
-        GameEvent.On("OrderCompleted", HandleOrderCompleted);
+        GameEvent.On(OrderSystem.ORDER_CREATED, HandleOrderCreated);
+        GameEvent.On(OrderSystem.ORDER_COMPLETED, HandleOrderCompleted);
+        GameEvent.On(OrderSystem.ORDER_CANCELLED, HandleOrderCompleted);
     }
 
     private void OnDisable()
     {
-        GameEvent.Off("OrderCreated", HandleOrderCreated);
-        GameEvent.Off("OrderCompleted", HandleOrderCompleted);
+        GameEvent.Off(OrderSystem.ORDER_CREATED, HandleOrderCreated);
+        GameEvent.Off(OrderSystem.ORDER_COMPLETED, HandleOrderCompleted);
+        GameEvent.Off(OrderSystem.ORDER_CANCELLED, HandleOrderCompleted);
     }
 
     private void Start()
