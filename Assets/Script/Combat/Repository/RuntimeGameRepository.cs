@@ -162,6 +162,16 @@ namespace KiKs.Combat
             return UnlockedRecipeIds.Add(recipeId);
         }
 
+        /// <summary>
+        /// Records a valid recipe discovered through hands-on coffee crafting.
+        /// Order acceptance is intentionally outside this boundary.
+        /// </summary>
+        public static bool DiscoverRecipeFromCrafting(string recipeId)
+        {
+            if (IsRecipeUnlocked(recipeId)) return false;
+            return UnlockRecipe(recipeId);
+        }
+
         public static bool LockRecipe(string recipeId)
         {
             return !string.IsNullOrWhiteSpace(recipeId) && UnlockedRecipeIds.Remove(recipeId);
@@ -380,11 +390,12 @@ namespace KiKs.Combat
             currentDay++;
             ClearSelectedDemoStage();
             ClearSelectedEncounterIndex();
-            ClearSelectedCoffees();
+            // Keep selected coffees across days, exactly like the deck: the player's
+            // loadout (deck + coffee) is a persistent configuration for the run.
             EventSelectionState.ClearCurrent();
             DailyAreaMapState.Reset();
             // Do NOT reset player health here — HP carries across days within a run.
-            // Defeat already halves HP in CompleteSelectedArea; full heal only on new run.
+            // Defeat already halves HP via RestoreAfterDefeat; full heal only on new run.
             DayChanged?.Invoke(currentDay);
             return true;
         }
@@ -401,10 +412,7 @@ namespace KiKs.Combat
                 return new AreaCompletionResult(false, false, currentDay, "PreBattle");
 
             if (defeated)
-            {
-                var halfHealth = Math.Max(1, (PlayerGlobalStats.MaxHealth + 1) / 2);
-                PlayerGlobalStats.SetHealth(halfHealth, PlayerGlobalStats.MaxHealth);
-            }
+                return ResolveSelectedAreaDefeat();
 
             DailyAreaMapState.CompleteSelectedPoint();
             ClearSelectedDemoStage();
@@ -414,6 +422,18 @@ namespace KiKs.Combat
 
             var advanced = AdvanceDay();
             return new AreaCompletionResult(true, advanced, currentDay, "Cafe");
+        }
+
+        public static AreaCompletionResult ResolveSelectedAreaDefeat()
+        {
+            if (!DailyAreaMapState.HasSelectedPoint)
+                return new AreaCompletionResult(false, false, currentDay, "PreBattle");
+
+            PlayerGlobalStats.RestoreAfterDefeat();
+            DailyAreaMapState.CancelSelectedPoint();
+            ClearSelectedDemoStage();
+            ClearSelectedEncounterIndex();
+            return new AreaCompletionResult(false, false, currentDay, "PreBattle");
         }
 
         private static void ValidateRewardBundle(LoopRewardBundleDefinition rewards)

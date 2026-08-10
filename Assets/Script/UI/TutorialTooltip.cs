@@ -24,10 +24,25 @@ namespace KiKs.UI
         [SerializeField] private float minHeight = 70f;
 
         private RectTransform _rectTransform;
+        private float _layoutScale = 1f;
+        private float _baseFontSize;
 
         private void Awake()
         {
             EnsureReferences();
+            CacheBaseFontSize();
+        }
+
+        public void SetScale(float scale)
+        {
+            _layoutScale = scale > 0f ? Mathf.Max(0.1f, scale) : 1f;
+            EnsureReferences();
+            CacheBaseFontSize();
+
+            if (messageText != null)
+                messageText.fontSize = _baseFontSize * _layoutScale;
+
+            RebuildLayout();
         }
 
         public void SetMessage(string message)
@@ -125,7 +140,11 @@ namespace KiKs.UI
             textRect.anchorMax = Vector2.one;
             textRect.pivot = new Vector2(0.5f, 0.5f);
 
-            var maxTextWidth = Mathf.Max(1f, maxWidth - padding.x * 2f);
+            var scaledPadding = padding * _layoutScale;
+            var scaledMinWidth = minWidth * _layoutScale;
+            var scaledMaxWidth = maxWidth * _layoutScale;
+            var scaledMinHeight = minHeight * _layoutScale;
+            var maxTextWidth = Mathf.Max(1f, scaledMaxWidth - scaledPadding.x * 2f);
 
             // 测量前先把文本区域撑大，避免 TMP 用当前（prefab 里的）小 rect 参与计算导致测不准。
             // 高度传一个很大的值而非 0：TMP 的 GetPreferredValues 中 0 表示"取当前 rect 尺寸"。
@@ -134,21 +153,24 @@ namespace KiKs.UI
             textRect.sizeDelta = new Vector2(maxTextWidth, 2048f);
 
             var preferred = messageText.GetPreferredValues(messageText.text, maxTextWidth, 2048f);
-            var panelWidth = Mathf.Clamp(preferred.x + padding.x * 2f, minWidth, maxWidth);
+            var panelWidth = Mathf.Clamp(
+                preferred.x + scaledPadding.x * 2f,
+                scaledMinWidth,
+                scaledMaxWidth);
 
             // 兜底：字体 atlas 未就绪等情况下测量可能返回 0，退化为最大宽度，保证长文本不被压缩。
-            if (panelWidth <= minWidth && preferred.x < 1f && !string.IsNullOrWhiteSpace(messageText.text))
-                panelWidth = maxWidth;
+            if (panelWidth <= scaledMinWidth && preferred.x < 1f && !string.IsNullOrWhiteSpace(messageText.text))
+                panelWidth = scaledMaxWidth;
 
-            var textWidth = Mathf.Max(1f, panelWidth - padding.x * 2f);
+            var textWidth = Mathf.Max(1f, panelWidth - scaledPadding.x * 2f);
             var textHeight = messageText.GetPreferredValues(messageText.text, textWidth, 2048f).y;
-            var panelHeight = Mathf.Max(minHeight, textHeight + padding.y * 2f);
+            var panelHeight = Mathf.Max(scaledMinHeight, textHeight + scaledPadding.y * 2f);
 
             _rectTransform.sizeDelta = new Vector2(panelWidth, panelHeight);
 
             // 布局完成后恢复文本内边距（stretch 锚点下 offsetMin/offsetMax 即内边距）。
-            textRect.offsetMin = padding;
-            textRect.offsetMax = -padding;
+            textRect.offsetMin = scaledPadding;
+            textRect.offsetMax = -scaledPadding;
             // 无需 ForceRebuildLayoutImmediate：尺寸全是手动设置，不依赖 Unity 自动布局系统，
             // 反而会在 OnValidate/Awake 期间触发 SendMessage 警告。
         }
@@ -174,6 +196,12 @@ namespace KiKs.UI
 
             if (messageText == null)
                 messageText = GetComponentInChildren<TMP_Text>(true);
+        }
+
+        private void CacheBaseFontSize()
+        {
+            if (_baseFontSize <= 0f && messageText != null)
+                _baseFontSize = messageText.fontSize;
         }
 
 #if UNITY_EDITOR

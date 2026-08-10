@@ -51,6 +51,7 @@ public class CustomerController : MonoBehaviour
     private Vector3 counterPosition;
     private Vector3 exitPosition;
     private Vector3 targetPosition;
+    private bool _isCancelled;
 
     private void OnEnable()
     {
@@ -158,6 +159,7 @@ public class CustomerController : MonoBehaviour
 
     private void OnDialogueEnded(object payload)
     {
+        if (_isCancelled) return;
         if (payload is not string context) return;
 
         switch (context)
@@ -216,6 +218,7 @@ public class CustomerController : MonoBehaviour
 
     private void OnOrderCompleted(object payload)
     {
+        if (_isCancelled) return;
         if (payload is not OrderTicket order) return;
         if (order.Owner != this) return;
         StartDepartureDialogue();
@@ -225,6 +228,17 @@ public class CustomerController : MonoBehaviour
     {
         ChangeState(NPCState.DepartureDialogue);
         EmitDialogue(Entry?.GetDialogueId("departure"), "departure");
+    }
+
+    /// <summary>Stops this customer's flow and leaves through the normal queue callback.</summary>
+    public void CancelAndLeave()
+    {
+        if (_isCancelled || State == NPCState.Leaving) return;
+        _isCancelled = true;
+        _pendingStartOfDayDialogue = false;
+        _pendingEndOfDayDialogue = false;
+        ChangeState(NPCState.Leaving);
+        targetPosition = exitPosition;
     }
 
     private void LeaveFinished()

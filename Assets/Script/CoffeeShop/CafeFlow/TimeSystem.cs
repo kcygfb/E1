@@ -192,6 +192,8 @@ public class TimeSystem : MonoBehaviour
     {
         if (isEndingShop) return;
         isEndingShop = true;
+        // 一天结束：清空小料台，避免前一天的素材残留到次日早晨重新出现。
+        IngredientTray.Clear();
         SynchronizeDayFromLoop();
         CurrentPhase = DayPhase.Night;
         EmitPhaseChanged();

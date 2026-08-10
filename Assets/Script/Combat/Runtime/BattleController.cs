@@ -186,13 +186,14 @@ namespace KiKs.Combat
                     huntResultPresenter = gameObject.AddComponent<HuntResultPresenter>();
                 huntResultPresenter.Configure(this);
 
-                // Coffee slots
+                // Coffee slots — consume the loadout into the battle, but keep it in
+                // the repository so returning to PreBattle restores the same selection
+                // (mirrors the deck persistence).
                 if (RuntimeGameRepository.HasSelectedCoffees)
                 {
                     var coffees = RuntimeGameRepository.SelectedCoffeeIds;
                     for (int i = 0; i < _coffeeSlots.Length && i < coffees.Count; i++)
                         _coffeeSlots[i] = coffees[i];
-                    RuntimeGameRepository.ClearSelectedCoffees();
                 }
                 return true;
             }
@@ -689,9 +690,10 @@ namespace KiKs.Combat
 
             if (_engine != null)
             {
-                // Sync final HP to global stats before disposing
+                // Defeat recovery is resolved after the terminal zero-health event.
+                // Do not overwrite that recovered value during scene teardown.
                 var player = _engine.State?.Player;
-                if (player != null)
+                if (player != null && _engine.State.Outcome != BattleOutcome.Defeat)
                     PlayerGlobalStats.SetHealth(player.CurrentHealth, player.MaxHealth);
                 _engine.EventRaised -= ForwardEvent;
             }

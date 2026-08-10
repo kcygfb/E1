@@ -53,6 +53,10 @@ namespace KiKs.Combat
         [HideInInspector]
         [Min(0)] [SerializeField] private int baseActionPoints = 2;
 
+        [Header("Enemy Berserk Skill")]
+        [Tooltip("狂暴回合（BerserkTurn）释放的固定伤害技能值；0 = 不使用技能（回退到特殊卡逻辑）")]
+        [Min(0)] [SerializeField] private int berserkSkillDamage = 0;
+
         public string CombatantId => combatantId;
         public string DisplayName => displayName;
         public CombatantSide Side => side;
@@ -94,6 +98,7 @@ namespace KiKs.Combat
         public int FallbackDamage => fallbackDamage;
         public int FallbackToughnessDamage => fallbackToughnessDamage;
         public int BaseActionPoints => baseActionPoints;
+        public int BerserkSkillDamage => berserkSkillDamage;
 
         public bool HasEnemyDeck => enemyCardIds != null && enemyCardIds.Count > 0;
 

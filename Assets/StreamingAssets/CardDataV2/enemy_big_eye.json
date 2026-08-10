@@ -143,47 +143,6 @@
    "image": "Art/Cards/suffocate.png"
   },
   {
-   "id": "enemy_big_eye_ten_thousand_hands",
-   "name": {
-    "zhCN": "万手缠身",
-    "en": "ten thousand hands"
-   },
-   "description": {
-    "en": "Ultimate barrage of grasping hands.",
-    "zhCN": "连续攻击10次，每次造成3点伤害，削减5点韧性，施加5层流血"
-   },
-   "category": "enemy_big_eye",
-   "copies": 1,
-   "cost": {
-    "resource": "action_point",
-    "amount": 3
-   },
-   "special": true,
-   "effects": [
-    {
-     "type": "damage",
-     "amount": 3,
-     "hits": 10
-    },
-    {
-     "type": "toughness_damage",
-     "amount": 5
-    },
-    {
-     "type": "bleed",
-     "amount": 5
-    }
-   ],
-   "source": {
-    "workbook": "Killkiss全套卡牌.xlsx",
-    "sheet": "怪",
-    "row": 60
-   },
-   "notes": [
-    "Ultimate: required on turn 12."
-   ]
-  },
-  {
    "id": "enemy_big_eye_mind_control_break",
    "name": {
     "zhCN": "精神控制",
@@ -211,7 +170,8 @@
     "sheet": "怪",
     "row": 62
    },
-   "notes": []
+   "notes": [],
+   "image": "Art/Cards/mindcontrol.png"
   }
  ]
 }

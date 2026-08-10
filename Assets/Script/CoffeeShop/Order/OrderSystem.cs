@@ -4,8 +4,9 @@ using UnityEngine;
 
 public class OrderSystem : MonoBehaviour
 {
-    public static string ORDER_CREATED = "OrderCreated";
-    public static string ORDER_COMPLETED = "OrderCompleted";
+    public const string ORDER_CREATED = "OrderCreated";
+    public const string ORDER_COMPLETED = "OrderCompleted";
+    public const string ORDER_CANCELLED = "OrderCancelled";
 
     private OrderTicket activeOrder;
 
@@ -59,7 +60,7 @@ public class OrderSystem : MonoBehaviour
         );
 
         Debug.Log($"[OrderSystem] Created: {activeOrder.NpcName} wants {(anyCoffee ? "ANY coffee" : activeOrder.CoffeeName)}");
-        GameEvent.Emit("OrderCreated", activeOrder);
+        GameEvent.Emit(ORDER_CREATED, activeOrder);
         return true;
     }
 
@@ -81,10 +82,29 @@ public class OrderSystem : MonoBehaviour
         activeOrder = null;
         Debug.Log($"[OrderSystem] Completed: {completed.CoffeeName}");
         KiKs.Combat.RuntimeGameRepository.AddCraftedCoffee(coffee.coffeeId);
-        // 玩家摸索做出的咖啡自动解锁菜谱（解锁后可在菜单/战备界面看到）
-        if (KiKs.Combat.RuntimeGameRepository.UnlockRecipe(coffee.coffeeId))
-            Debug.Log($"[OrderSystem] 解锁新菜谱: {completed.CoffeeName}");
-        GameEvent.Emit("OrderCompleted", completed);
+        // 菜谱解锁不在这里做——由 CraftController.Deliver 在"搓出合法咖啡"时统一解锁，
+        // 保证做错的咖啡（非订单所需）也能解锁。
+        GameEvent.Emit(ORDER_COMPLETED, completed);
+        return true;
+    }
+
+    /// <summary>
+    /// Cancels the current customer's order, or records a skip before the order
+    /// ticket exists. Refuses to clear an order owned by a different customer.
+    /// </summary>
+    public bool TryCancelCustomerOrder(CustomerController owner, out OrderTicket cancelledOrder)
+    {
+        cancelledOrder = activeOrder;
+        if (cancelledOrder != null && owner != null && cancelledOrder.Owner != owner)
+        {
+            Debug.LogError("[OrderSystem] Refused to cancel an order owned by another customer.", this);
+            cancelledOrder = null;
+            return false;
+        }
+
+        activeOrder = null;
+        GameEvent.Emit(ORDER_CANCELLED, new OrderCancelledPayload(owner, cancelledOrder));
+        Debug.Log($"[OrderSystem] Customer skipped: {owner?.NPCData?.npcName ?? "unknown"}");
         return true;
     }
 

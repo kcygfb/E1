@@ -136,16 +136,8 @@ namespace KiKs.Combat
             // 等战败立绘动画播放一会
             yield return new WaitForSecondsRealtime(2f);
 
-            // Defeat does not advance the day or complete the selected point; restore half health.
-            var halfHealth = Mathf.Max(1, (PlayerGlobalStats.MaxHealth + 1) / 2);
-            PlayerGlobalStats.SetHealth(halfHealth, PlayerGlobalStats.MaxHealth);
-
-
-            // 取消选点，不完成战斗点
-            DailyAreaMapState.CancelSelectedPoint();
-            RuntimeGameRepository.ClearSelectedDemoStage();
-
-            RuntimeGameRepository.ClearSelectedEncounterIndex();
+            // Defeat recovery and map rollback are one atomic progression operation.
+            RuntimeGameRepository.ResolveSelectedAreaDefeat();
             Debug.Log("[HuntResult] Defeat — transitioning to PreBattle.");
 
             // 战败回 PreBattle，不碰天数系统

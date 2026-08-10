@@ -194,7 +194,21 @@ public class DialoguePlayer : MonoBehaviour
 
     private void EndDialogue()
     {
+        CloseDialogue(true);
+    }
+
+    /// <summary>Closes the current dialogue without advancing the customer state machine.</summary>
+    public bool CancelCurrentDialogue()
+    {
+        if (!isRunning) return false;
+        CloseDialogue(false);
+        return true;
+    }
+
+    private void CloseDialogue(bool emitEndedEvent)
+    {
         if (typingRoutine != null) StopCoroutine(typingRoutine);
+        typingRoutine = null;
         isTyping = false;
         isRunning = false;
         currentDialogue = null;
@@ -204,7 +218,8 @@ public class DialoguePlayer : MonoBehaviour
         HideUI(false);
         var ctx = currentContext;
         currentContext = null;
-        GameEvent.Emit("DialogueEnded", ctx);
+        if (emitEndedEvent)
+            GameEvent.Emit("DialogueEnded", ctx);
     }
 
     private void HideUI(bool hide)

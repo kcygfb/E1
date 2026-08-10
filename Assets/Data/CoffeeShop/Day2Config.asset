@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Day2Config
   m_EditorClassIdentifier: Assembly-CSharp::DayConfig
   day: 2
+  orderCancellation: 0
   startOfDay:
   - npc: {fileID: 11400000, guid: 76935125c1142f24383b4766a299cd50, type: 2}
     dialogueKey: timi

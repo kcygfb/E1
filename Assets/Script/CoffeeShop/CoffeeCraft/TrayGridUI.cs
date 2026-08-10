@@ -77,7 +77,9 @@ public class TrayGridUI : MonoBehaviour
     private void ShowSelectionInternal()
     {
         _isDragMode = false;
-        IngredientTray.SetDefaultsIfEmpty();
+        // 每天早晨空盘开始：素材不跨天残留，玩家从材料仓库重新选。
+        // （打烊时 EnterNight 已 Clear，这里再清一次保证幂等。）
+        IngredientTray.Clear();
 
         gameObject.SetActive(true);
         if (materialPalette != null)

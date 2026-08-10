@@ -29,12 +29,14 @@ public class CraftController : MonoBehaviour
         GameEvent.On("OrderCreated", OnOrderCreated);
         GameEvent.On("DialogueRequested", OnDialogueRequested);
         GameEvent.On("DialogueEnded", OnDialogueEnded);
+        GameEvent.On(OrderSystem.ORDER_CANCELLED, OnOrderCancelled);
     }
     private void OnDisable()
     {
         GameEvent.Off("OrderCreated", OnOrderCreated);
         GameEvent.Off("DialogueRequested", OnDialogueRequested);
         GameEvent.Off("DialogueEnded", OnDialogueEnded);
+        GameEvent.Off(OrderSystem.ORDER_CANCELLED, OnOrderCancelled);
     }
 
     private void OnDialogueRequested(object payload)
@@ -54,6 +56,17 @@ public class CraftController : MonoBehaviour
     }
 
     private void OnOrderCreated(object payload) => StartCraft();
+
+    private void OnOrderCancelled(object payload)
+    {
+        bool wasCrafting = _isCrafting;
+        _isCrafting = false;
+        if (wasCrafting)
+            ResetCraft();
+        if (coffeeMakeGroup != null) coffeeMakeGroup.SetActive(false);
+        if (TrayGridUI.Instance != null) TrayGridUI.Instance.HideAll();
+        UpdateButtonStates();
+    }
 
     private void StartCraft()
     {

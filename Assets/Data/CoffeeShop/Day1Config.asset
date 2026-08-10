@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: Day1Config
   m_EditorClassIdentifier: Assembly-CSharp::DayConfig
   day: 1
+  orderCancellation: 0
   startOfDay: []
   customers:
   - npc: {fileID: 11400000, guid: 76935125c1142f24383b4766a299cd50, type: 2}

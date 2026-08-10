@@ -32,6 +32,9 @@ public class CustomerQueue : MonoBehaviour
     [Header("System")]
     public OrderSystem orderSystem;
 
+    [Header("Order Cancellation")]
+    [SerializeField] private Button cancelOrderButton;
+
     [Header("Visual Spawn")]
     public GameObject npcVisualPrefab;
     public RectTransform npcParent;
@@ -51,6 +54,7 @@ public class CustomerQueue : MonoBehaviour
 
     private bool _shopPhaseActive;
     private bool _endOfDayPhaseActive;
+    private bool _isCancellingCustomer;
 
     private bool IsShopQueueEmpty =>
         currentNpc == null &&
@@ -61,6 +65,7 @@ public class CustomerQueue : MonoBehaviour
     private void Awake()
     {
         ValidateDayConfigs();
+        ResolveCancelOrderButton();
     }
 
     public DayConfig GetDayConfig(int day)
@@ -108,12 +113,19 @@ public class CustomerQueue : MonoBehaviour
     {
         GameEvent.On("PhaseChanged", OnPhaseChanged);
         GameEvent.On("DayEnded", OnDayEnded);
+        if (cancelOrderButton != null)
+        {
+            cancelOrderButton.onClick.RemoveListener(CancelCurrentCustomer);
+            cancelOrderButton.onClick.AddListener(CancelCurrentCustomer);
+        }
     }
 
     private void OnDisable()
     {
         GameEvent.Off("PhaseChanged", OnPhaseChanged);
         GameEvent.Off("DayEnded", OnDayEnded);
+        if (cancelOrderButton != null)
+            cancelOrderButton.onClick.RemoveListener(CancelCurrentCustomer);
     }
 
     private void OnDayEnded(object payload) { ClearAllNPCs(); }
@@ -161,12 +173,78 @@ public class CustomerQueue : MonoBehaviour
             orderSystem.ClearActiveOrder();
         _shopPhaseActive = false;
         _endOfDayPhaseActive = false;
+        _isCancellingCustomer = false;
+        RefreshCancelOrderButton();
     }
 
     private void Update()
     {
         if (endDayButton != null)
             endDayButton.SetActive(_shopPhaseActive && IsShopQueueEmpty);
+        RefreshCancelOrderButton();
+    }
+
+    private void ResolveCancelOrderButton()
+    {
+        if (cancelOrderButton != null) return;
+
+        foreach (var button in FindObjectsByType<Button>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+        {
+            if (button.name == "取消订单" || button.name == "CancelOrderButton")
+            {
+                cancelOrderButton = button;
+                break;
+            }
+        }
+    }
+
+    private bool IsOrderCancellationAllowed()
+    {
+        var config = GetCurrentDayConfig();
+        return config == null || config.AllowsOrderCancellation;
+    }
+
+    private void RefreshCancelOrderButton()
+    {
+        if (cancelOrderButton == null) return;
+
+        bool visible = _shopPhaseActive && currentNpc != null && IsOrderCancellationAllowed();
+        if (cancelOrderButton.gameObject.activeSelf != visible)
+            cancelOrderButton.gameObject.SetActive(visible);
+        cancelOrderButton.interactable = visible && !_isCancellingCustomer;
+    }
+
+    private void CancelCurrentCustomer()
+    {
+        if (!_shopPhaseActive || currentNpc == null || _isCancellingCustomer || !IsOrderCancellationAllowed())
+            return;
+
+        _isCancellingCustomer = true;
+        var customer = currentNpc;
+
+        if (orderSystem == null)
+            orderSystem = FindFirstObjectByType<OrderSystem>();
+        if (orderSystem == null)
+        {
+            Debug.LogError("[CustomerQueue] Cannot cancel the customer because OrderSystem is missing.", this);
+            _isCancellingCustomer = false;
+            RefreshCancelOrderButton();
+            return;
+        }
+
+        if (!orderSystem.TryCancelCustomerOrder(customer, out _))
+        {
+            _isCancellingCustomer = false;
+            RefreshCancelOrderButton();
+            return;
+        }
+
+        var dialoguePlayer = FindFirstObjectByType<DialoguePlayer>();
+        if (dialoguePlayer != null)
+            dialoguePlayer.CancelCurrentDialogue();
+
+        customer.CancelAndLeave();
+        RefreshCancelOrderButton();
     }
 
     // ==================== Build Queues ====================
@@ -369,6 +447,7 @@ public class CustomerQueue : MonoBehaviour
         {
             currentNpc.OnLeftStore -= HandleNpcLeft;
             currentNpc = null;
+            _isCancellingCustomer = false;
         }
         TrySpawnNextNpc();
     }

@@ -32,6 +32,7 @@ namespace KiKs.UI
         [Header("Tooltip")]
         [SerializeField] private TutorialTooltip tooltipPrefab;
         [SerializeField] private RectTransform tooltipParent;
+        [SerializeField, Min(0.5f)] private float tooltipScale = 1f;
 
         [Header("Scene Callouts")]
         [SerializeField] private bool showSceneCalloutsOnStart = true;
@@ -262,6 +263,7 @@ namespace KiKs.UI
             }
 
             var tooltip = Instantiate(tooltipPrefab, parent, false);
+            tooltip.SetScale(tooltipScale);
             tooltip.SetMessage(description);
             DisableRaycastTargets(tooltip.gameObject);
             return tooltip;

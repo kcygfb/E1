@@ -4091,7 +4091,7 @@ MonoBehaviour:
   minNpcPerDay: 2
   maxNpcPerDay: 4
   orderSystem: {fileID: 391905253}
-  cancelOrderButton: {fileID: 907123166}
+  cancelOrderButton: {fileID: 0}
   npcVisualPrefab: {fileID: 0}
   npcParent: {fileID: 78695401}
   spawnPoint: {fileID: 822976074}
@@ -14528,7 +14528,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: KiKs.UI::KiKs.UI.TutorialController
   tooltipPrefab: {fileID: 7524191139530786084, guid: 8dcbd99d61a1f9d4f9d90dcdd9aab524, type: 3}
   tooltipParent: {fileID: 0}
-  tooltipScale: 1.2
   showSceneCalloutsOnStart: 1
   sceneCallouts: []
 --- !u!114 &4000000010
