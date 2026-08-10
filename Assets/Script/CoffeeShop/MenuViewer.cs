@@ -44,7 +44,6 @@ public class MenuViewer : MonoBehaviour
     private int _currentPage;
     private readonly List<Sprite> _filtered = new();
     private Vector2 _buttonOriginPos;
-    private bool _menuOpenedThisOrder;
     private Sequence _hintSeq;
 
     private static readonly Regex PriceRegex = new Regex(@"_(\d+)c?$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
@@ -64,8 +63,7 @@ public class MenuViewer : MonoBehaviour
 
     private void OnOrderCreated(object _)
     {
-        _menuOpenedThisOrder = false;
-        // 进入制作阶段后，菜单按钮可见且未打开过 → 开始提示抖动
+        // 进入制作阶段后，菜单按钮可见 → 开始提示抖动
         if (openButton != null && openButton.gameObject.activeInHierarchy)
             StartHintBounce();
     }
@@ -154,7 +152,6 @@ public class MenuViewer : MonoBehaviour
     private void Open()
     {
         if (viewerPanel == null || menuPages == null || menuPages.Length == 0) return;
-        _menuOpenedThisOrder = true;
         StopHintBounce();
         RefreshTierButtons();
 

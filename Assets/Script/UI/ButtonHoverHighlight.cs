@@ -34,7 +34,6 @@ namespace KiKs.UI
         private Tween _currentFade;
         private Tween _currentScale;
         private Vector3 _originalScale;
-        private bool _isPointerDown;
 
         private void Awake()
         {
@@ -55,7 +54,6 @@ namespace KiKs.UI
         public void OnPointerEnter(PointerEventData eventData)
         {
             if (!enabled) return;
-            _isPointerDown = false;
             if (selectionFrame != null)
             {
                 _currentFade?.Kill();
@@ -72,7 +70,6 @@ namespace KiKs.UI
         public void OnPointerExit(PointerEventData eventData)
         {
             if (!enabled) return;
-            _isPointerDown = false;
             if (selectionFrame != null)
             {
                 _currentFade?.Kill();
@@ -85,14 +82,12 @@ namespace KiKs.UI
         public void OnPointerDown(PointerEventData eventData)
         {
             if (!enabled) return;
-            _isPointerDown = true;
             ScaleTo(_originalScale * hoverScale * pressScale, pressDuration);
         }
 
         public void OnPointerUp(PointerEventData eventData)
         {
             if (!enabled) return;
-            _isPointerDown = false;
             ScaleTo(_originalScale * hoverScale, pressDuration);
         }
 
