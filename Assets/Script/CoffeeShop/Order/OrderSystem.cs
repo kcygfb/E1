@@ -44,18 +44,21 @@ public class OrderSystem : MonoBehaviour
             return false;
         }
 
+        bool anyCoffee = owner != null && owner.AcceptAny;
+
         activeOrder = new OrderTicket(
             Guid.NewGuid().ToString(),
             npcData.npcId,
             npcData.npcName,
-            coffeeData.coffeeId,
-            coffeeData.coffeeName,
-            coffeeData.sellPrice,
-            coffeeData.orderTicket,
-            owner
+            anyCoffee ? "" : (coffeeData?.coffeeId ?? ""),
+            anyCoffee ? "任意咖啡" : (coffeeData?.coffeeName ?? "咖啡"),
+            anyCoffee ? 0 : (coffeeData?.sellPrice ?? 0),
+            anyCoffee ? null : coffeeData?.orderTicket,
+            owner,
+            anyCoffee
         );
 
-        Debug.Log($"[OrderSystem] Created: {activeOrder.NpcName} wants {activeOrder.CoffeeName}");
+        Debug.Log($"[OrderSystem] Created: {activeOrder.NpcName} wants {(anyCoffee ? "ANY coffee" : activeOrder.CoffeeName)}");
         GameEvent.Emit("OrderCreated", activeOrder);
         return true;
     }
@@ -68,7 +71,7 @@ public class OrderSystem : MonoBehaviour
             return false;
         }
 
-        if (activeOrder.CoffeeId != coffee.coffeeId)
+        if (!activeOrder.AcceptAnyCoffee && activeOrder.CoffeeId != coffee.coffeeId)
         {
             Debug.Log($"[OrderSystem] Wrong coffee! Need {activeOrder.CoffeeName}");
             return false;

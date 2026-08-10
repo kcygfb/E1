@@ -46,7 +46,11 @@ public class OrderUI : MonoBehaviour
         ShowPanel();
         ShowTicket(order.TicketSprite);
         SetTicketLabel(order.CoffeeName);
-        SetTicketDetails(order.CoffeeId);
+
+        if (order.AcceptAnyCoffee)
+            SetTicketDetailsAnyCoffee();
+        else
+            SetTicketDetails(order.CoffeeId);
 
         if (npcText != null) npcText.text = $"Customer: {order.NpcName}";
         if (coffeeText != null) coffeeText.text = $"Order: {order.CoffeeName}";
@@ -80,6 +84,13 @@ public class OrderUI : MonoBehaviour
     private void SetTicketLabel(string coffeeName)
     {
         if (ticketCoffeeLabel != null) ticketCoffeeLabel.text = coffeeName;
+    }
+
+    private void SetTicketDetailsAnyCoffee()
+    {
+        if (ticketStepsText != null) ticketStepsText.text = "随意制作即可";
+        if (ticketPriceText != null) ticketPriceText.text = "";
+        if (ticketMaterialsText != null) ticketMaterialsText.text = "";
     }
 
     private void SetTicketDetails(string coffeeId)

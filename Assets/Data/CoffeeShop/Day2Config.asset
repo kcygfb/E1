@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 63f2a4c133539044ead2c4c919638e46, type: 3}
+  m_Name: Day2Config
+  m_EditorClassIdentifier: Assembly-CSharp::DayConfig
+  day: 2
+  startOfDay:
+  - npc: {fileID: 11400000, guid: 76935125c1142f24383b4766a299cd50, type: 2}
+    dialogueKey: timi
+    orderMode: 1
+    coffeeId: 
+  customers:
+  - npc: {fileID: 11400000, guid: fc7fe489f7ec42b42b4b94eafdbc3b6c, type: 2}
+    dialogueKey: barddy_day2
+    orderMode: 2
+    coffeeId: 
+  - npc: {fileID: 11400000, guid: 453617d48a7d1ca47b524d2599f78f09, type: 2}
+    dialogueKey: generic
+    orderMode: 1
+    coffeeId: 
+  - npc: {fileID: 11400000, guid: 453617d48a7d1ca47b524d2599f78f09, type: 2}
+    dialogueKey: generic
+    orderMode: 1
+    coffeeId: 
+  endOfDay: []

@@ -24,6 +24,7 @@ public class DialoguePlayer : MonoBehaviour
 
     [Header("主角")]
     [SerializeField] private string playerName = "Avril";
+    [SerializeField] private string[] playerAliases = { "艾薇儿" };
     [SerializeField] private Color playerColor = new Color(0.4f, 0.8f, 1f, 1f);
 
     private DialogueDataJson currentDialogue;
@@ -145,7 +146,7 @@ public class DialoguePlayer : MonoBehaviour
             if (speakerText != null)
             {
                 speakerText.text = speaker;
-                speakerText.color = speaker == playerName ? playerColor : _speakerColor;
+                speakerText.color = IsPlayer(speaker) ? playerColor : _speakerColor;
             }
 
             if (typingRoutine != null) StopCoroutine(typingRoutine);
@@ -224,8 +225,9 @@ public class DialoguePlayer : MonoBehaviour
         Image portraitImage = null;
         string cacheKey = speaker;
 
-        if (speaker == playerName)
+        if (IsPlayer(speaker))
         {
+            cacheKey = playerName;
             var player = GameObject.Find("Canvas/PlayerArea/PlayerP");
             if (player != null) portraitImage = player.GetComponent<Image>();
         }
@@ -234,11 +236,10 @@ public class DialoguePlayer : MonoBehaviour
             foreach (var kvp in CustomerController.ActiveCustomers)
             {
                 if (kvp.Value == null) continue;
-                var npcName = kvp.Key;
-                if (npcName == speaker || npcName.Contains(speaker) || speaker.Contains(npcName))
+                if (kvp.Value.MatchesSpeaker(speaker))
                 {
                     portraitImage = kvp.Value.GetComponent<Image>();
-                    cacheKey = npcName;
+                    cacheKey = kvp.Key; // npcName，用于 PortraitExpressionCache 查找
                     break;
                 }
             }
@@ -251,13 +252,25 @@ public class DialoguePlayer : MonoBehaviour
             portraitImage.sprite = sprite;
     }
 
+    private bool IsPlayer(string speaker)
+    {
+        if (string.IsNullOrEmpty(speaker)) return false;
+        if (speaker == playerName) return true;
+        if (playerAliases != null)
+        {
+            foreach (var alias in playerAliases)
+                if (speaker == alias) return true;
+        }
+        return false;
+    }
+
     private void AnimateSpeaker(string speaker)
     {
         if (string.IsNullOrEmpty(speaker)) return;
 
         RectTransform target = null;
 
-        if (speaker == playerName)
+        if (IsPlayer(speaker))
         {
             var player = GameObject.Find("Canvas/PlayerArea/PlayerP");
             if (player != null) target = player.GetComponent<RectTransform>();
@@ -267,8 +280,7 @@ public class DialoguePlayer : MonoBehaviour
             foreach (var kvp in CustomerController.ActiveCustomers)
             {
                 if (kvp.Value == null) continue;
-                var npcName = kvp.Key;
-                if (npcName == speaker || npcName.Contains(speaker) || speaker.Contains(npcName))
+                if (kvp.Value.MatchesSpeaker(speaker))
                 {
                     target = kvp.Value.GetComponent<RectTransform>();
                     break;

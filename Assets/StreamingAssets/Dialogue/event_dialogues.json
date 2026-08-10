@@ -1,36 +1,105 @@
 {
   "dialogues": [
     {
-      "dialogueId": "evt_light_intro",
+      "dialogueId": "evt_day1_intro",
       "lines": [
-        { "speaker": "提灯人", "text": "……你在黑暗中走了很远。", "expression": "" },
-        { "speaker": "艾薇儿", "text": "你是谁？你手里那盏灯……", "expression": "Thinking" },
-        { "speaker": "提灯人", "text": "灯里装的不是火。是选择。", "expression": "" },
-        { "speaker": "提灯人", "text": "选一张牌吧。每张牌都有代价，也有回报。但小心——有些选择不可挽回。", "expression": "" }
+        { "speaker": "艾薇儿", "expression": "Thinking", "text": "前面的路上好像躺着一个人……" },
+        { "speaker": "艾薇儿", "expression": "Annoyed", "text": "地上还有一滩滩血迹，看起来情况不太好。" },
+        { "speaker": "艾薇儿", "expression": "Thinking", "text": "是守夜人。他伤得很重，该怎么办？" }
       ]
     },
     {
-      "dialogueId": "evt_light_opt1",
+      "dialogueId": "evt_day1_50c",
       "lines": [
-        { "speaker": "提灯人", "text": "你用鲜血换来了财富。有趣。", "expression": "" },
-        { "speaker": "艾薇儿", "text": "咳……值得。", "expression": "Irritated" },
-        { "speaker": "提灯人", "text": "走吧。灯会记得你的选择。", "expression": "" }
+        { "speaker": "艾薇儿", "expression": "Professional Smile", "text": "不好意思，这是赔给你的钱，去买点治疗药水吧。" },
+        { "speaker": "守夜人", "expression": "", "text": "……谢谢，第一次有人愿意帮我。" },
+        { "speaker": "守夜人", "expression": "", "text": "这些蛇干你拿着，算是报答。" },
+        { "speaker": "艾薇儿", "expression": "Happy", "text": "不客气，快去疗伤吧。" }
       ]
     },
     {
-      "dialogueId": "evt_light_opt2",
+      "dialogueId": "evt_day1_10h",
       "lines": [
-        { "speaker": "提灯人", "text": "金币换材料，公平交易。", "expression": "" },
-        { "speaker": "艾薇儿", "text": "这些材料……有用。", "expression": "Professional Smile" },
-        { "speaker": "提灯人", "text": "去吧。灯已照亮你的路。", "expression": "" }
+        { "speaker": "艾薇儿", "expression": "Irritated", "text": "别怕，我帮你治一下……虽然有点疼。" },
+        { "speaker": "守夜人", "expression": "", "text": "你是……魔法使用者？" },
+        { "speaker": "艾薇儿", "expression": "Professional Smile", "text": "算是吧。好了，伤口止住了。" },
+        { "speaker": "守夜人", "expression": "", "text": "太感谢了。这张卡牌送给你，应该能帮到你。" },
+        { "speaker": "艾薇儿", "expression": "Happy", "text": "火焰喷射器？好厉害的东西！谢谢！" }
       ]
     },
     {
-      "dialogueId": "evt_light_end",
+      "dialogueId": "evt_day1_pilfer",
       "lines": [
-        { "speaker": "提灯人", "text": "什么都不选？有时候不选也是一种选择。", "expression": "" },
-        { "speaker": "艾薇儿", "text": "我只是想离开。", "expression": "Annoyed" },
-        { "speaker": "提灯人", "text": "那就走吧。灯不会等第二次。", "expression": "" }
+        { "speaker": "艾薇儿", "expression": "Thinking", "text": "（趁他还没醒……地上的东西先拿走再说。）" },
+        { "speaker": "艾薇儿", "expression": "Happy", "text": "嘿嘿，火焰喷射器和巨剑，收获不小。" }
+      ]
+    },
+    {
+      "dialogueId": "evt_day1_walkaway",
+      "lines": [
+        { "speaker": "艾薇儿", "expression": "Annoyed", "text": "算了，多一事不如少一事。" },
+        { "speaker": "艾薇儿", "expression": "Thinking", "text": "走了没多远，地上居然有个怪物的尸体。" },
+        { "speaker": "艾薇儿", "expression": "Happy", "text": "搜刮一番，居然有不少触手素材。" }
+      ]
+    },
+    {
+      "dialogueId": "evt_day2_intro",
+      "lines": [
+        { "speaker": "艾薇儿", "expression": "", "text": "赶路赶路——嘭！" },
+        { "speaker": "艾薇儿", "expression": "Irritated", "text": "好痛！谁把电线杆放路中间的！" },
+        { "speaker": "电线杆人", "expression": "", "text": "……我也没想到有人会撞上我。" },
+        { "speaker": "艾薇儿", "expression": "Annoyed", "text": "对不起！我不是故意撞你的，我只是没想到电线杆会动！" },
+        { "speaker": "电线杆人", "expression": "", "text": "没关系。难得遇到这么有意思的人。" }
+      ]
+    },
+    {
+      "dialogueId": "evt_day2_50c",
+      "lines": [
+        { "speaker": "艾薇儿", "expression": "Professional Smile", "text": "不好意思，这是赔给你的钱。" },
+        { "speaker": "电线杆人", "expression": "", "text": "哈哈，第一次遇到这么有意思的小家伙。" },
+        { "speaker": "电线杆人", "expression": "", "text": "收下钱币，再送你点东西吧。" },
+        { "speaker": "艾薇儿", "expression": "Happy", "text": "爪子素材？谢谢！" }
+      ]
+    },
+    {
+      "dialogueId": "evt_day2_walkaway",
+      "lines": [
+        { "speaker": "艾薇儿", "expression": "Annoyed", "text": "这电线杆人不像正常人……我还是跑吧。" },
+        { "speaker": "艾薇儿", "expression": "Irritated", "text": "慌不择路跑了一阵，发现口袋里的钱掉了。" },
+        { "speaker": "艾薇儿", "expression": "Annoyed", "text": "亏了二十块钱……" }
+      ]
+    },
+    {
+      "dialogueId": "evt_day3_intro",
+      "lines": [
+        { "speaker": "艾薇儿", "expression": "Thinking", "text": "前面的路边站着一个灰色斗篷的小女孩？" },
+        { "speaker": "小女孩", "expression": "", "text": "幸运的孩子，现在站在你面前的是全知全能伟大的无名之王！" },
+        { "speaker": "小女孩", "expression": "", "text": "现在，说出你的愿望。" },
+        { "speaker": "艾薇儿", "expression": "Annoyed", "text": "（这也太夸张了吧……）" }
+      ]
+    },
+    {
+      "dialogueId": "evt_day3_50c",
+      "lines": [
+        { "speaker": "艾薇儿", "expression": "Thinking", "text": "那……我想要钱币。" },
+        { "speaker": "小女孩", "expression": "", "text": "如你所愿。" },
+        { "speaker": "艾薇儿", "expression": "Happy", "text": "真的有两百块！这不是骗子吧？" }
+      ]
+    },
+    {
+      "dialogueId": "evt_day3_10h",
+      "lines": [
+        { "speaker": "艾薇儿", "expression": "Thinking", "text": "那……我想回复生命值。" },
+        { "speaker": "小女孩", "expression": "", "text": "如你所愿。" },
+        { "speaker": "艾薇儿", "expression": "Happy", "text": "身上的伤全部好了！感觉充满了力量！" }
+      ]
+    },
+    {
+      "dialogueId": "evt_day3_walkaway",
+      "lines": [
+        { "speaker": "艾薇儿", "expression": "Annoyed", "text": "算了，肯定是骗子。" },
+        { "speaker": "艾薇儿", "expression": "", "text": "摇摇头，直接离开了。" },
+        { "speaker": "小女孩", "expression": "", "text": "……不珍惜机会的人，总会后悔的。" }
       ]
     }
   ]

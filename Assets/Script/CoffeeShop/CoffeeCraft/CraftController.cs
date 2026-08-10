@@ -143,7 +143,7 @@ public class CraftController : MonoBehaviour
         {
             var order = orderSystem.ActiveOrder;
 
-            if (matched != null && order != null && order.CoffeeId == matched.coffeeId)
+            if (matched != null && order != null && (order.AcceptAnyCoffee || order.CoffeeId == matched.coffeeId))
             {
                 var coffeeData = ScriptableObject.CreateInstance<CoffeeData>();
                 coffeeData.ApplyJson(matched);

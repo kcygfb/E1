@@ -7,7 +7,7 @@ namespace KiKs.Combat
     public static class EventJsonRepository
     {
         public const string RelativePath = "Event/events.json";
-        public const int RequiredCardCount = 4;
+        public const int MinimumCardCount = 1;
 
         public static EventSceneDefinition Load()
         {
@@ -71,9 +71,9 @@ namespace KiKs.Combat
                     return false;
                 }
 
-                if (evt.cards == null || evt.cards.Length != RequiredCardCount)
+                if (evt.cards == null || evt.cards.Length < MinimumCardCount)
                 {
-                    error = $"Event '{evt.id}' needs exactly {RequiredCardCount} cards.";
+                    error = $"Event '{evt.id}' needs at least {MinimumCardCount} cards.";
                     return false;
                 }
 
@@ -90,26 +90,16 @@ namespace KiKs.Combat
                     switch (card.type)
                     {
                         case "effect":
-                            if (string.IsNullOrWhiteSpace(card.dialogueId))
-                            {
-                                error = $"Event '{evt.id}' effect card {cardIndex + 1} needs a dialogueId.";
-                                return false;
-                            }
+                            // effect 卡可选 dialogueId
                             break;
                         case "attack":
-                            // attack 卡需要 cardRewardMode
-                            if (string.IsNullOrWhiteSpace(card.cardRewardMode))
-                            {
-                                error = $"Event '{evt.id}' attack card {cardIndex + 1} needs a cardRewardMode.";
-                                return false;
-                            }
+                            // attack 卡可选 cardRewardMode/cardRewardIds
+                            break;
+                        case "pilfer":
+                            // pilfer 卡可选 cardRewardIds
                             break;
                         case "end":
-                            if (string.IsNullOrWhiteSpace(card.dialogueId))
-                            {
-                                error = $"Event '{evt.id}' end card {cardIndex + 1} needs a dialogueId.";
-                                return false;
-                            }
+                            // end 卡可选 dialogueId 和奖励
                             break;
                         default:
                             error = $"Event '{evt.id}' card {cardIndex + 1} has unknown type '{card.type}'.";

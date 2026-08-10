@@ -56,7 +56,7 @@ public sealed class DailyRevenueSummary : MonoBehaviour
         GameEvent.On("DayStarted", OnDayStarted);
         GameEvent.On("CustomerArrived", OnCustomerArrived);
         GameEvent.On("RevenueAwarded", OnRevenueAwarded);
-        GameEvent.On("ShopReadyToClose", OnShopReadyToClose);
+        GameEvent.On("PhaseChanged", OnPhaseChanged);
     }
 
     private void OnDisable()
@@ -64,7 +64,7 @@ public sealed class DailyRevenueSummary : MonoBehaviour
         GameEvent.Off("DayStarted", OnDayStarted);
         GameEvent.Off("CustomerArrived", OnCustomerArrived);
         GameEvent.Off("RevenueAwarded", OnRevenueAwarded);
-        GameEvent.Off("ShopReadyToClose", OnShopReadyToClose);
+        GameEvent.Off("PhaseChanged", OnPhaseChanged);
     }
 
     private void OnDayStarted(object payload)
@@ -90,13 +90,16 @@ public sealed class DailyRevenueSummary : MonoBehaviour
         revenues.Add(revenue);
     }
 
-    private void OnShopReadyToClose(object payload)
+    private void OnPhaseChanged(object payload)
     {
-        // In Cafe scene, skip the summary popup entirely.
+        if (payload is not PhaseChangedPayload p) return;
+        if (p.Phase != DayPhase.Settlement) return;
+
+        // In Cafe scene, skip the summary popup — go straight to night.
         if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "Cafe")
         {
             if (timeSystem != null)
-                timeSystem.CompleteEndShopPhase();
+                timeSystem.NotifySettlementComplete();
             return;
         }
         ShowSummary();
@@ -230,7 +233,7 @@ public sealed class DailyRevenueSummary : MonoBehaviour
         }
 
         if (timeSystem != null)
-            timeSystem.CompleteEndShopPhase();
+            timeSystem.NotifySettlementComplete();
     }
 
     private void BuildPlaceholderUI()

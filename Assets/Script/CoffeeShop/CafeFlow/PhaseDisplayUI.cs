@@ -37,11 +37,20 @@ public class PhaseDisplayUI : MonoBehaviour
 
         switch (p.Phase)
         {
+            case DayPhase.StartOfDay:
+                SetText("StartOfDay");
+                break;
             case DayPhase.MorningCheck:
                 SetText("MorningCheck");
                 break;
             case DayPhase.Shop:
                 SetText("Menu");
+                break;
+            case DayPhase.EndOfDay:
+                SetText("EndOfDay");
+                break;
+            case DayPhase.Settlement:
+                SetText("Settlement");
                 break;
             case DayPhase.Night:
                 SetText("Night");

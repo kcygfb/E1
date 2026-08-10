@@ -10,19 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 960556f0c23ddf7479d7994860c3cd3f, type: 3}
-  m_Name: Leyao
+  m_Name: Matcha
   m_EditorClassIdentifier: Assembly-CSharp::NPCData
-  npcId: 2
-  npcName: Leyao
-  portrait: {fileID: 4312824466976506394, guid: 761e8259328ec88498254a12bd8e2ae9, type: 3}
+  npcId: 3
+  npcName: Matcha
+  speakerAliases: []
+  speakerColor: {r: 0.20877323, g: 0.72955966, b: 0.36832783, a: 1}
+  portrait: {fileID: 6069710931494159596, guid: 761e8259328ec88498254a12bd8e2ae9, type: 3}
+  portraitPool: []
   portraitSize: {x: 637.5, y: 695.5125}
-  willOrder: 1
-  arrivalDialogueId: generic_arrival
-  departureDialogueId: generic_departure
-  desiredCoffeeId: 
-  lockedDialogueId: 
-  lockedDepartureDialogueId: 
-  returnFoundDialogueId: 
-  returnNotFoundDialogueId: 
-  returnReward: 0
-  spawnOrder: 0

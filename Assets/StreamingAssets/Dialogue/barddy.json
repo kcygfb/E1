@@ -68,6 +68,30 @@
         { "speaker": "Mysterious Courier", "expression": "", "text": "Did you manage to get that Mocha Latte I asked about last time?" },
         { "speaker": "Mysterious Courier", "expression": "", "text": "Still not ready, huh... Well, keep working on it. I'll check back next time." }
       ]
+    },
+    {
+      "dialogueId": "barddy_day2_arrival",
+      "lines": [
+        { "speaker": "Mysterious Courier", "expression": "", "text": "这是今天的物资。" },
+        { "speaker": "艾薇儿", "expression": "", "text": "哦，谢谢。今天想要一杯什么样的咖啡呢。" },
+        { "speaker": "Mysterious Courier", "expression": "", "text": "请帮我推荐一杯不是泥水口味的。" },
+        { "speaker": "艾薇儿", "expression": "Annoyed", "text": "我可以为您提供一杯甜口的咖啡。但我们店的咖啡不是泥水呢。" },
+        { "speaker": "Mysterious Courier", "expression": "", "text": "我想开个玩笑，抱歉冒犯了。" },
+        { "speaker": "艾薇儿", "expression": "Professional Smile", "text": "哈哈哈，原来是开玩笑啊，我还以为是开玩笑呢。" },
+        { "speaker": "Mysterious Courier", "expression": "", "text": "总之我现在有点疲惫了，需要补充一些咖啡因。" },
+        { "speaker": "艾薇儿", "expression": "Professional Smile", "text": "好的，那么就由我来为您推荐一杯呢。" }
+      ]
+    },
+    {
+      "dialogueId": "barddy_day2_departure",
+      "lines": [
+        { "speaker": "Mysterious Courier", "expression": "", "text": "嗯，这杯不错，比昨天那杯好喝多了。" },
+        { "speaker": "艾薇儿", "expression": "Professional Smile", "text": "谢谢夸奖，那以后就多来光顾呀。" },
+        { "speaker": "Mysterious Courier", "expression": "", "text": "对了，总部那边说最近可能会派人来视察咖啡店。" },
+        { "speaker": "艾薇儿", "expression": "Thinking", "text": "视察？我这边没什么问题吧……" },
+        { "speaker": "Mysterious Courier", "expression": "", "text": "放心，就是例行检查。我先走了，还有货要送。" },
+        { "speaker": "艾薇儿", "expression": "Professional Smile", "text": "慢走，路上小心。" }
+      ]
     }
   ]
 }

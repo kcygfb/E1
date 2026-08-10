@@ -4051,42 +4051,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 52681826a49a2ae40a1da703cd331ec8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NPCSpawner
-  npcPool:
-  - {fileID: 11400000, guid: 82efd85341336bd469495ea0a6064feb, type: 2}
-  - {fileID: 11400000, guid: e305df737251e894ea24646cec521f3c, type: 2}
-  - {fileID: 11400000, guid: fc7fe489f7ec42b42b4b94eafdbc3b6c, type: 2}
-  - {fileID: 11400000, guid: 4d71c29251f774c479ba087ad70e41c3, type: 2}
-  - {fileID: 11400000, guid: 76935125c1142f24383b4766a299cd50, type: 2}
-  coffeePool:
-  - {fileID: 11400000, guid: b3b9f62e4e490fb41af83f6042dedce0, type: 2}
-  - {fileID: 11400000, guid: c755fcb219eb9f647bdc06a9a9fc8278, type: 2}
-  - {fileID: 11400000, guid: 4da01673d2f680945bdb38e98d6f463f, type: 2}
-  - {fileID: 11400000, guid: 6901b4dffa703bd4e9c68fc92e3cdafa, type: 2}
-  orderSystem: {fileID: 391905253}
-  dayOverrides:
-  - day: 1
-    npcs:
-    - {fileID: 11400000, guid: 76935125c1142f24383b4766a299cd50, type: 2}
-    - {fileID: 11400000, guid: e305df737251e894ea24646cec521f3c, type: 2}
-    - {fileID: 11400000, guid: fc7fe489f7ec42b42b4b94eafdbc3b6c, type: 2}
-  - day: 2
-    npcs:
-    - {fileID: 11400000, guid: fc7fe489f7ec42b42b4b94eafdbc3b6c, type: 2}
-    - {fileID: 11400000, guid: 82efd85341336bd469495ea0a6064feb, type: 2}
-    - {fileID: 11400000, guid: 82efd85341336bd469495ea0a6064feb, type: 2}
-    - {fileID: 11400000, guid: 82efd85341336bd469495ea0a6064feb, type: 2}
+  dayConfigs:
+  - {fileID: 11400000, guid: b1fd93541f5b85644bae714e66761fbc, type: 2}
+  - {fileID: 11400000, guid: d4a3c7ce5a38e0646815b2ce3593e350, type: 2}
+  genericCustomer: {fileID: 11400000, guid: 453617d48a7d1ca47b524d2599f78f09, type: 2}
   minNpcPerDay: 2
   maxNpcPerDay: 4
+  orderSystem: {fileID: 391905253}
   npcVisualPrefab: {fileID: 0}
   npcParent: {fileID: 78695401}
   spawnPoint: {fileID: 822976074}
   counterPoint: {fileID: 1918748199}
   exitPoint: {fileID: 181298184}
   npcMoveSpeed: 800
-  endOfDayNpcs:
-  - {fileID: 11400000, guid: 76935125c1142f24383b4766a299cd50, type: 2}
   endDayButton: {fileID: 398917924}
-  morningCheckPanel: {fileID: 1966738963}
 --- !u!1 &440765295
 GameObject:
   m_ObjectHideFlags: 0
@@ -4206,8 +4184,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b8dd5bed908364747903d8a9bc74533b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StartOfDayController
-  startOfDayNpcs: []
-  dayOverrides: []
 --- !u!1 &453914901
 GameObject:
   m_ObjectHideFlags: 0
@@ -6118,7 +6094,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &871927031
 RectTransform:
   m_ObjectHideFlags: 0
@@ -6334,7 +6310,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: -9.367}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: 719.9509, y: 37.560608}
+  m_AnchoredPosition: {x: 719.9509, y: 37.560547}
   m_SizeDelta: {x: 270.1516, y: 234.0645}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!114 &898116928
@@ -14100,6 +14076,8 @@ MonoBehaviour:
   - {fileID: 0}
   nextWordIcon: {fileID: 65221889}
   playerName: Avril
+  playerAliases:
+  - "\u827E\u8587\u513F"
   playerColor: {r: 0.4, g: 0.8, b: 1, a: 1}
 --- !u!1 &2117794879
 GameObject:

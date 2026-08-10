@@ -1,40 +1,98 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "events": [
     {
-      "id": "evt_light",
-      "npcId": "light",
-      "npcDisplayName": "提灯人",
+      "id": "evt_day1_watchman",
+      "npcId": "watchman",
+      "npcDisplayName": "守夜人",
       "order": 1,
-      "introDialogueId": "evt_light_intro",
+      "day": 1,
+      "introDialogueId": "evt_day1_intro",
       "cards": [
         {
           "type": "effect",
-          "imagePath": "Art/Cards/50C.png",
-          "dialogueId": "evt_light_opt1",
-          "hpCost": 10,
-          "goldRewardMin": 20,
-          "goldRewardMax": 100,
-          "cardRewardMode": "random_normal"
+          "imagePath": "Art/EventCards/day1/50C.png",
+          "dialogueId": "evt_day1_50c",
+          "goldCost": 50,
+          "materialRewardId": "snake",
+          "materialRewardAmount": 5
         },
         {
           "type": "effect",
-          "imagePath": "Art/Cards/100C.png",
-          "dialogueId": "evt_light_opt2",
-          "goldCost": 50,
-          "materialRewardId": "random_raw",
-          "materialRewardAmount": 2,
-          "cardRewardMode": "random_normal"
+          "imagePath": "Art/EventCards/day1/10H.png",
+          "dialogueId": "evt_day1_10h",
+          "hpCost": 10,
+          "cardRewardIds": ["flamethrower"]
         },
         {
-          "type": "attack",
-          "imagePath": "Art/Cards/200C.png",
-          "cardRewardMode": "random_special"
+          "type": "pilfer",
+          "imagePath": "Art/EventCards/day1/pilferEvil.png",
+          "dialogueId": "evt_day1_pilfer",
+          "cardRewardIds": ["flamethrower", "greatsword"]
         },
         {
           "type": "end",
-          "imagePath": "Art/Cards/400C.png",
-          "dialogueId": "evt_light_end"
+          "imagePath": "Art/EventCards/day1/walkaway.png",
+          "dialogueId": "evt_day1_walkaway",
+          "materialRewardId": "tentacle",
+          "materialRewardAmount": 5
+        }
+      ]
+    },
+    {
+      "id": "evt_day2_poleman",
+      "npcId": "poleman",
+      "npcDisplayName": "电线杆人",
+      "order": 1,
+      "day": 2,
+      "introDialogueId": "evt_day2_intro",
+      "cards": [
+        {
+          "type": "effect",
+          "imagePath": "Art/EventCards/day2/50C.png",
+          "dialogueId": "evt_day2_50c",
+          "goldCost": 50,
+          "materialRewardId": "claw",
+          "materialRewardAmount": 5
+        },
+        {
+          "type": "end",
+          "imagePath": "Art/EventCards/day2/walkaway.png",
+          "dialogueId": "evt_day2_walkaway",
+          "goldCost": 20
+        },
+        {
+          "type": "attack",
+          "imagePath": "Art/EventCards/day2/executeEvil.png",
+          "cardRewardIds": ["reaper", "magicburst"]
+        }
+      ]
+    },
+    {
+      "id": "evt_day3_namelessking",
+      "npcId": "namelessking",
+      "npcDisplayName": "无名之王",
+      "order": 1,
+      "day": 3,
+      "introDialogueId": "evt_day3_intro",
+      "cards": [
+        {
+          "type": "effect",
+          "imagePath": "Art/EventCards/day3/50C.png",
+          "dialogueId": "evt_day3_50c",
+          "goldRewardMin": 200,
+          "goldRewardMax": 200
+        },
+        {
+          "type": "effect",
+          "imagePath": "Art/EventCards/day3/10H.png",
+          "dialogueId": "evt_day3_10h",
+          "healFull": true
+        },
+        {
+          "type": "end",
+          "imagePath": "Art/EventCards/day3/walkaway.png",
+          "dialogueId": "evt_day3_walkaway"
         }
       ]
     }

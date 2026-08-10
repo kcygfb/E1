@@ -608,12 +608,123 @@ namespace KiKs.Combat
                     yield return ResolveAttackCard(cardDef);
                     break;
 
+                case "pilfer":
+                    yield return ResolvePilferCard(cardDef);
+                    break;
+
                 case "end":
+                    // end 可以带代价和奖励
+                    ApplyCosts(cardDef);
+                    yield return ApplyRewards(cardDef);
                     yield return PlayDialogue(cardDef.dialogueId);
                     break;
             }
 
             FinishEvent();
+        }
+
+        /// <summary>处理代价（扣血/扣金币），end 类型共用</summary>
+        private void ApplyCosts(EventCardDefinition cardDef)
+        {
+            if (cardDef.hpCost > 0)
+            {
+                var newHp = Mathf.Max(0, PlayerGlobalStats.CurrentHealth - cardDef.hpCost);
+                PlayerGlobalStats.SetHealth(newHp, PlayerGlobalStats.MaxHealth);
+                RefreshHpDisplay();
+                Debug.Log($"[EventScene] HP -{cardDef.hpCost} → {PlayerGlobalStats.CurrentHealth}");
+            }
+
+            if (cardDef.goldCost > 0)
+            {
+                if (!RuntimeGameRepository.SpendGold(cardDef.goldCost))
+                {
+                    KiKs.UI.WarningToast.Show($"金币不足：需要 {cardDef.goldCost}C");
+                    return;
+                }
+                RefreshGoldDisplay();
+                Debug.Log($"[EventScene] Gold -{cardDef.goldCost} → {RuntimeGameRepository.Gold}");
+            }
+        }
+
+        /// <summary>处理奖励（金币/材料/卡牌/healFull），end 类型共用</summary>
+        private IEnumerator ApplyRewards(EventCardDefinition cardDef)
+        {
+            // 随机金币奖励
+            if (cardDef.goldRewardMax > 0)
+            {
+                var gold = Random.Range(cardDef.goldRewardMin, cardDef.goldRewardMax + 1);
+                RuntimeGameRepository.AddGold(gold);
+                RefreshGoldDisplay();
+                RevealRewardToken($"金币 ×{gold}", new Color32(210, 170, 60, 255));
+                Debug.Log($"[EventScene] Gold +{gold} → {RuntimeGameRepository.Gold}");
+            }
+
+            // 材料奖励
+            if (!string.IsNullOrWhiteSpace(cardDef.materialRewardId) && cardDef.materialRewardAmount > 0)
+            {
+                var matId = cardDef.materialRewardId;
+                if (matId == "random_raw")
+                    matId = PickRandomRawMaterial();
+
+                if (!string.IsNullOrEmpty(matId))
+                {
+                    RuntimeGameRepository.AddResource(matId, cardDef.materialRewardAmount);
+                    var matName = GetMaterialDisplayName(matId);
+                    RevealRewardToken($"{matName} ×{cardDef.materialRewardAmount}", new Color32(116, 82, 54, 255));
+                    Debug.Log($"[EventScene] Material +{cardDef.materialRewardAmount} {matId}");
+                }
+            }
+
+            // 指定卡牌奖励
+            if (cardDef.cardRewardIds != null && cardDef.cardRewardIds.Length > 0)
+            {
+                foreach (var cardId in cardDef.cardRewardIds)
+                {
+                    if (string.IsNullOrEmpty(cardId)) continue;
+                    RuntimeGameRepository.AddOwnedCard(cardId);
+                    RevealRewardToken($"卡牌: {cardId}", new Color32(87, 102, 142, 255));
+                    Debug.Log($"[EventScene] Card reward: {cardId}");
+                }
+            }
+            else if (!string.IsNullOrWhiteSpace(cardDef.cardRewardMode))
+            {
+                var cardId = PickRandomCard(cardDef.cardRewardMode);
+                if (!string.IsNullOrEmpty(cardId))
+                {
+                    RuntimeGameRepository.AddOwnedCard(cardId);
+                    RevealRewardToken($"卡牌: {cardId}", new Color32(87, 102, 142, 255));
+                    Debug.Log($"[EventScene] Card reward: {cardId}");
+                }
+            }
+
+            // HP 回满
+            if (cardDef.healFull)
+            {
+                PlayerGlobalStats.SetHealth(PlayerGlobalStats.MaxHealth, PlayerGlobalStats.MaxHealth);
+                RefreshHpDisplay();
+                RevealRewardToken("生命值回满", new Color32(80, 200, 80, 255));
+                Debug.Log("[EventScene] HP healed to full.");
+            }
+
+            yield return null;
+        }
+
+        /// <summary>pilfer：不扣不杀 → 给指定卡牌 → 播对话</summary>
+        private IEnumerator ResolvePilferCard(EventCardDefinition cardDef)
+        {
+            // 给指定卡牌
+            if (cardDef.cardRewardIds != null && cardDef.cardRewardIds.Length > 0)
+            {
+                foreach (var cardId in cardDef.cardRewardIds)
+                {
+                    if (string.IsNullOrEmpty(cardId)) continue;
+                    RuntimeGameRepository.AddOwnedCard(cardId);
+                    RevealRewardToken($"卡牌: {cardId}", new Color32(87, 102, 142, 255));
+                    Debug.Log($"[EventScene] Pilfer: {cardId}");
+                }
+            }
+
+            yield return PlayDialogue(cardDef.dialogueId);
         }
 
         /// <summary>选项1/2：扣血或扣金币 → 给随机奖励 → 播放对话</summary>
@@ -679,6 +790,27 @@ namespace KiKs.Combat
                 }
             }
 
+            // 指定卡牌奖励
+            if (cardDef.cardRewardIds != null && cardDef.cardRewardIds.Length > 0)
+            {
+                foreach (var cardId in cardDef.cardRewardIds)
+                {
+                    if (string.IsNullOrEmpty(cardId)) continue;
+                    RuntimeGameRepository.AddOwnedCard(cardId);
+                    RevealRewardToken($"卡牌: {cardId}", new Color32(87, 102, 142, 255));
+                    Debug.Log($"[EventScene] Card reward: {cardId}");
+                }
+            }
+
+            // HP 回满
+            if (cardDef.healFull)
+            {
+                PlayerGlobalStats.SetHealth(PlayerGlobalStats.MaxHealth, PlayerGlobalStats.MaxHealth);
+                RefreshHpDisplay();
+                RevealRewardToken("生命值回满", new Color32(80, 200, 80, 255));
+                Debug.Log("[EventScene] HP healed to full.");
+            }
+
             // 播放分支对话
             yield return PlayDialogue(cardDef.dialogueId);
         }
@@ -703,8 +835,18 @@ namespace KiKs.Combat
                 Debug.Log($"[EventScene] NPC '{evt.npcId}' killed.");
             }
 
-            // 给特殊卡牌掉落
-            if (!string.IsNullOrWhiteSpace(cardDef.cardRewardMode))
+            // 给卡牌掉落（指定或随机）
+            if (cardDef.cardRewardIds != null && cardDef.cardRewardIds.Length > 0)
+            {
+                foreach (var cardId in cardDef.cardRewardIds)
+                {
+                    if (string.IsNullOrEmpty(cardId)) continue;
+                    RuntimeGameRepository.AddOwnedCard(cardId);
+                    RevealRewardToken($"卡牌: {cardId}", new Color32(87, 102, 142, 255));
+                    Debug.Log($"[EventScene] Attack drop: {cardId}");
+                }
+            }
+            else if (!string.IsNullOrWhiteSpace(cardDef.cardRewardMode))
             {
                 var cardId = PickRandomCard(cardDef.cardRewardMode);
                 if (!string.IsNullOrEmpty(cardId))

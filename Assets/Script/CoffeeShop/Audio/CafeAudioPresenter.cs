@@ -29,7 +29,6 @@ public sealed class CafeAudioPresenter : MonoBehaviour
 
         GameEvent.On("PhaseChanged", OnPhaseChanged);
         GameEvent.On("DayEnded", OnDayEnded);
-        GameEvent.On("ShopReadyToClose", OnShopReadyToClose);
         GameEvent.On("CustomerArrived", OnCustomerArrived);
         GameEvent.On("CustomerReadyToOrder", OnCustomerReadyToOrder);
         GameEvent.On("DialogueRequested", OnDialogueRequested);
@@ -56,7 +55,6 @@ public sealed class CafeAudioPresenter : MonoBehaviour
     {
         GameEvent.Off("PhaseChanged", OnPhaseChanged);
         GameEvent.Off("DayEnded", OnDayEnded);
-        GameEvent.Off("ShopReadyToClose", OnShopReadyToClose);
         GameEvent.Off("CustomerArrived", OnCustomerArrived);
         GameEvent.Off("CustomerReadyToOrder", OnCustomerReadyToOrder);
         GameEvent.Off("DialogueRequested", OnDialogueRequested);
@@ -85,12 +83,6 @@ public sealed class CafeAudioPresenter : MonoBehaviour
     {
         Log("DayEnded");
         Play(bindings.dayEnded);
-    }
-
-    private void OnShopReadyToClose(object payload)
-    {
-        Log("ShopReadyToClose");
-        Play(bindings.shopReadyToClose);
     }
 
     private void OnCustomerArrived(object payload)

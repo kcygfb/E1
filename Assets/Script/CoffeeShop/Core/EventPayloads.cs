@@ -17,12 +17,16 @@ public class OrderTicket
     public Sprite TicketSprite { get; }
     public CustomerController Owner { get; }
 
+    /// <summary>如果为 true，TryServeCoffee 跳过 CoffeeId 匹配检查，接受任何咖啡。</summary>
+    public bool AcceptAnyCoffee { get; }
+
     /// <summary>QTE 评分结果，由 CraftController 在交付时填充</summary>
     public QTEScoreResult QTEScore { get; set; }
 
     public OrderTicket(string orderId, string npcId, string npcName,
         string coffeeId, string coffeeName, int coffeePrice,
-        Sprite ticketSprite, CustomerController owner)
+        Sprite ticketSprite, CustomerController owner,
+        bool acceptAnyCoffee = false)
     {
         OrderId = orderId;
         NpcId = npcId;
@@ -32,6 +36,7 @@ public class OrderTicket
         CoffeePrice = coffeePrice;
         TicketSprite = ticketSprite;
         Owner = owner;
+        AcceptAnyCoffee = acceptAnyCoffee;
     }
 }
 

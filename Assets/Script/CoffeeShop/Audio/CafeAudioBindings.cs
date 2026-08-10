@@ -59,10 +59,16 @@ public sealed class CafeAudioBindings : ScriptableObject
     {
         switch (phase)
         {
+            case DayPhase.StartOfDay:
+                return null;
             case DayPhase.MorningCheck:
                 return morningCheckStarted;
             case DayPhase.Shop:
                 return shopStarted;
+            case DayPhase.EndOfDay:
+                return null;
+            case DayPhase.Settlement:
+                return null;
             case DayPhase.Night:
                 return nightStarted;
             default:

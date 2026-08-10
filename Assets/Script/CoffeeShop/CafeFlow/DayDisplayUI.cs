@@ -9,11 +9,13 @@ public class DayDisplayUI : MonoBehaviour
     private void OnEnable()
     {
         GameEvent.On("DayStarted", OnDayStarted);
+        GameEvent.On("PhaseChanged", OnPhaseChanged);
     }
 
     private void OnDisable()
     {
         GameEvent.Off("DayStarted", OnDayStarted);
+        GameEvent.Off("PhaseChanged", OnPhaseChanged);
     }
 
     private void Start()
@@ -25,6 +27,12 @@ public class DayDisplayUI : MonoBehaviour
     private void OnDayStarted(object payload)
     {
         if (payload is int day) UpdateText(day);
+    }
+
+    private void OnPhaseChanged(object payload)
+    {
+        if (payload is PhaseChangedPayload p && p.Phase == DayPhase.MorningCheck)
+            UpdateText(p.Day);
     }
 
     private void UpdateText(int day)

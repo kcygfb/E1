@@ -14,14 +14,35 @@ public enum NPCState
 
 public class CustomerController : MonoBehaviour
 {
-    /// <summary>∞¥ npcName ◊¢≤·µƒªÓ‘æπÀøÕ£¨π© DialoguePlayer.AnimateSpeaker øÏÀŸ≤È’“°£</summary>
     public static readonly Dictionary<string, CustomerController> ActiveCustomers = new();
 
     public NPCData NPCData { get; private set; }
     public CoffeeData CoffeeData { get; private set; }
+    public NPCEntry Entry { get; private set; }
     public NPCState State { get; private set; }
+    public bool AcceptAny { get; set; }
     public System.Action<CustomerController> OnLeftStore;
     public CustomerQueue Spawner { get; set; }
+
+    public bool MatchesSpeaker(string speaker)
+    {
+        if (string.IsNullOrEmpty(speaker) || NPCData == null) return false;
+        if (NPCData.npcName == speaker ||
+            NPCData.npcName.Contains(speaker) ||
+            speaker.Contains(NPCData.npcName))
+            return true;
+
+        if (NPCData.speakerAliases != null)
+        {
+            foreach (var alias in NPCData.speakerAliases)
+            {
+                if (string.IsNullOrEmpty(alias)) continue;
+                if (alias == speaker || alias.Contains(speaker) || speaker.Contains(alias))
+                    return true;
+            }
+        }
+        return false;
+    }
 
     [Header("Movement")]
     public float moveSpeed = 500f;
@@ -45,15 +66,22 @@ public class CustomerController : MonoBehaviour
 
     public void Initialize(
         NPCData npcData,
+        NPCEntry entry,
         CoffeeData coffeeData,
         Vector3 counterPosition,
         Vector3 exitPosition
     )
     {
         NPCData = npcData;
+        Entry = entry;
         CoffeeData = coffeeData;
         this.counterPosition = counterPosition;
         this.exitPosition = exitPosition;
+
+        if (entry != null)
+        {
+            AcceptAny = entry.orderMode == OrderMode.AcceptAny;
+        }
 
         if (!string.IsNullOrEmpty(npcData.npcName))
             ActiveCustomers[npcData.npcName] = this;
@@ -81,12 +109,13 @@ public class CustomerController : MonoBehaviour
             {
                 _pendingStartOfDayDialogue = false;
                 ChangeState(NPCState.ArrivalDialogue);
-                EmitDialogue(NPCData.startOfDayDialogueId, "startofday");
+                EmitDialogue(Entry?.GetDialogueId("startofday"), "startofday");
             }
-            else if (!string.IsNullOrEmpty(NPCData.endOfDayDialogueId) && _pendingEndOfDayDialogue)
+            else if (_pendingEndOfDayDialogue)
             {
                 _pendingEndOfDayDialogue = false;
-                StartEndOfDayDialogue(NPCData.endOfDayDialogueId);
+                ChangeState(NPCState.ArrivalDialogue);
+                EmitDialogue(Entry?.GetDialogueId("endofday"), "endofday");
             }
             else
             {
@@ -100,23 +129,14 @@ public class CustomerController : MonoBehaviour
     private bool _pendingEndOfDayDialogue;
     private bool _pendingStartOfDayDialogue;
 
-    /// <summary>±Íº« NPC µΩ¥ÔπÒÃ®∫Û≤•∑≈ ’Œ≤∂‘ª∞£®∂¯∑«’˝≥£µΩ¥Ô∂‘ª∞£©°£”… CustomerQueue.TrySpawnNextNpc µ˜”√°£</summary>
     public void MarkEndOfDayDialogue()
     {
         _pendingEndOfDayDialogue = true;
     }
 
-    /// <summary>±Íº« NPC µΩ¥ÔπÒÃ®∫Û≤•∑≈æ≠”™«∞∂‘ª∞°£”… CustomerQueue.TrySpawnStartOfDayNpc µ˜”√°£</summary>
     public void MarkStartOfDayDialogue()
     {
         _pendingStartOfDayDialogue = true;
-    }
-
-    /// <summary> ’Œ≤∂‘ª∞£∫µΩ¥ÔπÒÃ®∫Û÷±Ω”≤•∑≈£¨≤ªœ¬µ•°£∂‘ª∞Ω· ¯“‘ 'endofday' context ¿Îø™°£</summary>
-    public void StartEndOfDayDialogue(string dialogueId)
-    {
-        ChangeState(NPCState.ArrivalDialogue);
-        EmitDialogue(dialogueId, "endofday");
     }
 
     private void StartArrivalDialogue()
@@ -124,36 +144,11 @@ public class CustomerController : MonoBehaviour
         ChangeState(NPCState.ArrivalDialogue);
         GameEvent.Emit("CustomerArrived", NPCData);
 
-        // ÂõûËÆøÊ£ÄÊü?
-        if (!string.IsNullOrEmpty(NPCData.desiredCoffeeId) && Spawner != null && Spawner.HasPendingReturnVisit(NPCData))
-        {
-            bool unlocked = CoffeeData != null && (UnlockManager.Instance == null || UnlockManager.Instance.IsUnlocked(CoffeeData));
-            if (unlocked)
-            {
-                GiveReturnReward();
-                Spawner.ClearReturnVisit(NPCData);
-                EmitDialogue(NPCData.returnFoundDialogueId, "arrival");
-            }
-            else
-            {
-                EmitDialogue(NPCData.returnNotFoundDialogueId, "locked_departure");
-            }
-            return;
-        }
-
-        // È¶ñÊ¨°Âà∞ËÆøÔºöÁâπÊÆäNPCÊåáÂÆöÂíñÂï°Êú™Ëß£Èî?
-        if (!string.IsNullOrEmpty(NPCData.desiredCoffeeId) && CoffeeData != null && UnlockManager.Instance != null && !UnlockManager.Instance.IsUnlocked(CoffeeData))
-        {
-            if (Spawner != null) Spawner.MarkReturnVisit(NPCData);
-            EmitDialogue(NPCData.lockedDialogueId, "locked_departure");
-            return;
-        }
-
         var tokens = new Dictionary<string, string>
         {
-            { "coffee", CoffeeData != null ? CoffeeData.coffeeName : "ÂíñÂï°" }
+            { "coffee", CoffeeData != null ? CoffeeData.coffeeName : (AcceptAny ? "‰ªªÊÑèÂíñÂï°" : "ÂíñÂï°") }
         };
-        EmitDialogue(NPCData.arrivalDialogueId, "arrival", tokens);
+        EmitDialogue(Entry?.GetDialogueId("arrival"), "arrival", tokens);
     }
 
     private void EmitDialogue(string dialogueId, string context, Dictionary<string, string> tokens = null)
@@ -168,8 +163,22 @@ public class CustomerController : MonoBehaviour
         switch (context)
         {
             case "arrival":
-                if (NPCData.willOrder)
+                // Êúâ orderMode Â∞±‰∏ãÂçïÔºàSpecificCoffee/RandomUnlocked/AcceptAny ÈÉΩ‰∏ãÂçïÔºâ
+                if (Entry != null && Entry.orderMode != OrderMode.AcceptAny || Entry == null)
                 {
+                    if (CoffeeData != null || AcceptAny)
+                    {
+                        MakeOrder();
+                        ChangeState(NPCState.WaitingForCoffee);
+                    }
+                    else
+                    {
+                        StartDepartureDialogue();
+                    }
+                }
+                else if (Entry != null && Entry.orderMode == OrderMode.AcceptAny)
+                {
+                    // AcceptAny ‰πü‰∏ãÂçï
                     MakeOrder();
                     ChangeState(NPCState.WaitingForCoffee);
                 }
@@ -180,7 +189,7 @@ public class CustomerController : MonoBehaviour
                 break;
 
             case "locked_departure":
-                StartDepartureDialogue(true);
+                StartDepartureDialogue();
                 break;
 
             case "departure":
@@ -200,13 +209,6 @@ public class CustomerController : MonoBehaviour
         }
     }
 
-    private void GiveReturnReward()
-    {
-        if (NPCData.returnReward <= 0) return;
-        RuntimeGameRepository.AddGold(NPCData.returnReward);
-        Debug.Log($"[CustomerController] {NPCData.npcName} return reward: +{NPCData.returnReward} gold");
-    }
-
     private void MakeOrder()
     {
         GameEvent.Emit("CustomerReadyToOrder", new OrderRequest(this, NPCData, CoffeeData));
@@ -219,13 +221,10 @@ public class CustomerController : MonoBehaviour
         StartDepartureDialogue();
     }
 
-    private void StartDepartureDialogue(bool locked = false)
+    private void StartDepartureDialogue()
     {
         ChangeState(NPCState.DepartureDialogue);
-        string dialogueId = locked && !string.IsNullOrEmpty(NPCData.lockedDepartureDialogueId)
-            ? NPCData.lockedDepartureDialogueId
-            : NPCData.departureDialogueId;
-        EmitDialogue(dialogueId, "departure");
+        EmitDialogue(Entry?.GetDialogueId("departure"), "departure");
     }
 
     private void LeaveFinished()

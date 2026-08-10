@@ -1,0 +1,30 @@
+{
+  "dialogues": [
+    {
+      "dialogueId": "timi_startofday",
+      "lines": [
+        { "speaker": "艾薇儿", "text": "昨天夜晚的战斗也是轻轻又松松的结束了（确信？）。", "expression": "Tired" },
+        { "speaker": "艾薇儿", "text": "从那些怪物身上搞到了不少好东西。", "expression": "Tired" },
+        { "speaker": "艾薇儿", "text": "如果能将这些素材运用到新的咖啡的制作中，应该可以让我们的咖啡大卖！！", "expression": "Thinking" },
+        { "speaker": "前辈小提", "text": "不行，艾薇儿。", "expression": "Annoyed" },
+        { "speaker": "艾薇儿", "text": "可以的，美丽可爱的小提前辈。", "expression": "Professional Smile" },
+        { "speaker": "前辈小提", "text": "不行。就算你跟我撒娇也没用。就算你夸我是这个世界上最好最美丽的前辈也没用。", "expression": "Annoyed" },
+        { "speaker": "前辈小提", "text": "客人们会拉肚子的。然后他们就会投诉我们。", "expression": "Annoyed" },
+        { "speaker": "艾薇儿", "text": "相信我，前辈。其实我在我们的库房里找到了一本来自不知道什么地方的咖啡配方。", "expression": "Happy" },
+        { "speaker": "艾薇儿", "text": "这应该是我们老板的祖传秘方。", "expression": "Happy" },
+        { "speaker": "前辈小提", "text": "让我看看。", "expression": "" },
+        { "speaker": "艾薇儿", "text": "好的前辈。", "expression": "Professional Smile" },
+        { "speaker": "前辈小提", "text": "。。。。。。", "expression": "" },
+        { "speaker": "艾薇儿", "text": "求求你了，前辈。这样会很有意思的！", "expression": "Happy" },
+        { "speaker": "前辈小提", "text": "好吧，艾薇儿。好吧。", "expression": "" },
+        { "speaker": "艾薇儿", "text": "我们还可以一起在配方的基础上继续研发更多的配方。", "expression": "Professional Smile" },
+        { "speaker": "前辈小提", "text": "也许可以的，但是我家的猫猫这几天生病了，下班之后我就需要去照顾他们。", "expression": "Annoyed" },
+        { "speaker": "艾薇儿", "text": "哦，可怜的maomao。我从没见过脾气这么好的猫。或多或少的猫脾气中都会带一点小恶魔的属性。她简直是一个天使。", "expression": "Professional Smile" },
+        { "speaker": "前辈小提", "text": "所以我要下班了，相信你一定可以把咖啡店经营的很好。", "expression": "" },
+        { "speaker": "艾薇儿", "text": "我喜欢你。", "expression": "Happy" },
+        { "speaker": "前辈小提", "text": "希望那些客人在喝了稀奇古怪的咖啡后就直接昏倒失忆了。", "expression": "Annoyed" },
+        { "speaker": "艾薇儿", "text": "希望如此。", "expression": "Professional Smile" }
+      ]
+    }
+  ]
+}

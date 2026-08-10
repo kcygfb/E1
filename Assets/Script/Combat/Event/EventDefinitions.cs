@@ -28,7 +28,7 @@ namespace KiKs.Combat
     public sealed class EventCardDefinition
     {
         /// <summary>
-        /// effect=触发效果+对话；attack=攻击NPC+掉落；end=对话后结束。
+        /// effect=触发效果+对话；attack=攻击NPC+掉落；pilfer=偷取卡牌+对话；end=对话后结束（可带奖励/代价）。
         /// </summary>
         public string type;
         public string imagePath;
@@ -49,5 +49,11 @@ namespace KiKs.Combat
         // 卡牌奖励: "random_normal" = 随机普通卡, "random_special" = 随机特殊卡, "specific" = 指定卡
         public string cardRewardMode;
         public string cardRewardSpecificId;
+
+        // 指定多张卡牌掉落（优先于 cardRewardMode）
+        public string[] cardRewardIds;
+
+        // HP 回满
+        public bool healFull;
     }
 }

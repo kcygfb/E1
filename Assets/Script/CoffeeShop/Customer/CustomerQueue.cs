@@ -3,33 +3,34 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// 顾客队列控制器。从 DayConfig 读取配置，生成顾客/收尾 NPC。
+/// 无 DayConfig 的天 = 纯随机日，用 GenericCustomer 刷。
+/// </summary>
 public class CustomerQueue : MonoBehaviour
 {
-    [System.Serializable]
-    public class DayNPCConfig
-    {
-        public int day;
-        public List<NPCData> npcs;
-    }
-
     [System.Serializable]
     private class NPCRequest
     {
         public NPCData npcData;
+        public NPCEntry entry;
         public CoffeeData coffeeData;
+        public Sprite portrait;
+        public bool acceptAny;
     }
 
-    [Header("Data")]
-    public List<NPCData> npcPool = new();
-    public List<CoffeeData> coffeePool = new();
-    public OrderSystem orderSystem;
+    [Header("Day Configs")]
+    [Tooltip("剧情天的配置。无配置的天=随机刷通用顾客。")]
+    public List<DayConfig> dayConfigs = new();
 
-    [Header("Day Overrides")]
-    public List<DayNPCConfig> dayOverrides = new();
-
-    [Header("Daily Queue")]
+    [Header("Random Day Fallback")]
+    [Tooltip("随机日使用的通用顾客 NPCData")]
+    public NPCData genericCustomer;
     public int minNpcPerDay = 2;
     public int maxNpcPerDay = 4;
+
+    [Header("System")]
+    public OrderSystem orderSystem;
 
     [Header("Visual Spawn")]
     public GameObject npcVisualPrefab;
@@ -37,84 +38,70 @@ public class CustomerQueue : MonoBehaviour
     public Transform spawnPoint;
     public Transform counterPoint;
     public Transform exitPoint;
-    [Tooltip("NPC移动速度，数值越大出场越快")]
+    [Tooltip("NPC移动速度")]
     public float npcMoveSpeed = 500f;
-
-    [Header("End of Day")]
-    [Tooltip("当天所有顾客离开后，按顺序出场的收尾NPC。它们的 endOfDayDialogueId 会以 'endofday' context 播放。")]
-    public List<NPCData> endOfDayNpcs = new();
 
     [Header("End Day Button")]
     public GameObject endDayButton;
 
-    [Header("Morning Check")]
-    public GameObject morningCheckPanel;
-
     private Queue<NPCRequest> waitingQueue = new();
     private Queue<NPCRequest> endOfDayQueue = new();
     private CustomerController currentNpc;
-    private readonly HashSet<string> pendingReturnVisits = new();
+    private TimeSystem _timeSystem;
 
-    public bool HasPendingReturnVisit(NPCData npc) =>
-        npc != null && pendingReturnVisits.Contains(npc.npcId);
+    private bool _shopPhaseActive;
+    private bool _endOfDayPhaseActive;
 
-    public void MarkReturnVisit(NPCData npc)
-    {
-        if (npc != null)
-        {
-            pendingReturnVisits.Add(npc.npcId);
-            Debug.Log($"[CustomerQueue] Marked return visit for {npc.npcName}");
-        }
-    }
-
-    public void ClearReturnVisit(NPCData npc)
-    {
-        if (npc != null)
-        {
-            pendingReturnVisits.Remove(npc.npcId);
-            Debug.Log($"[CustomerQueue] Cleared return visit for {npc.npcName}");
-        }
-    }
-
-    public bool CanEndDay =>
+    private bool IsShopQueueEmpty =>
         currentNpc == null &&
         waitingQueue.Count == 0 &&
-        endOfDayQueue.Count == 0 &&
         (orderSystem == null || !orderSystem.HasActiveOrder);
+
+    /// <summary>供 StartOfDayController 调用</summary>
+    public DayConfig GetDayConfig(int day)
+    {
+        if (dayConfigs == null) return null;
+        return dayConfigs.FirstOrDefault(d => d != null && d.day == day);
+    }
 
     private void OnEnable()
     {
-        GameEvent.On("DayStarted", OnDayStarted);
-        GameEvent.On("DayEnded", OnDayEnded);
         GameEvent.On("PhaseChanged", OnPhaseChanged);
+        GameEvent.On("DayEnded", OnDayEnded);
     }
 
     private void OnDisable()
     {
-        GameEvent.Off("DayStarted", OnDayStarted);
-        GameEvent.Off("DayEnded", OnDayEnded);
         GameEvent.Off("PhaseChanged", OnPhaseChanged);
+        GameEvent.Off("DayEnded", OnDayEnded);
     }
-
-    private void OnDayStarted(object payload) { /* int day — not used, spawn driven by PhaseChanged */ }
 
     private void OnDayEnded(object payload) { ClearAllNPCs(); }
 
     private void OnPhaseChanged(object payload)
     {
         if (payload is not PhaseChangedPayload p) return;
-        if (p.Phase == DayPhase.MorningCheck)
+
+        if (p.Phase == DayPhase.Shop)
         {
-            if (morningCheckPanel != null) morningCheckPanel.SetActive(true);
+            _shopPhaseActive = true;
+            _endOfDayPhaseActive = false;
             if (endDayButton != null) endDayButton.SetActive(false);
             BuildQueueForDay(p.Day);
-        }
-        else if (p.Phase == DayPhase.Shop)
-        {
-            if (morningCheckPanel != null) morningCheckPanel.SetActive(false);
-            if (endDayButton != null) endDayButton.SetActive(false);
             TrySpawnNextNpc();
-            NotifyIfReadyToClose();
+            NotifyIfShopComplete();
+        }
+        else if (p.Phase == DayPhase.EndOfDay)
+        {
+            _shopPhaseActive = false;
+            _endOfDayPhaseActive = true;
+            if (endDayButton != null) endDayButton.SetActive(false);
+            BuildEndOfDayQueue(p.Day);
+            TrySpawnNextNpc();
+        }
+        else if (p.Phase == DayPhase.MorningCheck)
+        {
+            if (endDayButton != null) endDayButton.SetActive(false);
         }
     }
 
@@ -130,113 +117,116 @@ public class CustomerQueue : MonoBehaviour
         }
         if (orderSystem != null && orderSystem.HasActiveOrder)
             orderSystem.ClearActiveOrder();
+        _shopPhaseActive = false;
+        _endOfDayPhaseActive = false;
     }
 
     private void Update()
     {
         if (endDayButton != null)
-            endDayButton.SetActive(CanEndDay);
+            endDayButton.SetActive(_shopPhaseActive && IsShopQueueEmpty);
     }
+
+    // ==================== Build Queues ====================
 
     private void BuildQueueForDay(int day)
     {
         waitingQueue.Clear();
 
-        // 1. 回访预检查
-        var pendingIds = pendingReturnVisits.ToList();
-        foreach (var npcId in pendingIds)
-        {
-            var npc = FindNPCById(npcId);
-            if (npc == null || string.IsNullOrEmpty(npc.desiredCoffeeId)) continue;
-            if (UnlockManager.Instance != null)
-            {
-                var loader = CoffeeDataLoader.Instance;
-                if (loader != null && loader.IsLoaded)
-                {
-                    var json = loader.GetCoffee(npc.desiredCoffeeId);
-                    if (json != null)
-                    {
-                        var tempData = ScriptableObject.CreateInstance<CoffeeData>();
-                        tempData.ApplyJson(json);
-                        if (UnlockManager.Instance.IsUnlocked(tempData))
-                        {
-                            returnVisitors.Add(npc);
-                            pendingReturnVisits.Remove(npcId);
-                        }
-                        Destroy(tempData);
-                    }
-                }
-            }
-        }
+        var config = GetDayConfig(day);
 
-        // 2. Day overrides
-        var overrideConfig = dayOverrides.FirstOrDefault(d => d.day == day);
-        if (overrideConfig != null && overrideConfig.npcs != null && overrideConfig.npcs.Count > 0)
+        if (config != null && config.customers != null && config.customers.Count > 0)
         {
-            foreach (var npc in overrideConfig.npcs)
+            foreach (var entry in config.customers)
             {
-                if (npc == null) continue;
-                EnqueueNpc(npc, null);
+                if (entry == null || entry.npc == null) continue;
+                EnqueueNpc(entry);
             }
-            BuildEndOfDayQueue();
             return;
         }
 
-        // 3. Random
-        if (npcPool == null || npcPool.Count == 0)
-        {
-            BuildEndOfDayQueue();
-            return;
-        }
-
-        var usedToday = new HashSet<NPCData>();
-        var firstNpcs = npcPool.Where(n => n.spawnOrder == SpawnOrder.First).ToList();
-        var lastNpcs = npcPool.Where(n => n.spawnOrder == SpawnOrder.Last).ToList();
-        var randomPool = npcPool.Where(n => n.spawnOrder == SpawnOrder.Random).ToList();
-
+        // 无 DayConfig：随机刷 GenericCustomer
+        if (genericCustomer == null) return;
         int total = Random.Range(minNpcPerDay, maxNpcPerDay + 1);
-        int middleCount = Mathf.Max(0, total - firstNpcs.Count - lastNpcs.Count);
-
-        foreach (var npc in firstNpcs) EnqueueNpc(npc, usedToday);
-        for (int i = 0; i < middleCount; i++)
+        for (int i = 0; i < total; i++)
         {
-            var npc = PickRandomNpc(randomPool, usedToday);
-            if (npc != null) EnqueueNpc(npc, usedToday);
+            var entry = new NPCEntry
+            {
+                npc = genericCustomer,
+                orderMode = OrderMode.RandomUnlocked
+            };
+            EnqueueNpc(entry);
         }
-        foreach (var npc in lastNpcs) EnqueueNpc(npc, usedToday);
-
-        BuildEndOfDayQueue();
     }
 
-    private void BuildEndOfDayQueue()
+    private void BuildEndOfDayQueue(int day)
     {
         endOfDayQueue.Clear();
-        if (endOfDayNpcs == null) return;
-        foreach (var npc in endOfDayNpcs)
+
+        var config = GetDayConfig(day);
+
+        if (config == null || config.endOfDay == null || config.endOfDay.Count == 0)
         {
-            if (npc == null) continue;
-            var coffeeData = PickCoffeeFor(npc);
-            endOfDayQueue.Enqueue(new NPCRequest { npcData = npc, coffeeData = coffeeData });
+            NotifyEndOfDayComplete();
+            return;
+        }
+
+        foreach (var entry in config.endOfDay)
+        {
+            if (entry == null || entry.npc == null) continue;
+            var coffeeData = PickCoffeeFor(entry);
+            endOfDayQueue.Enqueue(new NPCRequest
+            {
+                npcData = entry.npc,
+                entry = entry,
+                coffeeData = coffeeData,
+                portrait = PickPortrait(entry.npc),
+                acceptAny = false
+            });
         }
     }
 
-    private List<NPCData> returnVisitors = new();
+    // ==================== Enqueue ====================
 
-    private void EnqueueNpc(NPCData npcData, HashSet<NPCData> usedToday)
+    private Sprite _lastPortrait;
+
+    private void EnqueueNpc(NPCEntry entry)
     {
-        if (npcData == null || (usedToday != null && usedToday.Contains(npcData))) return;
-        if (usedToday != null) usedToday.Add(npcData);
+        if (entry == null || entry.npc == null) return;
 
-        CoffeeData coffeeData = PickCoffeeFor(npcData);
-        waitingQueue.Enqueue(new NPCRequest { npcData = npcData, coffeeData = coffeeData });
+        Sprite portrait = PickPortrait(entry.npc);
+
+        CoffeeData coffeeData = PickCoffeeFor(entry);
+        bool acceptAny = entry.orderMode == OrderMode.AcceptAny;
+
+        waitingQueue.Enqueue(new NPCRequest
+        {
+            npcData = entry.npc,
+            entry = entry,
+            coffeeData = coffeeData,
+            portrait = portrait,
+            acceptAny = acceptAny
+        });
     }
 
-    private NPCData PickRandomNpc(List<NPCData> pool, HashSet<NPCData> usedToday)
+    private Sprite PickPortrait(NPCData npcData)
     {
-        var available = pool.Where(n => !usedToday.Contains(n)).ToList();
-        if (available.Count == 0) return null;
-        return available[Random.Range(0, available.Count)];
+        Sprite portrait = npcData.portrait;
+        if (npcData.portraitPool != null && npcData.portraitPool.Count > 0)
+        {
+            var valid = npcData.portraitPool.FindAll(p => p != null);
+            if (valid.Count > 0)
+            {
+                if (valid.Count > 1 && _lastPortrait != null)
+                    valid = valid.FindAll(p => p != _lastPortrait);
+                portrait = valid[Random.Range(0, valid.Count)];
+                _lastPortrait = portrait;
+            }
+        }
+        return portrait;
     }
+
+    // ==================== Spawn ====================
 
     private void TrySpawnNextNpc()
     {
@@ -246,17 +236,19 @@ public class CustomerQueue : MonoBehaviour
         NPCRequest request;
         bool isEndOfDay = false;
 
-        if (waitingQueue.Count > 0)
+        if (_shopPhaseActive && waitingQueue.Count > 0)
         {
             request = waitingQueue.Dequeue();
         }
-        else if (endOfDayQueue.Count > 0)
+        else if (_endOfDayPhaseActive && endOfDayQueue.Count > 0)
         {
             request = endOfDayQueue.Dequeue();
             isEndOfDay = true;
         }
         else
         {
+            if (_shopPhaseActive) NotifyShopComplete();
+            else if (_endOfDayPhaseActive) NotifyEndOfDayComplete();
             return;
         }
 
@@ -265,10 +257,10 @@ public class CustomerQueue : MonoBehaviour
         currentNpc.OnLeftStore += HandleNpcLeft;
         currentNpc.Spawner = this;
         currentNpc.moveSpeed = npcMoveSpeed;
-        currentNpc.Initialize(request.npcData, request.coffeeData, GetCounterPosition(), GetExitPosition());
+        currentNpc.AcceptAny = request.acceptAny;
+        currentNpc.Initialize(request.npcData, request.entry, request.coffeeData, GetCounterPosition(), GetExitPosition());
 
-        // End-of-day NPC: 到达柜台后才播放 endOfDayDialogueId，不下单
-        if (isEndOfDay && !string.IsNullOrEmpty(request.npcData.endOfDayDialogueId))
+        if (isEndOfDay)
         {
             currentNpc.MarkEndOfDayDialogue();
         }
@@ -314,9 +306,10 @@ public class CustomerQueue : MonoBehaviour
     {
         var img = obj.GetComponent<Image>();
         if (img == null) return;
-        if (request.npcData.portrait != null)
+        Sprite portrait = request.portrait != null ? request.portrait : request.npcData.portrait;
+        if (portrait != null)
         {
-            img.sprite = request.npcData.portrait;
+            img.sprite = portrait;
             img.color = Color.white;
             img.preserveAspect = true;
         }
@@ -326,6 +319,8 @@ public class CustomerQueue : MonoBehaviour
         }
     }
 
+    // ==================== Callbacks ====================
+
     private void HandleNpcLeft(CustomerController npc)
     {
         if (currentNpc == npc)
@@ -334,57 +329,84 @@ public class CustomerQueue : MonoBehaviour
             currentNpc = null;
         }
         TrySpawnNextNpc();
-        NotifyIfReadyToClose();
     }
 
-    private void NotifyIfReadyToClose()
+    private void NotifyIfShopComplete()
     {
-        if (CanEndDay)
-            GameEvent.Emit("ShopReadyToClose");
+        if (_shopPhaseActive && IsShopQueueEmpty)
+            NotifyShopComplete();
     }
 
-    private CoffeeData PickCoffeeFor(NPCData npcData)
+    private void NotifyShopComplete()
     {
-        if (!string.IsNullOrEmpty(npcData.desiredCoffeeId))
+        if (_timeSystem == null)
+            _timeSystem = FindFirstObjectByType<TimeSystem>();
+        if (_timeSystem != null)
+            _timeSystem.NotifyAllCustomersServed();
+    }
+
+    private void NotifyEndOfDayComplete()
+    {
+        if (_timeSystem == null)
+            _timeSystem = FindFirstObjectByType<TimeSystem>();
+        if (_timeSystem != null)
+            _timeSystem.NotifyEndOfDayComplete();
+    }
+
+    // ==================== Coffee Picking ====================
+
+    private CoffeeData PickCoffeeFor(NPCEntry entry)
+    {
+        if (entry == null) return null;
+
+        switch (entry.orderMode)
         {
-            var loader = CoffeeDataLoader.Instance;
-            if (loader != null && loader.IsLoaded)
-            {
-                var json = loader.GetCoffee(npcData.desiredCoffeeId);
-                if (json != null)
+            case OrderMode.AcceptAny:
+                return null;
+
+            case OrderMode.SpecificCoffee:
+                if (!string.IsNullOrEmpty(entry.coffeeId))
                 {
-                    var coffee = ScriptableObject.CreateInstance<CoffeeData>();
-                    coffee.ApplyJson(json);
-                    return coffee;
+                    var loader = CoffeeDataLoader.Instance;
+                    if (loader != null && loader.IsLoaded)
+                    {
+                        var json = loader.GetCoffee(entry.coffeeId);
+                        if (json != null)
+                        {
+                            var coffee = ScriptableObject.CreateInstance<CoffeeData>();
+                            coffee.ApplyJson(json);
+                            return coffee;
+                        }
+                    }
                 }
-            }
-            return null;
-        }
+                return null;
 
-        var unlocked = coffeePool.Where(c => UnlockManager.Instance != null && UnlockManager.Instance.IsUnlocked(c)).ToList();
-        if (unlocked.Count == 0) return null;
-        return unlocked[Random.Range(0, unlocked.Count)];
+            case OrderMode.RandomUnlocked:
+            default:
+                var loader2 = CoffeeDataLoader.Instance;
+                if (loader2 != null && loader2.IsLoaded)
+                {
+                    var unlocked = loader2.GetAllCoffees()
+                        .Where(c => !c.locked && KiKs.Combat.RuntimeGameRepository.IsRecipeUnlocked(c.coffeeId))
+                        .ToList();
+                    if (unlocked.Count > 0)
+                    {
+                        var picked = unlocked[Random.Range(0, unlocked.Count)];
+                        var coffee = ScriptableObject.CreateInstance<CoffeeData>();
+                        coffee.ApplyJson(picked);
+                        return coffee;
+                    }
+                }
+                return null;
+        }
     }
 
-    private NPCData FindNPCById(string npcId)
-    {
-        if (string.IsNullOrEmpty(npcId)) return null;
-        foreach (var npc in npcPool)
-            if (npc != null && npc.npcId == npcId) return npc;
-        foreach (var config in dayOverrides)
-        {
-            if (config.npcs == null) continue;
-            foreach (var npc in config.npcs)
-                if (npc != null && npc.npcId == npcId) return npc;
-        }
-        return null;
-    }
+    // ==================== Positions ====================
 
     private Vector3 GetSpawnPosition() => spawnPoint != null ? spawnPoint.position : new Vector3(-6f, 1f, 0f);
     private Vector3 GetCounterPosition() => counterPoint != null ? counterPoint.position : new Vector3(0f, 1f, 0f);
     private Vector3 GetExitPosition() => exitPoint != null ? exitPoint.position : new Vector3(6f, 1f, 0f);
 
-    // 供 StartOfDayController 调用
     public Vector3 GetSpawnPositionPublic() => GetSpawnPosition();
     public Vector3 GetCounterPositionPublic() => GetCounterPosition();
     public Vector3 GetExitPositionPublic() => GetExitPosition();

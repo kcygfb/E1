@@ -3,38 +3,24 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// 经营前对话控制器。
-/// 拦截 MorningCheck 阶段：先隐藏 MorningCheck 面板，依次出场 NPC 播放 startOfDayDialogueId，
-/// 全部对话结束后再显示 MorningCheck 面板，让正常流程继续。
-/// 不修改 TimeSystem，通过监听 PhaseChanged 事件工作。
+/// 经营前（开场）对话控制器。
+/// 从 CustomerQueue.GetDayConfig(day).startOfDay 读取 NPCEntry 列表，
+/// 依次出场播放对话，完成后回调 TimeSystem.NotifyStartOfDayComplete()。
+/// 无配置或无 DayConfig 时直接推进。
 /// </summary>
 public class StartOfDayController : MonoBehaviour
 {
-    [System.Serializable]
-    public class DayNPCConfig
-    {
-        public int day;
-        public List<NPCData> npcs;
-    }
-
-    [Header("经营前 NPC（任意天）")]
-    [Tooltip("每天经营前都出场的 NPC。")]
-    public List<NPCData> startOfDayNpcs = new();
-
-    [Header("天数覆盖")]
-    [Tooltip("特定天数的经营前 NPC。优先于上面的默认列表。")]
-    public List<DayNPCConfig> dayOverrides = new();
-
+    private TimeSystem _timeSystem;
     private CustomerQueue _queue;
-    private GameObject _morningCheckPanel;
     private bool _played;
 
-    private void OnEnable()
+    private void Awake()
     {
         GameEvent.On("PhaseChanged", OnPhaseChanged);
+        _timeSystem = FindFirstObjectByType<TimeSystem>();
     }
 
-    private void OnDisable()
+    private void OnDestroy()
     {
         GameEvent.Off("PhaseChanged", OnPhaseChanged);
     }
@@ -44,51 +30,47 @@ public class StartOfDayController : MonoBehaviour
         if (payload is not PhaseChangedPayload p) return;
         if (p.Phase == DayPhase.Night)
         {
-            _played = false; // 新的一天重置
+            _played = false;
             return;
         }
-        if (p.Phase != DayPhase.MorningCheck) return;
+        if (p.Phase != DayPhase.StartOfDay) return;
         if (_played) return;
         _played = true;
 
         _queue = FindFirstObjectByType<CustomerQueue>();
-        _morningCheckPanel = _queue != null ? _queue.morningCheckPanel : null;
 
-        // 按天数选 NPC 列表：dayOverrides 优先，否则用默认 startOfDayNpcs
-        var npcs = ResolveNpcsForDay(p.Day);
-        if (npcs == null || npcs.Count == 0)
+        var entries = ResolveEntriesForDay(p.Day);
+        if (entries == null || entries.Count == 0)
+        {
+            CompleteStartOfDay();
             return;
-
-        if (_morningCheckPanel != null)
-            _morningCheckPanel.SetActive(false);
-
-        StartCoroutine(PlayStartOfDayDialogues(npcs));
-    }
-
-    private List<NPCData> ResolveNpcsForDay(int day)
-    {
-        if (dayOverrides != null)
-        {
-            foreach (var config in dayOverrides)
-            {
-                if (config != null && config.day == day && config.npcs != null && config.npcs.Count > 0)
-                    return config.npcs;
-            }
         }
-        return startOfDayNpcs;
+
+        StartCoroutine(PlayStartOfDayDialogues(entries));
     }
 
-    private System.Collections.IEnumerator PlayStartOfDayDialogues(List<NPCData> npcs)
+    private List<NPCEntry> ResolveEntriesForDay(int day)
     {
-        yield return null;
+        if (_queue == null) return null;
+        var config = _queue.GetDayConfig(day);
+        if (config == null || config.startOfDay == null || config.startOfDay.Count == 0)
+            return null;
+        return config.startOfDay;
+    }
 
-        foreach (var npcData in npcs)
+    private System.Collections.IEnumerator PlayStartOfDayDialogues(List<NPCEntry> entries)
+    {
+        // 隐藏 MorningCheck 相关 UI
+        if (TrayGridUI.Instance != null) TrayGridUI.Instance.HideAll();
+        var morningCheckPanel = GameObject.Find("Canvas/MorningCheckPanel");
+        if (morningCheckPanel != null) morningCheckPanel.SetActive(false);
+
+        foreach (var entry in entries)
         {
-            if (npcData == null) continue;
-            if (string.IsNullOrEmpty(npcData.startOfDayDialogueId)) continue;
+            if (entry == null || entry.npc == null) continue;
 
             // 生成 NPC
-            var npcObj = CreateNpc(npcData);
+            var npcObj = CreateNpc(entry.npc);
             var controller = npcObj.GetComponent<CustomerController>();
             if (controller == null) controller = npcObj.AddComponent<CustomerController>();
 
@@ -99,7 +81,7 @@ public class StartOfDayController : MonoBehaviour
             var counterPos = _queue != null ? _queue.GetCounterPositionPublic() : new Vector3(0f, 1f, 0f);
             var exitPos = _queue != null ? _queue.GetExitPositionPublic() : new Vector3(6f, 1f, 0f);
 
-            controller.Initialize(npcData, null, counterPos, exitPos);
+            controller.Initialize(entry.npc, entry, null, counterPos, exitPos);
             npcObj.transform.position = spawnPos;
             controller.MarkStartOfDayDialogue();
 
@@ -109,16 +91,28 @@ public class StartOfDayController : MonoBehaviour
             yield return new WaitUntil(() => left);
         }
 
-        // 全部对话完毕，显示 MorningCheck 面板
-        if (_morningCheckPanel != null)
-            _morningCheckPanel.SetActive(true);
+        // 恢复 MorningCheck 相关 UI（TimeSystem.EnterMorningCheck 也会处理，这里确保即时）
+        var mcPanel = GameObject.Find("Canvas/MorningCheckPanel");
+        if (mcPanel != null) mcPanel.SetActive(true);
+        if (TrayGridUI.Instance != null) TrayGridUI.Instance.ShowSelection();
+
+        CompleteStartOfDay();
+    }
+
+    private void CompleteStartOfDay()
+    {
+        if (_timeSystem == null)
+            _timeSystem = FindFirstObjectByType<TimeSystem>();
+        if (_timeSystem != null)
+            _timeSystem.NotifyStartOfDayComplete();
+        else
+            Debug.LogWarning("[StartOfDayController] TimeSystem not found.");
     }
 
     private GameObject CreateNpc(NPCData npcData)
     {
         GameObject obj;
 
-        // 尝试用 CustomerQueue 的 prefab
         if (_queue != null)
         {
             var prefabField = typeof(CustomerQueue).GetField("npcVisualPrefab",
@@ -140,7 +134,6 @@ public class StartOfDayController : MonoBehaviour
             obj.GetComponent<RectTransform>().sizeDelta = npcData.portraitSize;
         }
 
-        // 设置父物体
         Transform parent = null;
         if (_queue != null)
         {
@@ -156,7 +149,6 @@ public class StartOfDayController : MonoBehaviour
         if (parent == null) parent = FindFirstObjectByType<Canvas>().transform;
         obj.transform.SetParent(parent, false);
 
-        // 设置立绘
         var img = obj.GetComponent<Image>();
         if (img != null)
         {
