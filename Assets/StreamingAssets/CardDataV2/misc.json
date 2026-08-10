@@ -206,8 +206,8 @@
         "en": "magic burst"
       },
       "description": {
-        "en": "Deal {amount:0} damage for each mana card spent this turn.",
-        "zhCN": "本回合每消耗1张魔法牌，造成{剑}{amount:0}点伤害"
+        "en": "Deal {amount:0} damage for each mana card spent this battle.",
+        "zhCN": "本场战斗每消耗1张魔法牌，造成{剑}{amount:0}点伤害"
       },
       "category": "misc",
       "copies": 1,
@@ -231,7 +231,7 @@
         "row": 51
       },
       "notes": [
-        "每消耗过一张魔法牌，便造成5（8）点伤害。"
+        "本场战斗每用过一张魔法牌，便造成5（8）点伤害，跨回合累计。"
       ],
       "image": "Art/Cards/magicburst.png"
     }

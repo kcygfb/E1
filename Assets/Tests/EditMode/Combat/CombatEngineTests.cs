@@ -1262,7 +1262,7 @@ namespace KiKs.Combat.Tests
         }
 
         [Test]
-        public void MagicBurst_DealsDamagePerManaCardSpentThisTurn()
+        public void MagicBurst_DealsDamagePerManaCardSpentAcrossBattle()
         {
             var burst = new CardSpec(
                 "burst", "burst", "burst", "test",
@@ -1273,23 +1273,37 @@ namespace KiKs.Combat.Tests
                         new UpgradeableNumber(5, 8), UpgradeableNumber.One,
                         ValueUnit.Points, 1)
                 });
+            // cost=0 便于同一回合连续激活多张（每回合只回 1 点 mana，否则无法一回合激活 4 张）。
             var manaCard = new CardSpec(
                 "mana", "mana", "mana", "test",
-                CardResourceType.Mana, 1, false, CardTargetType.SingleEnemy,
+                CardResourceType.Mana, 0, false, CardTargetType.SingleEnemy,
                 new[] { new CardEffectSpec(CardEffectType.Damage, new UpgradeableNumber(1, null), UpgradeableNumber.One, ValueUnit.Points, 1) });
-            var engine = CreateEngine(new[] { burst, manaCard, manaCard, burst });
+            // 开局不洗牌、按序抽 4 张 => 第 1 回合手牌恰好 4 张魔法卡；爆破卡留到第 2 回合。
+            var engine = CreateEngine(new[]
+            {
+                manaCard, manaCard, manaCard, manaCard,
+                burst, burst, burst
+            });
             engine.StartBattle();
 
-            // Activate one mana card -> 1 spent.
-            var manaInstance = engine.State.Deck.Hand.First(c => c.Spec.Id == "mana");
-            Assert.That(engine.ActivateCard(manaInstance.InstanceId).Success, Is.True);
-            Assert.That(engine.State.Mana.ManaCardsSpentThisTurn, Is.EqualTo(1));
+            // 第 1 回合：激活全部 4 张魔法卡 -> 全场累计 4。
+            var manaHand = engine.State.Deck.Hand.Where(c => c.Spec.Id == "mana").ToList();
+            Assert.That(manaHand.Count, Is.EqualTo(4));
+            foreach (var mana in manaHand)
+                Assert.That(engine.ActivateCard(mana.InstanceId).Success, Is.True);
+            Assert.That(engine.State.Mana.ManaCardsSpentTotal, Is.EqualTo(4));
 
+            // 跨到第 2 回合：本回合计数清零，但全场累计必须保留（旧实现按回合清零，只会打出 5 点伤害）。
+            engine.EndPlayerTurn();
+            engine.CompleteEnemyTurn();
+            Assert.That(engine.State.Mana.ManaCardsSpentThisTurn, Is.EqualTo(0));
+            Assert.That(engine.State.Mana.ManaCardsSpentTotal, Is.EqualTo(4));
+
+            // 第 2 回合：打出魔法爆破 -> 本场战斗用过 4 张魔法卡，4 * 5 = 20 伤害。
             var burstCard = engine.State.Deck.Hand.First(c => c.Spec.Id == "burst");
             var result = engine.PlayCard(burstCard.InstanceId, "enemy");
             Assert.That(result.Success, Is.True);
-            // 5 damage per mana card (1 spent) -> 5 damage.
-            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(95));
+            Assert.That(engine.State.Enemies[0].CurrentHealth, Is.EqualTo(80));
         }
 
         [Test]

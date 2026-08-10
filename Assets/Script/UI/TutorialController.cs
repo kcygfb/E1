@@ -70,6 +70,7 @@ namespace KiKs.UI
         /// <summary>
         /// 挂在目标 UI 上的悬停监听。指针进入时显示提示框并记录鼠标位置，移出时隐藏；
         /// 提示框的位置跟随由 TutorialController.LateUpdate 统一驱动。
+        /// Pinned 模式（常驻）：提示框固定在 PinTarget 上方，不跟随鼠标、不受悬停控制。
         /// </summary>
         private sealed class HoverCallout : MonoBehaviour, IPointerEnterHandler, IPointerMoveHandler, IPointerExitHandler
         {
@@ -78,6 +79,8 @@ namespace KiKs.UI
             public TutorialTooltip Tooltip;
             public Vector2 Offset;
             public Vector2 LastMousePosition;
+            public bool Pinned;
+            public RectTransform PinTarget;
 
             public static HoverCallout Attach(RectTransform target, TutorialTooltip tooltip, Vector2 offset, TutorialController controller)
             {
@@ -92,6 +95,9 @@ namespace KiKs.UI
 
             public void OnPointerEnter(PointerEventData eventData)
             {
+                if (Pinned)
+                    return;
+
                 if (Tooltip == null)
                     return;
 
@@ -107,6 +113,9 @@ namespace KiKs.UI
 
             public void OnPointerExit(PointerEventData eventData)
             {
+                if (Pinned)
+                    return;
+
                 // 立即隐藏，不延迟：提示框已禁用射线检测，不会遮挡目标造成 enter/exit 循环；
                 // 延迟反而会在鼠标快速滑过相邻物品时留下旧框残影。
                 if (Tooltip != null)
@@ -115,6 +124,9 @@ namespace KiKs.UI
 
             public void OnPointerMove(PointerEventData eventData)
             {
+                if (Pinned)
+                    return;
+
                 LastMousePosition = eventData.position;
             }
         }
@@ -133,6 +145,13 @@ namespace KiKs.UI
                 if (callout == null || callout.Tooltip == null)
                 {
                     _callouts.RemoveAt(i);
+                    continue;
+                }
+
+                // 常驻气泡：固定在目标上方（每帧校正位置，防止目标移动/布局变化导致错位）
+                if (callout.Pinned && callout.PinTarget != null)
+                {
+                    callout.Tooltip.AttachTo(callout.PinTarget, TutorialTooltip.Placement.Above, callout.Offset);
                     continue;
                 }
 
@@ -202,6 +221,42 @@ namespace KiKs.UI
                 if (callout != null && callout.Owner == owner && callout.transform == target)
                     DestroyCalloutAt(i);
             }
+        }
+
+        /// <summary>
+        /// 注册"常驻"提示：提示框固定在 target 上方，不跟随鼠标、不因点击/刷新消失。
+        /// 与悬停式 <see cref="RegisterJsonCallout"/> 互斥：同一 target 只会保留后注册的一种。
+        /// </summary>
+        public void RegisterPinnedCallout(
+            Component owner,
+            RectTransform target,
+            string description,
+            Vector2 offset)
+        {
+            if (owner == null || target == null)
+                return;
+
+            UnregisterJsonCallout(owner, target);
+
+            if (string.IsNullOrWhiteSpace(description))
+                return;
+
+            var tooltip = CreateTooltipInstance(description, target);
+            if (tooltip == null)
+                return;
+
+            tooltip.name = $"Pinned_{target.name}";
+
+            var callout = HoverCallout.Attach(target, tooltip, offset, this);
+            callout.Owner = owner;
+            callout.Pinned = true;
+            callout.PinTarget = target;
+            _callouts.Add(callout);
+
+            // 常驻：直接显示并定位到目标上方
+            tooltip.gameObject.SetActive(true);
+            tooltip.transform.SetAsLastSibling();
+            tooltip.AttachTo(target, TutorialTooltip.Placement.Above, offset);
         }
 
         public void UnregisterJsonCallouts(Component owner)

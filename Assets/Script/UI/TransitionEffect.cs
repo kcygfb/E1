@@ -46,6 +46,10 @@ namespace KiKs.UI
 
         public static System.Collections.IEnumerator WaitEntrance()
         {
+            // OnSceneLoadedEntrance starts from a one-frame delayed coroutine.
+            // Without this frame, consumers can start scaled animations immediately
+            // before the transition pauses the game.
+            yield return null;
             while (IsEntrancePlaying)
                 yield return null;
         }
@@ -114,7 +118,10 @@ namespace KiKs.UI
 
         private void OnDestroy()
         {
-            if (Instance == this) Instance = null;
+            if (Instance != this) return;
+            Instance = null;
+            IsEntrancePlaying = false;
+            Time.timeScale = 1f;
         }
 
         public void TransitionTo(string sceneName, Action onComplete = null)
@@ -241,6 +248,10 @@ namespace KiKs.UI
             SceneManager.sceneLoaded -= OnSceneLoadedEntrance;
             if (this == null) return;
 
+            // Publish the pending entrance synchronously so scene Start coroutines
+            // cannot race past WaitEntrance before DelayEntrance's first frame.
+            IsEntrancePlaying = entrancePanel != null;
+
             System.Collections.IEnumerator DelayEntrance()
             {
                 yield return null;
@@ -287,7 +298,11 @@ namespace KiKs.UI
                 }
                 else
                 {
+                    IsEntrancePlaying = false;
+                    Time.timeScale = 1f;
                     exitPanel?.Reset();
+                    _pendingEntranceComplete?.Invoke();
+                    _pendingEntranceComplete = null;
                 }
             }
             StartCoroutine(DelayEntrance());

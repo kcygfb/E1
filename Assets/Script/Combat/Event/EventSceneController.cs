@@ -394,7 +394,8 @@ namespace KiKs.Combat
             if (dialoguePanel != null) dialoguePanel.gameObject.SetActive(true);
             if (_dialogueClickArea != null) _dialogueClickArea.SetActive(true);
             if (nextButton != null) nextButton.interactable = true;
-            if (nextWordIcon != null) nextWordIcon.SetActive(true);
+            // 逐字阶段不显示“下一句”提示。该节点的 Image 在动画停用时会呈现为白色矩形。
+            if (nextWordIcon != null) nextWordIcon.SetActive(false);
             if (_nextWordAnimator != null) _nextWordAnimator.enabled = false;
 
             for (var i = 0; i < data.lines.Count; i++)
@@ -443,7 +444,7 @@ namespace KiKs.Combat
         {
             _isTyping = true;
             if (lineText != null) lineText.text = "";
-            if (nextWordIcon != null) nextWordIcon.SetActive(true);
+            if (nextWordIcon != null) nextWordIcon.SetActive(false);
             if (_nextWordAnimator != null) _nextWordAnimator.enabled = false;
 
             var delay = 1f / CharsPerSecond;
@@ -576,7 +577,10 @@ namespace KiKs.Combat
             {
                 var card = cards[i];
                 var spec = CreateEventCardSpec(card, i);
-                var cardView = cardDealer.DrawCard(spec, $"event_card_{i}");
+                var cardView = cardDealer.DrawCard(
+                    spec,
+                    $"event_card_{i}",
+                    useUnscaledTime: true);
                 if (cardView != null)
                 {
                     cardsByView[cardView] = card;

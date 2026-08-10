@@ -65,6 +65,17 @@ public class CustomerController : MonoBehaviour
         GameEvent.Off("DialogueEnded", OnDialogueEnded);
     }
 
+    private void OnDestroy()
+    {
+        var npcName = NPCData != null ? NPCData.npcName : null;
+        if (!string.IsNullOrEmpty(npcName) &&
+            ActiveCustomers.TryGetValue(npcName, out var activeCustomer) &&
+            activeCustomer == this)
+        {
+            ActiveCustomers.Remove(npcName);
+        }
+    }
+
     public void Initialize(
         NPCData npcData,
         NPCEntry entry,

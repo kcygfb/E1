@@ -86,8 +86,8 @@
     "en": "drag to abyss"
    },
    "description": {
-    "en": "Drag the target into the abyss.",
-    "zhCN": "造成20点伤害"
+    "en": "Deal 9 damage.",
+    "zhCN": "造成9点伤害"
    },
    "category": "enemy_little_girl",
    "copies": 1,
@@ -99,7 +99,7 @@
    "effects": [
     {
      "type": "damage",
-     "amount": 20,
+     "amount": 9,
      "hits": 1
     }
    ],

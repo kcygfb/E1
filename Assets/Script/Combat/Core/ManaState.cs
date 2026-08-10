@@ -13,6 +13,9 @@ namespace KiKs.Combat
         /// <summary>Mana cards (played or activated) spent during the current player turn. Reset each turn.</summary>
         public int ManaCardsSpentThisTurn { get; private set; }
 
+        /// <summary>Mana cards spent across the whole battle. Never reset (drives battle-wide mana-burst effects).</summary>
+        public int ManaCardsSpentTotal { get; private set; }
+
         public ManaState(int manaPerTurn)
         {
             if (manaPerTurn <= 0) throw new ArgumentOutOfRangeException(nameof(manaPerTurn));
@@ -42,10 +45,11 @@ namespace KiKs.Combat
             ManaCardsSpentThisTurn = 0;
         }
 
-        /// <summary>Record that one mana card was spent this turn (for mana-burst style effects).</summary>
+        /// <summary>Record that one mana card was spent (for mana-burst style effects).</summary>
         internal void RecordManaCardSpent()
         {
             ManaCardsSpentThisTurn++;
+            ManaCardsSpentTotal++;
         }
     }
 }

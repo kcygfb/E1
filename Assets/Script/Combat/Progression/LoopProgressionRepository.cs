@@ -16,6 +16,7 @@ namespace KiKs.Combat
         private static HashSet<string> hiddenRecipeIds;
         private static Dictionary<int, TreasureOfferDefinition> treasureOffersByPrice;
         private static Dictionary<string, EnemyLoopRewardDefinition> enemyRewardsById;
+        private static readonly int[] RequiredTreasurePrices = { 50, 100, 200, 400 };
 
         public static LoopProgressionDefinition Definition
         {
@@ -54,6 +55,14 @@ namespace KiKs.Combat
         {
             EnsureLoaded();
             return treasureOffersByPrice.TryGetValue(price, out offer);
+        }
+
+        public static IReadOnlyList<TreasureOfferDefinition> GetTreasureOffers()
+        {
+            EnsureLoaded();
+            return RequiredTreasurePrices
+                .Select(price => treasureOffersByPrice[price])
+                .ToArray();
         }
 
         public static bool TryGetEnemyReward(
@@ -123,7 +132,7 @@ namespace KiKs.Combat
                 ValidateRewardBundle(offer.rewards, $"treasure offer '{offer.id}'");
             }
 
-            if (!prices.SetEquals(new[] { 50, 100, 200, 400 }))
+            if (!prices.SetEquals(RequiredTreasurePrices))
                 throw new InvalidDataException("Treasure prices must be exactly 50, 100, 200 and 400.");
 
             if (value.enemyRewards == null || value.enemyRewards.Length != 3)

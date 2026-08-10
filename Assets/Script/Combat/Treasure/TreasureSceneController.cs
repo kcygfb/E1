@@ -66,7 +66,6 @@ namespace KiKs.Combat
 
         private IEnumerator Start()
         {
-            var definition = LoopProgressionRepository.Definition;
             session = new TreasurePurchaseSession();
 
             ResolveSceneReferences();
@@ -75,7 +74,7 @@ namespace KiKs.Combat
             RefreshGold();
 
             yield return KiKs.UI.TransitionEffect.WaitEntrance();
-            DealOffers(definition.treasureOffers);
+            DealOffers(LoopProgressionRepository.GetTreasureOffers());
         }
 
         private void OnDestroy()
@@ -160,18 +159,51 @@ namespace KiKs.Combat
 
             cardDealer.OnCardPlayed = HandleOfferPlayed;
             var count = offers.Count;
+            var dealtOffers = new List<KeyValuePair<CardView, TreasureOfferDefinition>>(count);
             for (var index = 0; index < count; index++)
             {
                 var offer = offers[index];
-                var card = cardDealer.DrawCard(CreateOfferCardSpec(offer), offer.id);
-                if (card == null)
-                    continue;
+                try
+                {
+                    var card = cardDealer.DrawCard(
+                        CreateOfferCardSpec(offer),
+                        offer.id,
+                        useUnscaledTime: true);
+                    if (card == null)
+                    {
+                        Debug.LogError($"[Treasure] Failed to create the {offer.price}C offer card.", this);
+                        continue;
+                    }
 
-                offersByCard[card] = offer;
-                HideCombatOnlyCardText(card);
-                if (session.IsFullyOwned(offer))
-                    MarkOfferFullyOwned(card);
+                    offersByCard[card] = offer;
+                    dealtOffers.Add(new KeyValuePair<CardView, TreasureOfferDefinition>(card, offer));
+                    HideCombatOnlyCardText(card);
+                }
+                catch (System.Exception exception)
+                {
+                    Debug.LogException(new System.InvalidOperationException(
+                        $"[Treasure] Failed while dealing the {offer?.price ?? 0}C offer; continuing with the remaining tiers.",
+                        exception), this);
+                }
             }
+
+            foreach (var pair in dealtOffers)
+            {
+                try
+                {
+                    if (session.IsFullyOwned(pair.Value))
+                        MarkOfferFullyOwned(pair.Key);
+                }
+                catch (System.Exception exception)
+                {
+                    Debug.LogException(new System.InvalidOperationException(
+                        $"[Treasure] Failed to refresh ownership for the {pair.Value.price}C offer.",
+                        exception), this);
+                }
+            }
+
+            if (offersByCard.Count != count)
+                Debug.LogError($"[Treasure] Expected {count} offer cards but dealt {offersByCard.Count}.", this);
         }
 
         private bool HandleOfferPlayed(CardView card)

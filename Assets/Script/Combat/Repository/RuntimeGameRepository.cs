@@ -50,11 +50,6 @@ namespace KiKs.Combat
         public static bool IsFinalCafeDay => currentDay >= LoopProgressionRepository.FinalDay;
         public static IReadOnlyCollection<string> UnlockedRecipes => UnlockedRecipeIds;
 
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void ResetOnPlaySessionStart()
-        {
-            ResetRunState();
-        }
         public static IReadOnlyList<string> LastBattleRewardCards =>
             new ReadOnlyCollection<string>(LastBattleRewardCardIds);
 
@@ -451,7 +446,7 @@ namespace KiKs.Combat
                     throw new InvalidOperationException("Reward bundle contains an empty recipe id.");
         }
 
-        public static void ResetRunState()
+        internal static void ClearRunState()
         {
             ClearSelectedDeck();
             ClearSelectedDemoStage();
@@ -467,7 +462,7 @@ namespace KiKs.Combat
             ProcessedSettlementIds.Clear();
             currentDay = 1;
             DailyAreaMapState.Reset();
-            PlayerGlobalStats.ResetToFull();
+            PlayerGlobalStats.ResetToFull(100);
         }
 
         private static class InventoryBridge

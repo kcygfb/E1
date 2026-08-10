@@ -25,6 +25,12 @@ namespace KiKs.UI
         private static int s_activeDragCount;
         public static bool AnyDragging => s_activeDragCount > 0;
 
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetStaticDragState()
+        {
+            s_activeDragCount = 0;
+        }
+
         private RectTransform _rect;
         private RectTransform _dragParent;
         private Vector2 _originPos;
@@ -113,6 +119,11 @@ namespace KiKs.UI
         /// 拖拽中途对象被销毁（如出牌动画中禁用/回收卡牌）时，EndDrag 不再触发，
         /// 这里兜底释放全局拖拽计数，避免 AnyDragging 永久为 true 拦截后续点击。
         /// </summary>
+        private void OnDisable()
+        {
+            EndDragState();
+        }
+
         private void OnDestroy()
         {
             EndDragState();

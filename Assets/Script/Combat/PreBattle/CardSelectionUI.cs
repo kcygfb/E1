@@ -618,6 +618,7 @@ namespace KiKs.Combat
 
         /// <summary>
         /// 为每个战斗点程序化注册教学框：显示"里面的 Boss 名字 / 血量 / 韧性"。
+        /// 使用常驻气泡（固定在标记上方），这样点击任意标记后，其他标记的气泡不会消失。
         /// 描述按该点随机分配到的敌人槽位生成，每局重开（重新生成地图）后自动更新。
         /// </summary>
         private void RegisterMapPointCallouts()
@@ -645,10 +646,12 @@ namespace KiKs.Combat
                 if (definition == null)
                     continue;
 
-                tutorialController.RegisterJsonCallout(
+                // 常驻气泡：显示在标记点上方，点击其他标记后依然保留
+                tutorialController.RegisterPinnedCallout(
                     owner,
                     owner,
-                    new TutorialHintJson { description = BuildEncounterDescription(definition) });
+                    BuildEncounterDescription(definition),
+                    new Vector2(0f, 12f));
             }
         }
 
@@ -727,9 +730,7 @@ namespace KiKs.Combat
         [ContextMenu("Reset Demo Progress")]
         public void ResetDemoProgress()
         {
-            RuntimeGameRepository.ResetRunState();
-            DailyAreaMapState.Reset();
-            RuntimeGameRepository.ClearSelectedDeck();
+            GameRunLifecycle.ResetForNewGame();
             selectedCardIds.Clear();
 
             if (demoCompletePanel != null)

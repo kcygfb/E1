@@ -28,7 +28,12 @@ namespace KiKs.Combat
         public System.Func<CardView, bool> OnCardPlayed;
         public System.Func<CardView, bool> OnCardShot;
 
-        public CardView DrawCard(CardSpec spec, string instanceId, bool isUpgraded = false, bool isActivated = false)
+        public CardView DrawCard(
+            CardSpec spec,
+            string instanceId,
+            bool isUpgraded = false,
+            bool isActivated = false,
+            bool useUnscaledTime = false)
         {
             if (cardPrefab == null)
             {
@@ -53,7 +58,12 @@ namespace KiKs.Combat
             Vector2 deckAnchored = GetAnchoredPosInHand(deckArea);
             Vector2 targetAnchored = GetCardAnchoredPosition(_handCards.Count - 1);
 
-            cardView.PlayDrawAnimation(deckAnchored, targetAnchored, drawDuration, ArrangeHand);
+            cardView.PlayDrawAnimation(
+                deckAnchored,
+                targetAnchored,
+                drawDuration,
+                () => ArrangeHand(useUnscaledTime),
+                useUnscaledTime);
             return cardView;
         }
 
@@ -86,11 +96,19 @@ namespace KiKs.Combat
 
         public void ArrangeHand()
         {
+            ArrangeHand(useUnscaledTime: false);
+        }
+
+        public void ArrangeHand(bool useUnscaledTime)
+        {
             if (_handCards.Count == 0) return;
             for (int i = 0; i < _handCards.Count; i++)
             {
                 var card = _handCards[i];
                 if (card == null) continue;
+                // A completed card may arrange while the remaining cards are still being dealt.
+                // Killing those active tweens would leave CardView permanently interaction-locked.
+                if (card.IsAnimating) continue;
                 var rt = card.GetComponent<RectTransform>();
                 if (rt == null) continue;
                 var targetAnchored = GetCardAnchoredPosition(i);
@@ -98,11 +116,16 @@ namespace KiKs.Combat
                 rt.DOKill();
 
                 int capturedIndex = i;
-                rt.DOLocalMove(targetAnchored, 0.2f).SetEase(Ease.OutCubic).OnComplete(() =>
+                var moveTween = rt.DOLocalMove(targetAnchored, 0.2f).SetEase(Ease.OutCubic).OnComplete(() =>
                 {
                     card.SyncCardInteraction();
                 });
-                rt.DOLocalRotate(targetRot, 0.2f).SetEase(Ease.OutCubic);
+                var rotateTween = rt.DOLocalRotate(targetRot, 0.2f).SetEase(Ease.OutCubic);
+                if (useUnscaledTime)
+                {
+                    moveTween.SetUpdate(true);
+                    rotateTween.SetUpdate(true);
+                }
             }
         }
 

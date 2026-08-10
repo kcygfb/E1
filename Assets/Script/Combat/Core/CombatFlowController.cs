@@ -480,7 +480,8 @@ namespace KiKs.Combat
 
                 case CardEffectType.ManaCardBurst:
                     var perCard = effect.Amount.Resolve(card.IsUpgraded);
-                    var spent = _state.Mana?.ManaCardsSpentThisTurn ?? 0;
+                    // 设计：本场战斗每用过一张魔法卡，造成 perCard 点伤害（跨回合累计）。
+                    var spent = _state.Mana?.ManaCardsSpentTotal ?? 0;
                     if (perCard > 0 && spent > 0)
                     {
                         result.TotalDamage += ResolveAttackDamage(
@@ -488,7 +489,7 @@ namespace KiKs.Combat
                             target,
                             perCard * spent,
                             card.InstanceId,
-                            "Magic burst dealt " + perCard + " per mana card spent (" + spent + ").",
+                            "Magic burst dealt " + perCard + " per mana card spent this battle (" + spent + ").",
                             true,
                             events,
                             isUpgraded: card.IsUpgraded);

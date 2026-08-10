@@ -17,13 +17,9 @@ namespace KiKs.Combat
         public static DemoStage CurrentStage => (DemoStage)_currentBattleIndex;
         public static bool IsCompleted => _currentBattleIndex >= BattleCount;
 
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void ResetOnPlaySessionStart()
+        internal static void ResetProgress()
         {
             _currentBattleIndex = 0;
-            RuntimeGameRepository.ResetRunState();
-            DailyAreaMapState.Reset();
-            PlayerGlobalStats.ResetToFull(100);
         }
 
         public static bool IsStageAvailable(DemoStage stage)
@@ -52,10 +48,7 @@ namespace KiKs.Combat
 
         public static void ResetDemoProgress()
         {
-            _currentBattleIndex = 0;
-            RuntimeGameRepository.ResetRunState();
-            DailyAreaMapState.Reset();
-            PlayerGlobalStats.ResetToFull(100);
+            GameRunLifecycle.ResetForNewGame();
             Debug.Log("[DemoFlow] Progress reset to exploration 1 / DogBattle.");
         }
     }

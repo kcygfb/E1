@@ -8,7 +8,7 @@ namespace KiKs.Combat.Tests
         [SetUp]
         public void SetUp()
         {
-            RuntimeGameRepository.ResetRunState();
+            GameRunLifecycle.ResetForNewGame();
             SetGold(0);
         }
 
@@ -16,7 +16,7 @@ namespace KiKs.Combat.Tests
         public void TearDown()
         {
             SetGold(0);
-            RuntimeGameRepository.ResetRunState();
+            GameRunLifecycle.ResetForNewGame();
         }
 
         [Test]
@@ -92,6 +92,28 @@ namespace KiKs.Combat.Tests
             Assert.That(completion.Completed, Is.True);
             Assert.That(DailyAreaMapState.MapPoints[treasureIndex].IsCompleted, Is.True);
             Assert.That(DailyAreaMapState.CompletedExplorationCount, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void ThirdDayStillKeepsAllFourOfferTiersWhenRewardsAreAlreadyOwned()
+        {
+            Assert.That(RuntimeGameRepository.AdvanceDay(), Is.True);
+            Assert.That(RuntimeGameRepository.AdvanceDay(), Is.True);
+            Assert.That(RuntimeGameRepository.CurrentDay, Is.EqualTo(3));
+
+            var definition = LoopProgressionRepository.Definition;
+            foreach (var cardId in definition.initiallyHiddenCardIds)
+                RuntimeGameRepository.UnlockCard(cardId);
+            foreach (var recipeId in definition.initiallyHiddenRecipeIds)
+                RuntimeGameRepository.UnlockRecipe(recipeId);
+
+            var session = new TreasurePurchaseSession();
+
+            var offers = LoopProgressionRepository.GetTreasureOffers();
+            Assert.That(offers, Has.Count.EqualTo(4));
+            Assert.That(offers.Select(item => item.price),
+                Is.EqualTo(new[] { 50, 100, 200, 400 }));
+            Assert.That(offers.All(session.IsFullyOwned), Is.True);
         }
 
         [Test]

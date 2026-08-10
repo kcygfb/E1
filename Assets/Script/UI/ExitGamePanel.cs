@@ -1,10 +1,18 @@
+using System;
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace KiKs.UI
 {
+    public enum ExitConfirmationAction
+    {
+        QuitApplication,
+        ReturnToMainMenu
+    }
+
     /// <summary>
     /// 退出游戏确认弹窗。
     /// <para>
@@ -12,7 +20,7 @@ namespace KiKs.UI
     /// 按钮绑定在场景加载后自动完成，也可手动调用 <see cref="BindSettingsButtons"/>；
     /// ESC 由 <see cref="ExitGamePanelInput"/> 组件监听（存在即生效，且始终只会有一个实例）。
     /// 弹窗来自 Resources/UI/退出界面.prefab，其中：
-    /// "退出按钮" → 退出游戏；"X" → 关闭弹窗。
+    /// "退出按钮" → 主界面退出程序，其他场景重置本局并返回主界面；"X" → 关闭弹窗。
     /// </para>
     /// </summary>
     public sealed class ExitGamePanel : MonoBehaviour
@@ -21,6 +29,13 @@ namespace KiKs.UI
         private const string QuitButtonName = "\u9000\u51fa\u6309\u94ae"; // 退出按钮
         private const string CloseButtonName = "X";
         private const float PopInDuration = 0.2f;
+
+        public const string MainMenuSceneName = "MainMenu";
+
+        /// <summary>
+        /// 非主界面确认退出时发出的语义请求。UI 层不直接依赖或调用游戏状态仓库。
+        /// </summary>
+        public static event Action ReturnToMainMenuRequested;
 
         /// <summary>点击可呼出退出弹窗的场景按钮名集合（设置按钮与主界面苹果按钮）。</summary>
         private static readonly string[] TriggerButtonNames = { "Settings", "\U0001F34E" }; // 🍎
@@ -32,6 +47,14 @@ namespace KiKs.UI
         private CanvasGroup _canvasGroup;
         private Tween _popTween;
         private bool _initialized;
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetStaticState()
+        {
+            _instance = null;
+            ReturnToMainMenuRequested = null;
+            ExitGamePanelInput.ResetStaticState();
+        }
 
         /// <summary>
         /// 每次场景加载后自动绑定场景中的触发按钮（"Settings"/"🍎"），并启用 ESC 键监听。
@@ -46,7 +69,7 @@ namespace KiKs.UI
         /// <summary>把当前场景中所有可触发的 Button（"Settings"/"🍎"）绑定为打开弹窗。可重复调用，不会重复绑定。</summary>
         public static void BindSettingsButtons()
         {
-            var buttons = Object.FindObjectsByType<Button>(
+            var buttons = UnityEngine.Object.FindObjectsByType<Button>(
                 FindObjectsInactive.Exclude,
                 FindObjectsSortMode.None);
 
@@ -141,7 +164,7 @@ namespace KiKs.UI
         {
             Canvas overlayCanvas = null;
             Canvas cameraCanvas = null;
-            var canvases = Object.FindObjectsByType<Canvas>(
+            var canvases = UnityEngine.Object.FindObjectsByType<Canvas>(
                 FindObjectsInactive.Exclude,
                 FindObjectsSortMode.None);
 
@@ -206,8 +229,8 @@ namespace KiKs.UI
                 if (button.name == QuitButtonName)
                 {
                     _quitButton = button;
-                    _quitButton.onClick.RemoveListener(QuitGame);
-                    _quitButton.onClick.AddListener(QuitGame);
+                    _quitButton.onClick.RemoveListener(ConfirmExit);
+                    _quitButton.onClick.AddListener(ConfirmExit);
                 }
                 else if (button.name == CloseButtonName)
                 {
@@ -235,6 +258,8 @@ namespace KiKs.UI
 
             gameObject.SetActive(true);
             transform.SetAsLastSibling();
+            if (_quitButton != null)
+                _quitButton.interactable = true;
 
             // 弹出动画：淡入 + 轻微放大（不受暂停影响，用 unscaled time）
             if (_popTween != null)
@@ -262,14 +287,43 @@ namespace KiKs.UI
             gameObject.SetActive(false);
         }
 
-        private static void QuitGame()
+        public static ExitConfirmationAction GetConfirmationAction(string sceneName)
         {
-            Debug.Log("[ExitGamePanel] 收到退出请求。");
+            return string.Equals(sceneName, MainMenuSceneName, StringComparison.Ordinal)
+                ? ExitConfirmationAction.QuitApplication
+                : ExitConfirmationAction.ReturnToMainMenu;
+        }
+
+        private static void ConfirmExit()
+        {
+            var sceneName = SceneManager.GetActiveScene().name;
+            if (GetConfirmationAction(sceneName) == ExitConfirmationAction.QuitApplication)
+            {
+                QuitApplication();
+                return;
+            }
+
+            var handler = ReturnToMainMenuRequested;
+            if (handler == null)
+            {
+                Debug.LogError("[ExitGamePanel] 没有注册返回主界面的游戏会话处理器，已取消退出请求。");
+                return;
+            }
+
+            if (_instance != null && _instance._quitButton != null)
+                _instance._quitButton.interactable = false;
+            Hide();
+            handler.Invoke();
+        }
+
+        private static void QuitApplication()
+        {
+            Debug.Log("[ExitGamePanel] 主界面确认退出游戏。");
 
 #if UNITY_EDITOR
             // 编辑器内 Application.Quit() 不生效，通过反射停止 Play Mode 以便测试。
             // 使用反射是为了不引入 UnityEditor 程序集依赖（KiKs.UI 是运行时程序集）。
-            var editorApplicationType = System.Type.GetType("UnityEditor.EditorApplication, UnityEditor");
+            var editorApplicationType = Type.GetType("UnityEditor.EditorApplication, UnityEditor");
             if (editorApplicationType != null)
             {
                 var isPlayingProperty = editorApplicationType.GetProperty(
@@ -299,6 +353,11 @@ namespace KiKs.UI
         private sealed class ExitGamePanelInput : MonoBehaviour
         {
             private static ExitGamePanelInput _active;
+
+            public static void ResetStaticState()
+            {
+                _active = null;
+            }
 
             /// <summary>确保当前场景中存在一个监听者（首次触发自动创建，幂等）。</summary>
             public static void EnsureExists()

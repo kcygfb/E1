@@ -5367,6 +5367,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: KiKs.UI::KiKs.UI.TutorialController
   tooltipPrefab: {fileID: 7524191139530786084, guid: 8dcbd99d61a1f9d4f9d90dcdd9aab524, type: 3}
   tooltipParent: {fileID: 0}
+  tooltipScale: 1.35
   showSceneCalloutsOnStart: 1
   sceneCallouts: []
 --- !u!4 &1201496692

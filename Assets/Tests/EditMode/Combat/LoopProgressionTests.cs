@@ -10,7 +10,7 @@ namespace KiKs.Combat.Tests
         [SetUp]
         public void SetUp()
         {
-            RuntimeGameRepository.ResetRunState();
+            GameRunLifecycle.ResetForNewGame();
             PlayerGlobalStats.ResetToFull(100);
             SetGold(0);
         }
@@ -19,7 +19,7 @@ namespace KiKs.Combat.Tests
         public void TearDown()
         {
             SetGold(0);
-            RuntimeGameRepository.ResetRunState();
+            GameRunLifecycle.ResetForNewGame();
         }
 
         [Test]

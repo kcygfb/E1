@@ -16,6 +16,7 @@ namespace KiKs.Combat
         public CardSpec Spec { get; private set; }
         public bool IsUpgraded { get; private set; }
         public bool IsActivated { get; private set; }
+        public bool IsAnimating => _isAnimating;
 
         public System.Action<CardView> OnPlayRequested;
         public System.Action<CardView> OnShootRequested;
@@ -579,13 +580,20 @@ namespace KiKs.Combat
             return Draggable.AnyDragging;
         }
 
-        public void PlayDrawAnimation(Vector2 deckPos, Vector2 targetPos, float duration, System.Action onComplete)
+        public void PlayDrawAnimation(
+            Vector2 deckPos,
+            Vector2 targetPos,
+            float duration,
+            System.Action onComplete,
+            bool useUnscaledTime = false)
         {
             _isAnimating = true;
             _rect.localPosition = deckPos;
             _rect.localScale = Vector3.one * 0.3f;
 
             var seq = DOTween.Sequence();
+            if (useUnscaledTime)
+                seq.SetUpdate(true);
             seq.Join(_rect.DOLocalMove(targetPos, duration).SetEase(Ease.OutCubic));
             seq.Join(_rect.DOScale(1f, duration).SetEase(Ease.OutBack));
             seq.OnComplete(() =>

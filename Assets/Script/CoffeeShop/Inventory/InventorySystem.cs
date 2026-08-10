@@ -18,7 +18,30 @@ public class InventorySystem : MonoBehaviour
         transform.SetParent(null);
         DontDestroyOnLoad(gameObject);
 
-        // 直接从磁盘加载，不依赖 ResourceDataLoader.Instance 的初始化时机
+        LoadStartingAmounts(notifyListeners: false);
+    }
+
+    private void OnDestroy()
+    {
+        if (Instance == this) Instance = null;
+    }
+
+    /// <summary>仅由游戏会话生命周期在开始新游戏前调用。</summary>
+    internal void ResetToStartingAmounts()
+    {
+        LoadStartingAmounts(notifyListeners: true);
+    }
+
+    private void LoadStartingAmounts(bool notifyListeners)
+    {
+        var changedResourceIds = notifyListeners
+            ? new HashSet<string>(_amounts.Keys)
+            : null;
+
+        _amounts.Clear();
+        _infinite.Clear();
+
+        // 直接从磁盘加载，不依赖 ResourceDataLoader.Instance 的初始化时机。
         var db = ResourceDataLoader.LoadDirect();
         if (db != null)
         {
@@ -35,11 +58,13 @@ public class InventorySystem : MonoBehaviour
         {
             Debug.LogWarning("[InventorySystem] Failed to load resources from JSON.");
         }
-    }
 
-    private void OnDestroy()
-    {
-        if (Instance == this) Instance = null;
+        if (changedResourceIds == null)
+            return;
+
+        changedResourceIds.UnionWith(_amounts.Keys);
+        foreach (var resourceId in changedResourceIds)
+            OnResourceChanged?.Invoke(resourceId, GetAmount(resourceId));
     }
 
     public int GetAmount(string resourceId) =>

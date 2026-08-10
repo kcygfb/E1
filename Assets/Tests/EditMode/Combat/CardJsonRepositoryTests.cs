@@ -32,6 +32,12 @@ namespace KiKs.Combat.Tests
             Assert.That(repository.GetRequiredCard("enemy_big_eye_mind_control_break").ImagePath,
                 Is.EqualTo("Art/Cards/mindcontrol.png"));
 
+            var dragToAbyss = repository.GetRequiredCard("enemy_little_girl_drag_to_abyss");
+            var dragToAbyssDamage = dragToAbyss.Effects.Single(effect => effect.Type == CardEffectType.Damage);
+            Assert.That(dragToAbyss.DescriptionZhCn, Is.EqualTo("造成9点伤害"));
+            Assert.That(dragToAbyssDamage.Amount.BaseValue, Is.EqualTo(9));
+            Assert.That(dragToAbyssDamage.Hits.BaseValue, Is.EqualTo(1));
+
             var sniper = repository.GetRequiredCard("ranged_sniper_rifle");
             var damage = sniper.Effects.Single(effect => effect.Type == CardEffectType.Damage);
             Assert.That(damage.Amount.BaseValue, Is.EqualTo(12));

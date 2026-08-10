@@ -214,7 +214,7 @@ public sealed class LoopDebugCheats : MonoBehaviour
 
     private static void ResetWholeRun()
     {
-        RuntimeGameRepository.ResetRunState();
+        GameRunLifecycle.ResetForNewGame();
         foreach (var resource in InitialResources)
             SetResourceAmount(resource.Id, resource.Amount);
         Notify("CHEAT: loop progress and dynamic inventory reset");

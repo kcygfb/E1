@@ -43,7 +43,7 @@ namespace KiKs.UI
                 if (transitionImage != null)
                 {
                     transitionImage.material = _runtimeMat;
-                    var c = transitionImage.color; c.a = 0f; transitionImage.color = c;
+                    HideTransitionImage();
                 }
             }
         }
@@ -79,6 +79,7 @@ namespace KiKs.UI
             if (transitionImage != null)
             {
                 transitionImage.enabled = true;
+                transitionImage.raycastTarget = true;
                 var c = transitionImage.color; c.a = 1f; transitionImage.color = c;
             }
         }
@@ -89,7 +90,13 @@ namespace KiKs.UI
             _sequence?.Kill();
 
             var mat = _runtimeMat;
-            if (mat == null) { Debug.LogError("[TransitionEntrancePanel] material not found for entrance"); return; }
+            if (mat == null)
+            {
+                Debug.LogError("[TransitionEntrancePanel] material not found for entrance; skipping transition safely.");
+                HideTransitionImage();
+                onComplete?.Invoke();
+                return;
+            }
 
             var startSlider = mat.GetFloat("_Slider");
             var startAlpha = mat.GetFloat("_Trans_After_Alpha");
@@ -113,6 +120,7 @@ namespace KiKs.UI
                 _sequence = null;
                 mat.SetFloat("_Trans_After_Alpha", 0f);
                 mat.SetFloat("_Slider", 0f);
+                HideTransitionImage();
                 onComplete?.Invoke();
             });
         }
@@ -128,10 +136,18 @@ namespace KiKs.UI
                 mat.SetFloat("_Trans_After_Alpha", 0f);
                 mat.SetFloat("_Slider", 0f);
             }
-            if (transitionImage != null)
-            {
-                var c = transitionImage.color; c.a = 0f; transitionImage.color = c;
-            }
+            HideTransitionImage();
+        }
+
+        private void HideTransitionImage()
+        {
+            if (transitionImage == null) return;
+
+            var color = transitionImage.color;
+            color.a = 0f;
+            transitionImage.color = color;
+            transitionImage.raycastTarget = false;
+            transitionImage.enabled = false;
         }
 
         private void OnDestroy()
