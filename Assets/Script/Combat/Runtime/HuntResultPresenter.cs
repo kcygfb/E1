@@ -86,6 +86,7 @@ namespace KiKs.Combat
                 battleController.CombatEventRaised += OnCombatEvent;
 
             if (popupRoot == null) BuildPlaceholderUI();
+            BindConfirmButton();
         }
 
         private void OnDestroy()
@@ -94,6 +95,8 @@ namespace KiKs.Combat
                 battleController.CombatEventRaised -= OnCombatEvent;
             if (tutorialController != null)
                 tutorialController.UnregisterJsonCallouts(this);
+            if (confirmButton != null)
+                confirmButton.onClick.RemoveListener(OnConfirmClicked);
         }
 
         private void OnCombatEvent(CombatEvent combatEvent)
@@ -120,6 +123,7 @@ namespace KiKs.Combat
             if (popupRoot == null) BuildPlaceholderUI();
             if (popupRoot == null) yield break;
 
+            BindConfirmButton();
             popupRoot.SetActive(true);
             popupRoot.transform.SetAsLastSibling();
             if (rootCanvasGroup != null)
@@ -394,8 +398,20 @@ namespace KiKs.Combat
         {
             if (isTransitioning) return;
             isTransitioning = true;
-            confirmButton.interactable = false;
+            if (confirmButton != null)
+                confirmButton.interactable = false;
+            Debug.Log("[HuntResult] Confirm clicked; completing the selected area.", this);
             StartCoroutine(TransitionAfterBattleRoutine());
+        }
+
+        private void BindConfirmButton()
+        {
+            if (confirmButton == null) return;
+
+            // Runtime UI can be rebuilt after scene setup. Keep exactly one listener
+            // without removing any scene-authored listeners owned by other systems.
+            confirmButton.onClick.RemoveListener(OnConfirmClicked);
+            confirmButton.onClick.AddListener(OnConfirmClicked);
         }
 
         private IEnumerator TransitionAfterBattleRoutine()
@@ -452,8 +468,16 @@ namespace KiKs.Combat
                 return;
             }
 
-            popupRoot = CreateUIObject("HuntResult_Placeholder", canvas.transform, typeof(CanvasGroup));
+            popupRoot = CreateUIObject(
+                "HuntResult_Placeholder",
+                canvas.transform,
+                typeof(CanvasGroup),
+                typeof(Canvas),
+                typeof(GraphicRaycaster));
             Stretch(popupRoot.GetComponent<RectTransform>());
+            Canvas popupCanvas = popupRoot.GetComponent<Canvas>();
+            popupCanvas.overrideSorting = true;
+            popupCanvas.sortingOrder = 1000;
             rootCanvasGroup = popupRoot.GetComponent<CanvasGroup>();
             rootCanvasGroup.blocksRaycasts = true;
             rootCanvasGroup.interactable = true;
@@ -534,7 +558,7 @@ namespace KiKs.Combat
             colors.pressedColor = new Color(0.55f, 0.78f, 0.76f, 1f);
             colors.disabledColor = new Color(0.4f, 0.48f, 0.5f, 0.7f);
             confirmButton.colors = colors;
-            confirmButton.onClick.AddListener(OnConfirmClicked);
+            BindConfirmButton();
             Outline buttonOutline = buttonObject.GetComponent<Outline>();
             buttonOutline.effectColor = HotColor;
             buttonOutline.effectDistance = new Vector2(3f, -3f);

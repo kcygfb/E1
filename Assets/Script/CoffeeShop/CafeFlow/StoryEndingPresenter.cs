@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// Creates the terminal, non-dismissible ending overlay after the final cafe summary.
+/// Creates the terminal, non-dismissible ending overlay after entering the final Cafe scene.
 /// Day-specific story content remains outside this presenter.
 /// </summary>
 public static class StoryEndingPresenter

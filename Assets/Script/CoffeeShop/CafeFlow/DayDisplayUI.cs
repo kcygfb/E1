@@ -9,22 +9,34 @@ public class DayDisplayUI : MonoBehaviour
     private void OnEnable()
     {
         GameEvent.On("DayStarted", OnDayStarted);
+        KiKs.Combat.RuntimeGameRepository.DayChanged += OnRepositoryDayChanged;
+        RefreshFromRepository();
     }
 
     private void OnDisable()
     {
         GameEvent.Off("DayStarted", OnDayStarted);
+        KiKs.Combat.RuntimeGameRepository.DayChanged -= OnRepositoryDayChanged;
     }
 
     private void Start()
     {
-        var ts = FindFirstObjectByType<TimeSystem>();
-        if (ts != null) UpdateText(ts.dayCount);
+        RefreshFromRepository();
     }
 
     private void OnDayStarted(object payload)
     {
-        if (payload is int day) UpdateText(day);
+        RefreshFromRepository();
+    }
+
+    private void OnRepositoryDayChanged(int day)
+    {
+        UpdateText(day);
+    }
+
+    private void RefreshFromRepository()
+    {
+        UpdateText(KiKs.Combat.RuntimeGameRepository.CurrentDay);
     }
 
     private void UpdateText(int day)

@@ -86,7 +86,33 @@ public class TimeSystem : MonoBehaviour
         dayCount = KiKs.Combat.RuntimeGameRepository.CurrentDay;
         Debug.Log($"[TimeSystem] Start() -> Day {dayCount}");
         yield return KiKs.UI.TransitionEffect.WaitEntrance();
+
+        // Day 4 must still load the Cafe scene, but it has no authored story/shop flow.
+        // End only after the Cafe entrance transition has completed.
+        if (KiKs.Combat.RuntimeGameRepository.IsFinalCafeDay)
+        {
+            EnterFinalCafeEnding();
+            yield break;
+        }
+
         EnterMorningCheck();
+    }
+
+    private void EnterFinalCafeEnding()
+    {
+        isEndingShop = true;
+
+        if (startShopBtn != null)
+            startShopBtn.interactable = false;
+        if (morningCheckPanel != null)
+            morningCheckPanel.SetActive(false);
+        if (TrayGridUI.Instance != null)
+            TrayGridUI.Instance.HideAll();
+
+        KiKs.Combat.RuntimeGameRepository.NotifyFinalCafeCompleted();
+        GameEvent.Emit("FinalCafeCompleted", dayCount);
+        StoryEndingPresenter.Show();
+        Debug.Log($"[TimeSystem] Entered final Cafe on Day {dayCount}; story ending shown before morning/shop flow.");
     }
 
     public void EndShopPhase()
